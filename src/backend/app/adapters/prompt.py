@@ -1,0 +1,148 @@
+"""LLM 시스템 프롬프트 + 출력 JSON 파싱/검증 → MoodParameters.
+
+어댑터가 LLM 원시 응답을 받아 검증·클램프·기본값 주입 후 도메인 모델로 변환하는 로직.
+스키마1(architecture.md §③)의 검증 규칙을 단일 지점에 집약한다 — OpenRouter/스텁 공용.
+"""
+
+from __future__ import annotations
+
+import json
+
+from ..domain.models import MoodParameters
+from ..ports.mood_port import MoodInterpretationError
+
+# 스키마1 기본값·범위(architecture.md §③ 스키마1 표).
+_BRIGHTNESS_RANGE = (-1.0, 1.0)
+_ENERGY_RANGE = (0.0, 1.0)
+_STAGE_RANGE = (2, 5)
+_MINUTES_RANGE = (10, 180)
+_SUMMARY_MAX = 120
+
+DEFAULT_BRIGHTNESS = 0.0
+DEFAULT_START_ENERGY = 0.4
+DEFAULT_STAGE_COUNT = 3
+
+SYSTEM_PROMPT = (
+    "너는 밴드리(BanG Dream!) 음악 세트리스트 생성기의 무드 해석기다. "
+    "사용자의 한국어/영어 자연어 요청을 읽고, 아래 JSON 스키마에 맞춰 "
+    "무드·에너지 방향만 추출해 JSON 객체 하나로만 답한다. 코드블록·설명·군말 금지.\n\n"
+    "필드:\n"
+    "- brightness: -1.0(어두움)~+1.0(밝음) 실수. 밝고 기분 좋은 요청은 양수, 차분·어두운 요청은 음수.\n"
+    "- start_energy: 0.0~1.0 실수. 세트리스트 시작 지점의 에너지.\n"
+    "- end_energy: 0.0~1.0 실수. 마지막 지점의 에너지. 점점 고조되면 start보다 크게, "
+    "차분히 마무리면 작게.\n"
+    "- stage_count: 2~5 정수. 시간축 에너지 단계 수(기본 3).\n"
+    "- target_minutes: 10~180 정수 또는 null. 발화에 재생시간이 있으면 분 단위로, 없으면 null.\n"
+    "- interpretation_summary: 120자 이내 한국어 요약(선택 이유 설명용).\n\n"
+    '예: {"brightness":0.7,"start_energy":0.35,"end_energy":0.85,"stage_count":3,'
+    '"target_minutes":60,"interpretation_summary":"주말을 여는 밝고 점점 고조되는 약 1시간 흐름"}'
+)
+
+# OpenRouter response_format용 JSON 스키마(structured output 지원 모델에서 사용).
+RESPONSE_JSON_SCHEMA = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "mood_parameters",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "brightness": {"type": "number"},
+                "start_energy": {"type": "number"},
+                "end_energy": {"type": "number"},
+                "stage_count": {"type": "integer"},
+                "target_minutes": {"type": ["integer", "null"]},
+                "interpretation_summary": {"type": "string"},
+            },
+            "required": [
+                "brightness",
+                "start_energy",
+                "end_energy",
+                "stage_count",
+                "target_minutes",
+                "interpretation_summary",
+            ],
+        },
+    },
+}
+
+
+def build_messages(user_prompt: str) -> list[dict]:
+    """OpenRouter chat/completions messages 배열을 만든다."""
+    return [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt},
+    ]
+
+
+def _clamp(value: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, value))
+
+
+def _coerce_number(raw: object, default: float) -> float:
+    try:
+        return float(raw)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return default
+
+
+def _extract_json_object(text: str) -> dict:
+    """LLM 원시 텍스트에서 첫 JSON 객체를 관용적으로 추출한다(코드펜스·군말 허용)."""
+    text = text.strip()
+    try:
+        obj = json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start == -1 or end == -1 or end < start:
+            raise MoodInterpretationError(f"응답에서 JSON 객체를 찾지 못했습니다: {text[:200]!r}")
+        try:
+            obj = json.loads(text[start : end + 1])
+        except json.JSONDecodeError as exc:
+            raise MoodInterpretationError(f"JSON 파싱 실패: {exc}") from exc
+    if not isinstance(obj, dict):
+        raise MoodInterpretationError(f"JSON 최상위가 객체가 아닙니다: {type(obj).__name__}")
+    return obj
+
+
+def parse_mood(raw_text: str) -> MoodParameters:
+    """LLM 원시 응답 문자열을 검증·클램프·기본값 주입해 MoodParameters로 변환한다.
+
+    누락 필드는 기본값을 주입하고, 범위 밖 값은 클램프한다. 완전 파싱 불가 시에만
+    MoodInterpretationError(재시도 없음, PRD §7).
+    """
+    obj = _extract_json_object(raw_text)
+
+    brightness = _clamp(_coerce_number(obj.get("brightness"), DEFAULT_BRIGHTNESS), *_BRIGHTNESS_RANGE)
+    start_energy = _clamp(_coerce_number(obj.get("start_energy"), DEFAULT_START_ENERGY), *_ENERGY_RANGE)
+    # end_energy 누락 시 start_energy로(진행 방향 = 차이).
+    end_default = start_energy
+    end_energy = _clamp(_coerce_number(obj.get("end_energy"), end_default), *_ENERGY_RANGE)
+
+    try:
+        stage_count = int(obj.get("stage_count", DEFAULT_STAGE_COUNT))
+    except (TypeError, ValueError):
+        stage_count = DEFAULT_STAGE_COUNT
+    stage_count = int(_clamp(stage_count, *_STAGE_RANGE))
+
+    target_minutes = obj.get("target_minutes")
+    if target_minutes is not None:
+        try:
+            target_minutes = int(_clamp(int(target_minutes), *_MINUTES_RANGE))
+        except (TypeError, ValueError):
+            target_minutes = None
+
+    summary = obj.get("interpretation_summary", "")
+    if not isinstance(summary, str):
+        summary = ""
+    summary = summary.strip()[:_SUMMARY_MAX]
+
+    return MoodParameters(
+        brightness=brightness,
+        start_energy=start_energy,
+        end_energy=end_energy,
+        stage_count=stage_count,
+        target_minutes=target_minutes,
+        interpretation_summary=summary,
+    )

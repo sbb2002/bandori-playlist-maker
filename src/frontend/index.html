@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>setlist-maker — 밴드리 세트리스트 메이커</title>
+  <link rel="stylesheet" href="style.css" />
+  <!--
+    배포 설정: 백엔드(Render 등)와 프론트(GitHub Pages)가 다른 오리진에서 서빙되므로
+    아래 API 베이스를 백엔드 URL로 바꾼다. 로컬 개발 기본값은 http://localhost:8000.
+    umami 스크립트는 배포 시 아래 주석을 해제하고 website-id를 채운다.
+  -->
+  <script>window.SETLIST_API_BASE = "http://localhost:8000";</script>
+  <!-- <script defer src="https://cloud.umami.is/script.js" data-website-id="YOUR-ID"></script> -->
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>🎧 setlist-maker</h1>
+      <p class="sub">한 문장이면 됩니다. 기분·상황을 말하면 밴드리 곡으로 긴 재생 흐름을 만들어 드려요.</p>
+    </header>
+
+    <form id="request-form" class="card">
+      <label class="field">
+        <span class="field-label">어떤 플레이리스트를 원하세요?</span>
+        <input id="prompt" name="prompt" type="text" maxlength="500" autocomplete="off"
+               placeholder="예) 퇴근하고 주말 시작! 기분이 절로 좋아지는 1시간 플레이리스트" required />
+      </label>
+
+      <details class="options">
+        <summary>세부 설정 (선택)</summary>
+        <div class="options-grid">
+          <label class="field">
+            <span class="field-label">재생시간(분)</span>
+            <input id="target-minutes" type="number" min="10" max="180" placeholder="60 (기본)" />
+          </label>
+          <label class="field">
+            <span class="field-label">에너지 단계 수</span>
+            <input id="stage-count" type="number" min="2" max="5" placeholder="3 (기본)" />
+          </label>
+        </div>
+      </details>
+
+      <button id="submit-btn" type="submit" class="primary">플레이리스트 만들기</button>
+    </form>
+
+    <section id="loading" class="card loading hidden" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="loading-text">플레이리스트를 만드는 중입니다~ 🎶</p>
+      <p class="loading-sub">백엔드가 잠들어 있었다면 첫 응답이 조금 느릴 수 있어요.</p>
+    </section>
+
+    <section id="error" class="card error hidden" aria-live="assertive"></section>
+
+    <section id="result" class="hidden">
+      <div id="summary" class="card summary"></div>
+
+      <div class="card player-card">
+        <div class="player-frame">
+          <div id="player"></div>
+        </div>
+        <div id="now-playing" class="now-playing"></div>
+        <div class="player-controls">
+          <button id="prev-btn" type="button" class="ghost" title="이전 곡">⏮</button>
+          <button id="next-btn" type="button" class="ghost" title="다음 곡">⏭</button>
+        </div>
+      </div>
+
+      <ol id="tracklist" class="tracklist"></ol>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
