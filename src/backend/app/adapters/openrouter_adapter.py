@@ -13,8 +13,10 @@ from ..ports.mood_port import LLMUpstreamError, MoodInterpretationError
 from . import prompt as prompt_mod
 
 DEFAULT_BASE_URL = "https://openrouter.ai/api/v1"
-DEFAULT_MODEL = "openai/gpt-4o-mini"  # 경량 구조화 추출용 1차 후보(§④-3). env로 교체 가능.
-DEFAULT_TIMEOUT = 30.0
+# 파일럿 기본: 무료 경량 모델(사용자 결정 — §④-3/§9 모델 오픈퀘스천 확정). env로 교체 가능.
+# 참고: reasoning 모델이라 응답이 다소 느릴 수 있으나 추출 정확도·비용(무료) 양호.
+DEFAULT_MODEL = "nvidia/nemotron-3-nano-30b-a3b:free"
+DEFAULT_TIMEOUT = 60.0  # 무료/reasoning 모델 지연 감안
 
 
 class OpenRouterMoodInterpreter:
@@ -29,6 +31,7 @@ class OpenRouterMoodInterpreter:
         client: httpx.Client | None = None,
         referer: str | None = None,
         title: str = "setlist-maker",
+        response_format_mode: str = "none",
     ) -> None:
         if not api_key:
             raise ValueError("OpenRouter api_key가 비어 있습니다.")
@@ -40,6 +43,9 @@ class OpenRouterMoodInterpreter:
         self._client = client or httpx.Client(timeout=timeout)
         self._referer = referer
         self._title = title
+        # 응답 포맷 강제 모드: "none"(전 모델 호환, 프롬프트+관용 파서에 의존) |
+        # "json_object"(JSON 모드) | "json_schema"(structured output — 지원 모델만).
+        self._response_format_mode = response_format_mode.strip().lower()
 
     def _headers(self) -> dict[str, str]:
         headers = {
@@ -57,8 +63,12 @@ class OpenRouterMoodInterpreter:
             "model": self._model,
             "messages": prompt_mod.build_messages(prompt),
             "temperature": 0.2,
-            "response_format": prompt_mod.RESPONSE_JSON_SCHEMA,
         }
+        if self._response_format_mode == "json_schema":
+            payload["response_format"] = prompt_mod.RESPONSE_JSON_SCHEMA
+        elif self._response_format_mode == "json_object":
+            payload["response_format"] = {"type": "json_object"}
+        # "none": response_format 미전송 — 강한 시스템 프롬프트 + 관용 파서로 처리(전 모델 호환).
         try:
             response = self._client.post(
                 f"{self._base_url}/chat/completions",

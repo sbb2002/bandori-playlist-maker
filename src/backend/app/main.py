@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -42,6 +43,28 @@ _DEV_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+
+def _load_dotenv() -> None:
+    """의존성 없이 .env를 읽어 os.environ에 주입한다(이미 설정된 값은 유지).
+
+    탐색 위치: 리포지토리 루트 `.env`, `src/backend/.env`. 시크릿 파일이므로 커밋 금지
+    (.gitignore가 `.env` 차단). 예시는 `src/backend/.env.example` 참조.
+    """
+    here = Path(__file__).resolve()
+    candidates = [here.parents[3] / ".env", here.parents[1] / ".env"]  # repo root, src/backend
+    for path in candidates:
+        if not path.exists():
+            continue
+        for raw in path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
 
 
 def _error_response(status_code: int, code: str, message: str) -> JSONResponse:
@@ -73,8 +96,12 @@ def _build_interpreter() -> MoodInterpreter:
         model = os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)
         base_url = os.environ.get("OPENROUTER_BASE_URL", DEFAULT_BASE_URL)
         referer = os.environ.get("FRONTEND_ORIGIN", "").split(",")[0].strip() or None
-        logger.info("MoodInterpreter: OpenRouter (model=%s)", model)
-        return OpenRouterMoodInterpreter(api_key=api_key, model=model, base_url=base_url, referer=referer)
+        response_format = os.environ.get("OPENROUTER_RESPONSE_FORMAT", "none")
+        logger.info("MoodInterpreter: OpenRouter (model=%s, response_format=%s)", model, response_format)
+        return OpenRouterMoodInterpreter(
+            api_key=api_key, model=model, base_url=base_url, referer=referer,
+            response_format_mode=response_format,
+        )
 
     from .adapters.stub_adapter import StubMoodInterpreter
 
@@ -85,6 +112,7 @@ def _build_interpreter() -> MoodInterpreter:
 
 
 def create_app() -> FastAPI:
+    _load_dotenv()  # 어댑터·CORS가 env를 읽기 전에 .env 주입.
     app = FastAPI(title="setlist-maker", version="0.1.0-pilot")
 
     app.add_middleware(
