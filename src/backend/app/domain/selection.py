@@ -53,11 +53,18 @@ def _brightness_scores(pool: list[Song]) -> dict[int, float]:
 
 
 # 확률적 선곡 가중치 파라미터(요구 부합도 → 확률). 작을수록 뾰족(부합곡 집중), 클수록 다양성↑.
-_ENERGY_SIGMA = 0.15   # 에너지 부합 민감도(0~1 축)
-_BRIGHTNESS_SIGMA = 0.5  # 밝기 부합 민감도(-1~1 축, 상대적으로 완만)
-_HARMONIC_BONUS = 4.0  # 직전 곡과 하모닉 호환 시 가중 배수(하드 필터 아님 — key 신뢰도 미검증)
+_ENERGY_SIGMA = 0.15   # 단계 에너지 목표 부합 민감도(0~1 축)
+_BRIGHTNESS_SIGMA = 0.5  # 밝기 목표 부합 민감도(-1~1 축, 상대적으로 완만)
+# 인접 곡 연속성(분위기 급변 방지) — 직전 곡과의 차이에 대한 민감도.
+_CONT_ENERGY_SIGMA = 0.20
+_CONT_BRIGHTNESS_SIGMA = 0.40
+_HARMONIC_BONUS = 8.0  # 직전 곡과 하모닉 호환 시 가중 배수(하드 필터 아님 — key 신뢰도 미검증)
 _SAME_BAND_FACTOR = 0.5  # 직전 곡과 같은 밴드면 가중 감쇠(연속 억제)
 _MAX_PICK_PROB = 0.30  # 단일 곡 최대 선택 확률 상한(한 곡 독점 방지 — 좁은 후보군 대비)
+
+
+def _gauss(distance: float, sigma: float) -> float:
+    return math.exp(-((distance / sigma) ** 2))
 
 
 def _weight(
@@ -67,12 +74,17 @@ def _weight(
     brightness: dict[int, float],
     prev: Song | None,
 ) -> float:
-    """후보 곡의 선택 가중치(클수록 요구에 부합 → 높은 확률). 가우시안 부합도 곱."""
-    energy_dist = abs(song.energy - energy_target)
-    brightness_dist = abs(brightness[song.idx] - brightness_target)
-    weight = math.exp(-((energy_dist / _ENERGY_SIGMA) ** 2))
-    weight *= math.exp(-((brightness_dist / _BRIGHTNESS_SIGMA) ** 2))
+    """후보 곡의 선택 가중치(클수록 요구에 부합 → 높은 확률).
+
+    (a) 단계 에너지·밝기 목표 부합 + (b) 직전 곡과의 연속성(에너지·밝기 급변 방지) +
+    (c) 하모닉 호환 보너스 + (d) 같은 밴드 연속 감쇠의 곱.
+    """
+    weight = _gauss(song.energy - energy_target, _ENERGY_SIGMA)
+    weight *= _gauss(brightness[song.idx] - brightness_target, _BRIGHTNESS_SIGMA)
     if prev is not None:
+        # 직전 곡과 에너지·밝기가 가까울수록 가중↑ → 인접 곡 분위기가 매끄럽게 이어진다.
+        weight *= _gauss(song.energy - prev.energy, _CONT_ENERGY_SIGMA)
+        weight *= _gauss(brightness[song.idx] - brightness[prev.idx], _CONT_BRIGHTNESS_SIGMA)
         weight *= _HARMONIC_BONUS if is_compatible(prev.camelot, song.camelot) else 1.0
         if song.band == prev.band:
             weight *= _SAME_BAND_FACTOR

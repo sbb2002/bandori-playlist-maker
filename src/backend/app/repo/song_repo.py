@@ -58,24 +58,38 @@ def _to_song(row: dict[str, str], energy: float) -> Song:
     )
 
 
-def _energy_from_proxy(proxy: float, lo: float, hi: float) -> float:
-    """energy_proxy → 0~1 무드 에너지.
+# energy_proxy 비중(나머지는 acousticness_proxy). 데이터 검증(2026-07-11)으로 선정.
+_ENERGY_PROXY_WEIGHT = 0.6
 
-    데이터 검증(2026-07-11): 원래 쓰던 `energy` 컬럼(audio_map, EMOI-MAP 펄스용)은 무드
-    에너지와 무관/역전(FIRE BIRD=0.005·栞=0.907, corr 0.24). `energy_proxy`가 올바른 신호이며
-    **부호가 반전**돼 있다(음수=고에너지, 양수=저에너지). 따라서 반전 후 min-max 정규화한다.
+
+def _norm(value: float, lo: float, hi: float) -> float:
+    return (value - lo) / (hi - lo) if hi > lo else 0.5
+
+
+def _blended_energy(
+    energy_proxy: float, acous_proxy: float,
+    ep_lo: float, ep_hi: float, ac_lo: float, ac_hi: float,
+) -> float:
+    """0~1 무드 에너지를 `energy_proxy` + `acousticness_proxy` 블렌드로 산출한다.
+
+    데이터 검증(2026-07-11):
+    - 원래 쓰던 `energy` 컬럼(audio_map, EMOI-MAP 펄스용)은 무드 에너지와 무관/역전
+      (FIRE BIRD=0.005·栞=0.907, corr 0.24) → 폐기.
+    - `energy_proxy`는 올바른 신호이나 **부호 반전**(음수=고에너지). 다만 발췌 구간만 반영해
+      인트로만 조용한 곡(예: 黒のバースデイ=헤비메탈)을 조용하다고 오판.
+    - `acousticness_proxy`가 진짜 조용/어쿠스틱 곡을 강하게 구분(栞 5.05 vs 黒 -1.37).
+    양쪽 모두 반전·정규화 후 가중 평균한다(어쿠스틱↑ → 에너지↓).
     """
-    span = hi - lo
-    if span <= 0:
-        return 0.5
-    return (hi - proxy) / span  # 최저 proxy(고에너지)→1.0, 최고 proxy(저에너지)→0.0
+    e = _norm(-energy_proxy, -ep_hi, -ep_lo)
+    a = _norm(-acous_proxy, -ac_hi, -ac_lo)
+    return _ENERGY_PROXY_WEIGHT * e + (1.0 - _ENERGY_PROXY_WEIGHT) * a
 
 
 def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
     """songs_master.csv를 읽어 전체 곡 목록을 반환한다.
 
     eligible 여부와 무관하게 전 행을 적재한다(후보 필터링은 선곡 엔진이 수행).
-    energy는 `energy_proxy`를 반전·정규화해 산출한다(위 `_energy_from_proxy` 참조).
+    energy는 `energy_proxy`+`acousticness_proxy` 블렌드로 산출한다(위 `_blended_energy`).
 
     Raises:
         FileNotFoundError: CSV가 없는 경우.
@@ -87,6 +101,12 @@ def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
     with path.open(encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f))
 
-    proxies = [float(r["energy_proxy"]) for r in rows]
-    lo, hi = min(proxies), max(proxies)
-    return [_to_song(r, _energy_from_proxy(float(r["energy_proxy"]), lo, hi)) for r in rows]
+    eps = [float(r["energy_proxy"]) for r in rows]
+    acs = [float(r["acousticness_proxy"]) for r in rows]
+    ep_lo, ep_hi = min(eps), max(eps)
+    ac_lo, ac_hi = min(acs), max(acs)
+    return [
+        _to_song(r, _blended_energy(float(r["energy_proxy"]), float(r["acousticness_proxy"]),
+                                    ep_lo, ep_hi, ac_lo, ac_hi))
+        for r in rows
+    ]
