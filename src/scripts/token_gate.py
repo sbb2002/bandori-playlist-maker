@@ -7,8 +7,8 @@ Aggregates token usage from local Claude Code transcripts
 
 Standard library only -- no external dependencies, no venv required:
 
-    python scripts/token_gate.py
-    python scripts/token_gate.py --config scripts/token_gate_config.json
+    python src/scripts/token_gate.py
+    python src/scripts/token_gate.py --config src/scripts/token_gate_config.json
 
 Output contract (stdout, JSON)::
 

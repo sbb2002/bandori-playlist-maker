@@ -136,6 +136,7 @@ class TestAgainstSongsFullCsv(unittest.TestCase):
         "..",
         "..",
         "..",
+        "..",
         "bandori-song-sorter",
         "src",
         "content",

@@ -24,7 +24,7 @@ from camelot import (
 _CSV_PATH = os.path.normpath(
     os.path.join(
         os.path.dirname(__file__),
-        "..", "..", "..",
+        "..", "..", "..", "..",
         "bandori-song-sorter", "side-project", "genre-features",
         "song_features_with_proxies.csv",
     )

@@ -12,8 +12,9 @@
 
 ## 남은 작업 (재개 시 순서대로)
 
-1. **T1 스폰** (haiku): `backend/app/domain/models.py` + `repo/song_repo.py` + tests
+1. **T1 스폰** (haiku): `src/backend/app/domain/models.py` + `repo/song_repo.py` + tests
    — architecture.md §⑤ T1 명세 참조. 게이트 GO 확인 후 스폰.
+   (R11 신설: 모든 코드는 `src/` 하위, 폴더별 README.md 규칙 준수 — 스폰 프롬프트에 포함할 것)
 2. T1 검수(코드설계팀 팀장 SendMessage 또는 재스폰) 후 **T2(sonnet)·T3(sonnet)·T5(haiku) 병렬 스폰**.
 3. T2·T3 완료 후 **T4(sonnet)** 스폰 → 통합 검증(T5 포함) → `/code-review` → 커밋.
 4. (병렬 가능) 데이터팀에 `duration_sec` 백필 티켓 — **사용자 결재 + YouTube Data API 키 필요**.

@@ -17,6 +17,10 @@ PRD 파일럿 범위(§4)를 클린 아키텍처(§8)로 구현하기 위한 (a)
 
 ### 디렉토리 구조
 
+> **[2026-07-10 R11 개정]** 모든 소스코드는 `./src/` 하위로 이동 — 아래 트리의 `backend/`·
+> `frontend/`·`tests/`·`scripts/`는 각각 `src/backend/`·`src/frontend/`·`src/tests/`·
+> `src/scripts/`를 뜻한다. 폴더별 작성규칙은 각 폴더의 `README.md` 참조.
+
 ```
 bandori-playlist-maker/
 ├─ backend/
@@ -46,7 +50,7 @@ bandori-playlist-maker/
 │  ├─ test_harmonic.py / test_energy.py / test_selection.py
 │  ├─ test_openrouter_adapter.py  # HTTP 목킹
 │  └─ test_api.py                 # 엔드포인트 계약·CORS·에러
-└─ data/, scripts/data/           # ← 데이터팀 소유. 코드팀은 읽기 전용 소비만.
+└─ data/, scripts/data/           # ← 데이터팀 소유(현 src/scripts/data/). 코드팀은 읽기 전용 소비만.
 ```
 
 ### 경계 (의존 방향 = 안쪽으로만)
@@ -56,9 +60,9 @@ bandori-playlist-maker/
 자리에 주입. `domain/`은 `adapters/`·`api/`·OpenRouter를 모른다. 벤더 교체 = 어댑터 1파일 +
 주입 1줄. (investbot의 adapter→api 분리와 동형.)
 
-**cross-team import**: `harmonic.py`는 `scripts/data/camelot.py`의 `is_adjacent()`를,
+**cross-team import**: `harmonic.py`는 `src/scripts/data/camelot.py`의 `is_adjacent()`를,
 `song_repo.py`는 `video_id.py`를 읽기 전용 import (둘 다 표준 라이브러리 순수 함수 — 도메인
-순수성 위반 아님). 코드팀은 `scripts/data/` 편집 금지(R6 검수 항목).
+순수성 위반 아님). 코드팀은 `src/scripts/data/` 편집 금지(R6 검수 항목).
 
 ## ③ 핵심 스키마 3종 (팀 간 계약 — 동결)
 
