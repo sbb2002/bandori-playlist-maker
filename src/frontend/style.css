@@ -74,31 +74,55 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 
 /* 시간×에너지 텐션 그래프 편집기 */
 .stage-editor { margin-top: 12px; }
-.graph {
-  position: relative; width: 100%; height: 180px;
-  background: var(--card-2); border-radius: 12px; overflow: hidden;
-  touch-action: none; user-select: none;
+.plot-row { display: flex; gap: 6px; }
+.y-axis {
+  width: 40px; flex: 0 0 40px; display: flex; flex-direction: column;
+  justify-content: space-between; align-items: flex-end; padding: 2px 4px 2px 0;
 }
-.graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.graph-area { fill: rgba(124, 108, 255, 0.18); stroke: none; }
-.graph-curve { fill: none; stroke: var(--accent); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.y-tick { font-size: 0.68rem; color: var(--muted); }
+.y-axis-title { writing-mode: vertical-rl; font-size: 0.72rem; color: var(--muted); }
+.plot {
+  position: relative; flex: 1; height: 180px; background: var(--card-2);
+  border-left: 1px solid rgba(255,255,255,0.16); border-bottom: 1px solid rgba(255,255,255,0.16);
+  border-radius: 0 8px 0 0; overflow: visible; touch-action: none; user-select: none;
+}
+.graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.grid { stroke: rgba(255,255,255,0.06); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.grid-edge { stroke: rgba(255,255,255,0.12); }
+.graph-area { fill: rgba(124,108,255,0.18); stroke: none; }
+.graph-curve { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .energy-dot {
-  position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+  position: absolute; z-index: 3; width: 20px; height: 20px; margin: -10px 0 0 -10px;
   border-radius: 50%; background: var(--accent); border: 2px solid #fff;
-  cursor: ns-resize; box-shadow: 0 2px 6px rgba(0,0,0,0.4); touch-action: none;
+  cursor: ns-resize; box-shadow: 0 2px 6px rgba(0,0,0,0.45); touch-action: none;
+}
+.dot-val {
+  position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+  font-size: 0.68rem; color: var(--text); background: rgba(0,0,0,0.55);
+  padding: 1px 5px; border-radius: 6px; white-space: nowrap; pointer-events: none;
 }
 .bound-handle {
-  position: absolute; top: 0; height: 100%; width: 14px; margin-left: -7px;
+  position: absolute; z-index: 2; top: 0; height: 100%; width: 18px; margin-left: -9px;
   cursor: ew-resize; touch-action: none;
 }
 .bound-handle::before {
-  content: ""; position: absolute; left: 50%; top: 8%; height: 84%; width: 2px;
-  transform: translateX(-50%); background: rgba(255,108,196,0.7); border-radius: 2px;
+  content: ""; position: absolute; left: 50%; top: 0; height: 100%; width: 2px;
+  transform: translateX(-50%); background: rgba(255,108,196,0.55);
 }
-.energy-dot.dragging, .bound-handle.dragging::before { background: var(--accent-2); }
-.graph-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; }
-.leg-item { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.graph-hint { margin-top: 6px; font-size: 0.75rem; color: var(--muted); }
+.bound-handle::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px;
+  transform: translate(-50%,-50%) rotate(45deg);
+  background: var(--accent-2); border: 2px solid #fff; border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.energy-dot.dragging { background: var(--accent-2); }
+.bound-handle.dragging::after { background: var(--accent); }
+.x-axis-row { display: flex; gap: 6px; margin-top: 4px; }
+.x-spacer { width: 40px; flex: 0 0 40px; }
+.x-axis { position: relative; flex: 1; height: 16px; }
+.x-tick { position: absolute; top: 0; transform: translateX(-50%); font-size: 0.68rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.x-unit { position: absolute; right: -16px; top: 0; font-size: 0.68rem; color: var(--muted); }
+.graph-hint { margin-top: 8px; font-size: 0.75rem; color: var(--muted); }
 
 button {
   font-family: inherit;

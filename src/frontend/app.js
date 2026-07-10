@@ -87,7 +87,7 @@ function showError(message) {
 // ── 설정: 밴드 필터 · 단계 직접 지정 (§5-1) ────────────────────────────────────
 const bandListEl = $("band-list");
 const stageEditorEl = $("stage-editor");
-const customToggle = $("custom-stages-toggle");
+let stageTouched = false; // 사용자가 그래프를 조정했는지 — 조정 전엔 LLM 에너지 자동 사용
 
 async function loadBands() {
   try {
@@ -132,15 +132,11 @@ const MIN_WIDTH = 0.08;  // 구간 최소 폭(전체 대비)
 
 let stageModel = null; // { totalMinutes, segments: [{energy(0~1), width(합=1)}] }
 
-customToggle.addEventListener("change", () => {
-  toggle(stageEditorEl, customToggle.checked);
-  if (customToggle.checked) { initStageModel(); renderStageGraph(); }
-});
 $("stage-count").addEventListener("input", () => {
-  if (customToggle.checked) { initStageModel(); renderStageGraph(); }
+  initStageModel(); stageTouched = false; renderStageGraph();
 });
 $("target-minutes").addEventListener("input", () => {
-  if (customToggle.checked && stageModel) {
+  if (stageModel) {
     stageModel.totalMinutes = clampInt($("target-minutes").value, 10, 180, 60);
     renderStageGraph();
   }
@@ -174,26 +170,52 @@ function renderStageGraph() {
   if (!stageModel) initStageModel();
   stageEditorEl.replaceChildren();
 
-  const graph = elDiv("graph");
+  // 축 프레임: [Y축 라벨][플롯] / [여백][X축 시간 라벨]
+  const plotRow = elDiv("plot-row");
+  const yAxis = elDiv("y-axis");
+  const yTop = elDiv("y-tick"); yTop.textContent = "높음";
+  const yTitle = elDiv("y-axis-title"); yTitle.textContent = "에너지";
+  const yBot = elDiv("y-tick"); yBot.textContent = "낮음";
+  yAxis.append(yTop, yTitle, yBot);
+
+  const plot = elDiv("plot");
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("viewBox", "0 0 100 100");
   svg.setAttribute("preserveAspectRatio", "none");
   svg.setAttribute("class", "graph-svg");
+  const gridG = document.createElementNS(SVG_NS, "g");
+  [0, 0.25, 0.5, 0.75, 1].forEach((e) => {
+    const ln = document.createElementNS(SVG_NS, "line");
+    const y = energyToY(e);
+    ln.setAttribute("x1", "0"); ln.setAttribute("x2", "100");
+    ln.setAttribute("y1", String(y)); ln.setAttribute("y2", String(y));
+    ln.setAttribute("class", e === 0 || e === 1 ? "grid grid-edge" : "grid");
+    gridG.append(ln);
+  });
   const area = document.createElementNS(SVG_NS, "path"); area.setAttribute("class", "graph-area");
   const curve = document.createElementNS(SVG_NS, "path"); curve.setAttribute("class", "graph-curve");
-  svg.append(area, curve);
-  graph.append(svg);
+  svg.append(gridG, area, curve);
+  plot.append(svg);
 
-  const dots = stageModel.segments.map(() => graph.appendChild(elDiv("energy-dot")));
-  const handles = stageModel.segments.slice(1).map(() => graph.appendChild(elDiv("bound-handle")));
+  const dots = stageModel.segments.map(() => {
+    const dot = elDiv("energy-dot");
+    dot.append(elDiv("dot-val"));
+    return plot.appendChild(dot);
+  });
+  const handles = stageModel.segments.slice(1).map(() => plot.appendChild(elDiv("bound-handle")));
+  plotRow.append(yAxis, plot);
 
-  const legend = elDiv("graph-legend");
+  const xRow = elDiv("x-axis-row");
+  xRow.append(elDiv("x-spacer"));
+  const xAxis = elDiv("x-axis");
+  xRow.append(xAxis);
+
   const hint = elDiv("graph-hint");
-  hint.textContent = "● 위·아래 = 에너지 레벨  ·  ▮ 좌·우 = 구간 길이";
-  stageEditorEl.append(graph, legend, hint);
+  hint.textContent = "● 점을 위·아래로 = 에너지  ·  ◆ 경계를 좌·우로 = 구간 길이";
+  stageEditorEl.append(plotRow, xRow, hint);
 
   function update() {
-    const segs = stageModel.segments, n = segs.length;
+    const segs = stageModel.segments, n = segs.length, total = stageModel.totalMinutes;
     const cum = [0];
     segs.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
     const centers = segs.map((s, i) => (cum[i] + cum[i + 1]) / 2);
@@ -208,22 +230,28 @@ function renderStageGraph() {
     dots.forEach((dot, i) => {
       dot.style.left = `${centers[i] * 100}%`;
       dot.style.top = `${energyToY(segs[i].energy)}%`;
+      dot.firstChild.textContent = segs[i].energy.toFixed(2);
     });
     handles.forEach((h, j) => { h.style.left = `${cum[j + 1] * 100}%`; });
 
-    legend.replaceChildren();
-    segs.forEach((s, i) => {
-      const item = elDiv("leg-item");
-      item.textContent = `${i + 1}구간 · e${s.energy.toFixed(2)} · ${Math.max(1, Math.round(s.width * stageModel.totalMinutes))}분`;
-      legend.append(item);
+    // X축 시간 눈금(구간 경계 = 누적 분)
+    xAxis.replaceChildren();
+    cum.forEach((c, i) => {
+      const tick = elDiv("x-tick");
+      tick.style.left = `${c * 100}%`;
+      if (i === 0) tick.style.transform = "translateX(0)";
+      else if (i === cum.length - 1) tick.style.transform = "translateX(-100%)";
+      tick.textContent = String(Math.round(c * total));
+      xAxis.append(tick);
     });
+    const unit = elDiv("x-unit"); unit.textContent = "분"; xAxis.append(unit);
   }
 
-  dots.forEach((dot, i) => bindDrag(dot, graph, (fx, fy) => {
+  dots.forEach((dot, i) => bindDrag(dot, plot, (fx, fy) => {
     stageModel.segments[i].energy = yToEnergy(fy);
     update();
   }));
-  handles.forEach((handle, j) => bindDrag(handle, graph, (fx) => {
+  handles.forEach((handle, j) => bindDrag(handle, plot, (fx) => {
     const segs = stageModel.segments;
     const leftFixed = segs.slice(0, j).reduce((a, s) => a + s.width, 0);
     const rightFixed = segs.slice(j + 2).reduce((a, s) => a + s.width, 0);
@@ -242,6 +270,7 @@ function bindDrag(node, graph, onMove) {
     node.setPointerCapture(e.pointerId);
     node.classList.add("dragging");
     const move = (ev) => {
+      stageTouched = true; // 사용자가 그래프를 조정함 → 이후 요청에 이 아크를 적용
       const r = graph.getBoundingClientRect();
       onMove(clamp01((ev.clientX - r.left) / r.width), clamp01((ev.clientY - r.top) / r.height));
     };
@@ -256,7 +285,7 @@ function bindDrag(node, graph, onMove) {
 }
 
 function collectStages() {
-  if (!customToggle.checked || !stageModel) return null;
+  if (!stageTouched || !stageModel) return null;
   const total = stageModel.totalMinutes;
   return stageModel.segments.map((s) => ({
     energy: +s.energy.toFixed(3),
@@ -270,6 +299,8 @@ function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 function clampInt(raw, lo, hi, dflt) { const n = parseInt(raw, 10); return Number.isNaN(n) ? dflt : Math.max(lo, Math.min(hi, n)); }
 
 loadBands();
+initStageModel();
+renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
 
 // ── 렌더 ─────────────────────────────────────────────────────────────────────
 function renderResult(data) {

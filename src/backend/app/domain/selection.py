@@ -57,6 +57,7 @@ _ENERGY_SIGMA = 0.15   # 에너지 부합 민감도(0~1 축)
 _BRIGHTNESS_SIGMA = 0.5  # 밝기 부합 민감도(-1~1 축, 상대적으로 완만)
 _HARMONIC_BONUS = 4.0  # 직전 곡과 하모닉 호환 시 가중 배수(하드 필터 아님 — key 신뢰도 미검증)
 _SAME_BAND_FACTOR = 0.5  # 직전 곡과 같은 밴드면 가중 감쇠(연속 억제)
+_MAX_PICK_PROB = 0.30  # 단일 곡 최대 선택 확률 상한(한 곡 독점 방지 — 좁은 후보군 대비)
 
 
 def _weight(
@@ -78,6 +79,36 @@ def _weight(
     return weight
 
 
+def _cap_probabilities(probs: list[float], cap: float) -> list[float]:
+    """단일 확률이 cap을 넘지 않도록 초과분을 여유 있는 후보에 재분배한다.
+
+    후보 수가 적어 cap이 물리적으로 불가능하면(1/n > cap) 실현 가능한 하한(1/n)으로 완화한다.
+    """
+    n = len(probs)
+    if n == 0:
+        return probs
+    cap = max(cap, 1.0 / n)
+    probs = list(probs)
+    for _ in range(50):
+        total = sum(probs)
+        if total <= 0.0:
+            return [1.0 / n] * n
+        probs = [p / total for p in probs]
+        over = [i for i, p in enumerate(probs) if p > cap + 1e-12]
+        if not over:
+            break
+        excess = sum(probs[i] - cap for i in over)
+        for i in over:
+            probs[i] = cap
+        room = [(i, cap - probs[i]) for i in range(n) if probs[i] < cap - 1e-12]
+        room_total = sum(r for _, r in room)
+        if room_total <= 1e-12:
+            break
+        for i, r in room:
+            probs[i] += excess * (r / room_total)
+    return probs
+
+
 def _choose(
     remaining: dict[int, Song],
     energy_target: float,
@@ -86,9 +117,10 @@ def _choose(
     prev: Song | None,
     rng: random.Random,
 ) -> Song:
-    """단계 내 다음 곡 1개를 부합도 가중 확률로 샘플링한다(요구 부합↑ → 확률↑).
+    """단계 내 다음 곡 1개를 부합도 가중 확률로 샘플링한다(요구 부합↑ → 확률↑, 상한 제한).
 
     하모닉은 하드 필터가 아니라 가중치(×4)로 반영 — 다양성을 유지하면서 흐름을 선호.
+    단일 곡 독점을 막기 위해 확률 상한(`_MAX_PICK_PROB`)을 적용한다.
     가중치 합이 0이면 에너지 근접 결정적 폴백.
     """
     candidates = list(remaining.values())  # dict 삽입순 = 결정적 순서(시드 재현성)
@@ -96,10 +128,11 @@ def _choose(
     total = sum(weights)
     if total <= 0.0:
         return min(candidates, key=lambda c: (abs(c.energy - energy_target), c.idx))
-    threshold = rng.random() * total
+    probs = _cap_probabilities([w / total for w in weights], _MAX_PICK_PROB)
+    threshold = rng.random()
     acc = 0.0
-    for candidate, weight in zip(candidates, weights):
-        acc += weight
+    for candidate, prob in zip(candidates, probs):
+        acc += prob
         if threshold <= acc:
             return candidate
     return candidates[-1]

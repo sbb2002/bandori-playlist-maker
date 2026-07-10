@@ -73,6 +73,29 @@ def test_probabilistic_target_shapes_energy():
     assert avg_energy_for(0.1) < avg_energy_for(0.9)
 
 
+def test_max_probability_capped():
+    # 한 곡이 압도적으로 부합해도 단독 선택 확률이 상한(0.30) 근처로 제한되어야 한다.
+    songs = [
+        Song(0, "a", "perfect", "vid0000000", "8A", 0.50, 0.0, "neutral", eligible_band=True),
+        Song(1, "b", "x1", "vid0000001", "3A", 0.05, -1.0, "acoustic", eligible_band=True),
+        Song(2, "c", "x2", "vid0000002", "6B", 0.95, 1.0, "bright", eligible_band=True),
+        Song(3, "d", "x3", "vid0000003", "1A", 0.03, -0.9, "acoustic", eligible_band=True),
+        Song(4, "e", "x4", "vid0000004", "11B", 0.98, 0.9, "bright", eligible_band=True),
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5,
+        stage_count=1, target_minutes=None, interpretation_summary="",
+    )
+    first: Counter[int] = Counter()
+    trials = 400
+    for seed in range(trials):
+        specs = [StageSpec(energy_target=0.5, song_count=1)]
+        sl = build_setlist(songs, params, target_seconds=999, stage_specs=specs, rng=random.Random(seed))
+        first[sl.picks[0].idx] += 1
+    # 완벽 부합 곡(idx 0)이라도 상한(0.30) 덕에 절반을 넘지 못한다.
+    assert first[0] / trials <= 0.42
+
+
 def test_no_duplicate_songs():
     setlist = build_setlist(_songs(), _params(), target_seconds=8 * 213)
     idxs = [p.idx for p in setlist.picks]
