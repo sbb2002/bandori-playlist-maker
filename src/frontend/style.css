@@ -72,18 +72,33 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .band-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
 .band-item input { width: 15px; height: 15px; }
 
-.stage-editor { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
-.stage-row {
-  display: grid; grid-template-columns: 56px 1fr 92px; gap: 10px; align-items: center;
-  background: var(--card-2); border-radius: 10px; padding: 8px 12px;
+/* 시간×에너지 텐션 그래프 편집기 */
+.stage-editor { margin-top: 12px; }
+.graph {
+  position: relative; width: 100%; height: 180px;
+  background: var(--card-2); border-radius: 12px; overflow: hidden;
+  touch-action: none; user-select: none;
 }
-.stage-row-head { font-weight: 600; font-size: 0.85rem; }
-.stage-ctrl { display: flex; align-items: center; gap: 6px; }
-.stage-lbl { font-size: 0.75rem; color: var(--muted); }
-.stage-eval { font-variant-numeric: tabular-nums; font-size: 0.8rem; min-width: 30px; text-align: right; }
-.stage-energy { flex: 1; }
-.stage-minutes { width: 52px; padding: 6px 8px !important; }
-input[type="range"] { accent-color: var(--accent); }
+.graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.graph-area { fill: rgba(124, 108, 255, 0.18); stroke: none; }
+.graph-curve { fill: none; stroke: var(--accent); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.energy-dot {
+  position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+  border-radius: 50%; background: var(--accent); border: 2px solid #fff;
+  cursor: ns-resize; box-shadow: 0 2px 6px rgba(0,0,0,0.4); touch-action: none;
+}
+.bound-handle {
+  position: absolute; top: 0; height: 100%; width: 14px; margin-left: -7px;
+  cursor: ew-resize; touch-action: none;
+}
+.bound-handle::before {
+  content: ""; position: absolute; left: 50%; top: 8%; height: 84%; width: 2px;
+  transform: translateX(-50%); background: rgba(255,108,196,0.7); border-radius: 2px;
+}
+.energy-dot.dragging, .bound-handle.dragging::before { background: var(--accent-2); }
+.graph-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; }
+.leg-item { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.graph-hint { margin-top: 6px; font-size: 0.75rem; color: var(--muted); }
 
 button {
   font-family: inherit;
@@ -143,6 +158,8 @@ button.ghost {
 }
 .now-playing { margin: 12px 0 6px; font-weight: 600; }
 .now-playing .np-band { color: var(--muted); font-weight: 400; }
+.now-playing .np-link { color: var(--accent); font-weight: 500; font-size: 0.85rem; text-decoration: none; white-space: nowrap; }
+.now-playing .np-link:hover { text-decoration: underline; }
 .player-controls { display: flex; gap: 10px; }
 
 /* 트랙리스트 */

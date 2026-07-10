@@ -1,5 +1,8 @@
 """선곡 엔진 테스트 (도메인 순수 — 결정적성·중복 방지·하모닉 우선·필터)."""
 
+import random
+from collections import Counter
+
 import pytest
 
 from app.domain.models import MoodParameters, NoSetlistError, Song, StageSpec
@@ -37,11 +40,37 @@ def _params(stage_count=3, start=0.2, end=0.9) -> MoodParameters:
     )
 
 
-def test_deterministic_same_input_same_output():
+def test_seeded_reproducible():
+    # 동일 시드 → 동일 출력(확률적이지만 재현 가능).
     songs, params = _songs(), _params()
-    a = build_setlist(songs, params, target_seconds=6 * 213)
-    b = build_setlist(songs, params, target_seconds=6 * 213)
+    a = build_setlist(songs, params, target_seconds=6 * 213, rng=random.Random(42))
+    b = build_setlist(songs, params, target_seconds=6 * 213, rng=random.Random(42))
     assert [p.idx for p in a.picks] == [p.idx for p in b.picks]
+
+
+def test_different_seeds_can_differ():
+    songs, params = _songs(), _params()
+    orders = {
+        tuple(p.idx for p in build_setlist(songs, params, target_seconds=8 * 213, rng=random.Random(s)).picks)
+        for s in range(12)
+    }
+    assert len(orders) > 1  # 시드가 다르면 결과가 갈릴 수 있음(다양성)
+
+
+def test_probabilistic_target_shapes_energy():
+    # 낮은 에너지 목표는 더 낮은 에너지 곡을, 높은 목표는 더 높은 에너지 곡을 선호해야 한다.
+    songs, params = _songs(), _params()
+    by_idx = {s.idx: s for s in songs}
+
+    def avg_energy_for(target: float) -> float:
+        picks: Counter[int] = Counter()
+        for seed in range(150):
+            specs = [StageSpec(energy_target=target, song_count=1)]
+            sl = build_setlist(songs, params, target_seconds=999, stage_specs=specs, rng=random.Random(seed))
+            picks[sl.picks[0].idx] += 1
+        return sum(by_idx[i].energy * c for i, c in picks.items()) / sum(picks.values())
+
+    assert avg_energy_for(0.1) < avg_energy_for(0.9)
 
 
 def test_no_duplicate_songs():
@@ -74,11 +103,11 @@ def test_band_filter_restricts_pool():
 
 
 def test_harmonic_preference_prefers_adjacency():
-    # 하모닉 우선: seed 이후 대부분의 전환이 same/adjacent 여야 한다(non_harmonic는 소진 폴백).
-    setlist = build_setlist(_songs(), _params(), target_seconds=6 * 213)
+    # 하모닉은 하드 필터가 아니라 가중치(×4). 전환의 상당수가 same/adjacent 여야 한다.
+    setlist = build_setlist(_songs(), _params(), target_seconds=6 * 213, rng=random.Random(0))
     transitions = [p.reason.harmonic for p in setlist.picks[1:]]
     harmonic_ok = sum(1 for h in transitions if h in ("same", "adjacent"))
-    assert harmonic_ok >= len(transitions) // 2
+    assert harmonic_ok >= len(transitions) // 3
 
 
 def test_estimated_total_seconds_uses_avg():

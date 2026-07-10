@@ -23,6 +23,7 @@ let current = -1;
 let estimatedTotal = 0;
 let playedSeconds = 0;
 let halfFired = false;
+let errorSkips = 0; // 재생불가 영상 연속 스킵 가드(무한 루프 방지)
 
 // ── umami 계측(스크립트 미설치 시 무해) ─────────────────────────────────────────
 function track(name, data) {
@@ -123,65 +124,150 @@ $("band-clear").addEventListener("click", () => {
   document.querySelectorAll(".band-cb:checked").forEach((c) => (c.checked = false));
 });
 
+// 시간×에너지 텐션 그래프 편집기 (§5-1a). 점=에너지(상하 드래그), 경계=구간 길이(좌우 드래그).
+const SVG_NS = "http://www.w3.org/2000/svg";
+const PAD_TOP = 10;      // 그래프 상하 여백(뷰박스 0~100 기준)
+const PAD_BOTTOM = 12;
+const MIN_WIDTH = 0.08;  // 구간 최소 폭(전체 대비)
+
+let stageModel = null; // { totalMinutes, segments: [{energy(0~1), width(합=1)}] }
+
 customToggle.addEventListener("change", () => {
   toggle(stageEditorEl, customToggle.checked);
-  if (customToggle.checked) renderStageEditor();
+  if (customToggle.checked) { initStageModel(); renderStageGraph(); }
 });
 $("stage-count").addEventListener("input", () => {
-  if (customToggle.checked) renderStageEditor();
+  if (customToggle.checked) { initStageModel(); renderStageGraph(); }
+});
+$("target-minutes").addEventListener("input", () => {
+  if (customToggle.checked && stageModel) {
+    stageModel.totalMinutes = clampInt($("target-minutes").value, 10, 180, 60);
+    renderStageGraph();
+  }
 });
 
-function renderStageEditor() {
-  const n = Math.max(2, Math.min(5, parseInt($("stage-count").value, 10) || 3));
-  const totalMin = Math.max(10, Math.min(180, parseInt($("target-minutes").value, 10) || 60));
-  const perMin = Math.max(1, Math.round(totalMin / n));
-  stageEditorEl.replaceChildren();
+function initStageModel() {
+  const n = clampInt($("stage-count").value, 2, 5, 3);
+  const total = clampInt($("target-minutes").value, 10, 180, 60);
+  const segments = [];
   for (let i = 0; i < n; i++) {
-    const energy = +(0.3 + (0.55 * i) / (n - 1)).toFixed(2); // 기본 0.30→0.85 상승 아크
-    const row = document.createElement("div");
-    row.className = "stage-row";
-
-    const head = document.createElement("div");
-    head.className = "stage-row-head";
-    head.textContent = `${i + 1}단계`;
-
-    const eVal = document.createElement("span");
-    eVal.className = "stage-eval";
-    eVal.textContent = energy.toFixed(2);
-    const slider = document.createElement("input");
-    slider.type = "range"; slider.min = "0"; slider.max = "1"; slider.step = "0.05";
-    slider.value = String(energy);
-    slider.className = "stage-energy";
-    slider.addEventListener("input", () => (eVal.textContent = (+slider.value).toFixed(2)));
-
-    const eWrap = document.createElement("div");
-    eWrap.className = "stage-ctrl";
-    const eLbl = document.createElement("span"); eLbl.className = "stage-lbl"; eLbl.textContent = "에너지";
-    eWrap.append(eLbl, slider, eVal);
-
-    const mInput = document.createElement("input");
-    mInput.type = "number"; mInput.min = "1"; mInput.max = "180";
-    mInput.value = String(perMin);
-    mInput.className = "stage-minutes";
-    const mWrap = document.createElement("div");
-    mWrap.className = "stage-ctrl";
-    const mLbl = document.createElement("span"); mLbl.className = "stage-lbl"; mLbl.textContent = "분";
-    mWrap.append(mLbl, mInput);
-
-    row.append(head, eWrap, mWrap);
-    stageEditorEl.appendChild(row);
+    segments.push({ energy: +(0.3 + (0.55 * i) / (n - 1)).toFixed(2), width: 1 / n });
   }
+  stageModel = { totalMinutes: total, segments };
+}
+
+function energyToY(energy) { return PAD_TOP + (1 - energy) * (100 - PAD_TOP - PAD_BOTTOM); }
+function yToEnergy(frac) { return clamp01(1 - (frac * 100 - PAD_TOP) / (100 - PAD_TOP - PAD_BOTTOM)); }
+
+function smoothPath(pts) {
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    const c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+
+function renderStageGraph() {
+  if (!stageModel) initStageModel();
+  stageEditorEl.replaceChildren();
+
+  const graph = elDiv("graph");
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 100 100");
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("class", "graph-svg");
+  const area = document.createElementNS(SVG_NS, "path"); area.setAttribute("class", "graph-area");
+  const curve = document.createElementNS(SVG_NS, "path"); curve.setAttribute("class", "graph-curve");
+  svg.append(area, curve);
+  graph.append(svg);
+
+  const dots = stageModel.segments.map(() => graph.appendChild(elDiv("energy-dot")));
+  const handles = stageModel.segments.slice(1).map(() => graph.appendChild(elDiv("bound-handle")));
+
+  const legend = elDiv("graph-legend");
+  const hint = elDiv("graph-hint");
+  hint.textContent = "● 위·아래 = 에너지 레벨  ·  ▮ 좌·우 = 구간 길이";
+  stageEditorEl.append(graph, legend, hint);
+
+  function update() {
+    const segs = stageModel.segments, n = segs.length;
+    const cum = [0];
+    segs.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
+    const centers = segs.map((s, i) => (cum[i] + cum[i + 1]) / 2);
+
+    const pts = [{ x: 0, y: energyToY(segs[0].energy) }];
+    segs.forEach((s, i) => pts.push({ x: centers[i] * 100, y: energyToY(s.energy) }));
+    pts.push({ x: 100, y: energyToY(segs[n - 1].energy) });
+    const d = smoothPath(pts);
+    curve.setAttribute("d", d);
+    area.setAttribute("d", `${d} L 100 100 L 0 100 Z`);
+
+    dots.forEach((dot, i) => {
+      dot.style.left = `${centers[i] * 100}%`;
+      dot.style.top = `${energyToY(segs[i].energy)}%`;
+    });
+    handles.forEach((h, j) => { h.style.left = `${cum[j + 1] * 100}%`; });
+
+    legend.replaceChildren();
+    segs.forEach((s, i) => {
+      const item = elDiv("leg-item");
+      item.textContent = `${i + 1}구간 · e${s.energy.toFixed(2)} · ${Math.max(1, Math.round(s.width * stageModel.totalMinutes))}분`;
+      legend.append(item);
+    });
+  }
+
+  dots.forEach((dot, i) => bindDrag(dot, graph, (fx, fy) => {
+    stageModel.segments[i].energy = yToEnergy(fy);
+    update();
+  }));
+  handles.forEach((handle, j) => bindDrag(handle, graph, (fx) => {
+    const segs = stageModel.segments;
+    const leftFixed = segs.slice(0, j).reduce((a, s) => a + s.width, 0);
+    const rightFixed = segs.slice(j + 2).reduce((a, s) => a + s.width, 0);
+    const b = clamp(fx, leftFixed + MIN_WIDTH, 1 - rightFixed - MIN_WIDTH);
+    segs[j].width = b - leftFixed;
+    segs[j + 1].width = 1 - rightFixed - b;
+    update();
+  }));
+
+  update();
+}
+
+function bindDrag(node, graph, onMove) {
+  node.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    node.setPointerCapture(e.pointerId);
+    node.classList.add("dragging");
+    const move = (ev) => {
+      const r = graph.getBoundingClientRect();
+      onMove(clamp01((ev.clientX - r.left) / r.width), clamp01((ev.clientY - r.top) / r.height));
+    };
+    const up = () => {
+      node.classList.remove("dragging");
+      node.removeEventListener("pointermove", move);
+      node.removeEventListener("pointerup", up);
+    };
+    node.addEventListener("pointermove", move);
+    node.addEventListener("pointerup", up);
+  });
 }
 
 function collectStages() {
-  if (!customToggle.checked) return null;
-  const rows = [...stageEditorEl.querySelectorAll(".stage-row")];
-  if (!rows.length) return null;
-  return rows.map((r) => ({
-    energy: +r.querySelector(".stage-energy").value,
-    minutes: Math.max(1, parseInt(r.querySelector(".stage-minutes").value, 10) || 5),
+  if (!customToggle.checked || !stageModel) return null;
+  const total = stageModel.totalMinutes;
+  return stageModel.segments.map((s) => ({
+    energy: +s.energy.toFixed(3),
+    minutes: Math.max(1, Math.round(s.width * total)),
   }));
 }
+
+function elDiv(cls) { const d = document.createElement("div"); d.className = cls; return d; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+function clampInt(raw, lo, hi, dflt) { const n = parseInt(raw, 10); return Number.isNaN(n) ? dflt : Math.max(lo, Math.min(hi, n)); }
 
 loadBands();
 
@@ -191,6 +277,7 @@ function renderResult(data) {
   estimatedTotal = data.estimated_total_seconds || 0;
   playedSeconds = 0;
   halfFired = false;
+  errorSkips = 0;
   current = -1;
 
   if (!picks.length) {
@@ -306,17 +393,22 @@ function startPlayback() {
   highlight(0);
   updateNowPlaying(picks[0]);
 
+  // song-sorter 검증 패턴: 빈 플레이어(생성자 videoId 없음) + autoplay 0.
+  // 첫 곡은 cue만(자동재생 정책 위반 회피 — "An error occurred" 방지). 사용자가 ▶ 클릭 시 재생,
+  // 이후 곡은 loadVideoById로 자동 전환(상호작용 이후이므로 자동재생 허용).
   const boot = () => {
-    if (player && player.loadVideoById) {
-      player.loadVideoById(picks[0].video_id);
+    if (player && typeof player.cueVideoById === "function") {
+      player.cueVideoById(picks[0].video_id);
       return;
     }
     player = new YT.Player("player", {
-      videoId: picks[0].video_id,
-      playerVars: { autoplay: 1, playsinline: 1, rel: 0 },
+      height: "100%",
+      width: "100%",
+      playerVars: { autoplay: 0, modestbranding: 1, rel: 0, controls: 1, playsinline: 1 },
       events: {
-        onReady: (e) => e.target.playVideo(),
+        onReady: () => player.cueVideoById(picks[0].video_id),
         onStateChange: onPlayerStateChange,
+        onError: onPlayerError,
       },
     });
   };
@@ -326,10 +418,28 @@ function startPlayback() {
 }
 
 function onPlayerStateChange(e) {
-  if (e.data === YT.PlayerState.ENDED) {
+  if (e.data === YT.PlayerState.PLAYING) {
+    errorSkips = 0; // 정상 재생 시 스킵 가드 리셋
+  } else if (e.data === YT.PlayerState.ENDED) {
     playedSeconds += safeDuration();
     maybeFireHalf();
     if (current + 1 < picks.length) playSong(current + 1, true);
+  }
+}
+
+// 재생불가(삭제·임베드차단·연령제한·지역락) → 다음 곡 자동 스킵.
+function onPlayerError(e) {
+  const p = picks[current];
+  console.warn("YouTube 재생 오류", e && e.data, "video", p && p.video_id);
+  errorSkips += 1;
+  if (errorSkips > picks.length) {
+    showError("재생 가능한 영상을 찾지 못했어요. 다른 요청을 시도해 보세요.");
+    return;
+  }
+  if (current + 1 < picks.length) {
+    playSong(current + 1, true);
+  } else {
+    showError("이 영상은 재생할 수 없어요. 아래 'YouTube에서 열기'로 시청해 주세요.");
   }
 }
 
@@ -339,7 +449,8 @@ function playSong(index, auto) {
   const p = picks[index];
   highlight(index);
   updateNowPlaying(p);
-  if (player && player.loadVideoById) player.loadVideoById(p.video_id);
+  // 사용자 클릭/자동 전환 — 상호작용 이후이므로 loadVideoById(자동재생) 사용.
+  if (player && typeof player.loadVideoById === "function") player.loadVideoById(p.video_id);
   if (auto) track("song_advance", { position: p.position, idx: p.idx });
 }
 
@@ -376,8 +487,14 @@ function updateNowPlaying(p) {
   strong.textContent = `▶ ${p.song} `;
   const band = document.createElement("span");
   band.className = "np-band";
-  band.textContent = `— ${prettyBand(p.band)}`;
-  nowPlayingEl.append(strong, band);
+  band.textContent = `— ${prettyBand(p.band)} `;
+  const link = document.createElement("a");
+  link.className = "np-link";
+  link.href = `https://youtu.be/${p.video_id}`;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = "YouTube에서 열기 ↗";
+  nowPlayingEl.append(strong, band, link);
 }
 
 function prettyBand(band) {

@@ -6,6 +6,9 @@ architecture.md §③ 스키마2 알고리즘 구현. LLM 출력(MoodParameters)
 
 from __future__ import annotations
 
+import math
+import random
+
 from .energy import distribute_counts, stage_energy_targets, total_song_count
 from .harmonic import harmonic_label, is_compatible
 from .models import (
@@ -49,18 +52,30 @@ def _brightness_scores(pool: list[Song]) -> dict[int, float]:
     return scores
 
 
-def _sort_key(
+# 확률적 선곡 가중치 파라미터(요구 부합도 → 확률). 작을수록 뾰족(부합곡 집중), 클수록 다양성↑.
+_ENERGY_SIGMA = 0.15   # 에너지 부합 민감도(0~1 축)
+_BRIGHTNESS_SIGMA = 0.5  # 밝기 부합 민감도(-1~1 축, 상대적으로 완만)
+_HARMONIC_BONUS = 4.0  # 직전 곡과 하모닉 호환 시 가중 배수(하드 필터 아님 — key 신뢰도 미검증)
+_SAME_BAND_FACTOR = 0.5  # 직전 곡과 같은 밴드면 가중 감쇠(연속 억제)
+
+
+def _weight(
     song: Song,
     energy_target: float,
     brightness_target: float,
     brightness: dict[int, float],
     prev: Song | None,
-) -> tuple[float, float, int, int]:
-    """후보 정렬 키(작을수록 우선). 밴드 연속 억제는 동점 타이브레이크로만 작용(§③ 스키마2 6)."""
+) -> float:
+    """후보 곡의 선택 가중치(클수록 요구에 부합 → 높은 확률). 가우시안 부합도 곱."""
     energy_dist = abs(song.energy - energy_target)
     brightness_dist = abs(brightness[song.idx] - brightness_target)
-    same_band_penalty = 1 if (prev is not None and song.band == prev.band) else 0
-    return (round(energy_dist, 6), round(brightness_dist, 6), same_band_penalty, song.idx)
+    weight = math.exp(-((energy_dist / _ENERGY_SIGMA) ** 2))
+    weight *= math.exp(-((brightness_dist / _BRIGHTNESS_SIGMA) ** 2))
+    if prev is not None:
+        weight *= _HARMONIC_BONUS if is_compatible(prev.camelot, song.camelot) else 1.0
+        if song.band == prev.band:
+            weight *= _SAME_BAND_FACTOR
+    return weight
 
 
 def _choose(
@@ -69,15 +84,25 @@ def _choose(
     brightness_target: float,
     brightness: dict[int, float],
     prev: Song | None,
+    rng: random.Random,
 ) -> Song:
-    """단계 내 다음 곡 1개 선택: 하모닉 호환 후보 우선, 소진 시 non_harmonic 폴백."""
-    candidates = list(remaining.values())
-    if prev is not None:
-        compatible = [c for c in candidates if is_compatible(prev.camelot, c.camelot)]
-        pool = compatible if compatible else candidates
-    else:
-        pool = candidates  # 첫 곡(seed) — 하모닉 제약 없음
-    return min(pool, key=lambda c: _sort_key(c, energy_target, brightness_target, brightness, prev))
+    """단계 내 다음 곡 1개를 부합도 가중 확률로 샘플링한다(요구 부합↑ → 확률↑).
+
+    하모닉은 하드 필터가 아니라 가중치(×4)로 반영 — 다양성을 유지하면서 흐름을 선호.
+    가중치 합이 0이면 에너지 근접 결정적 폴백.
+    """
+    candidates = list(remaining.values())  # dict 삽입순 = 결정적 순서(시드 재현성)
+    weights = [_weight(c, energy_target, brightness_target, brightness, prev) for c in candidates]
+    total = sum(weights)
+    if total <= 0.0:
+        return min(candidates, key=lambda c: (abs(c.energy - energy_target), c.idx))
+    threshold = rng.random() * total
+    acc = 0.0
+    for candidate, weight in zip(candidates, weights):
+        acc += weight
+        if threshold <= acc:
+            return candidate
+    return candidates[-1]
 
 
 def _make_reason(
@@ -119,8 +144,9 @@ def build_setlist(
     avg_song_seconds: int = DEFAULT_AVG_SONG_SECONDS,
     band_filter: set[str] | None = None,
     stage_specs: list[StageSpec] | None = None,
+    rng: random.Random | None = None,
 ) -> Setlist:
-    """무드/에너지 파라미터로 세트리스트를 구성한다(순수·결정적).
+    """무드/에너지 파라미터로 세트리스트를 구성한다(부합도 가중 확률적 선곡).
 
     Args:
         songs: 전체 곡 목록(repo 로더 산출). `eligible_band == True`만 후보로 쓴다.
@@ -130,6 +156,8 @@ def build_setlist(
         band_filter: 밴드 화이트리스트(설정 기능 §5-1b, 기본 None=ALL).
         stage_specs: 사용자 지정 단계 스펙(설정 기능 §5-1a). 주어지면 에너지 아크·곡 수를
             이 값으로 강제하고 LLM 유도 산정을 건너뛴다.
+        rng: 선곡 샘플링 RNG. None이면 매 호출 새 시드(운영: 매번 다른 결과). 동일 시드를
+            주면 결정적 재현(테스트).
 
     Returns:
         Setlist(단계·추정시간·곡 순서·선곡 이유 포함).
@@ -137,6 +165,8 @@ def build_setlist(
     Raises:
         NoSetlistError: 후보곡이 0건이라 세트리스트를 만들 수 없는 경우.
     """
+    if rng is None:
+        rng = random.Random()
     pool = [s for s in songs if s.eligible_band]
     if band_filter:
         pool = [s for s in pool if s.band in band_filter]
@@ -164,7 +194,7 @@ def build_setlist(
         for _ in range(count):
             if not remaining:
                 break
-            picked = _choose(remaining, energy_target, params.brightness, brightness, prev)
+            picked = _choose(remaining, energy_target, params.brightness, brightness, prev, rng)
             harmonic = harmonic_label(None if prev is None else prev.camelot, picked.camelot)
             reason = _make_reason(
                 energy_target, picked, brightness[picked.idx], params.brightness,

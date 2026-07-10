@@ -35,7 +35,7 @@ def _resolve_path(csv_path: str | os.PathLike[str] | None) -> Path:
     return Path(env_path) if env_path else DEFAULT_CSV_PATH
 
 
-def _to_song(row: dict[str, str]) -> Song:
+def _to_song(row: dict[str, str], energy: float) -> Song:
     url = (row.get("url") or "").strip()
     video_id = (row.get("video_id") or "").strip()
     if not video_id:
@@ -50,7 +50,7 @@ def _to_song(row: dict[str, str]) -> Song:
         song=row["song"],
         video_id=video_id,
         camelot=row["camelot"],
-        energy=float(row["energy"]),
+        energy=energy,
         mode_score=float(row["mode_score"]),
         shape=row["shape"],
         eligible_band=str(row["eligible_band"]).strip().lower() == "true",
@@ -58,10 +58,24 @@ def _to_song(row: dict[str, str]) -> Song:
     )
 
 
+def _energy_from_proxy(proxy: float, lo: float, hi: float) -> float:
+    """energy_proxy → 0~1 무드 에너지.
+
+    데이터 검증(2026-07-11): 원래 쓰던 `energy` 컬럼(audio_map, EMOI-MAP 펄스용)은 무드
+    에너지와 무관/역전(FIRE BIRD=0.005·栞=0.907, corr 0.24). `energy_proxy`가 올바른 신호이며
+    **부호가 반전**돼 있다(음수=고에너지, 양수=저에너지). 따라서 반전 후 min-max 정규화한다.
+    """
+    span = hi - lo
+    if span <= 0:
+        return 0.5
+    return (hi - proxy) / span  # 최저 proxy(고에너지)→1.0, 최고 proxy(저에너지)→0.0
+
+
 def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
     """songs_master.csv를 읽어 전체 곡 목록을 반환한다.
 
     eligible 여부와 무관하게 전 행을 적재한다(후보 필터링은 선곡 엔진이 수행).
+    energy는 `energy_proxy`를 반전·정규화해 산출한다(위 `_energy_from_proxy` 참조).
 
     Raises:
         FileNotFoundError: CSV가 없는 경우.
@@ -71,5 +85,8 @@ def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
         raise FileNotFoundError(f"songs_master.csv를 찾을 수 없습니다: {path}")
 
     with path.open(encoding="utf-8", newline="") as f:
-        reader = csv.DictReader(f)
-        return [_to_song(row) for row in reader]
+        rows = list(csv.DictReader(f))
+
+    proxies = [float(r["energy_proxy"]) for r in rows]
+    lo, hi = min(proxies), max(proxies)
+    return [_to_song(r, _energy_from_proxy(float(r["energy_proxy"]), lo, hi)) for r in rows]
