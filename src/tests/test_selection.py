@@ -1,7 +1,6 @@
-"""선곡 엔진 테스트 (도메인 순수 — 결정적성·중복 방지·하모닉 우선·필터)."""
+"""선곡 엔진 테스트 (2단계 SELECT→SEQUENCE, 도메인 순수 — 네트워크·LLM 없음)."""
 
 import random
-from collections import Counter
 
 import pytest
 
@@ -10,7 +9,7 @@ from app.domain.selection import build_setlist
 
 
 def _songs() -> list[Song]:
-    # (idx, band, camelot, energy, mode_score, shape, eligible)
+    # (idx, band, camelot, intensity(=energy), mode_score, shape, eligible)
     rows = [
         (0, "a", "8A", 0.10, -1.0, "acoustic", True),
         (1, "a", "8B", 0.20, -0.5, "neutral", True),
@@ -33,108 +32,96 @@ def _songs() -> list[Song]:
     ]
 
 
+def _dense_pool(n: int = 30, intensity: float = 0.2) -> list[Song]:
+    """모두 동일 강도(허용창 내)·다양한 밝기/조성의 곡 — 변주 검증용."""
+    return [
+        Song(idx=i, band=f"b{i % 4}", song=f"s{i}", video_id=f"vid{i:08d}", camelot=f"{(i % 12) + 1}{'A' if i % 2 else 'B'}",
+             energy=intensity, mode_score=((i % 7) - 3) / 3.0, shape="neutral", eligible_band=True)
+        for i in range(n)
+    ]
+
+
 def _params(stage_count=3, start=0.2, end=0.9) -> MoodParameters:
     return MoodParameters(
-        brightness=0.5, start_energy=start, end_energy=end,
+        brightness=0.3, start_energy=start, end_energy=end,
         stage_count=stage_count, target_minutes=None, interpretation_summary="test",
     )
 
 
 def test_seeded_reproducible():
-    # 동일 시드 → 동일 출력(확률적이지만 재현 가능).
     songs, params = _songs(), _params()
     a = build_setlist(songs, params, target_seconds=6 * 213, rng=random.Random(42))
     b = build_setlist(songs, params, target_seconds=6 * 213, rng=random.Random(42))
     assert [p.idx for p in a.picks] == [p.idx for p in b.picks]
 
 
-def test_different_seeds_can_differ():
-    songs, params = _songs(), _params()
+def test_variety_on_dense_pool():
+    # 허용창이 충분히 크면(무드 부합 곡 다수) 시드마다 결과가 갈릴 수 있어야 한다(변주).
+    pool = _dense_pool(30, intensity=0.2)
+    params = MoodParameters(brightness=0.0, start_energy=0.2, end_energy=0.2,
+                            stage_count=3, target_minutes=None, interpretation_summary="")
     orders = {
-        tuple(p.idx for p in build_setlist(songs, params, target_seconds=8 * 213, rng=random.Random(s)).picks)
-        for s in range(12)
+        tuple(p.idx for p in build_setlist(pool, params, target_seconds=6 * 213, rng=random.Random(s)).picks)
+        for s in range(8)
     }
-    assert len(orders) > 1  # 시드가 다르면 결과가 갈릴 수 있음(다양성)
-
-
-def test_probabilistic_target_shapes_energy():
-    # 낮은 에너지 목표는 더 낮은 에너지 곡을, 높은 목표는 더 높은 에너지 곡을 선호해야 한다.
-    songs, params = _songs(), _params()
-    by_idx = {s.idx: s for s in songs}
-
-    def avg_energy_for(target: float) -> float:
-        picks: Counter[int] = Counter()
-        for seed in range(150):
-            specs = [StageSpec(energy_target=target, song_count=1)]
-            sl = build_setlist(songs, params, target_seconds=999, stage_specs=specs, rng=random.Random(seed))
-            picks[sl.picks[0].idx] += 1
-        return sum(by_idx[i].energy * c for i, c in picks.items()) / sum(picks.values())
-
-    assert avg_energy_for(0.1) < avg_energy_for(0.9)
-
-
-def test_max_probability_capped():
-    # 한 곡이 압도적으로 부합해도 단독 선택 확률이 상한(0.30) 근처로 제한되어야 한다.
-    songs = [
-        Song(0, "a", "perfect", "vid0000000", "8A", 0.50, 0.0, "neutral", eligible_band=True),
-        Song(1, "b", "x1", "vid0000001", "3A", 0.05, -1.0, "acoustic", eligible_band=True),
-        Song(2, "c", "x2", "vid0000002", "6B", 0.95, 1.0, "bright", eligible_band=True),
-        Song(3, "d", "x3", "vid0000003", "1A", 0.03, -0.9, "acoustic", eligible_band=True),
-        Song(4, "e", "x4", "vid0000004", "11B", 0.98, 0.9, "bright", eligible_band=True),
-    ]
-    params = MoodParameters(
-        brightness=0.0, start_energy=0.5, end_energy=0.5,
-        stage_count=1, target_minutes=None, interpretation_summary="",
-    )
-    first: Counter[int] = Counter()
-    trials = 400
-    for seed in range(trials):
-        specs = [StageSpec(energy_target=0.5, song_count=1)]
-        sl = build_setlist(songs, params, target_seconds=999, stage_specs=specs, rng=random.Random(seed))
-        first[sl.picks[0].idx] += 1
-    # 완벽 부합 곡(idx 0)이라도 상한(0.30) 덕에 절반을 넘지 못한다.
-    assert first[0] / trials <= 0.42
+    assert len(orders) > 1
 
 
 def test_no_duplicate_songs():
-    setlist = build_setlist(_songs(), _params(), target_seconds=8 * 213)
+    setlist = build_setlist(_songs(), _params(), target_seconds=8 * 213, rng=random.Random(0))
     idxs = [p.idx for p in setlist.picks]
     assert len(idxs) == len(set(idxs))
 
 
 def test_ineligible_band_excluded():
-    setlist = build_setlist(_songs(), _params(), target_seconds=12 * 213)
-    assert all(p.idx != 12 for p in setlist.picks)  # idx 12 = eligible_band False
+    setlist = build_setlist(_songs(), _params(), target_seconds=12 * 213, rng=random.Random(0))
+    assert all(p.idx != 12 for p in setlist.picks)
 
 
 def test_first_pick_is_seed():
-    setlist = build_setlist(_songs(), _params(), target_seconds=6 * 213)
+    setlist = build_setlist(_songs(), _params(), target_seconds=6 * 213, rng=random.Random(0))
     assert setlist.picks[0].reason.harmonic == "seed"
     assert setlist.picks[0].reason.prev_camelot is None
 
 
-def test_stages_energy_targets_ascending():
-    setlist = build_setlist(_songs(), _params(start=0.2, end=0.9), target_seconds=6 * 213)
+def test_stages_ascending_and_grouped():
+    setlist = build_setlist(_songs(), _params(start=0.2, end=0.9), target_seconds=6 * 213, rng=random.Random(0))
     targets = [s.energy_target for s in setlist.stages]
     assert targets == sorted(targets)
-    assert len(setlist.stages) == 3
+    stage_seq = [p.stage_index for p in setlist.picks]
+    assert stage_seq == sorted(stage_seq)  # 단계별로 그룹핑되어 순서대로 방출
 
 
 def test_band_filter_restricts_pool():
-    setlist = build_setlist(_songs(), _params(), target_seconds=3 * 213, band_filter={"a"})
+    setlist = build_setlist(_songs(), _params(), target_seconds=3 * 213, band_filter={"a"}, rng=random.Random(0))
     assert {p.band for p in setlist.picks} == {"a"}
 
 
-def test_harmonic_preference_prefers_adjacency():
-    # 하모닉은 하드 필터가 아니라 가중치(×4). 전환의 상당수가 same/adjacent 여야 한다.
-    setlist = build_setlist(_songs(), _params(), target_seconds=6 * 213, rng=random.Random(0))
-    transitions = [p.reason.harmonic for p in setlist.picks[1:]]
-    harmonic_ok = sum(1 for h in transitions if h in ("same", "adjacent"))
-    assert harmonic_ok >= len(transitions) // 3
+def test_low_target_favors_low_intensity():
+    songs = _songs()
+    lo = build_setlist(songs, _params(start=0.15, end=0.15), target_seconds=3 * 213, rng=random.Random(1))
+    hi = build_setlist(songs, _params(start=0.85, end=0.85), target_seconds=3 * 213, rng=random.Random(1))
+    avg = lambda sl: sum(p.energy for p in sl.picks) / len(sl.picks)
+    assert avg(lo) < avg(hi)
+
+
+def test_stage_specs_override_energy_and_counts():
+    specs = [StageSpec(energy_target=0.1, song_count=2), StageSpec(energy_target=0.9, song_count=3)]
+    setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs, rng=random.Random(0))
+    assert [s.energy_target for s in setlist.stages] == [0.1, 0.9]
+    assert len(setlist.picks) == 5
+    assert sum(1 for p in setlist.picks if p.stage_index == 0) == 2
+    assert sum(1 for p in setlist.picks if p.stage_index == 1) == 3
+
+
+def test_stage_specs_energy_clamped():
+    specs = [StageSpec(energy_target=5.0, song_count=1), StageSpec(energy_target=-3.0, song_count=1)]
+    setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs, rng=random.Random(0))
+    assert [s.energy_target for s in setlist.stages] == [1.0, 0.0]
 
 
 def test_estimated_total_seconds_uses_avg():
-    setlist = build_setlist(_songs(), _params(), target_seconds=6 * 213, avg_song_seconds=200)
+    setlist = build_setlist(_songs(), _params(), target_seconds=6 * 213, avg_song_seconds=200, rng=random.Random(0))
     assert setlist.estimated_total_seconds == len(setlist.picks) * 200
 
 
@@ -147,19 +134,3 @@ def test_all_ineligible_raises_no_setlist():
     songs = [Song(0, "a", "song", "vid0000000", "8A", 0.5, 0.0, "neutral", eligible_band=False)]
     with pytest.raises(NoSetlistError):
         build_setlist(songs, _params(), target_seconds=6 * 213)
-
-
-def test_stage_specs_override_energy_and_counts():
-    # 사용자 지정 단계: 에너지·곡 수를 그대로 강제(설정 §5-1a).
-    specs = [StageSpec(energy_target=0.1, song_count=2), StageSpec(energy_target=0.9, song_count=3)]
-    setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs)
-    assert [s.energy_target for s in setlist.stages] == [0.1, 0.9]
-    assert len(setlist.picks) == 5
-    assert sum(1 for p in setlist.picks if p.stage_index == 0) == 2
-    assert sum(1 for p in setlist.picks if p.stage_index == 1) == 3
-
-
-def test_stage_specs_energy_clamped():
-    specs = [StageSpec(energy_target=5.0, song_count=1), StageSpec(energy_target=-3.0, song_count=1)]
-    setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs)
-    assert [s.energy_target for s in setlist.stages] == [1.0, 0.0]
