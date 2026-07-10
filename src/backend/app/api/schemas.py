@@ -5,9 +5,23 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ..domain.models import Setlist
+
+
+class StageInput(BaseModel):
+    """사용자 지정 단계 1개(설정 기능 §5-1a). 에너지 + (시간 또는 곡 수) 중 최소 1개."""
+
+    energy: float = Field(..., ge=0.0, le=1.0, description="이 단계의 에너지 레벨 0~1")
+    minutes: int | None = Field(default=None, ge=1, le=180, description="이 단계 지정 시간(분)")
+    song_count: int | None = Field(default=None, ge=1, le=60, description="이 단계 곡 수")
+
+    @model_validator(mode="after")
+    def _require_size(self) -> "StageInput":
+        if self.minutes is None and self.song_count is None:
+            raise ValueError("각 단계는 minutes 또는 song_count 중 하나는 지정해야 합니다.")
+        return self
 
 
 class SetlistRequest(BaseModel):
@@ -16,6 +30,8 @@ class SetlistRequest(BaseModel):
     prompt: str = Field(..., min_length=1, max_length=500, description="자연어 요청 한 문장")
     target_minutes: int | None = Field(default=None, ge=10, le=180, description="목표 재생시간(분)")
     stage_count: int | None = Field(default=None, ge=2, le=5, description="에너지 단계 수 N")
+    bands: list[str] | None = Field(default=None, max_length=50, description="밴드 필터(빈 목록/미지정=ALL)")
+    stages: list[StageInput] | None = Field(default=None, min_length=1, max_length=8, description="단계 직접 지정")
 
     @field_validator("prompt")
     @classmethod

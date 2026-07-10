@@ -16,6 +16,7 @@ from .models import (
     Setlist,
     Song,
     Stage,
+    StageSpec,
 )
 
 # shape(음색 시그니처) → 밝기 보조 가중(architecture.md §③ 스키마2 2: mode_score 주 신호 + shape 보조).
@@ -117,6 +118,7 @@ def build_setlist(
     target_seconds: int,
     avg_song_seconds: int = DEFAULT_AVG_SONG_SECONDS,
     band_filter: set[str] | None = None,
+    stage_specs: list[StageSpec] | None = None,
 ) -> Setlist:
     """무드/에너지 파라미터로 세트리스트를 구성한다(순수·결정적).
 
@@ -125,7 +127,9 @@ def build_setlist(
         params: LLM 해석 결과(검증 완료).
         target_seconds: 목표 총 재생시간(초).
         avg_song_seconds: duration 부재 시 곡 길이 추정치(초).
-        band_filter: 밴드 화이트리스트(§5-1b 확장 예약, 기본 None=ALL).
+        band_filter: 밴드 화이트리스트(설정 기능 §5-1b, 기본 None=ALL).
+        stage_specs: 사용자 지정 단계 스펙(설정 기능 §5-1a). 주어지면 에너지 아크·곡 수를
+            이 값으로 강제하고 LLM 유도 산정을 건너뛴다.
 
     Returns:
         Setlist(단계·추정시간·곡 순서·선곡 이유 포함).
@@ -140,9 +144,14 @@ def build_setlist(
         raise NoSetlistError("후보곡이 없습니다(eligible_band/band_filter 결과 0건).")
 
     brightness = _brightness_scores(pool)
-    targets = stage_energy_targets(params.start_energy, params.end_energy, params.stage_count)
-    total = min(total_song_count(target_seconds, avg_song_seconds, params.stage_count), len(pool))
-    counts = distribute_counts(total, params.stage_count)
+    if stage_specs:
+        # 사용자 지정 단계: 에너지·곡 수를 그대로 사용(0~1 클램프만).
+        targets = [_clamp(s.energy_target, 0.0, 1.0) for s in stage_specs]
+        counts = [max(1, s.song_count) for s in stage_specs]
+    else:
+        targets = stage_energy_targets(params.start_energy, params.end_energy, params.stage_count)
+        total = min(total_song_count(target_seconds, avg_song_seconds, params.stage_count), len(pool))
+        counts = distribute_counts(total, params.stage_count)
 
     remaining = {s.idx: s for s in pool}
     stages_out: list[Stage] = []

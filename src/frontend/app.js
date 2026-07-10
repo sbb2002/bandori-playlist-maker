@@ -39,9 +39,14 @@ form.addEventListener("submit", async (e) => {
 
   const body = { prompt };
   const minutes = parseInt($("target-minutes").value, 10);
-  const stages = parseInt($("stage-count").value, 10);
+  const stageCount = parseInt($("stage-count").value, 10);
   if (!Number.isNaN(minutes)) body.target_minutes = minutes;
-  if (!Number.isNaN(stages)) body.stage_count = stages;
+  if (!Number.isNaN(stageCount)) body.stage_count = stageCount;
+
+  const bands = collectBands();
+  if (bands.length) body.bands = bands;
+  const customStages = collectStages();
+  if (customStages) body.stages = customStages;
 
   showLoading(true);
   hide(errorEl);
@@ -77,6 +82,108 @@ function showError(message) {
   errorEl.textContent = "⚠️ " + message;
   show(errorEl);
 }
+
+// ── 설정: 밴드 필터 · 단계 직접 지정 (§5-1) ────────────────────────────────────
+const bandListEl = $("band-list");
+const stageEditorEl = $("stage-editor");
+const customToggle = $("custom-stages-toggle");
+
+async function loadBands() {
+  try {
+    const res = await fetch(`${API_BASE}/api/bands`);
+    const data = await res.json();
+    renderBands(data.bands || []);
+  } catch (_) {
+    bandListEl.textContent = "밴드 목록을 불러오지 못했어요 (백엔드가 켜져 있는지 확인).";
+  }
+}
+
+function renderBands(bands) {
+  bandListEl.replaceChildren();
+  if (!bands.length) { bandListEl.textContent = "밴드 없음"; return; }
+  for (const b of bands) {
+    const label = document.createElement("label");
+    label.className = "band-item";
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.value = b.band;
+    cb.className = "band-cb";
+    const span = document.createElement("span");
+    span.textContent = `${prettyBand(b.band)} (${b.count})`;
+    label.append(cb, span);
+    bandListEl.appendChild(label);
+  }
+}
+
+function collectBands() {
+  return [...document.querySelectorAll(".band-cb:checked")].map((c) => c.value);
+}
+
+$("band-clear").addEventListener("click", () => {
+  document.querySelectorAll(".band-cb:checked").forEach((c) => (c.checked = false));
+});
+
+customToggle.addEventListener("change", () => {
+  toggle(stageEditorEl, customToggle.checked);
+  if (customToggle.checked) renderStageEditor();
+});
+$("stage-count").addEventListener("input", () => {
+  if (customToggle.checked) renderStageEditor();
+});
+
+function renderStageEditor() {
+  const n = Math.max(2, Math.min(5, parseInt($("stage-count").value, 10) || 3));
+  const totalMin = Math.max(10, Math.min(180, parseInt($("target-minutes").value, 10) || 60));
+  const perMin = Math.max(1, Math.round(totalMin / n));
+  stageEditorEl.replaceChildren();
+  for (let i = 0; i < n; i++) {
+    const energy = +(0.3 + (0.55 * i) / (n - 1)).toFixed(2); // 기본 0.30→0.85 상승 아크
+    const row = document.createElement("div");
+    row.className = "stage-row";
+
+    const head = document.createElement("div");
+    head.className = "stage-row-head";
+    head.textContent = `${i + 1}단계`;
+
+    const eVal = document.createElement("span");
+    eVal.className = "stage-eval";
+    eVal.textContent = energy.toFixed(2);
+    const slider = document.createElement("input");
+    slider.type = "range"; slider.min = "0"; slider.max = "1"; slider.step = "0.05";
+    slider.value = String(energy);
+    slider.className = "stage-energy";
+    slider.addEventListener("input", () => (eVal.textContent = (+slider.value).toFixed(2)));
+
+    const eWrap = document.createElement("div");
+    eWrap.className = "stage-ctrl";
+    const eLbl = document.createElement("span"); eLbl.className = "stage-lbl"; eLbl.textContent = "에너지";
+    eWrap.append(eLbl, slider, eVal);
+
+    const mInput = document.createElement("input");
+    mInput.type = "number"; mInput.min = "1"; mInput.max = "180";
+    mInput.value = String(perMin);
+    mInput.className = "stage-minutes";
+    const mWrap = document.createElement("div");
+    mWrap.className = "stage-ctrl";
+    const mLbl = document.createElement("span"); mLbl.className = "stage-lbl"; mLbl.textContent = "분";
+    mWrap.append(mLbl, mInput);
+
+    row.append(head, eWrap, mWrap);
+    stageEditorEl.appendChild(row);
+  }
+}
+
+function collectStages() {
+  if (!customToggle.checked) return null;
+  const rows = [...stageEditorEl.querySelectorAll(".stage-row")];
+  if (!rows.length) return null;
+  return rows.map((r) => ({
+    energy: +r.querySelector(".stage-energy").value,
+    minutes: Math.max(1, parseInt(r.querySelector(".stage-minutes").value, 10) || 5),
+  }));
+}
+
+loadBands();
 
 // ── 렌더 ─────────────────────────────────────────────────────────────────────
 function renderResult(data) {

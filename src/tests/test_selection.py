@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.domain.models import MoodParameters, NoSetlistError, Song
+from app.domain.models import MoodParameters, NoSetlistError, Song, StageSpec
 from app.domain.selection import build_setlist
 
 
@@ -95,3 +95,19 @@ def test_all_ineligible_raises_no_setlist():
     songs = [Song(0, "a", "song", "vid0000000", "8A", 0.5, 0.0, "neutral", eligible_band=False)]
     with pytest.raises(NoSetlistError):
         build_setlist(songs, _params(), target_seconds=6 * 213)
+
+
+def test_stage_specs_override_energy_and_counts():
+    # 사용자 지정 단계: 에너지·곡 수를 그대로 강제(설정 §5-1a).
+    specs = [StageSpec(energy_target=0.1, song_count=2), StageSpec(energy_target=0.9, song_count=3)]
+    setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs)
+    assert [s.energy_target for s in setlist.stages] == [0.1, 0.9]
+    assert len(setlist.picks) == 5
+    assert sum(1 for p in setlist.picks if p.stage_index == 0) == 2
+    assert sum(1 for p in setlist.picks if p.stage_index == 1) == 3
+
+
+def test_stage_specs_energy_clamped():
+    specs = [StageSpec(energy_target=5.0, song_count=1), StageSpec(energy_target=-3.0, song_count=1)]
+    setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs)
+    assert [s.energy_target for s in setlist.stages] == [1.0, 0.0]

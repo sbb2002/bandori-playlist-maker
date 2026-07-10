@@ -50,6 +50,18 @@ class Stage:
 
 
 @dataclass(frozen=True)
+class StageSpec:
+    """사용자가 직접 지정한 단계 스펙(설정 기능, PRD §5-1a).
+
+    선곡 엔진에 넘기면 LLM 유도 에너지 아크 대신 이 값으로 단계를 강제한다.
+    `song_count`는 곡 수(시간 지정은 API에서 곡 수로 환산해 넘긴다).
+    """
+
+    energy_target: float   # 0.0 ~ 1.0
+    song_count: int        # >= 1
+
+
+@dataclass(frozen=True)
 class PickReason:
     """선곡 이유 메타(architecture.md §③ 스키마2 · §④-4 '이유 노출 YES').
 

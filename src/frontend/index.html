@@ -39,6 +39,22 @@
             <input id="stage-count" type="number" min="2" max="5" placeholder="3 (기본)" />
           </label>
         </div>
+
+        <div class="setting-block">
+          <div class="setting-head">
+            <span class="field-label">밴드 필터 <small class="muted">(선택 안 하면 전체)</small></span>
+            <button type="button" id="band-clear" class="link-btn">전체 해제</button>
+          </div>
+          <div id="band-list" class="band-list">밴드 목록 불러오는 중…</div>
+        </div>
+
+        <div class="setting-block">
+          <label class="toggle">
+            <input type="checkbox" id="custom-stages-toggle" />
+            <span class="field-label">에너지 단계 직접 설정</span>
+          </label>
+          <div id="stage-editor" class="stage-editor hidden"></div>
+        </div>
       </details>
 
       <button id="submit-btn" type="submit" class="primary">플레이리스트 만들기</button>

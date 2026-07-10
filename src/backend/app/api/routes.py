@@ -10,8 +10,8 @@ from dataclasses import replace
 
 from fastapi import APIRouter, Request
 
-from ..domain.models import MoodParameters
-from ..domain.selection import build_setlist
+from ..domain.models import MoodParameters, StageSpec
+from ..domain.selection import DEFAULT_AVG_SONG_SECONDS, build_setlist
 from .schemas import SetlistRequest, serialize_setlist
 
 router = APIRouter()
@@ -24,6 +24,18 @@ def health() -> dict:
     return {"status": "ok"}
 
 
+@router.get("/api/bands")
+def list_bands(request: Request) -> dict:
+    """후보(eligible) 밴드 목록 + 곡 수 — 프론트 밴드 필터 체크박스용(설정 §5-1b)."""
+    counts: dict[str, int] = {}
+    for s in request.app.state.songs:
+        if s.eligible_band:
+            counts[s.band] = counts.get(s.band, 0) + 1
+    bands = [{"band": b, "count": n} for b, n in counts.items()]
+    bands.sort(key=lambda x: (-x["count"], x["band"]))
+    return {"bands": bands}
+
+
 @router.post("/api/setlist")
 def create_setlist(payload: SetlistRequest, request: Request) -> dict:
     interpreter = request.app.state.interpreter
@@ -31,15 +43,38 @@ def create_setlist(payload: SetlistRequest, request: Request) -> dict:
 
     params: MoodParameters = interpreter.interpret(payload.prompt)
 
-    # 요청이 명시한 값은 LLM 해석을 override(architecture.md 스키마3).
-    stage_count = payload.stage_count if payload.stage_count is not None else params.stage_count
-    stage_count = max(2, min(5, stage_count))
+    # 밴드 필터(설정 §5-1b): 빈 목록/미지정 = ALL.
+    band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
+    band_filter = band_names or None
 
-    minutes = payload.target_minutes if payload.target_minutes is not None else params.target_minutes
-    if minutes is None:
-        minutes = _DEFAULT_TARGET_MINUTES
-    minutes = max(10, min(180, minutes))
+    # 사용자 지정 단계(설정 §5-1a): 있으면 에너지 아크·곡 수를 강제.
+    stage_specs = None
+    if payload.stages:
+        stage_specs = [
+            StageSpec(
+                energy_target=st.energy,
+                song_count=st.song_count
+                if st.song_count is not None
+                else max(1, round(st.minutes * 60 / DEFAULT_AVG_SONG_SECONDS)),
+            )
+            for st in payload.stages
+        ]
+
+    # 요청이 명시한 값은 LLM 해석을 override(architecture.md 스키마3).
+    if stage_specs is not None:
+        stage_count = len(stage_specs)
+        minutes = round(sum(s.song_count for s in stage_specs) * DEFAULT_AVG_SONG_SECONDS / 60)
+    else:
+        stage_count = payload.stage_count if payload.stage_count is not None else params.stage_count
+        stage_count = max(2, min(5, stage_count))
+        minutes = payload.target_minutes if payload.target_minutes is not None else params.target_minutes
+        if minutes is None:
+            minutes = _DEFAULT_TARGET_MINUTES
+        minutes = max(10, min(180, minutes))
 
     effective = replace(params, stage_count=stage_count, target_minutes=minutes)
-    setlist = build_setlist(songs, effective, target_seconds=minutes * 60)
+    setlist = build_setlist(
+        songs, effective, target_seconds=minutes * 60,
+        band_filter=band_filter, stage_specs=stage_specs,
+    )
     return serialize_setlist(setlist)
