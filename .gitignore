@@ -1,0 +1,25 @@
+# audio assets (copyright — never commit; iframe 재생만 사용, PRD §7)
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.aac
+*.ogg
+*.opus
+audio_cache/
+**/audio_cache/
+**/audio/
+
+# raw feature re-extraction dumps
+*.npy
+*.npz
+
+# python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# env / secrets
+.env
+secret*.json
