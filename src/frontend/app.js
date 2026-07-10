@@ -298,6 +298,23 @@ function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 function clampInt(raw, lo, hi, dflt) { const n = parseInt(raw, 10); return Number.isNaN(n) ? dflt : Math.max(lo, Math.min(hi, n)); }
 
+// 응답 후 그래프를 LLM 해석 아크로 동기화(사용자가 드래그로 조정하기 전까지만).
+// → 그래프가 요청을 '반영'만 하고 간섭하지 않는다(코멘트 #1 대안 2).
+function syncGraphToParams(params) {
+  if (stageTouched || !params) return;
+  const n = Math.max(2, Math.min(5, params.stage_count || 3));
+  const start = typeof params.start_energy === "number" ? params.start_energy : 0.3;
+  const end = typeof params.end_energy === "number" ? params.end_energy : 0.7;
+  const total = params.target_minutes || (stageModel ? stageModel.totalMinutes : 60);
+  const segments = [];
+  for (let i = 0; i < n; i++) {
+    const energy = n === 1 ? start : start + ((end - start) * i) / (n - 1);
+    segments.push({ energy: clamp01(+energy.toFixed(2)), width: 1 / n });
+  }
+  stageModel = { totalMinutes: total, segments };
+  renderStageGraph();
+}
+
 loadBands();
 initStageModel();
 renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
@@ -318,6 +335,7 @@ function renderResult(data) {
 
   renderSummary(data);
   renderTracklist(picks);
+  syncGraphToParams(data.params); // 그래프에 이번 해석 아크 반영(미조정 시)
   show(resultEl);
 
   track("playlist_created", { count: picks.length, minutes: Math.round(estimatedTotal / 60) });
