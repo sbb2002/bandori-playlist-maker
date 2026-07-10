@@ -1,0 +1,6780 @@
+{
+    "generated": "2026-07-04",
+    "backend": "perceptual",
+    "sim_backend": "clap",
+    "axes": {
+        "x": {
+            "feature": "contrast",
+            "r": -0.81,
+            "pos": "음색이 거친",
+            "neg": "음색이 부드러운"
+        },
+        "y": {
+            "feature": "mode",
+            "r": 0.51,
+            "pos": "발랄한 느낌",
+            "neg": "진지한 느낌"
+        }
+    },
+    "bands": [
+        "afterglow",
+        "ave_mujica",
+        "hello_happy_world",
+        "ikka_dumb_rock",
+        "millsage",
+        "morfonica",
+        "mugendai_mutype",
+        "mygo",
+        "pastel_palettes",
+        "poppin_party",
+        "raise_a_suilen",
+        "roselia",
+        "various_artists"
+    ],
+    "overrides": {
+        "morfonica": {
+            "dx": 0.0,
+            "dy": 15.0,
+            "why": "violin 음색 밝음 미측정 → 밴드 밝기 큐레이션(측정 아님)"
+        },
+        "millsage": {
+            "dx": -18.0,
+            "dy": 0.0,
+            "why": "키보드 편곡의 '매끄러움'이 spectral contrast(음색 대비, 리듬 아님)로 미측정 → n=1 좌표 큐레이션(측정 아님, ≈1지각점). n≥5 도달 시 제거"
+        },
+        "ikka_dumb_rock": {
+            "dx": 0.0,
+            "dy": 18.0,
+            "why": "펑크 '경쾌함'(에너지축 energy=0.92 상위8%)이 mode(조성만)로 미측정 → n=1 좌표 큐레이션(측정 아님, ≈1.5지각점). n≥5 도달 시 제거"
+        }
+    },
+    "norm": {
+        "x": {
+            "mean": -22.02224849109751,
+            "std": 0.6945571484745917,
+            "k": 25.0,
+            "clip": 70.0,
+            "input": "neg_contrast",
+            "shift": 0.0
+        },
+        "y": {
+            "mean": 0.036380248795711286,
+            "std": 0.17429971777975156,
+            "k": 25.0,
+            "clip": 70.0,
+            "input": "mode",
+            "shift": 10.0
+        },
+        "overrides": {
+            "morfonica": {
+                "dx": 0.0,
+                "dy": 15.0,
+                "why": "violin 음색 밝음 미측정 → 밴드 밝기 큐레이션(측정 아님)"
+            },
+            "millsage": {
+                "dx": -18.0,
+                "dy": 0.0,
+                "why": "키보드 편곡의 '매끄러움'이 spectral contrast(음색 대비, 리듬 아님)로 미측정 → n=1 좌표 큐레이션(측정 아님, ≈1지각점). n≥5 도달 시 제거"
+            },
+            "ikka_dumb_rock": {
+                "dx": 0.0,
+                "dy": 18.0,
+                "why": "펑크 '경쾌함'(에너지축 energy=0.92 상위8%)이 mode(조성만)로 미측정 → n=1 좌표 큐레이션(측정 아님, ≈1.5지각점). n≥5 도달 시 제거"
+            }
+        },
+        "formula": "coord = clip((v-mean)/std*k, -clip, clip) + shift (+override.d[xy])"
+    },
+    "songs": [
+        {
+            "band": "afterglow",
+            "song": "ON YOUR MARK",
+            "url": "https://youtu.be/09B-WljIiTo",
+            "x": 16.57,
+            "y": 33.52,
+            "bpm": 123.0,
+            "energy": 0.822,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "That Is How I Roll!",
+            "url": "https://youtu.be/_lfuqSepLNw",
+            "x": 8.38,
+            "y": 15.71,
+            "bpm": 117.5,
+            "energy": 0.396,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "SENSENFUKOKU",
+            "url": "https://youtu.be/RDZUbagvt0E",
+            "x": 19.81,
+            "y": -3.98,
+            "bpm": 136.0,
+            "energy": 0.159,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "I knew it!",
+            "url": "https://youtu.be/q-TEDPBUv7M",
+            "x": 31.19,
+            "y": 30.9,
+            "bpm": 99.4,
+            "energy": 0.7,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "ツナグ、ソラモヨウ",
+            "url": "https://youtu.be/BnWyq8p7NzI",
+            "x": 11.18,
+            "y": 50.34,
+            "bpm": 95.7,
+            "energy": 0.449,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "Hey-day狂騒曲(カプリチオ)",
+            "url": "https://youtu.be/czHlLBls4oo",
+            "x": 31.26,
+            "y": 15.32,
+            "bpm": 161.5,
+            "energy": 0.367,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "Easy come, Easy go!",
+            "url": "https://youtu.be/erY4I7Irk0E",
+            "x": 24.57,
+            "y": 53.1,
+            "bpm": 136.0,
+            "energy": 0.636,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Sasanqua",
+            "url": "https://youtu.be/zB2aqNpT8ak",
+            "x": -0.92,
+            "y": 54.11,
+            "bpm": 99.4,
+            "energy": 0.413,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "RED RED RED",
+            "url": "https://youtu.be/PEUtqZ_lQ4w",
+            "x": -3.86,
+            "y": 21.95,
+            "bpm": 123.0,
+            "energy": 0.184,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "ONE OF US",
+            "url": "https://youtu.be/fwT9BgeiPNU",
+            "x": 20.3,
+            "y": -31.12,
+            "bpm": 103.4,
+            "energy": 0.058,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Y.O.L.O!!!!!",
+            "url": "https://youtu.be/NWTkdgPu9v8",
+            "x": 44.14,
+            "y": 41.42,
+            "bpm": 103.4,
+            "energy": 0.475,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "Scarlet Sky",
+            "url": "https://youtu.be/tfZBC32tcwo",
+            "x": 2.78,
+            "y": 37.14,
+            "bpm": 123.0,
+            "energy": 0.845,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Off we go.",
+            "url": "https://youtu.be/bg2UuSTbyqk",
+            "x": 0.58,
+            "y": 25.92,
+            "bpm": 117.5,
+            "energy": 0.522,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "いつも通りのBrand new days",
+            "url": "https://youtu.be/Ku2GV2VkQcA",
+            "x": 15.72,
+            "y": -24.78,
+            "bpm": 129.2,
+            "energy": 0.596,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "SWITCH ON NOW",
+            "url": "https://youtu.be/jsPk4RqO3N8",
+            "x": 27.22,
+            "y": 3.01,
+            "bpm": 136.0,
+            "energy": 0.768,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "ランブリングメモリー",
+            "url": "https://youtu.be/vRHfyDdge6s",
+            "x": -24.87,
+            "y": 54.83,
+            "bpm": 123.0,
+            "energy": 0.232,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "COMIC PANIC!!!",
+            "url": "https://youtu.be/LhpHCRJAAKw",
+            "x": 34.19,
+            "y": 44.8,
+            "bpm": 103.4,
+            "energy": 0.697,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Trouble Joyful!!",
+            "url": "https://youtu.be/RepUyAXXlD8",
+            "x": 2.9,
+            "y": 48.07,
+            "bpm": 95.7,
+            "energy": 0.618,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Jamboree!Journey!",
+            "url": "https://youtu.be/UEBaKDkey40",
+            "x": 14.3,
+            "y": 49.99,
+            "bpm": 152.0,
+            "energy": 0.282,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "カナユメ",
+            "url": "https://youtu.be/ZFXt0Ul0YA8",
+            "x": -33.44,
+            "y": 31.22,
+            "bpm": 123.0,
+            "energy": 0.552,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "独創収差",
+            "url": "https://youtu.be/8rQjShGMPYs",
+            "x": 11.14,
+            "y": -11.16,
+            "bpm": 123.0,
+            "energy": 0.733,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "極彩色",
+            "url": "https://youtu.be/YvpL2A3FZk4",
+            "x": 12.45,
+            "y": 44.51,
+            "bpm": 123.0,
+            "energy": 0.382,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "サクラゼンセン",
+            "url": "https://youtu.be/RJ98HN9hl6I",
+            "x": 7.3,
+            "y": -13.88,
+            "bpm": 143.6,
+            "energy": 0.514,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "True color",
+            "url": "https://youtu.be/zOTQpZkq_vk",
+            "x": -7.37,
+            "y": 4.82,
+            "bpm": 107.7,
+            "energy": 0.757,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "Crow Song",
+            "url": "https://youtu.be/mpPPaC8vfsU",
+            "x": 22.66,
+            "y": 24.71,
+            "bpm": 117.5,
+            "energy": 0.496,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "カサブタ",
+            "url": "https://youtu.be/-0QIHYtgwwQ",
+            "x": 29.91,
+            "y": 20.71,
+            "bpm": 112.3,
+            "energy": 0.595,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "アイのシナリオ",
+            "url": "https://youtu.be/TFvTI-1uz7g",
+            "x": 25.88,
+            "y": 29.5,
+            "bpm": 117.5,
+            "energy": 0.302,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Northern lights",
+            "url": "https://youtu.be/qrbkufy83yY",
+            "x": 11.81,
+            "y": -23.96,
+            "bpm": 136.0,
+            "energy": 0.639,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "トーキョーワンダー。",
+            "url": "https://youtu.be/4vNlqraef0E",
+            "x": 27.11,
+            "y": 21.67,
+            "bpm": 136.0,
+            "energy": 0.504,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "Reach Out To The Truth",
+            "url": "https://youtu.be/ufMWpo-RKpQ",
+            "x": 46.32,
+            "y": -2.1,
+            "bpm": 112.3,
+            "energy": 0.73,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "Listen!!",
+            "url": "https://youtu.be/VDWm77vSOR8",
+            "x": 34.94,
+            "y": 19.36,
+            "bpm": 117.5,
+            "energy": 0.476,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "青い栞",
+            "url": "https://youtu.be/bzJW33heiqw",
+            "x": -44.94,
+            "y": 56.64,
+            "bpm": 129.2,
+            "energy": 0.134,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "イマジネーション",
+            "url": "https://youtu.be/PDtPDiaQOK8",
+            "x": 8.47,
+            "y": -27.51,
+            "bpm": 136.0,
+            "energy": 0.24,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Butter-Fly",
+            "url": "https://youtu.be/GlylV3xII5k",
+            "x": 14.93,
+            "y": 34.51,
+            "bpm": 112.3,
+            "energy": 0.838,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "燦々",
+            "url": "https://youtu.be/WnTBaFVyDyM",
+            "x": 19.67,
+            "y": 25.21,
+            "bpm": 99.4,
+            "energy": 0.549,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "That's why I'm here.",
+            "url": "https://youtu.be/Q0l5OZb3Fr8",
+            "x": 25.46,
+            "y": 9.69,
+            "bpm": 123.0,
+            "energy": 0.724,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "IGNITE GLOW",
+            "url": "https://youtu.be/bU3kvmPZFBg",
+            "x": 24.34,
+            "y": -26.34,
+            "bpm": 129.2,
+            "energy": 0.747,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "ペトリコール・オベーション",
+            "url": "https://youtu.be/XUxFCXHCDkU",
+            "x": 23.67,
+            "y": 19.09,
+            "bpm": 123.0,
+            "energy": 0.728,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "Made My Day",
+            "url": "https://youtu.be/YfS7jNzytUs",
+            "x": 18.08,
+            "y": 48.73,
+            "bpm": 129.2,
+            "energy": 0.909,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Glowing After",
+            "url": "https://youtu.be/N-kz_Kbq6rU",
+            "x": -7.35,
+            "y": -6.91,
+            "bpm": 99.4,
+            "energy": 0.778,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "A Sunset So Bright",
+            "url": "https://youtu.be/gKHkLAXGVbE",
+            "x": 25.22,
+            "y": -2.16,
+            "bpm": 129.2,
+            "energy": 0.92,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "Start as Usual",
+            "url": "https://youtu.be/sWjSEnBR4qE",
+            "x": 5.71,
+            "y": 15.06,
+            "bpm": 117.5,
+            "energy": 0.836,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "“Say cheese!!!!!”",
+            "url": "https://youtu.be/RHGk1uT_yMc",
+            "x": -7.56,
+            "y": 16.45,
+            "bpm": 117.5,
+            "energy": 0.897,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "花笑みのデュオ",
+            "url": "https://youtu.be/m6jnZ8qDw-E",
+            "x": -0.48,
+            "y": 27.4,
+            "bpm": 99.4,
+            "energy": 0.904,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "READY STEADY GO (Cover)",
+            "url": "https://youtu.be/pSdx__hacYc",
+            "x": 39.42,
+            "y": 45.2,
+            "bpm": 143.6,
+            "energy": 0.548,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "abnormalize (Cover)",
+            "url": "https://youtu.be/PORDvsXEOjA",
+            "x": 17.15,
+            "y": 7.25,
+            "bpm": 117.5,
+            "energy": 0.592,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "メンタルチェンソー (Cover)",
+            "url": "https://youtu.be/ujO1ibiy_SQ",
+            "x": 33.03,
+            "y": -22.26,
+            "bpm": 123.0,
+            "energy": 0.678,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "Bunny Girl (Cover)",
+            "url": "https://youtu.be/9zRb7Kd0mOw",
+            "x": -9.72,
+            "y": 1.1,
+            "bpm": 107.7,
+            "energy": 0.203,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "オレンジ (Cover)",
+            "url": "https://youtu.be/1xpUhlxXVfQ",
+            "x": -14.68,
+            "y": 48.8,
+            "bpm": 99.4,
+            "energy": 0.457,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "カゲロウデイズ (Cover)",
+            "url": "https://youtu.be/f2UtT521XMs",
+            "x": 5.61,
+            "y": 7.94,
+            "bpm": 99.4,
+            "energy": 0.41,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "DAY×DAY (Cover)",
+            "url": "https://youtu.be/kSVcNXz21RY",
+            "x": 12.66,
+            "y": 19.92,
+            "bpm": 95.7,
+            "energy": 0.824,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "ロキ (Cover)",
+            "url": "https://youtu.be/i-3KO5JZOoA",
+            "x": 23.83,
+            "y": 0.79,
+            "bpm": 152.0,
+            "energy": 0.39,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "CHAINSAW BLOOD (Cover)",
+            "url": "https://youtu.be/0vocZOBTZKs",
+            "x": 14.45,
+            "y": -23.45,
+            "bpm": 143.6,
+            "energy": 0.51,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "チルドレンレコード (Re:boot) (Cover)",
+            "url": "https://youtu.be/SVBJBQX3IsA",
+            "x": 30.41,
+            "y": 8.58,
+            "bpm": 103.4,
+            "energy": 0.478,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "青のすみか (Cover)",
+            "url": "https://youtu.be/agEZ5jPpldQ",
+            "x": -9.3,
+            "y": 27.54,
+            "bpm": 152.0,
+            "energy": 0.686,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "GO!!! (Cover)",
+            "url": "https://youtu.be/FDflFAr27rE",
+            "x": 24.46,
+            "y": 44.91,
+            "bpm": 136.0,
+            "energy": 0.71,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "天ノ弱 (Cover)",
+            "url": "https://youtu.be/Rs6BXRn3noE",
+            "x": 18.31,
+            "y": 20.75,
+            "bpm": 99.4,
+            "energy": 0.744,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "アスノヨゾラ哨戒班 (Cover)",
+            "url": "https://youtu.be/Tdr0apLRXd4",
+            "x": 17.81,
+            "y": 58.91,
+            "bpm": 123.0,
+            "energy": 0.704,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "瞬間センチメンタル (Cover)",
+            "url": "https://youtu.be/_DYh8jUgy-Y",
+            "x": 25.33,
+            "y": -4.19,
+            "bpm": 112.3,
+            "energy": 0.599,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "プライド革命 (Cover)",
+            "url": "https://youtu.be/zvvFpagDgeY",
+            "x": 18.38,
+            "y": 45.76,
+            "bpm": 123.0,
+            "energy": 0.085,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "命に嫌われている。 (Cover)",
+            "url": "https://youtu.be/03BGdH5H5xE",
+            "x": 0.34,
+            "y": 49.8,
+            "bpm": 99.4,
+            "energy": 0.05,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "Redo (Cover)",
+            "url": "https://youtu.be/Q5ld_AEJAWw",
+            "x": 7.9,
+            "y": -22.18,
+            "bpm": 129.2,
+            "energy": 0.337,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "インフェルノ (Cover)",
+            "url": "https://youtu.be/DOrx3z-Z86c",
+            "x": 31.09,
+            "y": 19.44,
+            "bpm": 92.3,
+            "energy": 0.448,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "ドラマツルギー (Cover)",
+            "url": "https://youtu.be/wFqN8fUMosg",
+            "x": 17.57,
+            "y": -12.54,
+            "bpm": 99.4,
+            "energy": 0.709,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "COLORS (Cover)",
+            "url": "https://youtu.be/nUw5V5zupYQ",
+            "x": -1.09,
+            "y": 21.26,
+            "bpm": 136.0,
+            "energy": 0.34,
+            "shape": "acoustic"
+        },
+        {
+            "band": "afterglow",
+            "song": "午夜の待ち合わせ (Cover)",
+            "url": "https://youtu.be/jUMn-Sg_nq8",
+            "x": 32.54,
+            "y": -0.86,
+            "bpm": 129.2,
+            "energy": 0.44,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "サムライハート（Some Like It Hot!!） (Cover)",
+            "url": "https://youtu.be/DPCDABZ5uvY",
+            "x": -8.19,
+            "y": 39.83,
+            "bpm": 112.3,
+            "energy": 0.464,
+            "shape": "shimmer"
+        },
+        {
+            "band": "afterglow",
+            "song": "ベノム (Cover)",
+            "url": "https://youtu.be/MfBRzH_Wva8",
+            "x": 33.08,
+            "y": -7.23,
+            "bpm": 152.0,
+            "energy": 0.361,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Don't say “lazy” (Cover)",
+            "url": "https://youtu.be/PThqwHLyPpU",
+            "x": 37.12,
+            "y": 0.55,
+            "bpm": 123.0,
+            "energy": 0.343,
+            "shape": "bright"
+        },
+        {
+            "band": "afterglow",
+            "song": "Part of the Life",
+            "url": "https://youtu.be/O3ZcEs4b-uw",
+            "x": 1.82,
+            "y": 11.58,
+            "bpm": 123.0,
+            "energy": 0.888,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "Punchline Halloween!!!",
+            "url": "https://youtu.be/9o7t80l3ycg",
+            "x": 10.23,
+            "y": 16.51,
+            "bpm": 123.0,
+            "energy": 0.486,
+            "shape": "neutral"
+        },
+        {
+            "band": "afterglow",
+            "song": "I love your way！",
+            "url": "https://youtu.be/AXFAOTQ9oK8",
+            "x": 24.42,
+            "y": -7.58,
+            "bpm": 129.2,
+            "energy": 0.783,
+            "shape": "bright"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "KiLLKiSS",
+            "url": "https://youtu.be/RexyoaXaQ1o",
+            "x": 5.81,
+            "y": -33.02,
+            "bpm": 136.0,
+            "energy": 0.613,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Georgette Me, Georgette You",
+            "url": "https://youtu.be/vKDa7yfpd2M",
+            "x": -56.64,
+            "y": -16.13,
+            "bpm": 143.6,
+            "energy": 0.094,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Imprisoned XII",
+            "url": "https://youtu.be/0YNMV7xljD4",
+            "x": -70.0,
+            "y": 21.99,
+            "bpm": 107.7,
+            "energy": 0.011,
+            "shape": "neutral"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Crucifix X",
+            "url": "https://youtu.be/XP8al1l38Po",
+            "x": -12.31,
+            "y": -1.34,
+            "bpm": 103.4,
+            "energy": 0.352,
+            "shape": "neutral"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "八芒星ダンス",
+            "url": "https://youtu.be/tevtnb427Mw",
+            "x": 25.64,
+            "y": 18.09,
+            "bpm": 112.3,
+            "energy": 0.674,
+            "shape": "bright"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "顔",
+            "url": "https://youtu.be/cVfQBLdIUXk",
+            "x": 34.9,
+            "y": -10.15,
+            "bpm": 143.6,
+            "energy": 0.93,
+            "shape": "bright"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "天球のMúsica",
+            "url": "https://youtu.be/2Bo-ULStqLo",
+            "x": -6.15,
+            "y": 46.21,
+            "bpm": 129.2,
+            "energy": 0.88,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "黒のバースデイ",
+            "url": "https://youtu.be/WIhtJ7eJ-oI",
+            "x": 40.85,
+            "y": -21.81,
+            "bpm": 99.4,
+            "energy": 0.816,
+            "shape": "shimmer"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "ふたつの月 ~Deep Into The Forest~",
+            "url": "https://youtu.be/6USzFX8HnSY",
+            "x": 31.33,
+            "y": -27.72,
+            "bpm": 117.5,
+            "energy": 0.669,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Choir ‘S’ Choir",
+            "url": "https://youtu.be/7llj4mh4L-8",
+            "x": 28.57,
+            "y": -33.63,
+            "bpm": 99.4,
+            "energy": 0.716,
+            "shape": "neutral"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "神さま、バカ",
+            "url": "https://youtu.be/OT9KqYBAkQc",
+            "x": 12.17,
+            "y": -10.07,
+            "bpm": 117.5,
+            "energy": 0.792,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Mas?uerade Rhapsody Re?uest",
+            "url": "https://youtu.be/VLxM8q6PF4I",
+            "x": 38.16,
+            "y": -10.68,
+            "bpm": 95.7,
+            "energy": 0.871,
+            "shape": "neutral"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Ave Mujica",
+            "url": "https://youtu.be/QDsd0nyzwz0",
+            "x": 41.18,
+            "y": -37.69,
+            "bpm": 112.3,
+            "energy": 0.003,
+            "shape": "neutral"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Symbol I : △",
+            "url": "https://youtu.be/2O5C0mJx0Fs",
+            "x": 21.11,
+            "y": -8.35,
+            "bpm": 117.5,
+            "energy": 0.982,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Symbol II : Air",
+            "url": "https://youtu.be/pMk3iHPlUaI",
+            "x": 32.31,
+            "y": -6.47,
+            "bpm": 99.4,
+            "energy": 0.983,
+            "shape": "bright"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Symbol III : ▽",
+            "url": "https://youtu.be/NB3PxWLn9v4",
+            "x": -70.0,
+            "y": 11.99,
+            "bpm": 95.7,
+            "energy": 0.097,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Symbol IV : Earth",
+            "url": "https://youtu.be/WqQPM0dZpXc",
+            "x": -7.79,
+            "y": 7.7,
+            "bpm": 143.6,
+            "energy": 0.948,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Ether",
+            "url": "https://youtu.be/z6k7YIIZ6Hk",
+            "x": -10.78,
+            "y": 8.37,
+            "bpm": 123.0,
+            "energy": 0.95,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "The Whole Blue World",
+            "url": "https://youtu.be/lkS9XIzWObc",
+            "x": 11.5,
+            "y": 14.92,
+            "bpm": 99.4,
+            "energy": 0.756,
+            "shape": "neutral"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "in your blue eyes",
+            "url": "https://youtu.be/kVMuEQ3uXWc",
+            "x": -48.77,
+            "y": -32.7,
+            "bpm": 143.6,
+            "energy": 0.313,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "素晴らしき世界 でも どこにもない場所",
+            "url": "https://youtu.be/MyI6sKuV4kY",
+            "x": 3.33,
+            "y": -3.82,
+            "bpm": 136.0,
+            "energy": 0.812,
+            "shape": "neutral"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Angles",
+            "url": "https://youtu.be/au2A3wyiLIo",
+            "x": -65.02,
+            "y": -2.96,
+            "bpm": 129.2,
+            "energy": 0.124,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "DIVINE",
+            "url": "https://youtu.be/6bA-vjvi9oI",
+            "x": 18.75,
+            "y": 10.86,
+            "bpm": 117.5,
+            "energy": 0.977,
+            "shape": "neutral"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Sophie",
+            "url": "https://youtu.be/ivXQ21xDHfE",
+            "x": 6.29,
+            "y": -13.13,
+            "bpm": 136.0,
+            "energy": 0.255,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "‘S/’ The Way",
+            "url": "https://youtu.be/L0Ou9IfobFQ",
+            "x": 27.65,
+            "y": -16.99,
+            "bpm": 107.7,
+            "energy": 0.98,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "碧い瞳の中に",
+            "url": "https://youtu.be/bLOb7kC9Jns",
+            "x": -49.27,
+            "y": -32.67,
+            "bpm": 143.6,
+            "energy": 0.083,
+            "shape": "acoustic"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "堕天 (Cover)",
+            "url": "https://youtu.be/OLb0YQJfos0",
+            "x": 24.04,
+            "y": -1.18,
+            "bpm": 103.4,
+            "energy": 0.903,
+            "shape": "neutral"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "KINGS (Cover)",
+            "url": "https://youtu.be/NI1cd7_soy8",
+            "x": -2.1,
+            "y": -2.38,
+            "bpm": 117.5,
+            "energy": 0.945,
+            "shape": "shimmer"
+        },
+        {
+            "band": "ave_mujica",
+            "song": "暗黒天国 (Cover)",
+            "url": "https://youtu.be/HHxaj24Rx0I",
+            "x": 2.74,
+            "y": -16.85,
+            "bpm": 95.7,
+            "energy": 0.847,
+            "shape": "shimmer"
+        },
+        {
+            "band": "various_artists",
+            "song": "Don't be afraid!",
+            "url": "https://youtu.be/hPnvMOyGgzc",
+            "x": -20.56,
+            "y": -3.91,
+            "bpm": 123.0,
+            "energy": 0.329,
+            "shape": "acoustic"
+        },
+        {
+            "band": "various_artists",
+            "song": "Glee! Glee! Glee!",
+            "url": "https://youtu.be/8ciuJN6xTIo",
+            "x": -30.43,
+            "y": 57.27,
+            "bpm": 123.0,
+            "energy": 0.231,
+            "shape": "shimmer"
+        },
+        {
+            "band": "various_artists",
+            "song": "Be shine, shining!",
+            "url": "https://youtu.be/tv1Pf0FE6iw",
+            "x": -25.13,
+            "y": 61.16,
+            "bpm": 117.5,
+            "energy": 0.17,
+            "shape": "neutral"
+        },
+        {
+            "band": "various_artists",
+            "song": "Here, the world",
+            "url": "https://youtu.be/LuwRRghPD1A",
+            "x": -46.52,
+            "y": 51.69,
+            "bpm": 123.0,
+            "energy": 0.791,
+            "shape": "shimmer"
+        },
+        {
+            "band": "various_artists",
+            "song": "CiRCLE THANKS MUSiC♪",
+            "url": "https://youtu.be/P6o2SIJAxWw",
+            "x": 8.42,
+            "y": 55.11,
+            "bpm": 123.0,
+            "energy": 0.297,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "キミがいなくちゃっ！",
+            "url": "https://youtu.be/9itZp8utiAw",
+            "x": -43.11,
+            "y": 49.14,
+            "bpm": 123.0,
+            "energy": 0.249,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ハイファイブ∞あどべんちゃっ",
+            "url": "https://youtu.be/_Smbu0U70Ko",
+            "x": -0.09,
+            "y": 39.99,
+            "bpm": 99.4,
+            "energy": 0.375,
+            "shape": "bright"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "スマイルブーケで た〜まや〜！",
+            "url": "https://youtu.be/37b4LJg0yFk",
+            "x": -46.68,
+            "y": -6.99,
+            "bpm": 152.0,
+            "energy": 0.355,
+            "shape": "acoustic"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "えがお･シング･あ･ソング",
+            "url": "https://youtu.be/B-I2KAxGKD8",
+            "x": -36.09,
+            "y": 19.04,
+            "bpm": 152.0,
+            "energy": 0.185,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "YAPPY! SCHOOL CARNIVAL☆彡",
+            "url": "https://youtu.be/xNA7DZfdstI",
+            "x": -5.14,
+            "y": 13.01,
+            "bpm": 112.3,
+            "energy": 0.156,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "にこ×にこ=ハイパースマイルパワー！",
+            "url": "https://youtu.be/YRQHVpYDHAU",
+            "x": -0.04,
+            "y": 1.11,
+            "bpm": 129.2,
+            "energy": 0.572,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ないすみちゅっ！",
+            "url": "https://youtu.be/ByAniAhEdhk",
+            "x": -17.9,
+            "y": 8.13,
+            "bpm": 117.5,
+            "energy": 0.161,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ゴーカ！ごーかい！？ファントムシーフ！",
+            "url": "https://youtu.be/35xJFtwHx7Q",
+            "x": -14.1,
+            "y": -16.81,
+            "bpm": 107.7,
+            "energy": 0.417,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "うぃーきゃん☆フレフレっ！",
+            "url": "https://youtu.be/VJDcALjsZ80",
+            "x": -4.37,
+            "y": -12.77,
+            "bpm": 117.5,
+            "energy": 0.243,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "えがおのオーケストラっ！",
+            "url": "https://youtu.be/24Xzx6dH5tg",
+            "x": -34.35,
+            "y": 54.91,
+            "bpm": 136.0,
+            "energy": 0.03,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "にこにこねくと！",
+            "url": "https://youtu.be/B0AssN_z5gU",
+            "x": -43.77,
+            "y": 61.56,
+            "bpm": 112.3,
+            "energy": 0.053,
+            "shape": "acoustic"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ふぁいぶスマイル◯オールインっ！",
+            "url": "https://youtu.be/fTgVisxMdOQ",
+            "x": -35.27,
+            "y": 16.11,
+            "bpm": 123.0,
+            "energy": 0.331,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "せかいのっびのびトレジャー！",
+            "url": "https://youtu.be/t-YRHYvIqEE",
+            "x": 6.84,
+            "y": 41.83,
+            "bpm": 117.5,
+            "energy": 0.622,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "きらっ☆と キミフェス！",
+            "url": "https://youtu.be/VRSbIOh8w3U",
+            "x": -28.02,
+            "y": -20.13,
+            "bpm": 129.2,
+            "energy": 0.077,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "うちゃパ！で ぱっぴかポーんっ！",
+            "url": "https://youtu.be/Ibs-CJd-qws",
+            "x": -16.07,
+            "y": 54.34,
+            "bpm": 129.2,
+            "energy": 0.452,
+            "shape": "acoustic"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "はれやか すこやか ぴかりんりん♪",
+            "url": "https://youtu.be/hstT4_F2Hqg",
+            "x": -12.22,
+            "y": 30.61,
+            "bpm": 117.5,
+            "energy": 0.422,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ふわふわ☆ゆめいろサンドイッチ",
+            "url": "https://youtu.be/pAB-NYhMXFc",
+            "x": -39.07,
+            "y": 36.22,
+            "bpm": 129.2,
+            "energy": 0.086,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "Happy! Happier! Happiest!",
+            "url": "https://youtu.be/xpECEzVaWH8",
+            "x": -2.03,
+            "y": 37.37,
+            "bpm": 172.3,
+            "energy": 0.246,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "現るっ！大怪盗ハロハッピー！",
+            "url": "https://youtu.be/sLn7oV54kYY",
+            "x": 2.91,
+            "y": -20.52,
+            "bpm": 123.0,
+            "energy": 0.675,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "わちゃ・もちゃ・ぺったん行進曲",
+            "url": "https://youtu.be/Qq1_N9wKA0I",
+            "x": -19.85,
+            "y": 19.99,
+            "bpm": 161.5,
+            "energy": 0.602,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "おもいでイルミネーション",
+            "url": "https://youtu.be/ZC84bEuG6AA",
+            "x": -9.3,
+            "y": 19.07,
+            "bpm": 161.5,
+            "energy": 0.502,
+            "shape": "bright"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "おもいやりハーモニー",
+            "url": "https://youtu.be/tMlaNbpRmSE",
+            "x": -47.19,
+            "y": 42.19,
+            "bpm": 136.0,
+            "energy": 0.106,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ハピネスっ！ハピィーマジカルっ♪",
+            "url": "https://youtu.be/wPDP9eT2-Cs",
+            "x": -32.64,
+            "y": 53.17,
+            "bpm": 92.3,
+            "energy": 0.499,
+            "shape": "bright"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "えがお、あーゆーれでぃ???",
+            "url": "https://youtu.be/DAxR0sfi-pk",
+            "x": -1.89,
+            "y": 12.49,
+            "bpm": 136.0,
+            "energy": 0.354,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ハッピーサマーウェディング",
+            "url": "https://youtu.be/SQrYhJ6x7kE",
+            "x": -17.86,
+            "y": 7.68,
+            "bpm": 129.2,
+            "energy": 0.542,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ひまわりの約束",
+            "url": "https://youtu.be/WC3paFpeKTo",
+            "x": -70.0,
+            "y": 50.76,
+            "bpm": 161.5,
+            "energy": 0.067,
+            "shape": "acoustic"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ハッピー☆マテリアル",
+            "url": "https://youtu.be/YBNg45T7_2M",
+            "x": -13.33,
+            "y": 37.95,
+            "bpm": 107.7,
+            "energy": 0.344,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "太陽曰く燃えよカオス",
+            "url": "https://youtu.be/OHypaKK3Jww",
+            "x": 3.63,
+            "y": -0.45,
+            "bpm": 143.6,
+            "energy": 0.436,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "エクストラ・マジック・アワー",
+            "url": "https://youtu.be/kRQTnmIO5Jw",
+            "x": -26.8,
+            "y": 39.44,
+            "bpm": 117.5,
+            "energy": 0.296,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "コレカラ",
+            "url": "https://youtu.be/9DpyAgb_DO8",
+            "x": -14.44,
+            "y": 40.47,
+            "bpm": 161.5,
+            "energy": 0.349,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "全力少年",
+            "url": "https://youtu.be/-YBcjF1R-Es",
+            "x": -32.29,
+            "y": 32.14,
+            "bpm": 136.0,
+            "energy": 0.118,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "オレンジ",
+            "url": "https://youtu.be/YtgT2EaDZ0A",
+            "x": -47.28,
+            "y": 36.57,
+            "bpm": 143.6,
+            "energy": 0.046,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "Happy Girl",
+            "url": "https://youtu.be/AcAaiJqg8Ps",
+            "x": -14.05,
+            "y": 42.18,
+            "bpm": 143.6,
+            "energy": 0.111,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ン・パカマーチ",
+            "url": "https://youtu.be/KazeDrpkrBY",
+            "x": -21.49,
+            "y": 44.67,
+            "bpm": 117.5,
+            "energy": 0.173,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "サンバロハッピ〜！",
+            "url": "https://youtu.be/RvtTwS_wErQ",
+            "x": 9.17,
+            "y": 1.57,
+            "bpm": 129.2,
+            "energy": 0.209,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ボクらの夏's☆ショーたいむっ！！",
+            "url": "https://youtu.be/Wi9V_T-igiw",
+            "x": -7.97,
+            "y": 7.64,
+            "bpm": 117.5,
+            "energy": 0.401,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "むすんでわらって",
+            "url": "https://youtu.be/pdncPARjwrw",
+            "x": -11.07,
+            "y": 21.54,
+            "bpm": 129.2,
+            "energy": 0.103,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "キミを れっつ・はぶ・ふぁん♪",
+            "url": "https://youtu.be/2CnDHPhRVyQ",
+            "x": -27.06,
+            "y": 21.45,
+            "bpm": 161.5,
+            "energy": 0.707,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "らいふ・いず・みゅーじかるっ♪♪♪",
+            "url": "https://youtu.be/SnlhQO2t8Zo",
+            "x": -31.02,
+            "y": 2.58,
+            "bpm": 136.0,
+            "energy": 0.228,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "れっつ・スマイル・すとり〜みんぐっ♪",
+            "url": "https://youtu.be/5IcpLkGA54I",
+            "x": -9.87,
+            "y": 33.84,
+            "bpm": 152.0,
+            "energy": 0.801,
+            "shape": "acoustic"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "やっほー！いっぽ！わんだふぉー！",
+            "url": "https://youtu.be/1rfk9_lj-iA",
+            "x": 5.41,
+            "y": 55.96,
+            "bpm": 161.5,
+            "energy": 0.693,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "とーくとぅみー・とーくとぅゆー",
+            "url": "https://youtu.be/7HxPLgP9AEo",
+            "x": 14.9,
+            "y": -3.6,
+            "bpm": 136.0,
+            "energy": 0.933,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ハイタッチ／＼びりーばーず☆",
+            "url": "https://youtu.be/rCQsYw_x7Us",
+            "x": -18.44,
+            "y": 45.56,
+            "bpm": 112.3,
+            "energy": 0.657,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "Listen to Smile!",
+            "url": "https://youtu.be/5Bz8TBMardI",
+            "x": -30.25,
+            "y": 2.75,
+            "bpm": 129.2,
+            "energy": 0.687,
+            "shape": "acoustic"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "スマイリーキャロル",
+            "url": "https://youtu.be/f5aGrmFiDGc",
+            "x": -35.49,
+            "y": 0.63,
+            "bpm": 112.3,
+            "energy": 0.628,
+            "shape": "acoustic"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "えがお、み〜っけた！",
+            "url": "https://youtu.be/Gvey12GFPwU",
+            "x": -39.52,
+            "y": 37.62,
+            "bpm": 143.6,
+            "energy": 0.07,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "上海ハニー (Cover)",
+            "url": "https://youtu.be/JbEmP03gUnE",
+            "x": 5.72,
+            "y": 9.33,
+            "bpm": 129.2,
+            "energy": 0.071,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "シル・ヴ・プレジデント (Cover)",
+            "url": "https://youtu.be/pli3-yJjWJM",
+            "x": -3.52,
+            "y": 22.22,
+            "bpm": 117.5,
+            "energy": 0.162,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ヒャダインのじょーじょーゆーじょー (Cover)",
+            "url": "https://youtu.be/yfpbW_HnS4Y",
+            "x": 4.98,
+            "y": -13.23,
+            "bpm": 99.4,
+            "energy": 0.278,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "はいよろこんで (Cover)",
+            "url": "https://youtu.be/BHC1CKcSf50",
+            "x": -8.95,
+            "y": -29.44,
+            "bpm": 143.6,
+            "energy": 0.158,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "シカ色デイズ (Cover)",
+            "url": "https://youtu.be/KaD3F8riuLE",
+            "x": -16.88,
+            "y": 9.42,
+            "bpm": 123.0,
+            "energy": 0.178,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "強風オールバック (Cover)",
+            "url": "https://youtu.be/EGxEKCHDAFE",
+            "x": -20.41,
+            "y": 13.49,
+            "bpm": 136.0,
+            "energy": 0.155,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "最高到達点 (Cover)",
+            "url": "https://youtu.be/8AwnyCo2FF0",
+            "x": -28.89,
+            "y": 47.95,
+            "bpm": 129.2,
+            "energy": 0.187,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "許婚っきゅん (Cover)",
+            "url": "https://youtu.be/X9VNpJdPGWE",
+            "x": -15.44,
+            "y": -5.15,
+            "bpm": 143.6,
+            "energy": 0.215,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "新宝島 (Cover)",
+            "url": "https://youtu.be/61wi4lZdYWI",
+            "x": -38.7,
+            "y": 24.08,
+            "bpm": 161.5,
+            "energy": 0.558,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ドレミファロンド (Cover)",
+            "url": "https://youtu.be/IjlX1R75PRw",
+            "x": -12.66,
+            "y": 55.58,
+            "bpm": 123.0,
+            "energy": 0.074,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "きゅうくらりん (Cover)",
+            "url": "https://youtu.be/2WVpP1DEQMk",
+            "x": 10.77,
+            "y": -23.11,
+            "bpm": 112.3,
+            "energy": 0.797,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ロメオ (Cover)",
+            "url": "https://youtu.be/MFrdfe1gA-s",
+            "x": -21.57,
+            "y": 22.65,
+            "bpm": 143.6,
+            "energy": 0.138,
+            "shape": "bright"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "エイリアンエイリアン (Cover)",
+            "url": "https://youtu.be/KzkHYPBh0lg",
+            "x": -4.87,
+            "y": -3.41,
+            "bpm": 152.0,
+            "energy": 0.035,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "いーあるふぁんくらぶ (Cover)",
+            "url": "https://youtu.be/uchoxbR-Mkc",
+            "x": 1.27,
+            "y": -24.07,
+            "bpm": 143.6,
+            "energy": 0.108,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "回レ！雪月花 (Cover)",
+            "url": "https://youtu.be/h_gwUH2JlIA",
+            "x": 16.71,
+            "y": -26.64,
+            "bpm": 107.7,
+            "energy": 0.091,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "恋愛裁判 (Cover)",
+            "url": "https://youtu.be/qTEBfVWtDu4",
+            "x": -9.13,
+            "y": 2.95,
+            "bpm": 136.0,
+            "energy": 0.15,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "TOMORROW (Cover)",
+            "url": "https://youtu.be/AIMdg1EhHFw",
+            "x": -15.94,
+            "y": 15.54,
+            "bpm": 136.0,
+            "energy": 0.275,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "GO! GO! MANIAC (Cover)",
+            "url": "https://youtu.be/sDFuLB7r070",
+            "x": 9.07,
+            "y": -11.42,
+            "bpm": 123.0,
+            "energy": 0.498,
+            "shape": "neutral"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "Dragon Night (Cover)",
+            "url": "https://youtu.be/Dy4vu-bUI5s",
+            "x": -10.41,
+            "y": 12.77,
+            "bpm": 123.0,
+            "energy": 0.014,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ようこそジャパリパークへ (Cover)",
+            "url": "https://youtu.be/p0It2jRsdtw",
+            "x": 2.48,
+            "y": 20.14,
+            "bpm": 112.3,
+            "energy": 0.63,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ウィーアー！ (Cover)",
+            "url": "https://youtu.be/0p2o3wLQcNM",
+            "x": -10.38,
+            "y": 41.63,
+            "bpm": 112.3,
+            "energy": 0.398,
+            "shape": "acoustic"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "おジャ魔女カーニバル!! (Cover)",
+            "url": "https://youtu.be/b1ycD-2c_xw",
+            "x": -22.75,
+            "y": 5.86,
+            "bpm": 152.0,
+            "energy": 0.114,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ダーリンダンス (Cover)",
+            "url": "https://youtu.be/rf9zk-2d1kU",
+            "x": 16.54,
+            "y": -7.72,
+            "bpm": 152.0,
+            "energy": 0.513,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ノーポイッ！ (Cover)",
+            "url": "https://youtu.be/sUrFo5Xw0Lc",
+            "x": -16.21,
+            "y": 22.34,
+            "bpm": 161.5,
+            "energy": 0.569,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "SHINY DAYS (Cover)",
+            "url": "https://youtu.be/w0kOSCWzEx8",
+            "x": -33.57,
+            "y": 51.52,
+            "bpm": 112.3,
+            "energy": 0.143,
+            "shape": "shimmer"
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "シルエット (Cover)",
+            "url": "https://youtu.be/n7U-z7okdBM",
+            "x": 3.2,
+            "y": 11.39,
+            "bpm": 92.3,
+            "energy": 0.645,
+            "shape": "bright"
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "song": "ホーミー・タイッ！！",
+            "url": "https://youtu.be/BSP-xypGSak",
+            "x": 21.1,
+            "y": 8.72,
+            "bpm": 129.2,
+            "energy": 0.921,
+            "shape": "bright"
+        },
+        {
+            "band": "millsage",
+            "song": "起死開戦",
+            "url": "https://youtu.be/bzPxdHmMW3s",
+            "x": -4.07,
+            "y": -10.07,
+            "bpm": 112.3,
+            "energy": 0.859,
+            "shape": "neutral"
+        },
+        {
+            "band": "morfonica",
+            "song": "Daylight -デイライト-",
+            "url": "https://youtu.be/oT-B-uUUG28",
+            "x": 1.1,
+            "y": -12.27,
+            "bpm": 123.0,
+            "energy": 0.607,
+            "shape": "bright"
+        },
+        {
+            "band": "morfonica",
+            "song": "メランコリックララバイ",
+            "url": "https://youtu.be/D_uUbtZUOPc",
+            "x": 8.23,
+            "y": 14.26,
+            "bpm": 123.0,
+            "energy": 0.741,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "flame of hope",
+            "url": "https://youtu.be/4kLyLp8Oco0",
+            "x": -1.68,
+            "y": 7.4,
+            "bpm": 129.2,
+            "energy": 0.634,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "ブルームブルーム",
+            "url": "https://youtu.be/ulnZ8yiS7Jg",
+            "x": -0.26,
+            "y": 2.35,
+            "bpm": 123.0,
+            "energy": 0.598,
+            "shape": "neutral"
+        },
+        {
+            "band": "morfonica",
+            "song": "カラフルリバティー",
+            "url": "https://youtu.be/HqDa4NOAt8w",
+            "x": -14.8,
+            "y": 18.27,
+            "bpm": 92.3,
+            "energy": 0.511,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "fly with the night",
+            "url": "https://youtu.be/DpnFf8UINbs",
+            "x": -50.71,
+            "y": 38.74,
+            "bpm": 112.3,
+            "energy": 0.279,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "金色へのプレリュード",
+            "url": "https://youtu.be/Qam2U-LF_Ks",
+            "x": -23.96,
+            "y": 5.91,
+            "bpm": 117.5,
+            "energy": 0.53,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "The Circle Of Butterflies",
+            "url": "https://youtu.be/eMR-LxXyCKs",
+            "x": -14.29,
+            "y": 65.39,
+            "bpm": 117.5,
+            "energy": 0.414,
+            "shape": "neutral"
+        },
+        {
+            "band": "morfonica",
+            "song": "ハーモニー・デイ",
+            "url": "https://youtu.be/NuhjVeWwvoM",
+            "x": -25.2,
+            "y": 32.05,
+            "bpm": 123.0,
+            "energy": 0.267,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Sweet Cheers!",
+            "url": "https://youtu.be/e8IQBZMVIGw",
+            "x": -60.54,
+            "y": 35.67,
+            "bpm": 112.3,
+            "energy": 0.571,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "寄る辺のSunny, Sunny",
+            "url": "https://youtu.be/6C4NOz-t3QA",
+            "x": -23.53,
+            "y": 19.26,
+            "bpm": 92.3,
+            "energy": 0.604,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "誓いのWingbeat",
+            "url": "https://youtu.be/nnpD32__lAY",
+            "x": -23.89,
+            "y": -4.26,
+            "bpm": 103.4,
+            "energy": 0.75,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Ever Sky Blue",
+            "url": "https://youtu.be/Ar7QtswUNGw",
+            "x": -28.19,
+            "y": -6.22,
+            "bpm": 129.2,
+            "energy": 0.287,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Polyphonyscape",
+            "url": "https://youtu.be/I6h4Rm32k-I",
+            "x": -24.47,
+            "y": 43.68,
+            "bpm": 152.0,
+            "energy": 0.42,
+            "shape": "bright"
+        },
+        {
+            "band": "morfonica",
+            "song": "Wreath of Brave",
+            "url": "https://youtu.be/5O3gAE65_34",
+            "x": -24.59,
+            "y": 30.61,
+            "bpm": 136.0,
+            "energy": 0.587,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Merry Merry Thanks!!",
+            "url": "https://youtu.be/j3W3NHurJnk",
+            "x": -16.66,
+            "y": 37.94,
+            "bpm": 143.6,
+            "energy": 0.536,
+            "shape": "bright"
+        },
+        {
+            "band": "morfonica",
+            "song": "Sonorous",
+            "url": "https://youtu.be/Wl5LZ3iJNzM",
+            "x": -34.33,
+            "y": 46.39,
+            "bpm": 129.2,
+            "energy": 0.217,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "両翼のBrilliance",
+            "url": "https://youtu.be/O0jB7IA5tZg",
+            "x": -8.75,
+            "y": -9.79,
+            "bpm": 117.5,
+            "energy": 0.895,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Steer to Utopia",
+            "url": "https://youtu.be/wjpVRH7GOFc",
+            "x": -8.5,
+            "y": 16.33,
+            "bpm": 129.2,
+            "energy": 0.929,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Fateful...",
+            "url": "https://youtu.be/RD_6TSNkxg0",
+            "x": -39.94,
+            "y": 21.66,
+            "bpm": 129.2,
+            "energy": 0.519,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "ティリカモニカリラ",
+            "url": "https://youtu.be/d32zOmV118k",
+            "x": -31.81,
+            "y": 4.9,
+            "bpm": 136.0,
+            "energy": 0.616,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Secret Dawn",
+            "url": "https://youtu.be/eWqv5RB6jng",
+            "x": -55.48,
+            "y": 34.98,
+            "bpm": 129.2,
+            "energy": 0.261,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Angel's Ladder",
+            "url": "https://youtu.be/7Hml249yhKg",
+            "x": -10.98,
+            "y": 28.28,
+            "bpm": 99.4,
+            "energy": 0.869,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "One step at a time",
+            "url": "https://youtu.be/T_a1YLnxD50",
+            "x": -33.19,
+            "y": 63.44,
+            "bpm": 89.1,
+            "energy": 0.663,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Tempest",
+            "url": "https://youtu.be/OWTf5lEPT_g",
+            "x": -13.64,
+            "y": 16.77,
+            "bpm": 136.0,
+            "energy": 0.543,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "フレージング ミラージュ",
+            "url": "https://youtu.be/zY9c9Ws9I3Y",
+            "x": -9.56,
+            "y": 5.49,
+            "bpm": 129.2,
+            "energy": 0.821,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "MUGEN Reverberate!",
+            "url": "https://youtu.be/B6602-OMtZI",
+            "x": -10.12,
+            "y": -5.4,
+            "bpm": 123.0,
+            "energy": 0.193,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "わたしまちがいさがし",
+            "url": "https://youtu.be/UgP_YbdsoB8",
+            "x": -10.96,
+            "y": 18.21,
+            "bpm": 117.5,
+            "energy": 0.059,
+            "shape": "bright"
+        },
+        {
+            "band": "morfonica",
+            "song": "esora no clover",
+            "url": "https://youtu.be/fGgKN9_egCM",
+            "x": -23.56,
+            "y": 6.54,
+            "bpm": 107.7,
+            "energy": 0.37,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "きょうもMerry go rounD",
+            "url": "https://youtu.be/RDhZVoPqL8k",
+            "x": -4.83,
+            "y": 17.57,
+            "bpm": 136.0,
+            "energy": 0.842,
+            "shape": "neutral"
+        },
+        {
+            "band": "morfonica",
+            "song": "Feathered Dreams",
+            "url": "https://youtu.be/sAnwgtsAzs8",
+            "x": -10.29,
+            "y": 3.53,
+            "bpm": 117.5,
+            "energy": 0.936,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Portray Empathy",
+            "url": "https://youtu.be/A-8Ci-YRgjE",
+            "x": -23.88,
+            "y": 21.34,
+            "bpm": 172.3,
+            "energy": 0.9,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "ビューティ・フォー",
+            "url": "https://youtu.be/5kgdPWEUA7Q",
+            "x": -0.14,
+            "y": -5.9,
+            "bpm": 99.4,
+            "energy": 0.827,
+            "shape": "neutral"
+        },
+        {
+            "band": "morfonica",
+            "song": "胡蝶翔る星月夜",
+            "url": "https://youtu.be/GOU_X0KK-jo",
+            "x": -6.88,
+            "y": 51.64,
+            "bpm": 136.0,
+            "energy": 0.672,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Color of Us",
+            "url": "https://youtu.be/x9I1W3Aigrc",
+            "x": -36.26,
+            "y": 40.96,
+            "bpm": 129.2,
+            "energy": 0.66,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Resonant Strings",
+            "url": "https://youtu.be/zpHPneTujSA",
+            "x": 22.21,
+            "y": -8.14,
+            "bpm": 129.2,
+            "energy": 0.754,
+            "shape": "bright"
+        },
+        {
+            "band": "morfonica",
+            "song": "Shining Leaves",
+            "url": "https://youtu.be/HkruyxEhOPI",
+            "x": -24.76,
+            "y": 41.03,
+            "bpm": 123.0,
+            "energy": 0.892,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "音がえしのセレナーデ",
+            "url": "https://youtu.be/sUaDAY9u4y8",
+            "x": -37.21,
+            "y": 27.7,
+            "bpm": 123.0,
+            "energy": 0.654,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "蒼穹へのトレイル",
+            "url": "https://youtu.be/eAjX1Ihvtac",
+            "x": -7.37,
+            "y": 9.83,
+            "bpm": 129.2,
+            "energy": 0.804,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "QUEEN (Cover)",
+            "url": "https://youtu.be/_FiExtFisto",
+            "x": -8.83,
+            "y": -15.67,
+            "bpm": 112.3,
+            "energy": 0.856,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "again (Cover)",
+            "url": "https://youtu.be/4Vgb5ZfuGas",
+            "x": -26.82,
+            "y": 10.68,
+            "bpm": 143.6,
+            "energy": 0.722,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "輪舞-revolution (Cover)",
+            "url": "https://youtu.be/RquM6y7cTZU",
+            "x": -20.59,
+            "y": 2.43,
+            "bpm": 129.2,
+            "energy": 0.753,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "メロウ (Cover)",
+            "url": "https://youtu.be/falfRIZceKw",
+            "x": -39.4,
+            "y": 20.99,
+            "bpm": 143.6,
+            "energy": 0.351,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "祝福 (Cover)",
+            "url": "https://youtu.be/A8BRPZIHCs4",
+            "x": -35.9,
+            "y": 0.86,
+            "bpm": 112.3,
+            "energy": 0.56,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Overdose (Cover)",
+            "url": "https://youtu.be/ILjUR5nQQPA",
+            "x": -20.37,
+            "y": 3.86,
+            "bpm": 117.5,
+            "energy": 0.467,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "かくれんぼ (Cover)",
+            "url": "https://youtu.be/GGYr_vW75pI",
+            "x": -8.87,
+            "y": 31.1,
+            "bpm": 89.1,
+            "energy": 0.889,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "chAngE (Cover)",
+            "url": "https://youtu.be/SfdLc7O8nhM",
+            "x": -20.07,
+            "y": 17.11,
+            "bpm": 112.3,
+            "energy": 0.272,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "ALIVE (Cover)",
+            "url": "https://youtu.be/fzIHYLmJcy4",
+            "x": -30.33,
+            "y": 4.44,
+            "bpm": 117.5,
+            "energy": 0.815,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Nameless Story (Cover)",
+            "url": "https://youtu.be/hLQbNQsCqwg",
+            "x": -25.03,
+            "y": -11.88,
+            "bpm": 129.2,
+            "energy": 0.725,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "青空のラプソディ (Cover)",
+            "url": "https://youtu.be/ZK7DbX4BApQ",
+            "x": -23.46,
+            "y": -12.09,
+            "bpm": 136.0,
+            "energy": 0.857,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "Nevereverland (Cover)",
+            "url": "https://youtu.be/ou7eTJ4JzGE",
+            "x": -9.25,
+            "y": -9.38,
+            "bpm": 103.4,
+            "energy": 0.171,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "メリッサ (Cover)",
+            "url": "https://youtu.be/yGdpwyRIyAQ",
+            "x": -31.31,
+            "y": 13.07,
+            "bpm": 112.3,
+            "energy": 0.446,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "COLORFUL BOX (Cover)",
+            "url": "https://youtu.be/bdjK1IZSudQ",
+            "x": -33.76,
+            "y": 25.34,
+            "bpm": 161.5,
+            "energy": 0.546,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "unravel (Cover)",
+            "url": "https://youtu.be/uRaB7qZwZP4",
+            "x": -25.71,
+            "y": 38.27,
+            "bpm": 136.0,
+            "energy": 0.102,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "アゲハ蝶 (Cover)",
+            "url": "https://youtu.be/EG78S0HJvZg",
+            "x": -28.53,
+            "y": 6.9,
+            "bpm": 117.5,
+            "energy": 0.481,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "V.I.P (Cover)",
+            "url": "https://youtu.be/B4O27f5P8Dk",
+            "x": -18.76,
+            "y": 23.63,
+            "bpm": 123.0,
+            "energy": 0.769,
+            "shape": "acoustic"
+        },
+        {
+            "band": "morfonica",
+            "song": "CQCQ (Cover)",
+            "url": "https://youtu.be/v12Sqv9lA0c",
+            "x": 4.85,
+            "y": -1.12,
+            "bpm": 143.6,
+            "energy": 0.442,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "アイの夢限",
+            "url": "https://youtu.be/fSa8XH8d-T4",
+            "x": 17.61,
+            "y": 21.55,
+            "bpm": 117.5,
+            "energy": 0.346,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "どんがらがっしゃん",
+            "url": "https://youtu.be/DvZohC30iOw",
+            "x": 19.29,
+            "y": -8.97,
+            "bpm": 129.2,
+            "energy": 0.862,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "みゅーたんとミュータント",
+            "url": "https://youtu.be/qnHJDWgLkvw",
+            "x": -3.85,
+            "y": 21.86,
+            "bpm": 152.0,
+            "energy": 0.299,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "チューニング",
+            "url": "https://youtu.be/gJqvYYkdkC8",
+            "x": -8.86,
+            "y": 32.96,
+            "bpm": 99.4,
+            "energy": 0.109,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "Dream Voyage",
+            "url": "https://youtu.be/fDnYCRzvCco",
+            "x": -17.75,
+            "y": -20.6,
+            "bpm": 103.4,
+            "energy": 0.774,
+            "shape": "neutral"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "グラディエント",
+            "url": "https://youtu.be/QMcU8T8wOd4",
+            "x": -36.48,
+            "y": 35.52,
+            "bpm": 117.5,
+            "energy": 0.033,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "LET'Sあちあちトレーニング！",
+            "url": "https://youtu.be/g9fpSuTbouI",
+            "x": 24.64,
+            "y": 13.56,
+            "bpm": 117.5,
+            "energy": 0.137,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "真夜中遊園地",
+            "url": "https://youtu.be/KD-EeGTr53I",
+            "x": 44.85,
+            "y": -18.37,
+            "bpm": 129.2,
+            "energy": 0.392,
+            "shape": "bright"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "テレパシー",
+            "url": "https://youtu.be/mKiBvYqfBfk",
+            "x": -41.47,
+            "y": 5.19,
+            "bpm": 89.1,
+            "energy": 0.018,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "TRASH LIFE",
+            "url": "https://youtu.be/oD74b35UNVc",
+            "x": -3.48,
+            "y": 45.74,
+            "bpm": 117.5,
+            "energy": 0.009,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "新人類は仮想世界の夢を見るか?",
+            "url": "https://youtu.be/zFsTGz60TLY",
+            "x": 38.1,
+            "y": -33.69,
+            "bpm": 117.5,
+            "energy": 0.335,
+            "shape": "bright"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "コミュ着火Fire!",
+            "url": "https://youtu.be/SI8q0trRdOE",
+            "x": 37.65,
+            "y": 0.48,
+            "bpm": 99.4,
+            "energy": 0.288,
+            "shape": "bright"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "Calling",
+            "url": "https://youtu.be/a6oOosacMxc",
+            "x": 51.97,
+            "y": -21.15,
+            "bpm": 117.5,
+            "energy": 0.865,
+            "shape": "neutral"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "Hi-Vision",
+            "url": "https://youtu.be/a1-SB-tFYmI",
+            "x": 32.07,
+            "y": 3.18,
+            "bpm": 103.4,
+            "energy": 0.093,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "コハク",
+            "url": "https://youtu.be/XYCI2LzEnZA",
+            "x": 15.97,
+            "y": 58.71,
+            "bpm": 99.4,
+            "energy": 0.039,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "✞animaるパーティ✞開催中✞",
+            "url": "https://youtu.be/J_zCYMoy1Cw",
+            "x": 25.79,
+            "y": 3.01,
+            "bpm": 99.4,
+            "energy": 0.385,
+            "shape": "neutral"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "エンプティパペット",
+            "url": "https://youtu.be/xosxYF29mvk",
+            "x": 26.93,
+            "y": -26.25,
+            "bpm": 123.0,
+            "energy": 0.047,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "限界現実サバイブ天使",
+            "url": "https://youtu.be/_iX9WOOierg",
+            "x": 22.75,
+            "y": 42.95,
+            "bpm": 95.7,
+            "energy": 0.256,
+            "shape": "bright"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "ビッグマウス",
+            "url": "https://youtu.be/3WpaXoun2Tc",
+            "x": 56.74,
+            "y": 13.1,
+            "bpm": 143.6,
+            "energy": 0.578,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "夢現妄想世界",
+            "url": "https://youtu.be/vS2MCoSUEVs",
+            "x": 39.03,
+            "y": -10.97,
+            "bpm": 129.2,
+            "energy": 0.941,
+            "shape": "neutral"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "やわやわNERD 超FreQuency",
+            "url": "https://youtu.be/xzkEK0GF7fw",
+            "x": 53.21,
+            "y": -1.75,
+            "bpm": 143.6,
+            "energy": 0.527,
+            "shape": "bright"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "超惑星Xへの旅",
+            "url": "https://youtu.be/jr_xt37IcRc",
+            "x": 39.38,
+            "y": -28.37,
+            "bpm": 136.0,
+            "energy": 0.458,
+            "shape": "bright"
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "これはぼくたちの生存のあらすじ",
+            "url": "https://youtu.be/4XbNBhZuBoA",
+            "x": 41.71,
+            "y": 19.36,
+            "bpm": 129.2,
+            "energy": 0.78,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mygo",
+            "song": "迷星叫",
+            "url": "https://youtu.be/V6gq-6dAbHA",
+            "x": 5.21,
+            "y": 34.94,
+            "bpm": 129.2,
+            "energy": 0.944,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "壱雫空",
+            "url": "https://youtu.be/bqDL0mTUiLs",
+            "x": 32.23,
+            "y": 13.47,
+            "bpm": 103.4,
+            "energy": 0.974,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "碧天伴走",
+            "url": "https://youtu.be/S7S4gUjXKjo",
+            "x": 23.56,
+            "y": 16.21,
+            "bpm": 129.2,
+            "energy": 0.973,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "影色舞",
+            "url": "https://youtu.be/5_ZWx7Q26Tw",
+            "x": 13.59,
+            "y": -13.25,
+            "bpm": 112.3,
+            "energy": 0.879,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mygo",
+            "song": "歌いましょう鳴らしましょう",
+            "url": "https://youtu.be/Xtqz4zUlrGY",
+            "x": 34.54,
+            "y": -6.0,
+            "bpm": 112.3,
+            "energy": 0.942,
+            "shape": "bright"
+        },
+        {
+            "band": "mygo",
+            "song": "潜在表明",
+            "url": "https://youtu.be/ljBKERoFUZQ",
+            "x": 3.35,
+            "y": -10.63,
+            "bpm": 136.0,
+            "energy": 0.584,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "音一会",
+            "url": "https://youtu.be/SKj1BxRGdfI",
+            "x": 20.0,
+            "y": 9.22,
+            "bpm": 136.0,
+            "energy": 0.968,
+            "shape": "bright"
+        },
+        {
+            "band": "mygo",
+            "song": "春日影 (MyGO!!!!! ver.)",
+            "url": "https://youtu.be/NycFr6D6DSw",
+            "x": -30.87,
+            "y": 63.78,
+            "bpm": 99.4,
+            "energy": 0.923,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "詩超絆",
+            "url": "https://youtu.be/OenakjvUs24",
+            "x": -6.63,
+            "y": 59.26,
+            "bpm": 112.3,
+            "energy": 0.76,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "迷路日々",
+            "url": "https://youtu.be/d0E91J6UHSw",
+            "x": 14.16,
+            "y": 8.89,
+            "bpm": 129.2,
+            "energy": 0.976,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "無路矢",
+            "url": "https://youtu.be/b3Rapr2kUTM",
+            "x": -10.69,
+            "y": -13.52,
+            "bpm": 117.5,
+            "energy": 0.995,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "名無声",
+            "url": "https://youtu.be/DEyXwtinmfs",
+            "x": 14.38,
+            "y": 16.29,
+            "bpm": 129.2,
+            "energy": 0.954,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "栞",
+            "url": "https://youtu.be/SgJFZEI6GSw",
+            "x": -50.41,
+            "y": 58.06,
+            "bpm": 89.1,
+            "energy": 0.907,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "歩拾道",
+            "url": "https://youtu.be/EEeYU4-dhZk",
+            "x": 4.63,
+            "y": -20.23,
+            "bpm": 129.2,
+            "energy": 0.967,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "明弦音",
+            "url": "https://youtu.be/6sJ7vXe_oMU",
+            "x": 15.12,
+            "y": 13.22,
+            "bpm": 123.0,
+            "energy": 0.997,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "孤壊牢",
+            "url": "https://youtu.be/x56aIq5BDQU",
+            "x": 34.66,
+            "y": -25.2,
+            "bpm": 123.0,
+            "energy": 0.985,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "霧周途",
+            "url": "https://youtu.be/qJPXncScNA4",
+            "x": 26.02,
+            "y": -8.38,
+            "bpm": 112.3,
+            "energy": 0.991,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "端程山",
+            "url": "https://youtu.be/2gRiKJ6zxRg",
+            "x": 20.28,
+            "y": 0.87,
+            "bpm": 123.0,
+            "energy": 0.986,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "処救生",
+            "url": "https://youtu.be/Z2OLVzWFaY0",
+            "x": 14.57,
+            "y": 1.28,
+            "bpm": 129.2,
+            "energy": 1.0,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "輪符雨",
+            "url": "https://youtu.be/5qaDNLKfu3o",
+            "x": 2.79,
+            "y": 3.15,
+            "bpm": 103.4,
+            "energy": 0.998,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "夜隠染",
+            "url": "https://youtu.be/szlxFGtNCs0",
+            "x": 5.67,
+            "y": 36.12,
+            "bpm": 112.3,
+            "energy": 0.961,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "過惰幻",
+            "url": "https://youtu.be/aggmsIQMR4I",
+            "x": -70.0,
+            "y": 53.23,
+            "bpm": 112.3,
+            "energy": 0.419,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "回層浮",
+            "url": "https://youtu.be/ZPB6sJ0ehOI",
+            "x": 17.57,
+            "y": 11.28,
+            "bpm": 129.2,
+            "energy": 0.951,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "砂寸奏",
+            "url": "https://youtu.be/ydoFJ2s-kDA",
+            "x": 35.79,
+            "y": -16.71,
+            "bpm": 123.0,
+            "energy": 0.962,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "焚音打",
+            "url": "https://youtu.be/meUaiXnSeGY",
+            "x": 32.88,
+            "y": 11.03,
+            "bpm": 129.2,
+            "energy": 0.988,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "残痕字",
+            "url": "https://youtu.be/lfDO7bvUtn8",
+            "x": 16.64,
+            "y": 26.96,
+            "bpm": 117.5,
+            "energy": 0.971,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "掌心正銘",
+            "url": "https://youtu.be/Aww91itH5cQ",
+            "x": 20.31,
+            "y": 35.53,
+            "bpm": 123.0,
+            "energy": 0.958,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "証命讃歌",
+            "url": "https://youtu.be/I5s3q-_HCSk",
+            "x": 30.24,
+            "y": -2.29,
+            "bpm": 103.4,
+            "energy": 0.965,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "エガクミライ",
+            "url": "https://youtu.be/T_jH9KJTlsI",
+            "x": -57.21,
+            "y": 38.67,
+            "bpm": 89.1,
+            "energy": 0.81,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "静降想",
+            "url": "https://youtu.be/OdVHJhdFYOo",
+            "x": -2.66,
+            "y": 35.86,
+            "bpm": 95.7,
+            "energy": 0.918,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "聿日箋秋",
+            "url": "https://youtu.be/dKPye_tGXFM",
+            "x": 9.63,
+            "y": 41.69,
+            "bpm": 123.0,
+            "energy": 0.979,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "往欄印",
+            "url": "https://youtu.be/ypcMuQhWdZA",
+            "x": 27.98,
+            "y": 21.81,
+            "bpm": 117.5,
+            "energy": 0.994,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "だれかの心臓になれたなら (Cover)",
+            "url": "https://youtu.be/QOGVaoFOeuw",
+            "x": 4.86,
+            "y": 10.19,
+            "bpm": 143.6,
+            "energy": 0.463,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "遥か彼方 (Cover)",
+            "url": "https://youtu.be/rKyU_gxye30",
+            "x": -0.65,
+            "y": 29.99,
+            "bpm": 117.5,
+            "energy": 0.719,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "雑踏、僕らの街 (Cover)",
+            "url": "https://youtu.be/9fH4DBvi5pE",
+            "x": 16.15,
+            "y": -35.89,
+            "bpm": 112.3,
+            "energy": 0.666,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mygo",
+            "song": "過去を喰らう (Cover)",
+            "url": "https://youtu.be/ZwDx3We2qL8",
+            "x": 16.02,
+            "y": 39.23,
+            "bpm": 123.0,
+            "energy": 0.947,
+            "shape": "neutral"
+        },
+        {
+            "band": "mygo",
+            "song": "君の神様になりたい。 (Cover)",
+            "url": "https://youtu.be/NOo87S0ABXQ",
+            "x": 30.89,
+            "y": 4.18,
+            "bpm": 99.4,
+            "energy": 0.97,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "ノンブレス・オブリージュ (Cover)",
+            "url": "https://youtu.be/cdVOlppDwFo",
+            "x": -1.97,
+            "y": 18.71,
+            "bpm": 143.6,
+            "energy": 0.765,
+            "shape": "shimmer"
+        },
+        {
+            "band": "mygo",
+            "song": "swim (Cover)",
+            "url": "https://youtu.be/YcBvpV_CzuU",
+            "x": 22.1,
+            "y": 19.82,
+            "bpm": 129.2,
+            "energy": 0.992,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "猛独が襲う (Cover)",
+            "url": "https://youtu.be/DHxVK6DGqxk",
+            "x": 12.6,
+            "y": 13.74,
+            "bpm": 152.0,
+            "energy": 0.989,
+            "shape": "acoustic"
+        },
+        {
+            "band": "mygo",
+            "song": "春日影",
+            "url": "https://youtu.be/wRwQUk0Dl30",
+            "x": -43.78,
+            "y": 63.03,
+            "bpm": 95.7,
+            "energy": 0.0,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "TITLE IDOL",
+            "url": "https://youtu.be/DYcKUe6QYtQ",
+            "x": -24.32,
+            "y": 13.72,
+            "bpm": 143.6,
+            "energy": 0.369,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ワクワクmeetsトリップ",
+            "url": "https://youtu.be/2tsI2LPugWE",
+            "x": 10.04,
+            "y": 12.79,
+            "bpm": 136.0,
+            "energy": 0.211,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ゆら・ゆらRing-Dong-Dance",
+            "url": "https://youtu.be/IYi3pLHGEo0",
+            "x": -3.99,
+            "y": 13.87,
+            "bpm": 112.3,
+            "energy": 0.061,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "もういちど ルミナス",
+            "url": "https://youtu.be/674OQz-V6b0",
+            "x": -3.73,
+            "y": 28.48,
+            "bpm": 112.3,
+            "energy": 0.326,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "あっつあつ 常夏 らぶ☆サマー！",
+            "url": "https://youtu.be/F2XgwwQFcvs",
+            "x": -3.62,
+            "y": 28.7,
+            "bpm": 112.3,
+            "energy": 0.564,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "天下トーイツ A to Z☆",
+            "url": "https://youtu.be/rL-CITfYnV8",
+            "x": 11.95,
+            "y": 14.96,
+            "bpm": 152.0,
+            "energy": 0.311,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "しゅわりん☆どり〜みん",
+            "url": "https://youtu.be/9s_GFDvfUTI",
+            "x": -4.74,
+            "y": 19.43,
+            "bpm": 117.5,
+            "energy": 0.065,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Power of LOVE!!!",
+            "url": "https://youtu.be/zTJjAOvwhgo",
+            "x": -21.68,
+            "y": -7.28,
+            "bpm": 117.5,
+            "energy": 0.405,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "きゅ～まい＊flower",
+            "url": "https://youtu.be/_Y2me3JTTd4",
+            "x": -3.4,
+            "y": 4.83,
+            "bpm": 123.0,
+            "energy": 0.404,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Winking☆Cheer",
+            "url": "https://youtu.be/jDHsMU5ZFR0",
+            "x": -30.25,
+            "y": 51.69,
+            "bpm": 99.4,
+            "energy": 0.09,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ゆめゆめグラデーション",
+            "url": "https://youtu.be/p5ta20-h8vU",
+            "x": -10.2,
+            "y": 33.66,
+            "bpm": 136.0,
+            "energy": 0.238,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "はなまる◎アンダンテ",
+            "url": "https://youtu.be/QKpgJFE3CgM",
+            "x": -29.38,
+            "y": -28.16,
+            "bpm": 112.3,
+            "energy": 0.241,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "パスパレボリューションず☆",
+            "url": "https://youtu.be/02-G0MAcdmc",
+            "x": -6.73,
+            "y": -4.76,
+            "bpm": 117.5,
+            "energy": 0.555,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "SURVIVOR ねばーぎぶあっぷ!",
+            "url": "https://youtu.be/5emw7-6FnvE",
+            "x": 13.56,
+            "y": -3.62,
+            "bpm": 99.4,
+            "energy": 0.608,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Wonderland Girl",
+            "url": "https://youtu.be/i_pkiVx3dWo",
+            "x": 8.55,
+            "y": -11.38,
+            "bpm": 136.0,
+            "energy": 0.36,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ゼッタイ宣言～Recital～",
+            "url": "https://youtu.be/LoW3xxuewLc",
+            "x": 1.32,
+            "y": 21.36,
+            "bpm": 117.5,
+            "energy": 0.208,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ぎゅっDAYS♪",
+            "url": "https://youtu.be/Aihl3YY6wFw",
+            "x": 12.89,
+            "y": 52.6,
+            "bpm": 112.3,
+            "energy": 0.29,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Wonderful Sweet!",
+            "url": "https://youtu.be/oMtLVZ4z9wM",
+            "x": 16.18,
+            "y": 5.38,
+            "bpm": 112.3,
+            "energy": 0.633,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "るんっ♪てぃてぃー！",
+            "url": "https://youtu.be/pOhredaA3bY",
+            "x": 15.98,
+            "y": 11.88,
+            "bpm": 161.5,
+            "energy": 0.781,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "パッパレ☆人生！バーン万歳！",
+            "url": "https://youtu.be/AqU8cxKLmN0",
+            "x": 33.32,
+            "y": -23.96,
+            "bpm": 112.3,
+            "energy": 0.411,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Brand new Pastel Road!",
+            "url": "https://youtu.be/BDy7oYorJzw",
+            "x": 11.26,
+            "y": 45.26,
+            "bpm": 112.3,
+            "energy": 0.281,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "あこがれacross",
+            "url": "https://youtu.be/UbKbTPzYNOI",
+            "x": -9.85,
+            "y": 29.69,
+            "bpm": 95.7,
+            "energy": 0.554,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ハレハレ☆フォーチュン",
+            "url": "https://youtu.be/iKRoKPyOXlQ",
+            "x": -16.8,
+            "y": 0.2,
+            "bpm": 143.6,
+            "energy": 0.205,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ハナヒバナ",
+            "url": "https://youtu.be/mzgnly7MnCA",
+            "x": -38.9,
+            "y": 45.91,
+            "bpm": 95.7,
+            "energy": 0.12,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "そばかす",
+            "url": "https://youtu.be/jSvmpgJLlR4",
+            "x": -11.93,
+            "y": 26.09,
+            "bpm": 172.3,
+            "energy": 0.52,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "気まぐれロマンティック",
+            "url": "https://youtu.be/Awn0evP-X4k",
+            "x": -12.88,
+            "y": 36.55,
+            "bpm": 112.3,
+            "energy": 0.439,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ドリームパレード",
+            "url": "https://youtu.be/TOIuxE3mMcI",
+            "x": 13.86,
+            "y": 22.23,
+            "bpm": 112.3,
+            "energy": 0.621,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ラムのラブソング",
+            "url": "https://youtu.be/BnlwHfHBafM",
+            "x": -24.96,
+            "y": 14.72,
+            "bpm": 117.5,
+            "energy": 0.08,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "DANCE! おジャ魔女",
+            "url": "https://youtu.be/VkLZPuTArN4",
+            "x": 17.78,
+            "y": -2.83,
+            "bpm": 152.0,
+            "energy": 0.531,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "DISCOTHEQUE",
+            "url": "https://youtu.be/OK782ls3yH8",
+            "x": -7.77,
+            "y": 3.63,
+            "bpm": 143.6,
+            "energy": 0.188,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ゆりゆららららゆるゆり大事件",
+            "url": "https://youtu.be/pSH0gYedUEg",
+            "x": -24.3,
+            "y": 13.7,
+            "bpm": 117.5,
+            "energy": 0.627,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "SAKURAスキップ",
+            "url": "https://youtu.be/DxUyKQwPeWU",
+            "x": 19.71,
+            "y": 50.11,
+            "bpm": 112.3,
+            "energy": 0.437,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Stay Alive",
+            "url": "https://youtu.be/cC9iaoSJLqw",
+            "x": -54.79,
+            "y": 46.14,
+            "bpm": 143.6,
+            "energy": 0.194,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "秘密の扉から会いにきて",
+            "url": "https://youtu.be/Vfk4MdZKBn4",
+            "x": 15.05,
+            "y": 31.35,
+            "bpm": 123.0,
+            "energy": 0.534,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "トリドリ＊パレット",
+            "url": "https://youtu.be/bhbqZAY_TEk",
+            "x": 10.99,
+            "y": 3.89,
+            "bpm": 117.5,
+            "energy": 0.863,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ドラマチック！アライブ",
+            "url": "https://youtu.be/ppjwpt0H2o4",
+            "x": 12.38,
+            "y": -36.66,
+            "bpm": 123.0,
+            "energy": 0.619,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Radiate Warriors",
+            "url": "https://youtu.be/dS-SUwftzmM",
+            "x": 27.09,
+            "y": -12.8,
+            "bpm": 129.2,
+            "energy": 0.269,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ReReReエボリューションず☆",
+            "url": "https://youtu.be/4XSLFAmgO34",
+            "x": -21.43,
+            "y": 24.59,
+            "bpm": 123.0,
+            "energy": 0.748,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "everyday flower",
+            "url": "https://youtu.be/zEHPkLXcX1I",
+            "x": -43.34,
+            "y": 42.71,
+            "bpm": 136.0,
+            "energy": 0.727,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "With〜きみとわたしたちの物語〜",
+            "url": "https://youtu.be/zjMWXcNc8Uw",
+            "x": -14.39,
+            "y": 22.18,
+            "bpm": 92.3,
+            "energy": 0.516,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "フレっとパレットFight Song!!",
+            "url": "https://youtu.be/ZvK22__1ECE",
+            "x": -9.9,
+            "y": 17.09,
+            "bpm": 143.6,
+            "energy": 0.819,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "デイオフ・ラフ・ラブ・サンクス",
+            "url": "https://youtu.be/M4asKbF6F18",
+            "x": -18.59,
+            "y": 12.51,
+            "bpm": 136.0,
+            "energy": 0.533,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ホワイト ノスタルジア",
+            "url": "https://youtu.be/oN98BBBIOnw",
+            "x": -25.15,
+            "y": -20.17,
+            "bpm": 136.0,
+            "energy": 0.303,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Y.O.L.O！！！！！(パスパレver.)",
+            "url": "https://youtu.be/yKkCyuTOi8Q",
+            "x": -8.67,
+            "y": -14.18,
+            "bpm": 103.4,
+            "energy": 0.689,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "奏（かなで） (Cover)",
+            "url": "https://youtu.be/7ivdiNcTRmA",
+            "x": -70.0,
+            "y": 45.3,
+            "bpm": 152.0,
+            "energy": 0.017,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Sparkling Daydream (Cover)",
+            "url": "https://youtu.be/cWaspJSp51g",
+            "x": -0.5,
+            "y": 0.34,
+            "bpm": 117.5,
+            "energy": 0.492,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "春を告げる (Cover)",
+            "url": "https://youtu.be/Kz_bl2WNEag",
+            "x": -24.5,
+            "y": 8.92,
+            "bpm": 117.5,
+            "energy": 0.023,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "だから、ひとりじゃない (Cover)",
+            "url": "https://youtu.be/RxB9vL3xGts",
+            "x": -27.79,
+            "y": 56.74,
+            "bpm": 89.1,
+            "energy": 0.472,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "サインはB (Cover)",
+            "url": "https://youtu.be/pe-Hf4LBNu4",
+            "x": 10.88,
+            "y": 12.38,
+            "bpm": 117.5,
+            "energy": 0.545,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "愛包ダンスホール (Cover)",
+            "url": "https://youtu.be/qvnhTZ8Tt6Y",
+            "x": 23.21,
+            "y": -4.97,
+            "bpm": 143.6,
+            "energy": 0.416,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "最上級にかわいいの！ (Cover)",
+            "url": "https://youtu.be/e8vNIMfYZ5Q",
+            "x": 3.45,
+            "y": 18.68,
+            "bpm": 112.3,
+            "energy": 0.868,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "♡桃色片想い♡ (Cover)",
+            "url": "https://youtu.be/wYKNiQ89D2c",
+            "x": -4.2,
+            "y": 27.84,
+            "bpm": 152.0,
+            "energy": 0.684,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "金曜日のおはよう (Cover)",
+            "url": "https://youtu.be/Yuy49UdKUDk",
+            "x": -14.17,
+            "y": 29.35,
+            "bpm": 152.0,
+            "energy": 0.332,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "魔法少女とチョコレゐト (Cover)",
+            "url": "https://youtu.be/1TkdhB2WsRs",
+            "x": -8.45,
+            "y": 6.67,
+            "bpm": 152.0,
+            "energy": 0.64,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "可愛くてごめん (Cover)",
+            "url": "https://youtu.be/rUHSBpc0bII",
+            "x": -18.11,
+            "y": 43.93,
+            "bpm": 161.5,
+            "energy": 0.285,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "からくりピエロ (Cover)",
+            "url": "https://youtu.be/l-fkEvCQmPY",
+            "x": -17.14,
+            "y": 0.9,
+            "bpm": 103.4,
+            "energy": 0.027,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "みくみくにしてあげる♪【してやんよ】 (Cover)",
+            "url": "https://youtu.be/LwR74MCem6w",
+            "x": 15.9,
+            "y": 26.55,
+            "bpm": 107.7,
+            "energy": 0.153,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ルカルカ★ナイトフィーバー (Cover)",
+            "url": "https://youtu.be/9xwqyx5ctOo",
+            "x": 11.26,
+            "y": -29.98,
+            "bpm": 161.5,
+            "energy": 0.253,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "アイドル (Cover)",
+            "url": "https://youtu.be/cJBTmzjJzU8",
+            "x": 15.81,
+            "y": -9.87,
+            "bpm": 161.5,
+            "energy": 0.807,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "secret base ～君がくれたもの～ (Cover)",
+            "url": "https://youtu.be/itCnoApRdqU",
+            "x": -70.0,
+            "y": 28.05,
+            "bpm": 143.6,
+            "energy": 0.026,
+            "shape": "acoustic"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ふわふわ時間 (Cover)",
+            "url": "https://youtu.be/dLeFvw9vy3o",
+            "x": 12.62,
+            "y": 40.54,
+            "bpm": 89.1,
+            "energy": 0.115,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Fantastic future (Cover)",
+            "url": "https://youtu.be/6Io8ctmS0YY",
+            "x": -3.21,
+            "y": 10.44,
+            "bpm": 112.3,
+            "energy": 0.044,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Baby Sweet Berry Love (Cover)",
+            "url": "https://youtu.be/OOd6NXBYo3k",
+            "x": -25.16,
+            "y": 23.66,
+            "bpm": 112.3,
+            "energy": 0.235,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Q＆A　リサイタル！ (Cover)",
+            "url": "https://youtu.be/UdKKTRtfxjg",
+            "x": 2.57,
+            "y": 43.74,
+            "bpm": 123.0,
+            "energy": 0.129,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ヒトリゴト (Cover)",
+            "url": "https://youtu.be/v5LyeEX1YV0",
+            "x": -9.3,
+            "y": -7.27,
+            "bpm": 161.5,
+            "energy": 0.322,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "惑星ループ (Cover)",
+            "url": "https://youtu.be/myK79DvRm3o",
+            "x": 6.02,
+            "y": -15.23,
+            "bpm": 172.3,
+            "energy": 0.305,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "世界は恋に落ちている (Cover)",
+            "url": "https://youtu.be/5EWO1vDl0tc",
+            "x": -23.37,
+            "y": 47.71,
+            "bpm": 129.2,
+            "energy": 0.055,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ハッピーシンセサイザ (Cover)",
+            "url": "https://youtu.be/AD3WCMhAGVs",
+            "x": 9.15,
+            "y": 12.22,
+            "bpm": 129.2,
+            "energy": 0.068,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "春擬き (Cover)",
+            "url": "https://youtu.be/LuBJ_pjwIXk",
+            "x": -18.91,
+            "y": 20.93,
+            "bpm": 117.5,
+            "energy": 0.563,
+            "shape": "neutral"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "Make it! (Cover)",
+            "url": "https://youtu.be/l0RnmsJuvfo",
+            "x": -1.43,
+            "y": 16.33,
+            "bpm": 112.3,
+            "energy": 0.786,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "花ハ踊レヤいろはにほ (Cover)",
+            "url": "https://youtu.be/ZoMwONgrN_E",
+            "x": -5.01,
+            "y": 3.44,
+            "bpm": 161.5,
+            "energy": 0.455,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "夜に駆ける (Cover)",
+            "url": "https://youtu.be/qr_jUCTw_T0",
+            "x": -47.31,
+            "y": -3.41,
+            "bpm": 129.2,
+            "energy": 0.568,
+            "shape": "shimmer"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "徒花ネクロマンシー (Cover)",
+            "url": "https://youtu.be/_G5oGC6aJYs",
+            "x": -0.82,
+            "y": 38.64,
+            "bpm": 112.3,
+            "energy": 0.423,
+            "shape": "bright"
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "ノスタルジックレインフォール (Cover)",
+            "url": "https://youtu.be/i-jiHiL7G8s",
+            "x": -37.81,
+            "y": 56.07,
+            "bpm": 112.3,
+            "energy": 0.127,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Yes! BanG_Dream!",
+            "url": "https://youtu.be/tBSpLDIqbHc",
+            "x": 10.53,
+            "y": 10.85,
+            "bpm": 123.0,
+            "energy": 0.079,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "STAR BEAT!～ホシノコドウ～",
+            "url": "https://youtu.be/RtKwXh18gkc",
+            "x": -1.89,
+            "y": 57.88,
+            "bpm": 129.2,
+            "energy": 0.605,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "走り始めたばかりのキミに",
+            "url": "https://youtu.be/pBKo-SAbtcM",
+            "x": -2.89,
+            "y": -10.79,
+            "bpm": 123.0,
+            "energy": 0.168,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ティアドロップス",
+            "url": "https://youtu.be/lOE3DB6Ur4A",
+            "x": 28.98,
+            "y": -19.21,
+            "bpm": 129.2,
+            "energy": 0.316,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ときめきエクスペリエンス！",
+            "url": "https://youtu.be/OqN-TbVubpA",
+            "x": 14.12,
+            "y": 1.2,
+            "bpm": 117.5,
+            "energy": 0.373,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "キラキラだとか夢だとか ～Sing Girls～",
+            "url": "https://youtu.be/4YrfrDTabQk",
+            "x": 5.35,
+            "y": 27.03,
+            "bpm": 117.5,
+            "energy": 0.428,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "私の心はチョココロネ",
+            "url": "https://youtu.be/ZnaBCQTeHYI",
+            "x": -16.18,
+            "y": 13.16,
+            "bpm": 136.0,
+            "energy": 0.149,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "前へススメ！",
+            "url": "https://youtu.be/3ugLz4FMdeI",
+            "x": -8.89,
+            "y": 19.54,
+            "bpm": 123.0,
+            "energy": 0.399,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "夢みるSunflower",
+            "url": "https://youtu.be/yQ0ebf3C1zM",
+            "x": 3.73,
+            "y": 27.87,
+            "bpm": 107.7,
+            "energy": 0.214,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ティアドロップス ～Popipa Acoustic Ver.～",
+            "url": "https://youtu.be/Eq0Mo7Ca02I",
+            "x": -46.29,
+            "y": -19.53,
+            "bpm": 123.0,
+            "energy": 0.041,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "走り始めたばかりのキミに ～Popipa Acoustic Ver.～",
+            "url": "https://youtu.be/PZlcgbhP8PY",
+            "x": -70.0,
+            "y": -6.22,
+            "bpm": 107.7,
+            "energy": 0.008,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Time Lapse",
+            "url": "https://youtu.be/ap3LhZJvbiw",
+            "x": 14.62,
+            "y": -13.93,
+            "bpm": 95.7,
+            "energy": 0.146,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "八月のif",
+            "url": "https://youtu.be/y_wsqM33BaY",
+            "x": -40.02,
+            "y": 61.32,
+            "bpm": 117.5,
+            "energy": 0.196,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "クリスマスのうた",
+            "url": "https://youtu.be/EMwYk4qPK1k",
+            "x": -3.77,
+            "y": 54.95,
+            "bpm": 136.0,
+            "energy": 0.197,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "B.O.F",
+            "url": "https://youtu.be/dW25FkbQC58",
+            "x": 5.93,
+            "y": 49.01,
+            "bpm": 117.5,
+            "energy": 0.487,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "CiRCLING",
+            "url": "https://youtu.be/Zj4qzqS--UY",
+            "x": 5.39,
+            "y": 43.29,
+            "bpm": 107.7,
+            "energy": 0.364,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "二重の虹(ダブル レインボウ)",
+            "url": "https://youtu.be/sNaJuqFB-_g",
+            "x": 0.32,
+            "y": 32.91,
+            "bpm": 95.7,
+            "energy": 0.252,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "最高(さあ行こう)！",
+            "url": "https://youtu.be/w5jX2B8W6l8",
+            "x": 14.88,
+            "y": -10.7,
+            "bpm": 123.0,
+            "energy": 0.378,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ガールズコード",
+            "url": "https://youtu.be/94djfHnNylA",
+            "x": -7.91,
+            "y": 27.88,
+            "bpm": 123.0,
+            "energy": 0.795,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Yes! BanG_Dream! ～Popipa Acoustic Ver.～",
+            "url": "https://youtu.be/ZHrWJfxYKOQ",
+            "x": -47.03,
+            "y": 25.25,
+            "bpm": 112.3,
+            "energy": 0.056,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "夏空 SUN! SUN! SEVEN! ～Popipa Acoustic Ver.～",
+            "url": "https://youtu.be/aWzYylwrlNU",
+            "x": -43.69,
+            "y": -21.77,
+            "bpm": 161.5,
+            "energy": 0.02,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "STAR BEAT!～ホシノコドウ～ ～Popipa Acoustic Ver.～",
+            "url": "https://youtu.be/kj5orLd_XnA",
+            "x": -70.0,
+            "y": 18.57,
+            "bpm": 89.1,
+            "energy": 0.006,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Breakthrough!",
+            "url": "https://youtu.be/jL9BEY5Lt7Q",
+            "x": -11.36,
+            "y": 24.95,
+            "bpm": 123.0,
+            "energy": 0.507,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "NO GIRL NO CRY/Poppin'Party Ver.",
+            "url": "https://youtu.be/D1ONxAWcbGE",
+            "x": 15.05,
+            "y": 40.87,
+            "bpm": 129.2,
+            "energy": 0.734,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "イニシャル",
+            "url": "https://youtu.be/Yb9FzUPpk0Y",
+            "x": 16.31,
+            "y": 5.22,
+            "bpm": 129.2,
+            "energy": 0.387,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Hello! Wink!",
+            "url": "https://youtu.be/BduVH7BZj2k",
+            "x": 42.4,
+            "y": -20.18,
+            "bpm": 152.0,
+            "energy": 0.294,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Step×Step!",
+            "url": "https://youtu.be/yJSDaYtRGto",
+            "x": -18.79,
+            "y": 46.23,
+            "bpm": 143.6,
+            "energy": 0.181,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Jumpin'",
+            "url": "https://youtu.be/SIF5yp2lNqA",
+            "x": -18.33,
+            "y": 36.38,
+            "bpm": 99.4,
+            "energy": 0.524,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "White Afternoon",
+            "url": "https://youtu.be/Q7Y-vskuNVQ",
+            "x": -23.31,
+            "y": 54.46,
+            "bpm": 143.6,
+            "energy": 0.247,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "キラキラスター！",
+            "url": "https://youtu.be/idH2KGN0C4A",
+            "x": -4.16,
+            "y": -11.1,
+            "bpm": 152.0,
+            "energy": 0.501,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Returns",
+            "url": "https://youtu.be/zWKV5yudE18",
+            "x": -33.58,
+            "y": 19.89,
+            "bpm": 92.3,
+            "energy": 0.237,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Dreamers Go!",
+            "url": "https://youtu.be/VigNV3bsE_k",
+            "x": -4.01,
+            "y": -0.6,
+            "bpm": 123.0,
+            "energy": 0.408,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "キズナミュージック♪",
+            "url": "https://youtu.be/rvKC_BDWo0o",
+            "x": -3.57,
+            "y": 16.93,
+            "bpm": 95.7,
+            "energy": 0.561,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ミライトレイン",
+            "url": "https://youtu.be/amlyxSdWmTg",
+            "x": -3.89,
+            "y": 53.37,
+            "bpm": 117.5,
+            "energy": 0.379,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "夢を撃ち抜く瞬間に！",
+            "url": "https://youtu.be/Y8-nQ9ehgZE",
+            "x": -6.75,
+            "y": 46.27,
+            "bpm": 103.4,
+            "energy": 0.713,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ぽっぴん'しゃっふる",
+            "url": "https://youtu.be/FNpk2rkmT_U",
+            "x": 15.09,
+            "y": 21.81,
+            "bpm": 112.3,
+            "energy": 0.643,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "夏空 SUN! SUN! SEVEN!",
+            "url": "https://youtu.be/AwmICsVBWLU",
+            "x": 34.25,
+            "y": 11.98,
+            "bpm": 89.1,
+            "energy": 0.825,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "1000回潤んだ空",
+            "url": "https://youtu.be/b-ZAiNOYtE0",
+            "x": -50.23,
+            "y": 20.55,
+            "bpm": 123.0,
+            "energy": 0.088,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "HAPPY HAPPY PARTY!",
+            "url": "https://youtu.be/c0brvCZdxeg",
+            "x": 5.42,
+            "y": 1.79,
+            "bpm": 136.0,
+            "energy": 0.551,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "夏のドーン！",
+            "url": "https://youtu.be/xtgdECulbbw",
+            "x": 17.9,
+            "y": -1.32,
+            "bpm": 107.7,
+            "energy": 0.212,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "キミにもらったもの",
+            "url": "https://youtu.be/gu85qKfXfj8",
+            "x": -70.0,
+            "y": 55.2,
+            "bpm": 143.6,
+            "energy": 0.012,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Light Delight",
+            "url": "https://youtu.be/ycVVqPjxPqk",
+            "x": -37.17,
+            "y": 44.48,
+            "bpm": 117.5,
+            "energy": 0.372,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "切ないSandglass",
+            "url": "https://youtu.be/W_W3LnZJApA",
+            "x": -16.36,
+            "y": 31.95,
+            "bpm": 92.3,
+            "energy": 0.505,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Home Street",
+            "url": "https://youtu.be/_n8qGOBD0J8",
+            "x": -10.18,
+            "y": 38.81,
+            "bpm": 103.4,
+            "energy": 0.384,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "What's the POPIPA!?",
+            "url": "https://youtu.be/pX8lWO_Jwv4",
+            "x": 34.02,
+            "y": 18.32,
+            "bpm": 123.0,
+            "energy": 0.61,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "SAKURA MEMORIES",
+            "url": "https://youtu.be/lQF_5FOrl7k",
+            "x": -31.28,
+            "y": 35.29,
+            "bpm": 117.5,
+            "energy": 0.1,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "アニバーサリー",
+            "url": "https://youtu.be/0TYq4xK3G8g",
+            "x": -0.09,
+            "y": 37.32,
+            "bpm": 112.3,
+            "energy": 0.681,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Tomorrow's Door",
+            "url": "https://youtu.be/j7o8KLDowG8",
+            "x": 12.26,
+            "y": 42.88,
+            "bpm": 117.5,
+            "energy": 0.877,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "イントロダクション",
+            "url": "https://youtu.be/KfuOq4v5H_A",
+            "x": 7.48,
+            "y": -0.87,
+            "bpm": 112.3,
+            "energy": 0.338,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "TARINAI",
+            "url": "https://youtu.be/aIaSbIpxXb8",
+            "x": 24.53,
+            "y": -12.77,
+            "bpm": 129.2,
+            "energy": 0.715,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "DOKI DOKI SCARY",
+            "url": "https://youtu.be/T6a3TbucVIk",
+            "x": 13.07,
+            "y": -28.06,
+            "bpm": 143.6,
+            "energy": 0.912,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Photograph",
+            "url": "https://youtu.be/jLWs8qcXF7o",
+            "x": -15.16,
+            "y": 39.96,
+            "bpm": 152.0,
+            "energy": 0.517,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "夏に閉じこめて",
+            "url": "https://youtu.be/02n9fIuuew8",
+            "x": -6.18,
+            "y": 55.13,
+            "bpm": 95.7,
+            "energy": 0.357,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ぽっぴん'どりーむ！",
+            "url": "https://youtu.be/-ISFvqdfTHo",
+            "x": 11.5,
+            "y": 14.48,
+            "bpm": 99.4,
+            "energy": 0.762,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "星の約束",
+            "url": "https://youtu.be/fa9khQQc5HE",
+            "x": -2.54,
+            "y": 9.79,
+            "bpm": 117.5,
+            "energy": 0.772,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "新しい季節に",
+            "url": "https://youtu.be/bqKoweXOY1I",
+            "x": -14.48,
+            "y": 53.86,
+            "bpm": 123.0,
+            "energy": 0.651,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "トレモロアイズ",
+            "url": "https://youtu.be/lsRTa_4Q9iU",
+            "x": 4.18,
+            "y": 46.48,
+            "bpm": 112.3,
+            "energy": 0.803,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "雨上がり、キミと",
+            "url": "https://youtu.be/6PWbcFhH1sc",
+            "x": 3.32,
+            "y": 46.93,
+            "bpm": 123.0,
+            "energy": 0.959,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "花咲く未来に",
+            "url": "https://youtu.be/rTVN1M1DNx8",
+            "x": 3.27,
+            "y": -7.21,
+            "bpm": 136.0,
+            "energy": 0.932,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Live Beyond!!",
+            "url": "https://youtu.be/BQ417cl8-iE",
+            "x": 1.16,
+            "y": 29.49,
+            "bpm": 95.7,
+            "energy": 0.483,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Sweets BAN!",
+            "url": "https://youtu.be/_Zbm5jidUmM",
+            "x": 19.9,
+            "y": -15.42,
+            "bpm": 152.0,
+            "energy": 0.319,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "キミが始まる！",
+            "url": "https://youtu.be/tjFia-3Se94",
+            "x": 4.09,
+            "y": -12.03,
+            "bpm": 117.5,
+            "energy": 0.32,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Moonlight Walk",
+            "url": "https://youtu.be/Ie0-J4-CMk4",
+            "x": 22.57,
+            "y": -14.89,
+            "bpm": 95.7,
+            "energy": 0.273,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ここから先は歌にならない",
+            "url": "https://youtu.be/YfSxTmBzz9k",
+            "x": 14.72,
+            "y": 39.85,
+            "bpm": 95.7,
+            "energy": 0.131,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "青春 To Be Continued",
+            "url": "https://youtu.be/inyz9fpWPT0",
+            "x": 18.66,
+            "y": 21.22,
+            "bpm": 136.0,
+            "energy": 0.866,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Future Place",
+            "url": "https://youtu.be/JonvwJvZFv4",
+            "x": 3.92,
+            "y": 51.94,
+            "bpm": 123.0,
+            "energy": 0.886,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "大好き！",
+            "url": "https://youtu.be/NW5DnKrpr8M",
+            "x": -9.56,
+            "y": 30.06,
+            "bpm": 161.5,
+            "energy": 0.854,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Five Letters",
+            "url": "https://youtu.be/-rDKKJcyyTU",
+            "x": -25.15,
+            "y": 48.47,
+            "bpm": 129.2,
+            "energy": 0.493,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "最強☆ソング",
+            "url": "https://youtu.be/pSYXzPMhsPQ",
+            "x": 18.11,
+            "y": 37.36,
+            "bpm": 123.0,
+            "energy": 0.848,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "RiNG A BELL",
+            "url": "https://youtu.be/ai76D_byMgk",
+            "x": 10.69,
+            "y": -33.53,
+            "bpm": 123.0,
+            "energy": 0.873,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Drive Your Heart",
+            "url": "https://youtu.be/3qwN9R7er9Y",
+            "x": 14.72,
+            "y": 54.82,
+            "bpm": 152.0,
+            "energy": 0.927,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "とっておきAnswer",
+            "url": "https://youtu.be/uOdEmtdzblA",
+            "x": 8.2,
+            "y": 64.09,
+            "bpm": 129.2,
+            "energy": 0.891,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "START!! True dreams",
+            "url": "https://youtu.be/SQ_-nPf-SNI",
+            "x": 16.21,
+            "y": 41.19,
+            "bpm": 89.1,
+            "energy": 0.924,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "どきどきデエト",
+            "url": "https://youtu.be/sk7nYFsnLto",
+            "x": 22.27,
+            "y": 44.72,
+            "bpm": 123.0,
+            "energy": 0.83,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "チョコレイトの低音レシピ",
+            "url": "https://youtu.be/pbDiKPBuTsc",
+            "x": -2.92,
+            "y": 32.94,
+            "bpm": 129.2,
+            "energy": 0.123,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Chu Chueen!",
+            "url": "https://youtu.be/5j2a4m1OQsg",
+            "x": 30.37,
+            "y": -33.59,
+            "bpm": 107.7,
+            "energy": 0.851,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "どきどきSING OUT!",
+            "url": "https://youtu.be/Y-tnOBf-byo",
+            "x": 0.9,
+            "y": 47.07,
+            "bpm": 129.2,
+            "energy": 0.395,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Freedom",
+            "url": "https://youtu.be/oy6OCnr9eAg",
+            "x": -21.93,
+            "y": 16.7,
+            "bpm": 107.7,
+            "energy": 0.612,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Game Changer",
+            "url": "https://youtu.be/X7NS0u628lw",
+            "x": 43.68,
+            "y": -9.12,
+            "bpm": 99.4,
+            "energy": 0.583,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "花園電気ギター！！！",
+            "url": "https://youtu.be/Fb6Vxj--Fq4",
+            "x": 10.5,
+            "y": -23.19,
+            "bpm": 95.7,
+            "energy": 0.586,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "す、好きなんかじゃない！",
+            "url": "https://youtu.be/vdYlI5BnvPk",
+            "x": -18.32,
+            "y": -6.54,
+            "bpm": 112.3,
+            "energy": 0.27,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "遠い音楽 ～ハートビート～",
+            "url": "https://youtu.be/jTSPnt5kts0",
+            "x": 1.72,
+            "y": 40.14,
+            "bpm": 112.3,
+            "energy": 0.126,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ほな！",
+            "url": "https://youtu.be/hDgXSuDV51A",
+            "x": 9.6,
+            "y": 26.04,
+            "bpm": 123.0,
+            "energy": 0.833,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "世界中の青空をあつめて",
+            "url": "https://youtu.be/OuCaAYkV2d8",
+            "x": 15.42,
+            "y": 32.69,
+            "bpm": 129.2,
+            "energy": 0.915,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "勇気Limit！",
+            "url": "https://youtu.be/HNpDj7g9Fd0",
+            "x": 19.49,
+            "y": 37.75,
+            "bpm": 112.3,
+            "energy": 0.646,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "開けたらDream!",
+            "url": "https://youtu.be/E7Vac5VF7Qg",
+            "x": 4.97,
+            "y": 6.93,
+            "bpm": 136.0,
+            "energy": 0.445,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "絆色のアンサンブル",
+            "url": "https://youtu.be/tvXmaug8tG8",
+            "x": -3.93,
+            "y": 21.81,
+            "bpm": 123.0,
+            "energy": 0.182,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "NO GIRL NO CRY (Poppin'Party Ver.)",
+            "url": "https://youtu.be/uBLg7gB5FiM",
+            "x": 15.05,
+            "y": 40.87,
+            "bpm": 129.2,
+            "energy": 0.736,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ちゅ、多様性。 (Cover)",
+            "url": "https://youtu.be/DhaNne4oohU",
+            "x": 9.54,
+            "y": 8.26,
+            "bpm": 152.0,
+            "energy": 0.853,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "フィクション (Cover)",
+            "url": "https://youtu.be/NF-IGTDm138",
+            "x": 5.85,
+            "y": 26.87,
+            "bpm": 123.0,
+            "energy": 0.794,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "幾億光年 (Cover)",
+            "url": "https://youtu.be/CHkferCyEUM",
+            "x": -16.57,
+            "y": 20.71,
+            "bpm": 95.7,
+            "energy": 0.91,
+            "shape": "acoustic"
+        },
+        {
+            "band": "poppin_party",
+            "song": "心絵 (Cover)",
+            "url": "https://youtu.be/9FhNnX_qsV0",
+            "x": -32.87,
+            "y": 26.63,
+            "bpm": 95.7,
+            "energy": 0.68,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "じょいふる (Cover)",
+            "url": "https://youtu.be/3bnaYpv-DFU",
+            "x": 29.41,
+            "y": -30.49,
+            "bpm": 161.5,
+            "energy": 0.874,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "MATSURI BAYASHI (Cover)",
+            "url": "https://youtu.be/Gpkg81TpkSA",
+            "x": 15.08,
+            "y": -21.35,
+            "bpm": 152.0,
+            "energy": 0.818,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "私は最強 (Cover)",
+            "url": "https://youtu.be/fRxQcfI2PXo",
+            "x": -8.57,
+            "y": 13.43,
+            "bpm": 95.7,
+            "energy": 0.775,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "トウキョウ・シャンディ・ランデヴ (Cover)",
+            "url": "https://youtu.be/FWdBp0JXxhs",
+            "x": -2.3,
+            "y": -5.24,
+            "bpm": 136.0,
+            "energy": 0.466,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "夜行性ハイズ (Cover)",
+            "url": "https://youtu.be/bAB2ZuwcxFc",
+            "x": 10.38,
+            "y": 5.48,
+            "bpm": 129.2,
+            "energy": 0.167,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "メランコリック (Cover)",
+            "url": "https://youtu.be/7X1NMdaFLiw",
+            "x": -9.33,
+            "y": -4.98,
+            "bpm": 136.0,
+            "energy": 0.258,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "怪獣の花唄 (Cover)",
+            "url": "https://youtu.be/36Q4jzk_IvE",
+            "x": 3.95,
+            "y": 28.43,
+            "bpm": 152.0,
+            "energy": 0.731,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "光るなら (Cover)",
+            "url": "https://youtu.be/tM9njVVTxaQ",
+            "x": -6.87,
+            "y": 5.34,
+            "bpm": 107.7,
+            "energy": 0.407,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ミュージック・アワー (Cover)",
+            "url": "https://youtu.be/dwYnaJHhnmw",
+            "x": 11.61,
+            "y": 22.42,
+            "bpm": 136.0,
+            "energy": 0.48,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "only my railgun (Cover)",
+            "url": "https://youtu.be/MjJX_7wt76A",
+            "x": 15.23,
+            "y": 5.06,
+            "bpm": 143.6,
+            "energy": 0.199,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ロミオとシンデレラ (Cover)",
+            "url": "https://youtu.be/AO5UM_1IIFQ",
+            "x": -7.47,
+            "y": 26.72,
+            "bpm": 112.3,
+            "energy": 0.434,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "Daydream café (Cover)",
+            "url": "https://youtu.be/2uu5rGrlHec",
+            "x": 14.37,
+            "y": -10.52,
+            "bpm": 152.0,
+            "energy": 0.132,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "君じゃなきゃダメみたい (Cover)",
+            "url": "https://youtu.be/o4JpKWTT2rI",
+            "x": 16.98,
+            "y": 1.37,
+            "bpm": 129.2,
+            "energy": 0.323,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "＊〜アスタリスク〜 (Cover)",
+            "url": "https://youtu.be/nAmOOEi3LHc",
+            "x": 5.69,
+            "y": 24.32,
+            "bpm": 129.2,
+            "energy": 0.798,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "DAYS of DASH (Cover)",
+            "url": "https://youtu.be/dGAFk19MN6Q",
+            "x": -15.01,
+            "y": -9.27,
+            "bpm": 107.7,
+            "energy": 0.284,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "檄！帝国華撃団 (Cover)",
+            "url": "https://youtu.be/XtZaRGkRwL4",
+            "x": 11.88,
+            "y": -1.35,
+            "bpm": 143.6,
+            "energy": 0.317,
+            "shape": "bright"
+        },
+        {
+            "band": "poppin_party",
+            "song": "DAYS (Cover)",
+            "url": "https://youtu.be/SJWQwOIdJgY",
+            "x": -7.3,
+            "y": 2.34,
+            "bpm": 136.0,
+            "energy": 0.191,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ディスカバリー！ (Cover)",
+            "url": "https://youtu.be/EHmHYlveZTI",
+            "x": 1.97,
+            "y": 35.22,
+            "bpm": 172.3,
+            "energy": 0.742,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "チェリボム (Cover)",
+            "url": "https://youtu.be/BomRuEmkPsc",
+            "x": 34.02,
+            "y": 6.97,
+            "bpm": 95.7,
+            "energy": 0.85,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "ヴァンパイア (Cover)",
+            "url": "https://youtu.be/I_TIPc02Ros",
+            "x": -0.43,
+            "y": 2.11,
+            "bpm": 161.5,
+            "energy": 0.47,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "怪物 (Cover)",
+            "url": "https://youtu.be/k49-xYTRmyY",
+            "x": 6.08,
+            "y": -20.99,
+            "bpm": 112.3,
+            "energy": 0.425,
+            "shape": "shimmer"
+        },
+        {
+            "band": "poppin_party",
+            "song": "大河よ共に泣いてくれ (Cover)",
+            "url": "https://youtu.be/1ZoP4xnF_J0",
+            "x": 0.48,
+            "y": 0.06,
+            "bpm": 117.5,
+            "energy": 0.314,
+            "shape": "neutral"
+        },
+        {
+            "band": "poppin_party",
+            "song": "空色デイズ (Cover)",
+            "url": "https://youtu.be/Z42iAtQpMNs",
+            "x": 22.24,
+            "y": -6.69,
+            "bpm": 117.5,
+            "energy": 0.557,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Invincible Fighter",
+            "url": "https://youtu.be/m5z-mCUwmxM",
+            "x": 14.14,
+            "y": 10.93,
+            "bpm": 129.2,
+            "energy": 0.165,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "A DECLARATION OF ×××",
+            "url": "https://youtu.be/9iOltuunbvs",
+            "x": 25.42,
+            "y": 3.74,
+            "bpm": 152.0,
+            "energy": 0.259,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "SOUL SOLDIER",
+            "url": "https://youtu.be/vHZF9D4gAoQ",
+            "x": 32.57,
+            "y": -9.59,
+            "bpm": 129.2,
+            "energy": 0.809,
+            "shape": "acoustic"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "UNSTOPPABLE",
+            "url": "https://youtu.be/HTxkTejTs8E",
+            "x": 24.0,
+            "y": 6.1,
+            "bpm": 112.3,
+            "energy": 0.495,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "HELL! or HELL?",
+            "url": "https://youtu.be/xalGIIeyPLo",
+            "x": 22.99,
+            "y": -19.8,
+            "bpm": 129.2,
+            "energy": 0.347,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Beautiful Birthday",
+            "url": "https://youtu.be/AxEUw6LdHR4",
+            "x": 14.33,
+            "y": -12.99,
+            "bpm": 117.5,
+            "energy": 0.451,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Takin’ my Heart",
+            "url": "https://youtu.be/ikck11yNDxg",
+            "x": 11.18,
+            "y": -28.82,
+            "bpm": 123.0,
+            "energy": 0.049,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "DRIVE US CRAZY",
+            "url": "https://youtu.be/5gUl74wG2DE",
+            "x": 19.24,
+            "y": -6.68,
+            "bpm": 136.0,
+            "energy": 0.577,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "!NVADE SHOW!",
+            "url": "https://youtu.be/eLpe02tbeYU",
+            "x": 24.4,
+            "y": 15.07,
+            "bpm": 112.3,
+            "energy": 0.766,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "REIGNING",
+            "url": "https://youtu.be/4i9vGzhaCg0",
+            "x": -3.95,
+            "y": 41.23,
+            "bpm": 123.0,
+            "energy": 0.649,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "EXPOSE ‘Burn out!!!’",
+            "url": "https://youtu.be/oXN2YFZH0ig",
+            "x": 23.92,
+            "y": -31.74,
+            "bpm": 129.2,
+            "energy": 0.537,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "R・I・O・T",
+            "url": "https://youtu.be/JYbew8XnCc8",
+            "x": 28.93,
+            "y": -9.27,
+            "bpm": 136.0,
+            "energy": 0.036,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "V.I.P MONSTER",
+            "url": "https://youtu.be/ci5Ot5n-8_k",
+            "x": 27.75,
+            "y": -7.95,
+            "bpm": 112.3,
+            "energy": 0.525,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "mind of Prominence",
+            "url": "https://youtu.be/CmEGhNuz_zs",
+            "x": 24.55,
+            "y": -16.15,
+            "bpm": 123.0,
+            "energy": 0.745,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Ray of hope",
+            "url": "https://youtu.be/bjHImc6cTqE",
+            "x": 7.05,
+            "y": -23.29,
+            "bpm": 129.2,
+            "energy": 0.219,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "EXIST",
+            "url": "https://youtu.be/Vo3lvsrP9mY",
+            "x": -7.94,
+            "y": 9.17,
+            "bpm": 136.0,
+            "energy": 0.461,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Sacred world",
+            "url": "https://youtu.be/4b3deIpxkSk",
+            "x": 13.73,
+            "y": -10.68,
+            "bpm": 143.6,
+            "energy": 0.832,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "-N-E-M-E-S-I-S-",
+            "url": "https://youtu.be/caxxCfDdklI",
+            "x": 26.25,
+            "y": 8.96,
+            "bpm": 143.6,
+            "energy": 0.659,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "DANCING DARING",
+            "url": "https://youtu.be/cmbqhJ7OM8w",
+            "x": 5.51,
+            "y": -8.94,
+            "bpm": 123.0,
+            "energy": 0.914,
+            "shape": "acoustic"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "BATTLE CRY",
+            "url": "https://youtu.be/pW01z1Q-MQY",
+            "x": 21.93,
+            "y": -14.69,
+            "bpm": 123.0,
+            "energy": 0.839,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Domination to world",
+            "url": "https://youtu.be/41K7ic6HN4E",
+            "x": 26.72,
+            "y": -17.9,
+            "bpm": 136.0,
+            "energy": 0.906,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "THE WAY OF LIFE",
+            "url": "https://youtu.be/W5bmkfq6_Wo",
+            "x": 31.7,
+            "y": -35.33,
+            "bpm": 112.3,
+            "energy": 0.788,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "灼熱 Bonfire!",
+            "url": "https://youtu.be/Uh2MjQ9Q324",
+            "x": 15.68,
+            "y": -16.07,
+            "bpm": 103.4,
+            "energy": 0.885,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Repaint",
+            "url": "https://youtu.be/eJp3_buirj4",
+            "x": 33.06,
+            "y": 3.61,
+            "bpm": 103.4,
+            "energy": 0.334,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Life on the Lotus",
+            "url": "https://youtu.be/zle_8SGQgcg",
+            "x": 22.09,
+            "y": -19.81,
+            "bpm": 136.0,
+            "energy": 0.223,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "CORUSCATE -DNA-",
+            "url": "https://youtu.be/1NgjttSojKw",
+            "x": 24.64,
+            "y": -4.2,
+            "bpm": 143.6,
+            "energy": 0.721,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "That Is How I Roll!",
+            "url": "https://youtu.be/YsdbJl-eg2o",
+            "x": 12.16,
+            "y": -22.95,
+            "bpm": 123.0,
+            "energy": 0.789,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "しゅわりん☆どり～みん",
+            "url": "https://youtu.be/xFat9vDHNJE",
+            "x": 11.21,
+            "y": 16.75,
+            "bpm": 117.5,
+            "energy": 0.052,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "パスパレボリューションず☆",
+            "url": "https://youtu.be/mDKUbNpjzDU",
+            "x": 6.26,
+            "y": -13.04,
+            "bpm": 117.5,
+            "energy": 0.206,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "えがおのオーケストラっ！",
+            "url": "https://youtu.be/Vlp3NkDZh7c",
+            "x": -9.95,
+            "y": 40.49,
+            "bpm": 136.0,
+            "energy": 0.021,
+            "shape": "shimmer"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Don't be afraid!",
+            "url": "https://youtu.be/Wv9HiA6ONbI",
+            "x": 11.62,
+            "y": 1.35,
+            "bpm": 117.5,
+            "energy": 0.024,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "ゆら・ゆらRing-Dong-Dance",
+            "url": "https://youtu.be/j69ZFBRuOlA",
+            "x": 11.25,
+            "y": 21.28,
+            "bpm": 117.5,
+            "energy": 0.25,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Hey-day狂騒曲(カプリチオ)",
+            "url": "https://youtu.be/dQuVrNLZOFM",
+            "x": 24.51,
+            "y": 34.02,
+            "bpm": 107.7,
+            "energy": 0.426,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Scarlet Sky",
+            "url": "https://youtu.be/bRWWFTSHICg",
+            "x": 11.15,
+            "y": 25.61,
+            "bpm": 123.0,
+            "energy": 0.489,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "ゴーカ！ごーかい！？ファントムシーフ！",
+            "url": "https://youtu.be/sooblFkVWdo",
+            "x": 10.58,
+            "y": -25.54,
+            "bpm": 107.7,
+            "energy": 0.147,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "R・I・O・T",
+            "url": "https://youtu.be/NTkFFLOLuCc",
+            "x": 34.53,
+            "y": -20.68,
+            "bpm": 136.0,
+            "energy": 0.038,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "That Is How I Roll! (ライブ / アンコール)",
+            "url": "https://youtu.be/inRDSCi2O_E",
+            "x": 23.2,
+            "y": -7.16,
+            "bpm": 117.5,
+            "energy": 0.22,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "R･I･O･T (ライブ / アンコール)",
+            "url": "https://youtu.be/eyjb_cL2nag",
+            "x": 39.27,
+            "y": -18.77,
+            "bpm": 136.0,
+            "energy": 0.099,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Apocalypse",
+            "url": "https://youtu.be/0fBH7M4EY1M",
+            "x": 28.22,
+            "y": 0.05,
+            "bpm": 152.0,
+            "energy": 0.58,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "TWIN TALE",
+            "url": "https://youtu.be/pB350d7RuAg",
+            "x": 29.0,
+            "y": 13.13,
+            "bpm": 99.4,
+            "energy": 0.883,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "STRAY CERBERUS",
+            "url": "https://youtu.be/e_5VjvDrHz8",
+            "x": 15.74,
+            "y": -24.98,
+            "bpm": 117.5,
+            "energy": 0.276,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "BERSER-KEY",
+            "url": "https://youtu.be/cmwOP8goDTw",
+            "x": 21.93,
+            "y": -36.4,
+            "bpm": 117.5,
+            "energy": 0.19,
+            "shape": "acoustic"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "POLARIS",
+            "url": "https://youtu.be/M-6HMvPPnLM",
+            "x": 7.05,
+            "y": 3.94,
+            "bpm": 123.0,
+            "energy": 0.429,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "HOWLING AMBITION",
+            "url": "https://youtu.be/XYMoaMqyf6s",
+            "x": 47.94,
+            "y": -26.58,
+            "bpm": 136.0,
+            "energy": 0.935,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "VIVID FIRST TIME",
+            "url": "https://youtu.be/ckqNhklWz6I",
+            "x": 25.53,
+            "y": 40.6,
+            "bpm": 136.0,
+            "energy": 0.898,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "'FIGHT' ADDICT",
+            "url": "https://youtu.be/gHqSTnDDmJk",
+            "x": 29.15,
+            "y": 50.49,
+            "bpm": 129.2,
+            "energy": 0.956,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Drown Out the Noise and Push Through the Trash",
+            "url": "https://youtu.be/EELGtL1U1vw",
+            "x": 43.51,
+            "y": -0.07,
+            "bpm": 95.7,
+            "energy": 0.939,
+            "shape": "shimmer"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "FIVE as ONE",
+            "url": "https://youtu.be/rRo4HYj654A",
+            "x": 14.5,
+            "y": 26.91,
+            "bpm": 95.7,
+            "energy": 0.964,
+            "shape": "acoustic"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "EXPOSE 'Burn out!!!' (English)",
+            "url": "https://youtu.be/JuSc3CMEv34",
+            "x": 25.66,
+            "y": -28.95,
+            "bpm": 129.2,
+            "energy": 0.46,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Takin' my Heart (English)",
+            "url": "https://youtu.be/ops9Visjdwc",
+            "x": 12.62,
+            "y": -17.66,
+            "bpm": 123.0,
+            "energy": 0.222,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "WELCOME TO PANDEMONIUM",
+            "url": "https://youtu.be/5sj1cxlpp5U",
+            "x": 16.81,
+            "y": -26.34,
+            "bpm": 103.4,
+            "energy": 0.953,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "WHAT AN EXPLOSION",
+            "url": "https://youtu.be/5AL7kBxbMI8",
+            "x": 50.22,
+            "y": -24.12,
+            "bpm": 123.0,
+            "energy": 0.706,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "RUNAWAY STAR",
+            "url": "https://youtu.be/DkMyx_sLMlk",
+            "x": 19.86,
+            "y": -13.89,
+            "bpm": 99.4,
+            "energy": 0.718,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Bad Kids All Bet",
+            "url": "https://youtu.be/mKt2u5a3-H8",
+            "x": 33.07,
+            "y": -1.42,
+            "bpm": 112.3,
+            "energy": 0.938,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Light a fire",
+            "url": "https://youtu.be/oVEfC2fyvLY",
+            "x": -33.37,
+            "y": 50.55,
+            "bpm": 136.0,
+            "energy": 0.121,
+            "shape": "acoustic"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Embrace of light",
+            "url": "https://youtu.be/7LN3sI8JE5E",
+            "x": -36.87,
+            "y": 11.06,
+            "bpm": 152.0,
+            "energy": 0.073,
+            "shape": "acoustic"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "OUTSIDER RODEO",
+            "url": "https://youtu.be/gSVSgtA9ke4",
+            "x": 30.29,
+            "y": -13.67,
+            "bpm": 143.6,
+            "energy": 0.454,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "JUST THE WAY I AM",
+            "url": "https://youtu.be/-0OIoHQv5qY",
+            "x": 37.02,
+            "y": -5.41,
+            "bpm": 117.5,
+            "energy": 0.763,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "ラスハピーポー！",
+            "url": "https://youtu.be/Wq-hNQDOPJA",
+            "x": 25.21,
+            "y": 43.08,
+            "bpm": 129.2,
+            "energy": 0.393,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "1/3の純情な感情 (Cover)",
+            "url": "https://youtu.be/GBGMF98_oBs",
+            "x": 1.01,
+            "y": 6.61,
+            "bpm": 152.0,
+            "energy": 0.244,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "ヒトリノ夜 (Cover)",
+            "url": "https://youtu.be/9zwlVCZ4LRw",
+            "x": 29.3,
+            "y": 7.47,
+            "bpm": 117.5,
+            "energy": 0.363,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "激動 (Cover)",
+            "url": "https://youtu.be/AacM4_SwEPc",
+            "x": 11.99,
+            "y": -26.96,
+            "bpm": 112.3,
+            "energy": 0.076,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "メギツネ (Cover)",
+            "url": "https://youtu.be/FHdbSnHhlts",
+            "x": 43.87,
+            "y": -23.09,
+            "bpm": 143.6,
+            "energy": 0.59,
+            "shape": "acoustic"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Bling-Bang-Bang-Born (Cover)",
+            "url": "https://youtu.be/ciUhdk5mxt4",
+            "x": 19.43,
+            "y": -3.1,
+            "bpm": 161.5,
+            "energy": 0.443,
+            "shape": "shimmer"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "第六感 (Cover)",
+            "url": "https://youtu.be/cb2c5sJShsQ",
+            "x": 12.1,
+            "y": -30.22,
+            "bpm": 136.0,
+            "energy": 0.508,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "革命道中 (Cover)",
+            "url": "https://youtu.be/xj_PkFdvQ0g",
+            "x": 20.92,
+            "y": -18.8,
+            "bpm": 123.0,
+            "energy": 0.431,
+            "shape": "shimmer"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Get Wild (Cover)",
+            "url": "https://youtu.be/ezQiWaCbpug",
+            "x": 12.68,
+            "y": 9.74,
+            "bpm": 136.0,
+            "energy": 0.692,
+            "shape": "acoustic"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "ボッカデラべリタ (Cover)",
+            "url": "https://youtu.be/OsWFLfjctjQ",
+            "x": 5.55,
+            "y": 7.63,
+            "bpm": 172.3,
+            "energy": 0.759,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "第ゼロ感 (Cover)",
+            "url": "https://youtu.be/-87myA3SB-g",
+            "x": 25.79,
+            "y": -39.45,
+            "bpm": 152.0,
+            "energy": 0.703,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "劣等上等 (Cover)",
+            "url": "https://youtu.be/jE_GE2IJ5FA",
+            "x": 34.0,
+            "y": 8.14,
+            "bpm": 107.7,
+            "energy": 0.656,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Just Awake (Cover)",
+            "url": "https://youtu.be/nyn9h6BraQ4",
+            "x": 29.85,
+            "y": 34.74,
+            "bpm": 129.2,
+            "energy": 0.54,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "Keep the Heat and Fire Yourself Up (Cover)",
+            "url": "https://youtu.be/SGMxavJkvqA",
+            "x": 32.81,
+            "y": -12.62,
+            "bpm": 152.0,
+            "energy": 0.69,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "ボッカデラベリタ (Cover)",
+            "url": "https://youtu.be/1Ey5S6imOwM",
+            "x": 5.2,
+            "y": 10.1,
+            "bpm": 172.3,
+            "energy": 0.844,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "VORACITY (Cover)",
+            "url": "https://youtu.be/rdAtnVC03M0",
+            "x": 15.81,
+            "y": -8.31,
+            "bpm": 99.4,
+            "energy": 0.473,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "神っぽいな (Cover)",
+            "url": "https://youtu.be/J1pFz1b08f8",
+            "x": -3.21,
+            "y": 21.09,
+            "bpm": 143.6,
+            "energy": 0.625,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "狂乱 Hey Kids!! (Cover)",
+            "url": "https://youtu.be/NaadmtMFqI4",
+            "x": 16.77,
+            "y": -13.76,
+            "bpm": 143.6,
+            "energy": 0.835,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "SAVIOR OF SONG (Cover)",
+            "url": "https://youtu.be/M45pCdVZhHY",
+            "x": 17.45,
+            "y": -30.18,
+            "bpm": 129.2,
+            "energy": 0.381,
+            "shape": "bright"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "恋しさとせつなさと心強さと (Cover)",
+            "url": "https://youtu.be/8XRwP6pLi_s",
+            "x": 35.26,
+            "y": -10.06,
+            "bpm": 129.2,
+            "energy": 0.325,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "DEPARTURES (Cover)",
+            "url": "https://youtu.be/TLq1MbV686M",
+            "x": -10.47,
+            "y": 11.94,
+            "bpm": 99.4,
+            "energy": 0.082,
+            "shape": "neutral"
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "CORE PRIDE (Cover)",
+            "url": "https://youtu.be/sS9JtIVl-Lw",
+            "x": 26.03,
+            "y": -19.85,
+            "bpm": 123.0,
+            "energy": 0.876,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Neo-Aspect",
+            "url": "https://youtu.be/03iVXFZ8jrs",
+            "x": 5.86,
+            "y": 50.34,
+            "bpm": 117.5,
+            "energy": 0.737,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "BLACK SHOUT",
+            "url": "https://youtu.be/MmnU-s1TdsI",
+            "x": 1.87,
+            "y": -39.58,
+            "bpm": 123.0,
+            "energy": 0.152,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Opera of the wasteland",
+            "url": "https://youtu.be/kzzXxwU3qo4",
+            "x": 0.83,
+            "y": -3.34,
+            "bpm": 136.0,
+            "energy": 0.777,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "陽だまりロードナイト",
+            "url": "https://youtu.be/KjgjeK-ppd0",
+            "x": -11.13,
+            "y": 50.16,
+            "bpm": 143.6,
+            "energy": 0.042,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "ONENESS",
+            "url": "https://youtu.be/m3mZynIlQe0",
+            "x": 17.44,
+            "y": -26.24,
+            "bpm": 129.2,
+            "energy": 0.176,
+            "shape": "shimmer"
+        },
+        {
+            "band": "roselia",
+            "song": "Re:birth day",
+            "url": "https://youtu.be/cqY4sBLd-_E",
+            "x": -17.31,
+            "y": 18.39,
+            "bpm": 112.3,
+            "energy": 0.144,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Legendary",
+            "url": "https://youtu.be/MaWXiKOzwUc",
+            "x": -2.5,
+            "y": -19.4,
+            "bpm": 143.6,
+            "energy": 0.701,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "- HEROIC ADVENT -",
+            "url": "https://youtu.be/HD--qY58fsM",
+            "x": 0.2,
+            "y": 32.66,
+            "bpm": 123.0,
+            "energy": 0.388,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Determination Symphony",
+            "url": "https://youtu.be/4jyT00Gn2Ec",
+            "x": 18.15,
+            "y": -9.04,
+            "bpm": 129.2,
+            "energy": 0.308,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "熱色スターマイン",
+            "url": "https://youtu.be/DZNOUNsvWps",
+            "x": 0.83,
+            "y": -10.18,
+            "bpm": 123.0,
+            "energy": 0.293,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "軌跡",
+            "url": "https://youtu.be/P2BT98BC1N8",
+            "x": -70.0,
+            "y": 63.28,
+            "bpm": 172.3,
+            "energy": 0.029,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "LOUDER",
+            "url": "https://youtu.be/RZBHAjojJhg",
+            "x": 3.14,
+            "y": 36.71,
+            "bpm": 129.2,
+            "energy": 0.229,
+            "shape": "shimmer"
+        },
+        {
+            "band": "roselia",
+            "song": "R",
+            "url": "https://youtu.be/ZqdMPCDsCeE",
+            "x": 11.24,
+            "y": -21.68,
+            "bpm": 123.0,
+            "energy": 0.668,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "BRAVE JEWEL",
+            "url": "https://youtu.be/MHXRfiufs2o",
+            "x": 3.3,
+            "y": -17.56,
+            "bpm": 129.2,
+            "energy": 0.341,
+            "shape": "shimmer"
+        },
+        {
+            "band": "roselia",
+            "song": "FIRE BIRD",
+            "url": "https://youtu.be/59kPRviWjAo",
+            "x": -16.48,
+            "y": -33.25,
+            "bpm": 152.0,
+            "energy": 0.005,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Safe and Sound",
+            "url": "https://youtu.be/0Hj-eXZzL90",
+            "x": -25.54,
+            "y": 34.99,
+            "bpm": 123.0,
+            "energy": 0.631,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Avant-garde HISTORY",
+            "url": "https://youtu.be/C3vzihABDZQ",
+            "x": -3.13,
+            "y": -29.73,
+            "bpm": 112.3,
+            "energy": 0.653,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Break your desire",
+            "url": "https://youtu.be/tzXB1HCJAQo",
+            "x": 3.46,
+            "y": 12.76,
+            "bpm": 136.0,
+            "energy": 0.683,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Neo-Aspect",
+            "url": "https://youtu.be/Izq3AAix1Os",
+            "x": 9.94,
+            "y": 49.31,
+            "bpm": 117.5,
+            "energy": 0.739,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "約束",
+            "url": "https://youtu.be/Xrx-qzgzhek",
+            "x": 2.39,
+            "y": -26.15,
+            "bpm": 123.0,
+            "energy": 0.575,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "\"UNIONS\" Road",
+            "url": "https://youtu.be/1afLYh5w8XY",
+            "x": -14.85,
+            "y": 25.95,
+            "bpm": 136.0,
+            "energy": 0.593,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Song I am.",
+            "url": "https://youtu.be/Kohn9PRanoY",
+            "x": 33.96,
+            "y": 4.98,
+            "bpm": 129.2,
+            "energy": 0.484,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "Sage der Rosen",
+            "url": "https://youtu.be/z0jU3sNiA44",
+            "x": 9.52,
+            "y": -22.48,
+            "bpm": 161.5,
+            "energy": 0.574,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "覚悟のLiberation",
+            "url": "https://youtu.be/ncY1KiGbQk8",
+            "x": 7.3,
+            "y": 0.75,
+            "bpm": 123.0,
+            "energy": 0.662,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Keep Heart",
+            "url": "https://youtu.be/0e9gzU4spFU",
+            "x": 4.2,
+            "y": -2.86,
+            "bpm": 99.4,
+            "energy": 0.695,
+            "shape": "shimmer"
+        },
+        {
+            "band": "roselia",
+            "song": "Original Call",
+            "url": "https://youtu.be/Rfw6OoJj3Cw",
+            "x": -24.74,
+            "y": 30.36,
+            "bpm": 117.5,
+            "energy": 0.307,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Always recall.",
+            "url": "https://youtu.be/M5h9Td238hI",
+            "x": 6.16,
+            "y": 1.8,
+            "bpm": 123.0,
+            "energy": 0.624,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Floral Haven",
+            "url": "https://youtu.be/Qa7n53DmlHg",
+            "x": -18.96,
+            "y": 30.39,
+            "bpm": 129.2,
+            "energy": 0.539,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Sprechchor",
+            "url": "https://youtu.be/OpSimLr7ouc",
+            "x": -12.91,
+            "y": 9.65,
+            "bpm": 152.0,
+            "energy": 0.358,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "閃光",
+            "url": "https://youtu.be/I0s49imrtho",
+            "x": -4.18,
+            "y": -27.72,
+            "bpm": 117.5,
+            "energy": 0.226,
+            "shape": "shimmer"
+        },
+        {
+            "band": "roselia",
+            "song": "THE HISTORIC...",
+            "url": "https://youtu.be/2AjNrv9FhRQ",
+            "x": 16.2,
+            "y": -34.01,
+            "bpm": 117.5,
+            "energy": 0.263,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "ROZEN HORIZON",
+            "url": "https://youtu.be/8Cygbjd1h8Y",
+            "x": -8.98,
+            "y": -42.65,
+            "bpm": 107.7,
+            "energy": 0.581,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "廻廻奇譚",
+            "url": "https://youtu.be/Upm95P9Wye0",
+            "x": 16.47,
+            "y": -16.12,
+            "bpm": 123.0,
+            "energy": 0.615,
+            "shape": "shimmer"
+        },
+        {
+            "band": "roselia",
+            "song": "鳥の詩",
+            "url": "https://youtu.be/Y5CTSrakFlY",
+            "x": -22.95,
+            "y": -2.93,
+            "bpm": 123.0,
+            "energy": 0.117,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Synchrogazer",
+            "url": "https://youtu.be/3QeYCxU7ftQ",
+            "x": 3.64,
+            "y": -13.91,
+            "bpm": 107.7,
+            "energy": 0.164,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "名前のない怪物",
+            "url": "https://youtu.be/7jOjYce_f4c",
+            "x": -7.87,
+            "y": 16.27,
+            "bpm": 117.5,
+            "energy": 0.032,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "Dazzle the Destiny",
+            "url": "https://youtu.be/NBqwhhtVs9I",
+            "x": -1.05,
+            "y": -16.42,
+            "bpm": 129.2,
+            "energy": 0.882,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Grateful Melting",
+            "url": "https://youtu.be/xeBOEvFrWK8",
+            "x": -22.37,
+            "y": 24.77,
+            "bpm": 123.0,
+            "energy": 0.31,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Second to None",
+            "url": "https://youtu.be/qqEMtc1NtGk",
+            "x": 25.47,
+            "y": -0.9,
+            "bpm": 123.0,
+            "energy": 0.917,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "Steadfast Spirits",
+            "url": "https://youtu.be/ppeswfW0mg4",
+            "x": 11.67,
+            "y": -26.76,
+            "bpm": 129.2,
+            "energy": 0.901,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "紫炎",
+            "url": "https://youtu.be/0BsIKL3t76M",
+            "x": 12.84,
+            "y": 5.74,
+            "bpm": 129.2,
+            "energy": 0.841,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "XV",
+            "url": "https://youtu.be/P9PXzNniuaY",
+            "x": 9.83,
+            "y": -3.69,
+            "bpm": 129.2,
+            "energy": 0.829,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "Blessing Chord",
+            "url": "https://youtu.be/qKYf5ozmgsE",
+            "x": -11.51,
+            "y": 6.72,
+            "bpm": 152.0,
+            "energy": 0.266,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Fear Nothing",
+            "url": "https://youtu.be/WhEs2KF4zNo",
+            "x": 12.28,
+            "y": 15.32,
+            "bpm": 117.5,
+            "energy": 0.751,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "PASSIONATE ANTHEM",
+            "url": "https://youtu.be/68Gwwqp1DK4",
+            "x": 14.22,
+            "y": -4.89,
+            "bpm": 129.2,
+            "energy": 0.712,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "Requiem for Fate",
+            "url": "https://youtu.be/eoq81V4BpHQ",
+            "x": 26.25,
+            "y": 15.36,
+            "bpm": 103.4,
+            "energy": 0.926,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Sanctuary",
+            "url": "https://youtu.be/LAPLzxHzaHY",
+            "x": -25.13,
+            "y": 41.6,
+            "bpm": 123.0,
+            "energy": 0.637,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Sunlit Musical",
+            "url": "https://youtu.be/BtG1mA_1e0s",
+            "x": 17.7,
+            "y": -2.37,
+            "bpm": 123.0,
+            "energy": 0.589,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "Talk to My Tone",
+            "url": "https://youtu.be/ZtHU3JLdNoU",
+            "x": -22.4,
+            "y": 32.19,
+            "bpm": 103.4,
+            "energy": 0.469,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "一逢のFull Glory",
+            "url": "https://youtu.be/uXgEOq0544w",
+            "x": -31.53,
+            "y": 49.33,
+            "bpm": 99.4,
+            "energy": 0.202,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "礎の花冠",
+            "url": "https://youtu.be/GyZ4UFCbWZo",
+            "x": 6.5,
+            "y": 1.87,
+            "bpm": 117.5,
+            "energy": 0.894,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "FRONTIER FANTASIA",
+            "url": "https://youtu.be/XuxC9WuFZcw",
+            "x": -3.4,
+            "y": -14.24,
+            "bpm": 117.5,
+            "energy": 0.806,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Dear Gleam",
+            "url": "https://youtu.be/ihQB9wYq89g",
+            "x": -6.79,
+            "y": 9.11,
+            "bpm": 99.4,
+            "energy": 0.671,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Call the shots",
+            "url": "https://youtu.be/VBn-ME6-jGs",
+            "x": 0.79,
+            "y": -30.12,
+            "bpm": 123.0,
+            "energy": 0.328,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "THRONE OF ROSE",
+            "url": "https://youtu.be/H_ngLOaoMvs",
+            "x": -0.08,
+            "y": -33.95,
+            "bpm": 107.7,
+            "energy": 0.86,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "VIOLET LINE",
+            "url": "https://youtu.be/-yVtSiKoc1c",
+            "x": 2.54,
+            "y": 30.21,
+            "bpm": 99.4,
+            "energy": 0.432,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Ringing Bloom",
+            "url": "https://youtu.be/h4cEEXCPO8M",
+            "x": 21.79,
+            "y": 9.45,
+            "bpm": 129.2,
+            "energy": 0.528,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "ZEAL of proud",
+            "url": "https://youtu.be/LKvJhHQN4Y8",
+            "x": 20.47,
+            "y": -17.39,
+            "bpm": 129.2,
+            "energy": 0.665,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "Singing “OURS”",
+            "url": "https://youtu.be/rGkei9v-jz4",
+            "x": -70.0,
+            "y": -9.08,
+            "bpm": 123.0,
+            "energy": 0.015,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "競宴Red×Violet",
+            "url": "https://youtu.be/fAYoLTda5Uo",
+            "x": 8.29,
+            "y": -8.41,
+            "bpm": 99.4,
+            "energy": 0.141,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "overtuRe",
+            "url": "https://youtu.be/ZbI7Cfdo4ZM",
+            "x": 8.0,
+            "y": -16.0,
+            "bpm": 129.2,
+            "energy": 0.648,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Proud of oneself",
+            "url": "https://youtu.be/QJ5DMiLGliA",
+            "x": -9.71,
+            "y": 1.9,
+            "bpm": 129.2,
+            "energy": 0.402,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Sing Alive",
+            "url": "https://youtu.be/2zRyFvvZa-g",
+            "x": -5.67,
+            "y": -6.92,
+            "bpm": 129.2,
+            "energy": 0.264,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Swear ～Night & Day～",
+            "url": "https://youtu.be/q9g4jk1-XCs",
+            "x": -56.68,
+            "y": -6.55,
+            "bpm": 112.3,
+            "energy": 0.002,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Reweave (Cover)",
+            "url": "https://youtu.be/NOIUNyfVnbI",
+            "x": 16.39,
+            "y": -11.81,
+            "bpm": 123.0,
+            "energy": 0.785,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "ヒバナ -Reloaded- (Cover)",
+            "url": "https://youtu.be/_8_h1aTcH-c",
+            "x": 36.12,
+            "y": -6.68,
+            "bpm": 99.4,
+            "energy": 0.813,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "ファタール (Cover)",
+            "url": "https://youtu.be/B8Twg8j4a1A",
+            "x": 13.59,
+            "y": 39.19,
+            "bpm": 103.4,
+            "energy": 0.771,
+            "shape": "shimmer"
+        },
+        {
+            "band": "roselia",
+            "song": "HONEY (Cover)",
+            "url": "https://youtu.be/frI2-4pnOrw",
+            "x": -5.81,
+            "y": 5.45,
+            "bpm": 123.0,
+            "energy": 0.677,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "悪魔の子 (Cover)",
+            "url": "https://youtu.be/kHdgtPHuya8",
+            "x": -45.09,
+            "y": 12.55,
+            "bpm": 117.5,
+            "energy": 0.112,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "slash (Cover)",
+            "url": "https://youtu.be/gtVeDq1y0R4",
+            "x": -12.29,
+            "y": -22.87,
+            "bpm": 107.7,
+            "energy": 0.2,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "右肩の蝶 (Cover)",
+            "url": "https://youtu.be/XfrqZWj8jD0",
+            "x": -2.0,
+            "y": -5.81,
+            "bpm": 143.6,
+            "energy": 0.601,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "乙女解剖 (Cover)",
+            "url": "https://youtu.be/c6pS6PEjk4c",
+            "x": 1.06,
+            "y": 1.25,
+            "bpm": 136.0,
+            "energy": 0.8,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "六兆年と一夜物語 (Cover)",
+            "url": "https://youtu.be/xnlJkmRhi3Q",
+            "x": 16.23,
+            "y": -28.04,
+            "bpm": 123.0,
+            "energy": 0.135,
+            "shape": "shimmer"
+        },
+        {
+            "band": "roselia",
+            "song": "残酷な天使のテーゼ (Cover)",
+            "url": "https://youtu.be/wiuhDFE6h0Y",
+            "x": -5.59,
+            "y": 6.26,
+            "bpm": 143.6,
+            "energy": 0.096,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "海色 (Cover)",
+            "url": "https://youtu.be/ohmlUNGuGP0",
+            "x": -11.23,
+            "y": -2.16,
+            "bpm": 129.2,
+            "energy": 0.366,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "ETERNAL BLAZE (Cover)",
+            "url": "https://youtu.be/mfYOideAJ30",
+            "x": -0.8,
+            "y": 20.45,
+            "bpm": 103.4,
+            "energy": 0.234,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "魂のルフラン (Cover)",
+            "url": "https://youtu.be/f1nfxEw-A24",
+            "x": -23.04,
+            "y": 1.08,
+            "bpm": 129.2,
+            "energy": 0.062,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "This game (Cover)",
+            "url": "https://youtu.be/6zCxyy2HERM",
+            "x": -9.59,
+            "y": -3.62,
+            "bpm": 143.6,
+            "energy": 0.14,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "スカイクラッドの観測者 (Cover)",
+            "url": "https://youtu.be/jFaVomJ6IRk",
+            "x": -13.9,
+            "y": -31.2,
+            "bpm": 112.3,
+            "energy": 0.105,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "シャルル (Cover)",
+            "url": "https://youtu.be/cn4pKTcLNwQ",
+            "x": 1.77,
+            "y": 24.78,
+            "bpm": 143.6,
+            "energy": 0.376,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "新時代 (Cover)",
+            "url": "https://youtu.be/TLnpE1QLVBs",
+            "x": -5.39,
+            "y": -15.3,
+            "bpm": 117.5,
+            "energy": 0.225,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "革命デュアリズム (Cover)",
+            "url": "https://youtu.be/RKJtSnR-7cY",
+            "x": 1.11,
+            "y": -27.56,
+            "bpm": 136.0,
+            "energy": 0.698,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Red fraction (Cover)",
+            "url": "https://youtu.be/SF1JjeTPbU4",
+            "x": 35.64,
+            "y": -17.5,
+            "bpm": 143.6,
+            "energy": 0.566,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "深愛 (Cover)",
+            "url": "https://youtu.be/MOVw2hYsZcg",
+            "x": -19.41,
+            "y": 7.89,
+            "bpm": 136.0,
+            "energy": 0.3,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Paradisus‐Paradoxum (Cover)",
+            "url": "https://youtu.be/A12CMqrBFSw",
+            "x": 1.87,
+            "y": 4.98,
+            "bpm": 136.0,
+            "energy": 0.291,
+            "shape": "acoustic"
+        },
+        {
+            "band": "roselia",
+            "song": "Realize (Cover)",
+            "url": "https://youtu.be/bfWK5imos6A",
+            "x": 3.84,
+            "y": 16.37,
+            "bpm": 103.4,
+            "energy": 0.175,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "Preserved Roses (Cover)",
+            "url": "https://youtu.be/rB5eL98q6f8",
+            "x": 19.3,
+            "y": 36.0,
+            "bpm": 112.3,
+            "energy": 0.179,
+            "shape": "bright"
+        },
+        {
+            "band": "roselia",
+            "song": "My Dearest (Cover)",
+            "url": "https://youtu.be/PeeD7-Mek8k",
+            "x": -42.45,
+            "y": 50.14,
+            "bpm": 112.3,
+            "energy": 0.064,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "Shangri-La (Cover)",
+            "url": "https://youtu.be/vpj8rTjY_dw",
+            "x": -7.98,
+            "y": 0.6,
+            "bpm": 152.0,
+            "energy": 0.642,
+            "shape": "neutral"
+        },
+        {
+            "band": "roselia",
+            "song": "KING (Cover)",
+            "url": "https://youtu.be/mR86Quw762c",
+            "x": 29.3,
+            "y": 15.66,
+            "bpm": 112.3,
+            "energy": 0.49,
+            "shape": "bright"
+        }
+    ],
+    "centroids": [
+        {
+            "band": "afterglow",
+            "n": 72,
+            "x": 13.94,
+            "y": 17.38
+        },
+        {
+            "band": "ave_mujica",
+            "n": 29,
+            "x": 0.26,
+            "y": -6.88
+        },
+        {
+            "band": "hello_happy_world",
+            "n": 72,
+            "x": -15.75,
+            "y": 18.57
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "n": 1,
+            "x": 21.1,
+            "y": 8.72
+        },
+        {
+            "band": "millsage",
+            "n": 1,
+            "x": -4.07,
+            "y": -10.07
+        },
+        {
+            "band": "morfonica",
+            "n": 57,
+            "x": -20.1,
+            "y": 16.22
+        },
+        {
+            "band": "mugendai_mutype",
+            "n": 23,
+            "x": 20.69,
+            "y": 6.39
+        },
+        {
+            "band": "mygo",
+            "n": 41,
+            "x": 7.4,
+            "y": 16.04
+        },
+        {
+            "band": "pastel_palettes",
+            "n": 74,
+            "x": -7.43,
+            "y": 16.01
+        },
+        {
+            "band": "poppin_party",
+            "n": 115,
+            "x": -0.2,
+            "y": 17.62
+        },
+        {
+            "band": "raise_a_suilen",
+            "n": 80,
+            "x": 19.01,
+            "y": -3.28
+        },
+        {
+            "band": "roselia",
+            "n": 90,
+            "x": -2.02,
+            "y": 2.07
+        },
+        {
+            "band": "various_artists",
+            "n": 5,
+            "x": -22.84,
+            "y": 44.27
+        }
+    ],
+    "metrics": {
+        "x_feature": "contrast",
+        "y_feature": "mode",
+        "x_r": -0.81,
+        "y_r": 0.51,
+        "n": 660,
+        "x_shift": 0.0,
+        "y_shift": 10.0,
+        "loo_acc": 0.133,
+        "chance": 0.1
+    }
+}
