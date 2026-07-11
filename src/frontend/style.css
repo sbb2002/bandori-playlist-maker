@@ -193,8 +193,9 @@ button.ghost {
 /* 트랙리스트 */
 .tracklist { list-style: none; padding: 0; margin: 0; counter-reset: t; }
 .track {
+  position: relative; /* 사이-삽입 인서터(+)의 기준점 */
   display: flex; gap: 12px; align-items: flex-start;
-  padding: 12px 14px; margin-bottom: 8px;
+  padding: 12px 14px; margin-bottom: 14px;
   background: var(--card); border: 1px solid rgba(255,255,255,0.06);
   border-radius: 12px; cursor: pointer;
   transition: border-color 0.15s, transform 0.05s;
@@ -220,38 +221,57 @@ button.ghost {
 .badge.non_harmonic { color: var(--warn); }
 .badge.seed { color: var(--accent-2); }
 
-/* 트랙 편집 액션 — 우측에 이동 핸들·제거 (참고: docs/ref/user-opinion/2026-07-11-song-buttons.png) */
+/* 트랙 편집 액션 — 우측 이동 핸들·제거. 행 호버 시 은은히 나타나는 고스트 아이콘(테마 조화). */
 .track { user-select: none; -webkit-user-select: none; } /* 곡 텍스트 드래그 선택 방지 */
 .track-actions {
   flex: 0 0 auto; align-self: center;
-  display: flex; align-items: center; gap: 10px;
-  margin-left: 4px;
+  display: flex; align-items: center; gap: 4px;
+  margin-left: 2px;
+  opacity: 0; transition: opacity 0.14s;
 }
-/* 이동 핸들 — 노란 상하 셰브런, 배경 없음 */
-.track-move {
-  display: flex; align-items: center; justify-content: center;
-  width: 30px; height: 40px; padding: 0;
-  border: none; background: transparent; color: var(--warn);
-  cursor: grab; touch-action: none;
+.track:hover .track-actions, .track:focus-within .track-actions { opacity: 1; }
+@media (hover: none) { .track-actions { opacity: 0.85; } } /* 터치 환경 상시 노출 */
+
+.track-btn {
+  width: 30px; height: 30px; padding: 0; border-radius: 8px;
+  display: grid; place-items: center;
+  background: transparent; border: 1px solid transparent; color: var(--muted);
+  cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
+.track-btn:hover { background: var(--card-2); color: var(--text); border-color: rgba(255,255,255,0.09); }
+.track-btn svg { display: block; }
+.track-move { cursor: grab; touch-action: none; }
 .track-move:active { cursor: grabbing; }
-.track-move:hover { filter: brightness(1.15); }
-.track-move svg { width: 22px; height: 15px; display: block; }
-/* 원형 액션(제거/추가) */
-.track-circle {
-  width: 34px; height: 34px; padding: 0; border-radius: 50%;
-  display: grid; place-items: center; cursor: pointer;
-  border: 2px solid transparent; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transition: transform 0.1s, filter 0.12s;
+.track-move svg { width: 18px; height: 12px; }
+.track-move:hover { color: var(--accent); }
+.track-remove svg { width: 15px; height: 15px; }
+.track-remove:hover { color: var(--err); background: rgba(255,107,107,0.10); border-color: rgba(255,107,107,0.35); }
+
+/* 사이-삽입 인서터 — 트랙 아래 간격에 겹쳐, 호버 시 라인 + 중앙 '+' 노출 */
+.track-inserter {
+  position: absolute; left: 0; right: 0; bottom: -14px; height: 14px; z-index: 5;
+  display: grid; place-items: center;
 }
-.track-circle svg { width: 16px; height: 16px; display: block; }
-.track-circle:hover { filter: brightness(1.12); }
-.track-circle:active { transform: scale(0.9); }
-.track-remove { background: #e5484d; border-color: #ff8a8d; }
-.track-add { background: #30a46c; border-color: #6cd9a0; }
+.track-inserter::before {
+  content: ""; position: absolute; left: 10px; right: 10px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent) 25%, var(--accent) 75%, transparent);
+  opacity: 0; transition: opacity 0.14s;
+}
+.inserter-btn {
+  position: relative; z-index: 1;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--card-2); border: 1px solid rgba(124,108,255,0.5); color: var(--accent);
+  opacity: 0; transform: scale(0.6); transition: opacity 0.14s, transform 0.14s;
+}
+.inserter-btn svg { display: block; width: 13px; height: 13px; }
+.track-inserter:hover::before { opacity: 0.65; }
+.track-inserter:hover .inserter-btn, .inserter-btn:focus-visible { opacity: 1; transform: scale(1); }
+.inserter-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
 /* 드래그 중인 곡 — 떠오른 느낌 */
 .track.dragging {
-  position: relative; z-index: 10; opacity: 0.97;
+  z-index: 10; opacity: 0.97;
   border-color: var(--accent); box-shadow: 0 12px 30px rgba(0,0,0,0.55);
 }
 body.reordering { cursor: grabbing; user-select: none; -webkit-user-select: none; }

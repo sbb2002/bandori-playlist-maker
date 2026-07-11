@@ -431,50 +431,58 @@ function renderTracklist(list) {
 
     bodyEl.append(title, band, reason, badges);
     li.append(pos, bodyEl, makeTrackActions(li, i));
+    li.appendChild(makeInserter(i + 1)); // 이 트랙 '다음'(배열 index i+1) 삽입점
     tracklistEl.appendChild(li);
   });
 }
 
-// 트랙 우측 액션 버튼(참고: docs/ref/user-opinion/2026-07-11-song-buttons.png).
-// 좌→우: 노란 상하 셰브런(이동 핸들) · 빨간 원형 −(제거) · 초록 원형 +(다음에 곡 추가).
+// 트랙 우측 액션 — 이동 핸들(상하 셰브런) · 제거(−). 행 호버 시 은은히 나타나는 고스트 버튼.
+// 곡 추가(+)는 트랙 사이 인서터로 분리(makeInserter) — 더 직관적인 '사이 삽입'.
 function makeTrackActions(li, index) {
   const actions = elDiv("track-actions");
   actions.addEventListener("click", (e) => e.stopPropagation()); // 행 클릭(재생) 방지
 
   const move = document.createElement("button");
   move.type = "button";
-  move.className = "track-move";
+  move.className = "track-btn track-move";
   move.title = "잡고 위아래로 드래그해 순서 이동";
   move.setAttribute("aria-label", "순서 이동 (드래그)");
   move.innerHTML =
-    '<svg viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2.6" ' +
+    '<svg viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2.4" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<path d="M5 6.5 L12 1.5 L19 6.5"/><path d="M5 9.5 L12 14.5 L19 9.5"/></svg>';
   move.addEventListener("pointerdown", (e) => startReorder(move, li, e));
 
   const remove = document.createElement("button");
   remove.type = "button";
-  remove.className = "track-circle track-remove";
+  remove.className = "track-btn track-remove";
   remove.title = "이 곡 제거";
   remove.setAttribute("aria-label", "곡 제거");
   remove.innerHTML =
     '<svg viewBox="0 0 16 16" aria-hidden="true">' +
-    '<rect x="3.2" y="6.9" width="9.6" height="2.2" rx="1.1" fill="#fff"/></svg>';
+    '<rect x="3" y="7" width="10" height="2" rx="1" fill="currentColor"/></svg>';
   remove.addEventListener("click", () => removeSong(index));
 
-  const add = document.createElement("button");
-  add.type = "button";
-  add.className = "track-circle track-add";
-  add.title = "이 다음에 곡 추가";
-  add.setAttribute("aria-label", "곡 추가");
-  add.innerHTML =
-    '<svg viewBox="0 0 16 16" aria-hidden="true">' +
-    '<rect x="6.9" y="3.2" width="2.2" height="9.6" rx="1.1" fill="#fff"/>' +
-    '<rect x="3.2" y="6.9" width="9.6" height="2.2" rx="1.1" fill="#fff"/></svg>';
-  add.addEventListener("click", () => openSongPicker(index));
-
-  actions.append(move, remove, add);
+  actions.append(move, remove);
   return actions;
+}
+
+// 트랙 사이 삽입점(+): 트랙 아래 간격에 겹쳐 두고, 그 구역에 호버하면 중앙에 '+'가 떠오른다.
+// atIndex = picks 배열의 삽입 위치(이 트랙 '다음' = index+1).
+function makeInserter(atIndex) {
+  const zone = elDiv("track-inserter");
+  zone.addEventListener("click", (e) => e.stopPropagation()); // 행 클릭(재생) 방지
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "inserter-btn";
+  btn.title = "여기에 곡 추가";
+  btn.setAttribute("aria-label", "여기에 곡 추가");
+  btn.innerHTML =
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" ' +
+    'stroke-linecap="round" aria-hidden="true"><path d="M8 3.5 V12.5 M3.5 8 H12.5"/></svg>';
+  btn.addEventListener("click", () => openSongPickerAt(atIndex));
+  zone.append(btn);
+  return zone;
 }
 
 function makeBadge(kind, label) {
@@ -751,9 +759,9 @@ const pickerBandsEl = $("picker-bands");
 const pickerSongsEl = $("picker-songs");
 const pickerSearchEl = $("picker-search");
 const pickerWhereEl = $("picker-where");
-let allSongs = null;       // /api/songs 캐시(첫 열람 시 로드)
-let insertAfterIndex = -1; // + 를 누른 트랙 위치 — 그 다음에 삽입
-let pickerBand = null;     // 선택된 밴드(null=전체)
+let allSongs = null;      // /api/songs 캐시(첫 열람 시 로드)
+let insertAtIndex = 0;    // 삽입점(+)이 가리키는 picks 배열 위치
+let pickerBand = null;    // 선택된 밴드(null=전체)
 
 async function ensureSongs() {
   if (allSongs) return allSongs;
@@ -763,11 +771,11 @@ async function ensureSongs() {
   return allSongs;
 }
 
-async function openSongPicker(afterIndex) {
-  insertAfterIndex = afterIndex;
+async function openSongPickerAt(atIndex) {
+  insertAtIndex = atIndex;
   pickerBand = null;
   pickerSearchEl.value = "";
-  pickerWhereEl.textContent = `${afterIndex + 1}번 다음에 삽입`;
+  pickerWhereEl.textContent = atIndex <= 0 ? "맨 앞에 삽입" : `${atIndex}번 다음에 삽입`;
   show(pickerEl);
   pickerBandsEl.replaceChildren();
   pickerSongsEl.replaceChildren();
@@ -831,9 +839,9 @@ function renderPickerSongs() {
     info.append(t, meta);
     const addBtn = document.createElement("button");
     addBtn.type = "button"; addBtn.className = "picker-add"; addBtn.textContent = "추가";
-    addBtn.addEventListener("click", () => insertSong(s, insertAfterIndex));
+    addBtn.addEventListener("click", () => insertSong(s));
     li.append(info, addBtn);
-    li.addEventListener("dblclick", () => insertSong(s, insertAfterIndex));
+    li.addEventListener("dblclick", () => insertSong(s));
     pickerSongsEl.appendChild(li);
   }
   if (list.length > CAP) {
@@ -844,9 +852,9 @@ function renderPickerSongs() {
   }
 }
 
-function insertSong(song, afterIndex) {
+function insertSong(song) {
   pushHistory();
-  const at = Math.min(Math.max(afterIndex + 1, 0), picks.length);
+  const at = Math.min(Math.max(insertAtIndex, 0), picks.length);
   picks.splice(at, 0, buildAddedPick(song));
   renderTracklist(picks);
   reconcilePlayer();
