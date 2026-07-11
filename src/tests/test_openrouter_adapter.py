@@ -3,15 +3,21 @@
 import httpx
 import pytest
 
+import app.adapters.openrouter_adapter as orad
 from app.adapters.openrouter_adapter import OpenRouterMoodInterpreter
-from app.ports.mood_port import LLMUpstreamError, MoodInterpretationError
+from app.ports.mood_port import (
+    LLMRateLimitError,
+    LLMUpstreamError,
+    MoodInterpretationError,
+)
 
 
 class FakeResponse:
-    def __init__(self, status_code, json_data=None, text=""):
+    def __init__(self, status_code, json_data=None, text="", headers=None):
         self.status_code = status_code
         self._json = json_data
         self.text = text
+        self.headers = headers or {}
 
     def json(self):
         if self._json is None:
@@ -20,17 +26,20 @@ class FakeResponse:
 
 
 class FakeClient:
-    """httpx.Client.post 시그니처만 흉내내는 목 클라이언트."""
+    """httpx.Client.post 시그니처만 흉내내는 목 클라이언트. responses=[...]로 순차 응답."""
 
-    def __init__(self, response=None, exc=None):
+    def __init__(self, response=None, exc=None, responses=None):
         self._response = response
         self._exc = exc
+        self._responses = list(responses) if responses is not None else None
         self.calls = []
 
     def post(self, url, headers=None, json=None, timeout=None):
         self.calls.append({"url": url, "headers": headers, "json": json})
         if self._exc is not None:
             raise self._exc
+        if self._responses is not None:
+            return self._responses.pop(0)
         return self._response
 
 
@@ -38,8 +47,16 @@ def _chat_response(content: str) -> FakeResponse:
     return FakeResponse(200, {"choices": [{"message": {"content": content}}]})
 
 
-def _make(client) -> OpenRouterMoodInterpreter:
-    return OpenRouterMoodInterpreter(api_key="test-key", model="test/model", client=client)
+_OK_JSON = ('{"brightness":0,"start_energy":0.4,"end_energy":0.4,'
+            '"stage_count":3,"target_minutes":null,"interpretation_summary":""}')
+
+
+def _make(client, max_retries=0) -> OpenRouterMoodInterpreter:
+    # 기본 max_retries=0 → 기존 테스트는 단일 호출(빠름·즉시). 재시도 테스트만 명시적으로 올린다.
+    return OpenRouterMoodInterpreter(
+        api_key="test-key", model="test/model", client=client,
+        max_retries=max_retries, retry_base=0.0,
+    )
 
 
 def test_success_parses_mood():
@@ -90,10 +107,51 @@ def test_auth_header_sent():
     assert client.calls[0]["headers"]["Authorization"] == "Bearer test-key"
 
 
-def test_non_200_raises_upstream():
-    interp = _make(FakeClient(response=FakeResponse(429, text="rate limited")))
+def test_non_retryable_non_200_raises_upstream():
+    interp = _make(FakeClient(response=FakeResponse(400, text="bad request")))
     with pytest.raises(LLMUpstreamError):
         interp.interpret("x")
+
+
+def test_429_raises_rate_limit_error():
+    interp = _make(FakeClient(response=FakeResponse(429, text="rate limited")))
+    with pytest.raises(LLMRateLimitError):
+        interp.interpret("x")
+
+
+def test_persistent_429_retries_then_raises(monkeypatch):
+    monkeypatch.setattr(orad.time, "sleep", lambda *a, **k: None)
+    client = FakeClient(response=FakeResponse(429, text="slow down"))
+    with pytest.raises(LLMRateLimitError):
+        _make(client, max_retries=2).interpret("x")
+    assert len(client.calls) == 3  # 최초 + 2 재시도
+
+
+def test_429_then_success(monkeypatch):
+    monkeypatch.setattr(orad.time, "sleep", lambda *a, **k: None)
+    client = FakeClient(responses=[FakeResponse(429, text="wait"), _chat_response(_OK_JSON)])
+    params = _make(client, max_retries=2).interpret("x")
+    assert params.stage_count == 3
+    assert len(client.calls) == 2
+
+
+def test_5xx_then_success(monkeypatch):
+    monkeypatch.setattr(orad.time, "sleep", lambda *a, **k: None)
+    client = FakeClient(responses=[FakeResponse(503, text="unavailable"), _chat_response(_OK_JSON)])
+    params = _make(client, max_retries=1).interpret("x")
+    assert params.stage_count == 3
+    assert len(client.calls) == 2
+
+
+def test_retry_after_header_honored(monkeypatch):
+    slept = []
+    monkeypatch.setattr(orad.time, "sleep", lambda s: slept.append(s))
+    client = FakeClient(responses=[
+        FakeResponse(429, text="wait", headers={"Retry-After": "2"}),
+        _chat_response(_OK_JSON),
+    ])
+    _make(client, max_retries=1).interpret("x")
+    assert slept == [2.0]  # Retry-After(초) 존중
 
 
 def test_network_error_raises_upstream():

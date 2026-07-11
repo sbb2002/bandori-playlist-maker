@@ -77,7 +77,10 @@ def create_setlist(payload: SetlistRequest, request: Request) -> dict:
         request.app.state.songs, payload.include_original, payload.include_cover
     )
 
+    # print("TEST:", interpreter)
+    # print("TEST:", payload.prompt, payload.bands, payload.stages, payload.stage_count, payload.target_minutes)
     params: MoodParameters = interpreter.interpret(payload.prompt)
+    # print("TEST:", params, payload.bands, payload.stages, payload.stage_count, payload.target_minutes)
 
     # 밴드 필터(설정 §5-1b): 빈 목록/미지정 = ALL.
     band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
@@ -117,4 +120,6 @@ def create_setlist(payload: SetlistRequest, request: Request) -> dict:
     result = serialize_setlist(setlist)
     # 실제 적용된 밴드 필터(프롬프트 자동감지 포함) — 프론트가 체크박스 동기화에 사용.
     result["applied_bands"] = sorted(band_filter) if band_filter else []
+
+    # print("TEST:", result)
     return result

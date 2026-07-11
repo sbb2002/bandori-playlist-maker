@@ -20,10 +20,18 @@ services:
         value: https://sbb2002.github.io
       # MOOD_INTERPRETER는 지정하지 않음 → 자동감지(키 있으면 openrouter, 없으면 stub).
       # 키를 아직 안 넣어도 앱은 stub로 기동됨(첫 배포 안전). 키 넣으면 openrouter로 전환.
-      - key: OPENROUTER_MODEL
+      - key: GROQ_MODEL
         value: nvidia/nemotron-3-nano-30b-a3b:free
-      - key: OPENROUTER_RESPONSE_FORMAT
+      - key: GROQ_RESPONSE_FORMAT
         value: none
+      # 트래픽 급증 대비: 429/5xx 백오프 재시도 횟수(기본 2).
+      - key: GROQ_MAX_RETRIES
+        value: "2"
       # 시크릿 — 커밋 금지. 대시보드에서 값 입력.
-      - key: OPENROUTER_API_KEY
+      - key: GROQ_API_KEY
+        sync: false
+      # 운영 오류 알림(선택) — 둘 다 설정 시 Telegram 활성, 없으면 알림 비활성.
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
         sync: false

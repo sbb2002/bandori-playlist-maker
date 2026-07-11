@@ -80,9 +80,46 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
+// 대기 UX(트래픽/콜드스타트 대비): 로딩 중 문구를 위트있게 순환하고, 오래 걸리면(콜드스타트 추정)
+// '서버 깨우는 중' 안내로 강화. 무료 플랜 슬립 시 첫 응답이 느려도 이탈을 줄인다.
+const LOADING_MESSAGES = [
+  "플레이리스트를 만드는 중입니다~ 🎶",
+  "요청을 무드로 해석하고 있어요… 🔮",
+  "곡을 하모닉하게 잇는 중… 🎼",
+  "에너지 흐름을 다듬는 중… 📈",
+  "당신을 위한 곡을 고르고 있어요… ✨",
+];
+const COLDSTART_SUB = "서버가 잠깐 자고 있었나 봐요… 깨우는 중이에요! 🥱☕ (유메와 파와—!)";
+const LOADING_DEFAULT_SUB = "백엔드가 잠들어 있었다면 첫 응답이 조금 느릴 수 있어요.";
+const loadingTextEl = loadingEl.querySelector(".loading-text");
+const loadingSubEl = loadingEl.querySelector(".loading-sub");
+let loadingRotateTimer = null;
+let coldStartTimer = null;
+
 function showLoading(on) {
   submitBtn.disabled = on;
   toggle(loadingEl, on);
+  if (on) startLoadingAnimation();
+  else stopLoadingAnimation();
+}
+
+function startLoadingAnimation() {
+  let i = 0;
+  if (loadingTextEl) loadingTextEl.textContent = LOADING_MESSAGES[0];
+  if (loadingSubEl) loadingSubEl.textContent = LOADING_DEFAULT_SUB;
+  loadingRotateTimer = setInterval(() => {
+    i = (i + 1) % LOADING_MESSAGES.length;
+    if (loadingTextEl) loadingTextEl.textContent = LOADING_MESSAGES[i];
+  }, 2200);
+  // 8초 넘게 걸리면 콜드스타트로 보고 위트 멘트로 안내 강화.
+  coldStartTimer = setTimeout(() => {
+    if (loadingSubEl) loadingSubEl.textContent = COLDSTART_SUB;
+  }, 8000);
+}
+
+function stopLoadingAnimation() {
+  if (loadingRotateTimer) { clearInterval(loadingRotateTimer); loadingRotateTimer = null; }
+  if (coldStartTimer) { clearTimeout(coldStartTimer); coldStartTimer = null; }
 }
 function showError(message) {
   errorEl.textContent = "⚠️ " + message;

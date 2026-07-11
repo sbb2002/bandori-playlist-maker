@@ -23,7 +23,7 @@ DEFAULT_START_ENERGY = 0.4
 DEFAULT_STAGE_COUNT = 3
 
 SYSTEM_PROMPT = (
-    "너는 밴드리(BanG Dream!) 음악 세트리스트 생성기의 무드 해석기다. "
+    "너는 뱅드림(BanG Dream!) 음악 세트리스트 생성기의 무드 해석기다. "
     "사용자의 한국어/영어 자연어 요청을 읽고, 아래 JSON 스키마에 맞춰 "
     "무드·에너지 방향만 추출해 JSON 객체 하나로만 답한다. 코드블록·설명·군말 금지.\n\n"
     "필드:\n"

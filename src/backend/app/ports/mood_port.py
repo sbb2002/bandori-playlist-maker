@@ -16,7 +16,14 @@ class MoodInterpretationError(Exception):
 
 
 class LLMUpstreamError(Exception):
-    """LLM 업스트림 호출 실패(네트워크·HTTP 오류·레이트리밋). API에서 502 LLM_UPSTREAM_FAILED."""
+    """LLM 업스트림 호출 실패(네트워크·HTTP 오류). API에서 502 LLM_UPSTREAM_FAILED."""
+
+
+class LLMRateLimitError(LLMUpstreamError):
+    """LLM 레이트리밋(429)이 재시도 소진 후에도 지속. API에서 429 RATE_LIMITED로 매핑.
+
+    LLMUpstreamError 하위라 전용 핸들러가 없어도 502로 폴백되지만, main.py가 전용 429
+    핸들러를 등록해 '지금 요청이 많아요' 안내로 매핑한다(트래픽 급증 대비)."""
 
 
 class MoodInterpreter(Protocol):

@@ -1,4 +1,4 @@
-"""OpenRouter 어댑터 — MoodInterpreter 포트의 운영 구현.
+"""Groq 어댑터 — MoodInterpreter 포트의 운영 구현.
 
 벤더/모델 교체 시 이 파일(과 main.py 주입 1줄)만 교체하면 된다. HTTP 세부는 여기에만 존재하며
 도메인·API는 이 모듈을 모른다. 파싱/검증은 `prompt.py`에 위임한다.
@@ -19,15 +19,15 @@ from ..ports.mood_port import (
 )
 from . import prompt as prompt_mod
 
-DEFAULT_BASE_URL = "https://openrouter.ai/api/v1"
+DEFAULT_BASE_URL = "https://api.groq.com/openai/v1"
 # 파일럿 기본: 무료 경량 모델(사용자 결정 — §④-3/§9 모델 오픈퀘스천 확정). env로 교체 가능.
 # 참고: reasoning 모델이라 응답이 다소 느릴 수 있으나 추출 정확도·비용(무료) 양호.
-DEFAULT_MODEL = "nvidia/nemotron-3-nano-30b-a3b:free"
+DEFAULT_MODEL = "llama-3.1-8b-instant"
 DEFAULT_TIMEOUT = 60.0  # 무료/reasoning 모델 지연 감안
 
 
-class OpenRouterMoodInterpreter:
-    """OpenRouter chat/completions로 무드를 해석하는 MoodInterpreter 구현."""
+class GroqMoodInterpreter:
+    """Groq chat/completions로 무드를 해석하는 MoodInterpreter 구현."""
 
     def __init__(
         self,
@@ -43,7 +43,7 @@ class OpenRouterMoodInterpreter:
         retry_base: float = 0.5,
     ) -> None:
         if not api_key:
-            raise ValueError("OpenRouter api_key가 비어 있습니다.")
+            raise ValueError("Groq api_key가 비어 있습니다.")
         self._api_key = api_key
         self._model = model
         self._base_url = base_url.rstrip("/")
@@ -64,14 +64,15 @@ class OpenRouterMoodInterpreter:
         headers = {
             "Authorization": f"Bearer {self._api_key}",
             "Content-Type": "application/json",
-            "X-Title": self._title,
+            # "X-Title": self._title,
         }
-        # OpenRouter 랭킹/식별용(선택). GitHub Pages 오리진 등.
+        # Groq 랭킹/식별용(선택). GitHub Pages 오리진 등.
         if self._referer:
             headers["HTTP-Referer"] = self._referer
         return headers
 
     def interpret(self, prompt: str) -> MoodParameters:
+        # print("TEST:", self._model, self._base_url, self._response_format_mode)
         payload = {
             "model": self._model,
             "messages": prompt_mod.build_messages(prompt),
@@ -88,10 +89,10 @@ class OpenRouterMoodInterpreter:
             data = response.json()
             content = data["choices"][0]["message"]["content"]
         except (ValueError, KeyError, IndexError, TypeError) as exc:
-            raise MoodInterpretationError(f"OpenRouter 응답 구조 예상 밖: {exc}") from exc
+            raise MoodInterpretationError(f"Groq 응답 구조 예상 밖: {exc}") from exc
 
         if not isinstance(content, str) or not content.strip():
-            raise MoodInterpretationError("OpenRouter 응답 content가 비어 있습니다.")
+            raise MoodInterpretationError("Groq 응답 content가 비어 있습니다.")
 
         return prompt_mod.parse_mood(content)
 
@@ -103,6 +104,7 @@ class OpenRouterMoodInterpreter:
             LLMUpstreamError:  네트워크 오류·기타 비정상 응답 → API 502.
         """
         url = f"{self._base_url}/chat/completions"
+        # print("TEST:", url, payload)
         headers = self._headers()
         for attempt in range(self._max_retries + 1):
             try:
@@ -111,7 +113,7 @@ class OpenRouterMoodInterpreter:
                 if attempt < self._max_retries:
                     time.sleep(self._backoff(attempt))
                     continue
-                raise LLMUpstreamError(f"OpenRouter 요청 실패: {exc}") from exc
+                raise LLMUpstreamError(f"Groq 요청 실패: {exc}") from exc
 
             if response.status_code == 200:
                 return response
@@ -122,12 +124,13 @@ class OpenRouterMoodInterpreter:
                 continue
 
             body = response.text[:200]
+            # print("TEST:", body)
             if response.status_code == 429:
-                raise LLMRateLimitError(f"OpenRouter 레이트리밋(429): {body}")
-            raise LLMUpstreamError(f"OpenRouter 비정상 응답 {response.status_code}: {body}")
+                raise LLMRateLimitError(f"Groq 레이트리밋(429): {body}")
+            raise LLMUpstreamError(f"Groq 비정상 응답 {response.status_code}: {body}")
 
         # 논리상 도달하지 않음(위 for가 반드시 return 또는 raise). 방어적 처리.
-        raise LLMUpstreamError("OpenRouter 재시도 로직 예외(도달 불가)")
+        raise LLMUpstreamError("Groq 재시도 로직 예외(도달 불가)")
 
     def _backoff(self, attempt: int) -> float:
         """지수 백오프 + 지터(초). 동기화된 재폭주(thundering herd) 방지용 지터 포함."""
