@@ -21,6 +21,17 @@
   <script defer src="https://cloud.umami.is/script.js" data-website-id="7185d432-2c87-41e5-8166-46125dc76e33"></script>
 </head>
 <body>
+  <!-- 좌상단 메뉴(햄버거 ↔ X) → 좌측 프리셋 패널 -->
+  <button id="menu-btn" class="menu-btn" type="button" aria-label="메뉴 열기" aria-expanded="false">
+    <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+  </button>
+  <div id="menu-scrim" class="menu-scrim" hidden></div>
+  <aside id="menu-panel" class="menu-panel" aria-hidden="true" aria-label="저장된 플레이리스트">
+    <div class="menu-header"><strong>저장된 플레이리스트</strong></div>
+    <ul id="preset-list" class="preset-list"></ul>
+    <p id="preset-empty" class="preset-empty">아직 저장된 플레이리스트가 없어요.<br>플레이리스트를 만들면 자동으로 저장돼요.</p>
+  </aside>
+
   <main class="wrap">
     <header class="hero">
       <h1>🎧 Bangdream Playlist Maker</h1>

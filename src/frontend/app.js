@@ -26,7 +26,15 @@ let halfFired = false;
 let errorSkips = 0; // 재생불가 영상 연속 스킵 가드(무한 루프 방지)
 let loadedVideoId = null; // 플레이어에 로드/큐된 영상 id — 편집 후 재생 정합에 사용
 let playbackStarted = false; // 첫 PLAYING 이후 true — 편집 시 cue(정지) vs load(자동재생) 선택
-const editHistory = []; // 편집(순서이동·제거) 되돌리기 스택 — Ctrl+Z
+// 통합 되돌리기 스택(Ctrl+Z): {kind:'edit', picks, current} | {kind:'preset-delete', preset, index}.
+// 'edit'은 새 플레이리스트 생성 시 리셋, 'preset-delete'는 유지.
+const undoStack = [];
+// 프리셋 자동저장용 최신 스냅샷(renderResult에서 갱신).
+let lastParams = {};
+let lastAppliedBands = [];
+let lastStages = [];
+let currentPresetId = null; // 현재 세션이 매핑된 프리셋 id(편집 시 이 프리셋 갱신)
+let restoring = false; // 프리셋 복원 중엔 새 프리셋 자동생성 생략
 
 // ── umami 계측(스크립트 미설치 시 무해) ─────────────────────────────────────────
 function track(name, data) {
@@ -397,12 +405,16 @@ function renderResult(data) {
   current = -1;
   playbackStarted = false;
   loadedVideoId = null;
-  editHistory.length = 0; // 새 플레이리스트 → 편집 히스토리 리셋
+  clearEditUndos(); // 새 플레이리스트 → 편집 되돌리기 리셋(프리셋 삭제 되돌리기는 유지)
 
   if (!picks.length) {
     showError("조건에 맞는 곡을 찾지 못했어요. 요청을 조금 바꿔 보세요.");
     return;
   }
+
+  lastParams = data.params || {};
+  lastAppliedBands = data.applied_bands || [];
+  lastStages = data.stages || [];
 
   renderSummary(data);
   renderTracklist(picks);
@@ -413,6 +425,8 @@ function renderResult(data) {
   track("playlist_created", { count: picks.length, minutes: Math.round(estimatedTotal / 60) });
 
   startPlayback();
+
+  if (!restoring) autoSaveOnGenerate(); // 새 생성 시에만 새 프리셋(복원 시엔 생략)
 }
 
 function renderSummary(data) {
@@ -728,6 +742,7 @@ function commitMove(from, target) {
   renderTracklist(picks);
   reconcilePlayer();
   syncGraphToEdited();
+  autoSaveOnEdit();
 }
 
 // − 버튼: 해당 곡 제거. 재생 중이던 곡이면 reconcilePlayer가 다음 곡으로 넘긴다.
@@ -743,6 +758,7 @@ function removeSong(index) {
   renderTracklist(picks);
   reconcilePlayer();
   syncGraphToEdited();
+  autoSaveOnEdit();
 }
 
 // 편집 후 하이라이트·재생을 정합한다. 재생 중이던 곡이 남아 있으면 그 위치로 current를 옮기고,
@@ -766,26 +782,41 @@ function reconcilePlayer() {
 }
 
 function pushHistory() {
-  editHistory.push({ picks: picks.slice(), current });
-  if (editHistory.length > 50) editHistory.shift();
+  undoStack.push({ kind: "edit", picks: picks.slice(), current });
+  capUndo();
+}
+function capUndo() {
+  while (undoStack.length > 60) undoStack.shift();
+}
+// 새 플레이리스트 시 'edit' 되돌리기만 제거(프리셋 삭제 되돌리기는 유지).
+function clearEditUndos() {
+  for (let i = undoStack.length - 1; i >= 0; i--) {
+    if (undoStack[i].kind === "edit") undoStack.splice(i, 1);
+  }
 }
 
-// Ctrl/Cmd+Z — 직전 편집 상태(순서·구성) 복원. 텍스트 입력 중엔 브라우저 기본 되돌리기 양보.
+// Ctrl/Cmd+Z — 최근 되돌리기(편집 상태 복원 또는 프리셋 삭제 취소). 텍스트 입력 중엔 기본 양보.
 document.addEventListener("keydown", (e) => {
   if (!(e.ctrlKey || e.metaKey) || e.shiftKey) return;
   if (e.key !== "z" && e.key !== "Z") return;
   const tag = (document.activeElement && document.activeElement.tagName) || "";
   if (tag === "INPUT" || tag === "TEXTAREA") return;
-  if (!editHistory.length) return;
+  if (!undoStack.length) return;
   e.preventDefault();
-  const prev = editHistory.pop();
-  picks = prev.picks;
-  current = prev.current;
+  const action = undoStack.pop();
+  if (action.kind === "preset-delete") {
+    undoPresetDelete(action);
+    return;
+  }
+  // kind === 'edit' — 편집 직전 상태 복원.
+  picks = action.picks;
+  current = action.current;
   hide(errorEl);
   show(resultEl); // 전부 제거 후 되돌리기면 결과 다시 표시
   renderTracklist(picks);
   reconcilePlayer();
   syncGraphToEdited();
+  autoSaveOnEdit(); // 되돌린 상태를 현재 프리셋에 반영
 });
 
 // 편집 후 에너지 그래프를 '실제 배치'로 갱신(옵션 기능). 편집된 순서를 n개 연속 그룹으로 나눠
@@ -807,6 +838,163 @@ function syncGraphToEdited() {
   stageModel = { totalMinutes: stageModel.totalMinutes, segments };
   renderStageGraph();
 }
+
+// ── 프리셋(로컬 저장) — 좌측 메뉴에서 저장된 플레이리스트 열람·복원·삭제 (사용자 제안 B3) ────
+// localStorage에 최대 50개 저장. 생성·이동·제거·추가 시 자동저장(현재 세션 프리셋 갱신).
+// 형제 프로젝트가 랭크 진행률을 localStorage로 보존하는 방식과 동일.
+const PRESETS_KEY = "setlist-presets-v1";
+const PRESET_CAP = 50;
+
+const menuBtn = $("menu-btn");
+const menuPanel = $("menu-panel");
+const menuScrim = $("menu-scrim");
+const presetListEl = $("preset-list");
+const presetEmptyEl = $("preset-empty");
+
+function loadPresets() {
+  try { return JSON.parse(localStorage.getItem(PRESETS_KEY)) || []; }
+  catch (_) { return []; }
+}
+function persistPresets(arr) {
+  try { localStorage.setItem(PRESETS_KEY, JSON.stringify(arr)); }
+  catch (_) {/* 용량 초과/비활성(시크릿 모드) — 무시 */}
+}
+
+// 현재 플레이리스트 전체 상태 스냅샷(복원용). renderResult(data)와 같은 형태.
+function currentSnapshot() {
+  return {
+    picks,
+    params: lastParams,
+    estimated_total_seconds: estimatedTotal,
+    applied_bands: lastAppliedBands,
+    stages: lastStages,
+  };
+}
+
+function genPresetId() {
+  return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function autoSaveOnGenerate() {
+  currentPresetId = genPresetId();
+  upsertPreset(currentPresetId);
+}
+function autoSaveOnEdit() {
+  if (currentPresetId == null) return; // 프리셋 세션 없음 — skip
+  upsertPreset(currentPresetId);
+}
+
+// 프리셋 생성/갱신. 없으면 맨 앞에 추가(초과 시 오래된 것 제거), 있으면 제자리 갱신.
+function upsertPreset(id) {
+  const arr = loadPresets();
+  const title = (lastParams && lastParams.interpretation_summary) || "플레이리스트";
+  const data = JSON.parse(JSON.stringify(currentSnapshot())); // 라이브 상태와 참조 분리
+  const idx = arr.findIndex((p) => p.id === id);
+  if (idx >= 0) {
+    arr[idx] = { ...arr[idx], title, data }; // 위치·savedAt 유지
+  } else {
+    arr.unshift({ id, title, savedAt: Date.now(), data });
+    if (arr.length > PRESET_CAP) arr.length = PRESET_CAP;
+  }
+  persistPresets(arr);
+  renderPresetList();
+}
+
+function deletePreset(id) {
+  const arr = loadPresets();
+  const idx = arr.findIndex((p) => p.id === id);
+  if (idx < 0) return;
+  const [removed] = arr.splice(idx, 1);
+  persistPresets(arr);
+  if (currentPresetId === id) currentPresetId = null; // 현재 세션 프리셋이 삭제됨
+  undoStack.push({ kind: "preset-delete", preset: removed, index: idx });
+  capUndo();
+  renderPresetList();
+}
+
+function undoPresetDelete(action) {
+  const arr = loadPresets();
+  arr.splice(Math.min(action.index, arr.length), 0, action.preset);
+  if (arr.length > PRESET_CAP) arr.length = PRESET_CAP;
+  persistPresets(arr);
+  openMenu(); // 되돌린 프리셋을 보여주기 위해 메뉴 열기(renderPresetList 포함)
+}
+
+function restorePreset(id) {
+  const p = loadPresets().find((x) => x.id === id);
+  if (!p || !p.data) return;
+  restoring = true;
+  try { renderResult(p.data); } finally { restoring = false; }
+  currentPresetId = id; // 이후 편집은 이 프리셋을 갱신
+  closeMenu();
+}
+
+function relTime(ts) {
+  const s = Math.max(0, (Date.now() - (ts || 0)) / 1000);
+  if (s < 60) return "방금 전";
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}분 전`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}시간 전`;
+  return `${Math.floor(h / 24)}일 전`;
+}
+
+function renderPresetList() {
+  if (!presetListEl) return;
+  const arr = loadPresets();
+  presetListEl.replaceChildren();
+  if (presetEmptyEl) presetEmptyEl.hidden = arr.length > 0;
+  for (const p of arr) {
+    const li = document.createElement("li");
+    li.className = "preset-item";
+
+    const open = document.createElement("button");
+    open.type = "button";
+    open.className = "preset-open";
+    const title = elDiv("preset-title");
+    title.textContent = p.title || "플레이리스트";
+    const meta = elDiv("preset-meta");
+    const count = (p.data && p.data.picks && p.data.picks.length) || 0;
+    meta.textContent = `${relTime(p.savedAt)} · ${count}곡`;
+    open.append(title, meta);
+    open.addEventListener("click", () => restorePreset(p.id));
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "preset-del";
+    del.title = "삭제";
+    del.setAttribute("aria-label", "프리셋 삭제");
+    del.innerHTML =
+      '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M2.8 4.3 H13.2 M6.4 4.3 V3 H9.6 V4.3 M4.6 4.3 L5.2 13 H10.8 L11.4 4.3"/></svg>';
+    del.addEventListener("click", (e) => { e.stopPropagation(); deletePreset(p.id); });
+
+    li.append(open, del);
+    presetListEl.appendChild(li);
+  }
+}
+
+// 좌상단 메뉴(햄버거 ↔ X) — 좌측 슬라이드 패널에서 프리셋 열람.
+let menuOpen = false;
+function openMenu() {
+  menuOpen = true;
+  if (menuBtn) { menuBtn.classList.add("open"); menuBtn.setAttribute("aria-expanded", "true"); menuBtn.setAttribute("aria-label", "메뉴 닫기"); }
+  if (menuPanel) { menuPanel.classList.add("open"); menuPanel.setAttribute("aria-hidden", "false"); }
+  if (menuScrim) menuScrim.hidden = false;
+  renderPresetList();
+}
+function closeMenu() {
+  menuOpen = false;
+  if (menuBtn) { menuBtn.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); menuBtn.setAttribute("aria-label", "메뉴 열기"); }
+  if (menuPanel) { menuPanel.classList.remove("open"); menuPanel.setAttribute("aria-hidden", "true"); }
+  if (menuScrim) menuScrim.hidden = true;
+}
+if (menuBtn) menuBtn.addEventListener("click", () => (menuOpen ? closeMenu() : openMenu()));
+if (menuScrim) menuScrim.addEventListener("click", closeMenu);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && menuOpen) closeMenu();
+});
 
 // ── 곡 추가 미니 브라우저 (Phase 2) ─────────────────────────────────────────────
 // + 버튼 → 밴드 셀렉터 + 곡 리스트에서 곡을 골라 그 트랙 '다음'에 삽입. /api/songs 1회 캐시.
@@ -962,6 +1150,7 @@ function insertSong(song) {
   renderTracklist(picks);
   reconcilePlayer();
   syncGraphToEdited();
+  autoSaveOnEdit();
   closeSongPicker();
   track("song_added", { idx: song.idx });
 }
