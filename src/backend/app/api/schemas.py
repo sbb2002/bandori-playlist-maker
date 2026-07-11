@@ -32,8 +32,10 @@ class SetlistRequest(BaseModel):
     stage_count: int | None = Field(default=None, ge=2, le=5, description="에너지 단계 수 N")
     bands: list[str] | None = Field(default=None, max_length=50, description="밴드 필터(빈 목록/미지정=ALL)")
     stages: list[StageInput] | None = Field(default=None, min_length=1, max_length=8, description="단계 직접 지정")
-    include_original: bool = Field(default=True, description="오리지널 곡 포함(기본 True)")
-    include_cover: bool = Field(default=False, description="커버 곡 포함(기본 False). 둘 다 같으면 ALL")
+    # None = 사용자가 체크박스를 안 건드림 → LLM의 song_type으로 결정(둘 다 미지정=ALL 기본).
+    # 명시 시(둘 다) 그 값이 우선. 둘 다 같으면(모두 포함/모두 제외) ALL.
+    include_original: bool | None = Field(default=None, description="오리지널 포함(None=LLM 판단)")
+    include_cover: bool | None = Field(default=None, description="커버 포함(None=LLM 판단)")
 
     @field_validator("prompt")
     @classmethod
@@ -55,6 +57,7 @@ def serialize_setlist(setlist: Setlist) -> dict:
             "target_minutes": setlist.params.target_minutes,
             "interpretation_summary": setlist.params.interpretation_summary,
             "tags": setlist.params.tags or [],
+            "song_type": setlist.params.song_type,
         },
         "stages": [
             {"index": s.index, "energy_target": s.energy_target} for s in setlist.stages

@@ -70,6 +70,25 @@ def test_cover_only_includes_only_covers(client):
     assert picks and all("(cover)" in p["song"].lower() for p in picks)
 
 
+def test_cover_keyword_sets_cover_only(client):
+    # 체크박스 미지정 + 프롬프트에 '커버' → LLM(stub) song_type=cover → 커버만 + 응답에 반영.
+    r = client.post("/api/setlist", json={"prompt": "커버곡으로만 신나게"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["params"]["song_type"] == "cover"
+    assert body["include_original"] is False and body["include_cover"] is True
+    assert all("(cover)" in p["song"].lower() for p in body["picks"])
+
+
+def test_no_song_type_mention_is_all(client):
+    # 체크박스 미지정 + 언급 없음 → song_type=all → 둘 다 포함(기본 ALL).
+    r = client.post("/api/setlist", json={"prompt": "신나는 곡"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["params"]["song_type"] == "all"
+    assert body["include_original"] is True and body["include_cover"] is True
+
+
 def test_out_of_range_minutes_is_invalid_request(client):
     r = client.post("/api/setlist", json={"prompt": "x", "target_minutes": 999})
     assert r.status_code == 400

@@ -28,6 +28,9 @@ _LOW_ENERGY_WORDS = ("차분", "집중", "잔잔", "휴식", "수면", "명상",
 _RISE_WORDS = ("점점", "고조", "올라", "끌어올", "달아오", "build", "rise")
 _FALL_WORDS = ("가라앉", "마무리", "식", "진정", "내려", "wind down", "cool down")
 
+_COVER_WORDS = ("커버", "cover")
+_ORIGINAL_WORDS = ("오리지널", "원곡", "original")
+
 # 단위는 한국어 조사가 뒤에 붙을 수 있어(예: "30분만") 후행 \b를 쓰지 않는다.
 # 오탐 위험이 있는 단문자 h/m 약어는 제외하고 명확한 단위만 인식한다.
 _MINUTES_RE = re.compile(r"(\d+)\s*(시간|hours?|hrs?|분|minutes?|mins?)", re.IGNORECASE)
@@ -87,6 +90,15 @@ class StubMoodInterpreter:
 
         summary, tags = _flavor(brightness, start_energy, end_energy, target_minutes)
 
+        cover_hits = _count(text, _COVER_WORDS)
+        orig_hits = _count(text, _ORIGINAL_WORDS)
+        if cover_hits and not orig_hits:
+            song_type = "cover"
+        elif orig_hits and not cover_hits:
+            song_type = "original"
+        else:
+            song_type = "all"
+
         return MoodParameters(
             brightness=round(brightness, 3),
             start_energy=round(start_energy, 3),
@@ -95,6 +107,7 @@ class StubMoodInterpreter:
             target_minutes=target_minutes,
             interpretation_summary=summary,
             tags=tags,
+            song_type=song_type,
         )
 
 

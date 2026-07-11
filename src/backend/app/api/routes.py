@@ -34,6 +34,14 @@ def _apply_cover_filter(songs, include_original: bool, include_cover: bool):
     return [s for s in songs if _is_cover(s)]
 
 
+def _resolve_song_type(inc_original, inc_cover, song_type: str) -> tuple[bool, bool]:
+    """(include_original, include_cover) 결정. 사용자가 체크박스를 명시(None 아님)하면 그 값,
+    아니면 LLM song_type("all"|"original"|"cover")으로. 기본(all)=둘 다 포함=ALL."""
+    if inc_original is None and inc_cover is None:
+        return (song_type in ("all", "original"), song_type in ("all", "cover"))
+    return (bool(inc_original), bool(inc_cover))
+
+
 @router.get("/api/health")
 def health(request: Request) -> dict:
     return {"status": "ok", "version": getattr(request.app.state, "version", "dev")}
@@ -73,14 +81,14 @@ def list_songs(request: Request) -> dict:
 @router.post("/api/setlist")
 def create_setlist(payload: SetlistRequest, request: Request) -> dict:
     interpreter = request.app.state.interpreter
-    songs = _apply_cover_filter(
-        request.app.state.songs, payload.include_original, payload.include_cover
-    )
 
-    # print("TEST:", interpreter)
-    # print("TEST:", payload.prompt, payload.bands, payload.stages, payload.stage_count, payload.target_minutes)
     params: MoodParameters = interpreter.interpret(payload.prompt)
-    # print("TEST:", params, payload.bands, payload.stages, payload.stage_count, payload.target_minutes)
+
+    # 커버/오리지널: 사용자가 체크박스를 명시하면 그 값, 아니면 LLM song_type으로 결정(기본 ALL).
+    inc_original, inc_cover = _resolve_song_type(
+        payload.include_original, payload.include_cover, params.song_type
+    )
+    songs = _apply_cover_filter(request.app.state.songs, inc_original, inc_cover)
 
     # 밴드 필터(설정 §5-1b): 빈 목록/미지정 = ALL.
     band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
@@ -120,6 +128,7 @@ def create_setlist(payload: SetlistRequest, request: Request) -> dict:
     result = serialize_setlist(setlist)
     # 실제 적용된 밴드 필터(프롬프트 자동감지 포함) — 프론트가 체크박스 동기화에 사용.
     result["applied_bands"] = sorted(band_filter) if band_filter else []
-
-    # print("TEST:", result)
+    # 실제 적용된 곡 종류(커버/오리지널) — 프론트가 체크박스 반영에 사용.
+    result["include_original"] = inc_original
+    result["include_cover"] = inc_cover
     return result

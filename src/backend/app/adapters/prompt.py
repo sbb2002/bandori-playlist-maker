@@ -49,10 +49,12 @@ SYSTEM_PROMPT = (
     "- interpretation_summary: 이 플레이리스트의 분위기를 한 문장으로 따뜻하게 요약한 한국어 "
     "플레이버 텍스트(80자 이내). 숫자·수치(밝기 0.7 같은) 나열 금지, 감성적으로.\n"
     "- tags: 이 플레이리스트를 표현하는 인스타그램식 해시태그 키워드 배열(최대 5개, # 없이, "
-    "한국어 짧은 단어). 예: [\"드라이브\",\"밝은\",\"설렘\"]. 억지로 다 채우지 말고 어울리는 만큼만.\n\n"
+    "한국어 짧은 단어). 예: [\"드라이브\",\"밝은\",\"설렘\"]. 억지로 다 채우지 말고 어울리는 만큼만.\n"
+    "- song_type: \"all\" | \"original\" | \"cover\". 사용자가 '커버곡만/커버로'라 하면 \"cover\", "
+    "'오리지널만/원곡만'이면 \"original\", 언급이 없으면 \"all\".\n\n"
     '예: {"brightness":0.7,"start_energy":0.35,"end_energy":0.85,"stage_count":3,'
     '"target_minutes":60,"interpretation_summary":"주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",'
-    '"tags":["드라이브","설렘","주말","고조되는"]}'
+    '"tags":["드라이브","설렘","주말","고조되는"],"song_type":"all"}'
 )
 
 # OpenRouter response_format용 JSON 스키마(structured output 지원 모델에서 사용).
@@ -73,6 +75,7 @@ RESPONSE_JSON_SCHEMA = {
                 "target_minutes": {"type": ["integer", "null"]},
                 "interpretation_summary": {"type": "string"},
                 "tags": {"type": ["array", "null"], "items": {"type": "string"}},
+                "song_type": {"type": "string", "enum": ["all", "original", "cover"]},
             },
             "required": [
                 "brightness",
@@ -83,6 +86,7 @@ RESPONSE_JSON_SCHEMA = {
                 "target_minutes",
                 "interpretation_summary",
                 "tags",
+                "song_type",
             ],
         },
     },
@@ -171,6 +175,10 @@ def parse_mood(raw_text: str) -> MoodParameters:
 
     tags = _clean_tags(obj.get("tags"))
 
+    song_type = str(obj.get("song_type", "all")).strip().lower()
+    if song_type not in ("all", "original", "cover"):
+        song_type = "all"
+
     return MoodParameters(
         brightness=brightness,
         start_energy=start_energy,
@@ -180,6 +188,7 @@ def parse_mood(raw_text: str) -> MoodParameters:
         interpretation_summary=summary,
         stage_energies=stage_energies,
         tags=tags,
+        song_type=song_type,
     )
 
 

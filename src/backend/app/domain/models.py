@@ -48,6 +48,9 @@ class MoodParameters:
     stage_energies: list[float] | None = None
     # 인스타그램식 해시태그 키워드(# 없이, 최대 5개). 요약 카드에 감성 태그로 표시. None=없음.
     tags: list[str] | None = None
+    # 곡 종류 필터 의도: "all" | "original" | "cover". 사용자가 커버/오리지널만 원하면 그에 맞게,
+    # 아니면 "all". 사용자가 체크박스를 명시하면 그게 우선(라우트에서 조정).
+    song_type: str = "all"
 
 
 @dataclass(frozen=True)
