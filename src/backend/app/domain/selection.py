@@ -11,11 +11,10 @@
 
 from __future__ import annotations
 
-import math
 import random
 
 from .energy import distribute_counts, stage_energy_targets, total_song_count
-from .harmonic import harmonic_label
+from .harmonic import harmonic_label, is_compatible
 from .models import (
     MoodParameters,
     NoSetlistError,
@@ -41,8 +40,7 @@ DEFAULT_AVG_SONG_SECONDS = 213
 # 2단계 엔진 파라미터(R&D §4.2 권장 기본값). 파일럿 후 실사용 피드백으로 튜닝.
 _TOL = 0.08              # Stage A 강도 허용창(목표에서 이 이내만 후보)
 _BRIGHTNESS_BUCKET = 0.25  # Stage A 밝기 근접 버킷 폭(같은 버킷 내에선 rng 변주)
-_W_E, _W_B, _W_T = 1.0, 0.9, 1.1  # 시퀀싱 특징 가중(에너지·밝기·조성)
-_TONALITY_HEIGHT = 2.0 * math.sin(math.pi / 12)  # ≈0.5176, EPJ 조성 3D 임베딩 높이
+_CONT_WINDOW = 0.15      # Stage B 경계 연속성 창(최근접 대비 이 범위 내 후보는 랜덤 — 다양성)
 
 
 def _clamp(value: float, lo: float, hi: float) -> float:
@@ -63,53 +61,37 @@ def _brightness_scores(pool: list[Song]) -> dict[int, float]:
     return scores
 
 
-def _tonality_xyz(camelot: str) -> tuple[float, float, float]:
-    """Camelot 코드 → 5도권 12각기둥 3D 좌표(EPJ §4.6). 장조=바닥, 단조=높이 h."""
-    number = int(camelot[:-1])
-    letter = camelot[-1]
-    theta = 2.0 * math.pi * (number - 1) / 12.0
-    z = 0.0 if letter == "B" else _TONALITY_HEIGHT
-    return (math.cos(theta), math.sin(theta), z)
+def _sequence_by_continuity(
+    members: list[Song],
+    target: float,
+    prev_outro: float | None,
+    rng: random.Random,
+) -> list[Song]:
+    """곡 경계 텐션 연속성 기반 방향성 그리디 체인(사용자 §종합, 2026-07-11).
 
+    이전 곡 **아웃트로 텐션 ↔ 다음 곡 인트로 텐션**의 차이를 최소화하도록 이어붙인다. 곡 *내부*
+    텐션 변동은 정상으로 보고 무시하며, 오직 곡 *경계*의 급차이만 줄인다.
 
-def _feature(song: Song, brightness: dict[int, float]) -> tuple[float, ...]:
-    """시퀀싱용 가중 특징벡터(에너지·밝기·조성3D)."""
-    x, y, z = _tonality_xyz(song.camelot)
-    brightness01 = brightness[song.idx] * 0.5 + 0.5
-    return (_W_E * song.energy, _W_B * brightness01, _W_T * x, _W_T * y, _W_T * z)
-
-
-def _distance(a: Song, b: Song, brightness: dict[int, float]) -> float:
-    fa = _feature(a, brightness)
-    fb = _feature(b, brightness)
-    return math.sqrt(sum((p - q) ** 2 for p, q in zip(fa, fb)))
-
-
-def _sequence_ham2(members: list[Song], target: float, brightness: dict[int, float]) -> list[Song]:
-    """HAM-2(Spotify §3.1.2): 시드에서 시작해 매 스텝 부분경로 머리/꼬리 중 특징거리 최소 곡 부착.
-
-    시드 = 단계 강도 목표에 가장 가까운 곡. 결정적(members 순서·idx 타이브레이크).
+    - seed: 이전 스테이지 아웃트로가 있으면 그와 인트로가 가장 가까운 곡(경계 접합), 없으면(첫
+      스테이지) 단계 강도 목표 근접 곡.
+    - 이후: 직전 곡 아웃트로와 인트로 차가 최소인 후보(±`_CONT_WINDOW`) 중, 하모닉 호환을
+      소프트 우선하고 그 안에서 랜덤 선택(사용자 '랜덤 셀렉트' + 다양성).
     """
-    seed = min(members, key=lambda s: (abs(s.energy - target), s.idx))
+    if prev_outro is None:
+        seed = min(members, key=lambda s: (abs(s.energy - target), s.idx))
+    else:
+        seed = min(members, key=lambda s: (abs(prev_outro - s.intro_energy), s.idx))
     seq = [seed]
     rem = [s for s in members if s.idx != seed.idx]
     while rem:
-        head, tail = seq[0], seq[-1]
-        best: Song | None = None
-        best_dist = math.inf
-        attach = "tail"
-        for candidate in rem:
-            dist_head = _distance(head, candidate, brightness)
-            dist_tail = _distance(tail, candidate, brightness)
-            if dist_head < best_dist:
-                best_dist, best, attach = dist_head, candidate, "head"
-            if dist_tail < best_dist:
-                best_dist, best, attach = dist_tail, candidate, "tail"
-        if attach == "head":
-            seq.insert(0, best)  # type: ignore[arg-type]
-        else:
-            seq.append(best)  # type: ignore[arg-type]
-        rem = [s for s in rem if s.idx != best.idx]  # type: ignore[union-attr]
+        current = seq[-1]
+        rem.sort(key=lambda c: (abs(current.outro_energy - c.intro_energy), c.idx))
+        nearest = abs(current.outro_energy - rem[0].intro_energy)
+        window = [c for c in rem if abs(current.outro_energy - c.intro_energy) <= nearest + _CONT_WINDOW]
+        compatible = [c for c in window if is_compatible(current.camelot, c.camelot)]
+        pick = rng.choice(compatible or window)
+        seq.append(pick)
+        rem.remove(pick)
     return seq
 
 
@@ -221,21 +203,18 @@ def build_setlist(
             del remaining[s.idx]
         stage_members.append(chosen)
 
-    # ── Stage B: SEQUENCE — 단계 내부 HAM-2 정렬 + 단계 경계 아크 접합 ──
+    # ── Stage B: SEQUENCE — 곡 경계 텐션 연속성 체인(이전 아웃트로 ↔ 다음 인트로) ──
     stages_out: list[Stage] = []
     picks: list[Pick] = []
     prev: Song | None = None
     position = 0
-    ordered: list[Song] = []
+    prev_outro: float | None = None  # 직전 스테이지 마지막 곡의 아웃트로 텐션(경계 접합용)
 
     for stage_index, (target, members) in enumerate(zip(targets, stage_members)):
         stages_out.append(Stage(index=stage_index, energy_target=round(target, 4)))
         if not members:
             continue
-        seq = _sequence_ham2(members, target, brightness)
-        # 아크 접합: 이전 단계 끝 곡과 더 가까운 방향으로 이어붙인다(진행 아크 보존).
-        if ordered and _distance(ordered[-1], seq[0], brightness) > _distance(ordered[-1], seq[-1], brightness):
-            seq.reverse()
+        seq = _sequence_by_continuity(members, target, prev_outro, rng)
         for s in seq:
             harmonic = harmonic_label(None if prev is None else prev.camelot, s.camelot)
             reason = _make_reason(
@@ -256,7 +235,7 @@ def build_setlist(
             )
             prev = s
             position += 1
-        ordered.extend(seq)
+        prev_outro = seq[-1].outro_energy
 
     if not picks:
         raise NoSetlistError("세트리스트를 구성하지 못했습니다(곡 수 산정 결과 0).")

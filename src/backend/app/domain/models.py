@@ -27,6 +27,10 @@ class Song:
     shape: str
     eligible_band: bool
     duration_sec: int | None = None
+    # 곡 경계 텐션(전곡 프레임별 강도의 인트로 0~15s / 아웃트로 last-15s 평균; i_* 동일 스케일).
+    # 시퀀싱에서 이전 곡 아웃트로 ↔ 다음 곡 인트로를 매끄럽게 잇는 데 쓴다.
+    intro_energy: float = 0.0
+    outro_energy: float = 0.0
 
 
 @dataclass(frozen=True)

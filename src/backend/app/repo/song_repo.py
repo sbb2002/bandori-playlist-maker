@@ -46,6 +46,9 @@ def _to_song(row: dict[str, str], energy: float) -> Song:
     duration_raw = (row.get("duration_sec") or "").strip()
     duration_sec = int(duration_raw) if duration_raw else None
 
+    intro_raw = (row.get("i_start") or "").strip()
+    outro_raw = (row.get("i_end") or "").strip()
+
     return Song(
         idx=int(row["idx"]),
         band=row["band"],
@@ -57,6 +60,8 @@ def _to_song(row: dict[str, str], energy: float) -> Song:
         shape=row["shape"],
         eligible_band=str(row["eligible_band"]).strip().lower() == "true",
         duration_sec=duration_sec,
+        intro_energy=float(intro_raw) if intro_raw else 0.0,
+        outro_energy=float(outro_raw) if outro_raw else 0.0,
     )
 
 

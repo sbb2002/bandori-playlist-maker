@@ -62,6 +62,19 @@ def test_genuinely_quiet_songs_rate_low():
         assert song.energy <= 0.1, f"{song.song} intensity={song.energy:.3f}"
 
 
+def test_boundary_tension_continuity_is_smooth():
+    """곡 경계 텐션 연속성(사용자 §종합): 이전 아웃트로↔다음 인트로 평균 급차이가 작아야 한다."""
+    import statistics
+    songs = load_songs()
+    by_idx = {s.idx: s for s in songs}
+    sl = build_setlist(songs, _quiet_params(), target_seconds=60 * 60, rng=random.Random(0))
+    gaps = [
+        abs(by_idx[a.idx].outro_energy - by_idx[b.idx].intro_energy)
+        for a, b in zip(sl.picks, sl.picks[1:])
+    ]
+    assert statistics.mean(gaps) < 0.40  # 베이스라인(연속성 미적용) ~0.56 → 개선
+
+
 def test_seed_reproducible_on_real_data():
     songs = load_songs()
     params = _quiet_params()
