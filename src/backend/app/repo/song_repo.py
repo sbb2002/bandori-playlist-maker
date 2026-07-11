@@ -60,9 +60,8 @@ def _to_song(row: dict[str, str], energy: float) -> Song:
     )
 
 
-# 강도(intensity) power-mean 지수(soft-OR). 클수록 보수적(누출↓), 작을수록 다양성↑.
-# R&D 보고서(docs/research/2026-07-11-playlist-sequencing-strategy.md §2-i, §3.1) 권장 p=3.
-_INTENSITY_P = 3
+# 강도(intensity) soft-OR power-mean 지수. energy_full(전곡)과 acousticness를 결합.
+_INTENSITY_P = 2
 
 
 def _percentile_ranker(values: list[float]) -> Callable[[float], float]:
@@ -88,13 +87,18 @@ def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
     """songs_master.csv를 읽어 전체 곡 목록을 반환한다.
 
     eligible 여부와 무관하게 전 행을 적재한다(후보 필터링은 선곡 엔진이 수행).
-    `Song.energy`는 무드 **강도(intensity)** — eligible 풀 기준 백분위 + power-mean(p=3)로 산출.
+    `Song.energy`는 무드 **강도(intensity)** — `energy_full`(전곡 재추출)과 acousticness를
+    soft-OR(power-mean p=2)로 결합해 산출한다.
 
-    데이터 검증(2026-07-11) 및 R&D 시퀀싱 전략 보고서(§2-i):
+    데이터 검증(2026-07-11) 및 전곡 재추출 보고서:
     - `energy` 컬럼(EMOI-MAP 펄스용)은 무드와 무관/역전 → 폐기.
-    - `energy_proxy`(부호반전)·`acousticness_proxy`를 각각 백분위 변환 후, 어느 한쪽이라도
-      '시끄럽다'면 시끄럽게 보는 soft-OR(power-mean p=3)로 결합. 발췌 편향(인트로만 조용한
-      헤비메탈 등)을 완화한다. 근본 해결은 전곡 재추출(기기 B, 보고서 §5).
+    - `energy_proxy`·`acousticness_proxy`는 **발췌 구간만** 반영 → 조용한 인트로 곡을 오판.
+      데이터팀이 로컬 전곡 오디오에서 지각 에너지 복합(perc·onset·zcr·centroid·flatness의
+      전곡 평균 + rms 피크)을 재추출해 `energy_full`(전곡, 0~1) 신설
+      (`src/scripts/data/build_energy_full.py`, `docs/research/2026-07-11-full-track-energy-extraction.md`).
+    - 최종 강도 = soft-OR(`energy_full`, `−acousticness_proxy` 백분위): 전곡 에너지가 높거나
+      비어쿠스틱하면 시끄럽게 본다. 발췌 편향으로 못 잡던 곡(헤비메탈 黒のバースデイ 등)을 구제.
+    - `energy_full` 결측 시 acousticness 백분위로 폴백.
 
     Raises:
         FileNotFoundError: CSV가 없는 경우.
@@ -108,13 +112,13 @@ def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
 
     # 백분위는 후보가 되는 eligible 풀 분포 기준(밴드 필터와 무관하게 안정).
     eligible = [r for r in rows if str(r["eligible_band"]).strip().lower() == "true"]
-    rank_energy = _percentile_ranker([-float(r["energy_proxy"]) for r in eligible])
     rank_acoustic = _percentile_ranker([-float(r["acousticness_proxy"]) for r in eligible])
     p = _INTENSITY_P
 
     def intensity(row: dict[str, str]) -> float:
-        pe = rank_energy(-float(row["energy_proxy"]))       # 1=가장 시끄러움
-        pa = rank_acoustic(-float(row["acousticness_proxy"]))  # 1=가장 비어쿠스틱
-        return ((pe ** p + pa ** p) / 2.0) ** (1.0 / p)
+        pa = rank_acoustic(-float(row["acousticness_proxy"]))  # 1=가장 비어쿠스틱(시끄러움)
+        ef_raw = (row.get("energy_full") or "").strip()
+        ef = float(ef_raw) if ef_raw else pa  # 전곡 에너지(0~1). 결측 시 acousticness로 폴백
+        return ((ef ** p + pa ** p) / 2.0) ** (1.0 / p)
 
     return [_to_song(r, intensity(r)) for r in rows]
