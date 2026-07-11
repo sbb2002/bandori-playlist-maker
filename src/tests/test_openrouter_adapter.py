@@ -62,6 +62,15 @@ def test_markdown_fenced_json_is_parsed():
     assert params.target_minutes is None
 
 
+def test_parse_stage_energies_nonmonotonic():
+    from app.adapters.prompt import parse_mood
+    p = parse_mood(
+        '{"brightness":0.3,"start_energy":0.3,"end_energy":0.4,"stage_count":4,'
+        '"stage_energies":[0.3,0.85,0.85,0.4],"target_minutes":45,"interpretation_summary":"유산소"}'
+    )
+    assert p.stage_energies == [0.3, 0.85, 0.85, 0.4]
+
+
 def test_out_of_range_values_clamped():
     content = ('{"brightness":5,"start_energy":-2,"end_energy":9,'
                '"stage_count":99,"target_minutes":9999,"interpretation_summary":""}')

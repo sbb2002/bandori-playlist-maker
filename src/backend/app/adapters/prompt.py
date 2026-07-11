@@ -34,6 +34,9 @@ SYSTEM_PROMPT = (
     "요청이 명시될 때만** start보다 크게 한다. '조용/잔잔/차분' 처럼 전체 무드가 일정한 요청은 "
     "start와 거의 같게(플랫) 두어 끝까지 낮게 유지한다.\n"
     "- stage_count: 2~5 정수. 시간축 에너지 단계 수(기본 3).\n"
+    "- stage_energies: (선택) 0.0~1.0 실수 배열(길이 2~5). 운동·유산소·러닝처럼 에너지가 오르내리는 "
+    "활동은 자연스러운 흐름을 단계별로 담아라. 예: 유산소=[0.3,0.85,0.85,0.4](준비운동→본운동→정리운동). "
+    "주면 start_energy/end_energy/stage_count보다 우선한다. 단순 상승/하강/일정 요청은 생략하고 start/end만.\n"
     "- target_minutes: 10~180 정수 또는 null. 발화에 재생시간이 있으면 분 단위로, 없으면 null.\n"
     "- interpretation_summary: 120자 이내 한국어 요약(선택 이유 설명용).\n\n"
     '예: {"brightness":0.7,"start_energy":0.35,"end_energy":0.85,"stage_count":3,'
@@ -54,6 +57,7 @@ RESPONSE_JSON_SCHEMA = {
                 "start_energy": {"type": "number"},
                 "end_energy": {"type": "number"},
                 "stage_count": {"type": "integer"},
+                "stage_energies": {"type": ["array", "null"], "items": {"type": "number"}},
                 "target_minutes": {"type": ["integer", "null"]},
                 "interpretation_summary": {"type": "string"},
             },
@@ -62,6 +66,7 @@ RESPONSE_JSON_SCHEMA = {
                 "start_energy",
                 "end_energy",
                 "stage_count",
+                "stage_energies",
                 "target_minutes",
                 "interpretation_summary",
             ],
@@ -140,6 +145,16 @@ def parse_mood(raw_text: str) -> MoodParameters:
         summary = ""
     summary = summary.strip()[:_SUMMARY_MAX]
 
+    # 비단조 아크(선택): 길이 2~5 실수 배열이면 클램프, 아니면 None(선형 아크로 폴백).
+    stage_energies = obj.get("stage_energies")
+    if isinstance(stage_energies, list) and 2 <= len(stage_energies) <= 5:
+        try:
+            stage_energies = [_clamp(float(e), *_ENERGY_RANGE) for e in stage_energies]
+        except (TypeError, ValueError):
+            stage_energies = None
+    else:
+        stage_energies = None
+
     return MoodParameters(
         brightness=brightness,
         start_energy=start_energy,
@@ -147,4 +162,5 @@ def parse_mood(raw_text: str) -> MoodParameters:
         stage_count=stage_count,
         target_minutes=target_minutes,
         interpretation_summary=summary,
+        stage_energies=stage_energies,
     )

@@ -114,6 +114,16 @@ def test_stage_specs_override_energy_and_counts():
     assert sum(1 for p in setlist.picks if p.stage_index == 1) == 3
 
 
+def test_stage_energies_produce_nonmonotonic_arc():
+    # 비단조 아크(유산소류): stage_energies가 선형 아크를 덮어써 단계 목표가 오르내린다.
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=3,
+        target_minutes=None, interpretation_summary="", stage_energies=[0.2, 0.9, 0.3],
+    )
+    setlist = build_setlist(_songs(), params, target_seconds=9 * 213, rng=random.Random(0))
+    assert [s.energy_target for s in setlist.stages] == [0.2, 0.9, 0.3]
+
+
 def test_stage_specs_energy_clamped():
     specs = [StageSpec(energy_target=5.0, song_count=1), StageSpec(energy_target=-3.0, song_count=1)]
     setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs, rng=random.Random(0))

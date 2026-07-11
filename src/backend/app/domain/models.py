@@ -43,6 +43,9 @@ class MoodParameters:
     stage_count: int           # 2 ~ 5
     target_minutes: int | None # 10 ~ 180, 또는 None(API가 60 적용)
     interpretation_summary: str = ""
+    # 단계별 에너지 목표(비단조 아크 지원 — 유산소=준비↓→본운동↑→정리↓ 등). 주어지면
+    # start/end/stage_count 대신 이 배열을 단계 목표로 쓴다(선형 보간 불필요). None이면 선형 아크.
+    stage_energies: list[float] | None = None
 
 
 @dataclass(frozen=True)

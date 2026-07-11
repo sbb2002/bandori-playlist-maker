@@ -150,6 +150,12 @@ def _stage_targets_and_counts(
         targets = [_clamp(s.energy_target, 0.0, 1.0) for s in stage_specs]
         counts = [max(1, s.song_count) for s in stage_specs]
         return targets, counts
+    if params.stage_energies:
+        # 비단조 아크(LLM 산출): 단계별 에너지 배열을 그대로 목표로. 곡 수는 균등 분배.
+        targets = [_clamp(e, 0.0, 1.0) for e in params.stage_energies]
+        n = len(targets)
+        total = min(total_song_count(target_seconds, avg_song_seconds, n), pool_size)
+        return targets, distribute_counts(total, n)
     targets = stage_energy_targets(params.start_energy, params.end_energy, params.stage_count)
     total = min(total_song_count(target_seconds, avg_song_seconds, params.stage_count), pool_size)
     counts = distribute_counts(total, params.stage_count)
