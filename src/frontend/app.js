@@ -24,6 +24,9 @@ let estimatedTotal = 0;
 let playedSeconds = 0;
 let halfFired = false;
 let errorSkips = 0; // 재생불가 영상 연속 스킵 가드(무한 루프 방지)
+let loadedVideoId = null; // 플레이어에 로드/큐된 영상 id — 편집 후 재생 정합에 사용
+let playbackStarted = false; // 첫 PLAYING 이후 true — 편집 시 cue(정지) vs load(자동재생) 선택
+const editHistory = []; // 편집(순서이동·제거) 되돌리기 스택 — Ctrl+Z
 
 // ── umami 계측(스크립트 미설치 시 무해) ─────────────────────────────────────────
 function track(name, data) {
@@ -344,6 +347,9 @@ function renderResult(data) {
   halfFired = false;
   errorSkips = 0;
   current = -1;
+  playbackStarted = false;
+  loadedVideoId = null;
+  editHistory.length = 0; // 새 플레이리스트 → 편집 히스토리 리셋
 
   if (!picks.length) {
     showError("조건에 맞는 곡을 찾지 못했어요. 요청을 조금 바꿔 보세요.");
@@ -424,9 +430,34 @@ function renderTracklist(list) {
     badges.appendChild(makeBadge("", p.camelot));
 
     bodyEl.append(title, band, reason, badges);
-    li.append(pos, bodyEl);
+    li.append(pos, bodyEl, makeTrackActions(li, i));
     tracklistEl.appendChild(li);
   });
+}
+
+// 호버 시 나타나는 트랙 우측 액션 — ⠿ 순서 이동 핸들, − 제거. (곡 추가 +는 Phase 2.)
+function makeTrackActions(li, index) {
+  const actions = elDiv("track-actions");
+  actions.addEventListener("click", (e) => e.stopPropagation()); // 행 클릭(재생) 방지
+
+  const handle = document.createElement("button");
+  handle.type = "button";
+  handle.className = "track-btn track-handle";
+  handle.title = "드래그해서 순서 이동";
+  handle.setAttribute("aria-label", "순서 이동 핸들");
+  handle.textContent = "⠿";
+  handle.addEventListener("pointerdown", (e) => startReorder(handle, li, e));
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "track-btn remove";
+  removeBtn.title = "이 곡 제거";
+  removeBtn.setAttribute("aria-label", "곡 제거");
+  removeBtn.textContent = "−";
+  removeBtn.addEventListener("click", () => removeSong(index));
+
+  actions.append(handle, removeBtn);
+  return actions;
 }
 
 function makeBadge(kind, label) {
@@ -457,6 +488,8 @@ function loadYouTubeApi() {
 
 function startPlayback() {
   current = 0;
+  loadedVideoId = picks[0].video_id;
+  playbackStarted = false;
   highlight(0);
   updateNowPlaying(picks[0]);
 
@@ -487,6 +520,7 @@ function startPlayback() {
 function onPlayerStateChange(e) {
   if (e.data === YT.PlayerState.PLAYING) {
     errorSkips = 0; // 정상 재생 시 스킵 가드 리셋
+    playbackStarted = true; // 이후 편집 시 load(자동재생) 허용
   } else if (e.data === YT.PlayerState.ENDED) {
     playedSeconds += safeDuration();
     maybeFireHalf();
@@ -514,6 +548,7 @@ function playSong(index, auto) {
   if (index < 0 || index >= picks.length) return;
   current = index;
   const p = picks[index];
+  loadedVideoId = p.video_id;
   highlight(index);
   updateNowPlaying(p);
   // 사용자 클릭/자동 전환 — 상호작용 이후이므로 loadVideoById(자동재생) 사용.
@@ -536,6 +571,134 @@ function maybeFireHalf() {
     halfFired = true;
     track("playlist_half_played", { played_seconds: Math.round(playedSeconds) });
   }
+}
+
+// ── 플레이리스트 편집: 순서 이동 · 곡 제거 · 되돌리기 (사용자 제안 2026-07-11) ────────
+// 편집은 클라이언트 `picks` 배열 조작 + 재렌더로 처리(백엔드 무관). 재생 흐름은 loadedVideoId
+// 기준으로 정합해 편집 중에도 현재 곡이 유지되도록 한다.
+
+// ⠿ 핸들 포인터 드래그로 순서 이동. 드래그 중엔 DOM만 실시간 재배치하고, 놓을 때 picks를
+// 새 순서로 재구성한다(드래그 도중 재렌더로 드래그가 끊기지 않도록).
+function startReorder(handle, li, e) {
+  e.preventDefault();
+  e.stopPropagation();
+  handle.setPointerCapture(e.pointerId);
+  li.classList.add("dragging");
+  const onMove = (ev) => {
+    const after = getDragAfterElement(tracklistEl, ev.clientY);
+    if (after == null) tracklistEl.appendChild(li);
+    else if (after !== li) tracklistEl.insertBefore(li, after);
+  };
+  const onUp = () => {
+    li.classList.remove("dragging");
+    try { handle.releasePointerCapture(e.pointerId); } catch (_) {/* 이미 해제됨 */}
+    handle.removeEventListener("pointermove", onMove);
+    handle.removeEventListener("pointerup", onUp);
+    commitReorderFromDom();
+  };
+  handle.addEventListener("pointermove", onMove);
+  handle.addEventListener("pointerup", onUp);
+}
+
+// 커서 Y 위로 들어온 첫 형제(드래그 중 항목 제외)를 찾아 그 앞에 삽입할 기준으로 삼는다.
+function getDragAfterElement(container, y) {
+  const els = [...container.querySelectorAll(".track:not(.dragging)")];
+  let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+  for (const child of els) {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) closest = { offset, element: child };
+  }
+  return closest.element;
+}
+
+// DOM의 새 순서(각 li의 렌더시점 dataset.index)로 picks를 재구성한다.
+function commitReorderFromDom() {
+  const order = [...tracklistEl.children].map((li) => Number(li.dataset.index));
+  if (order.every((v, i) => v === i)) return; // 순서 변화 없음
+  pushHistory();
+  picks = order.map((i) => picks[i]);
+  renderTracklist(picks);
+  reconcilePlayer();
+  syncGraphToEdited();
+}
+
+// − 버튼: 해당 곡 제거. 재생 중이던 곡이면 reconcilePlayer가 다음 곡으로 넘긴다.
+function removeSong(index) {
+  if (index < 0 || index >= picks.length) return;
+  pushHistory();
+  picks.splice(index, 1);
+  if (!picks.length) {
+    hide(resultEl);
+    showError("모든 곡을 제거했어요. 새 요청을 만들거나 되돌리기(Ctrl+Z) 하세요.");
+    return;
+  }
+  renderTracklist(picks);
+  reconcilePlayer();
+  syncGraphToEdited();
+}
+
+// 편집 후 하이라이트·재생을 정합한다. 재생 중이던 곡이 남아 있으면 그 위치로 current를 옮기고,
+// 제거됐으면 그 슬롯(클램프)의 곡으로 전환한다(재생 시작 전이면 cue, 이후면 load).
+function reconcilePlayer() {
+  const idx = picks.findIndex((p) => p.video_id === loadedVideoId);
+  if (idx >= 0) {
+    current = idx;
+    highlight(current);
+    updateNowPlaying(picks[current]);
+    return;
+  }
+  current = Math.max(0, Math.min(current, picks.length - 1));
+  const p = picks[current];
+  loadedVideoId = p.video_id;
+  highlight(current);
+  updateNowPlaying(p);
+  if (!player) return;
+  if (playbackStarted && typeof player.loadVideoById === "function") player.loadVideoById(p.video_id);
+  else if (typeof player.cueVideoById === "function") player.cueVideoById(p.video_id);
+}
+
+function pushHistory() {
+  editHistory.push({ picks: picks.slice(), current });
+  if (editHistory.length > 50) editHistory.shift();
+}
+
+// Ctrl/Cmd+Z — 직전 편집 상태(순서·구성) 복원. 텍스트 입력 중엔 브라우저 기본 되돌리기 양보.
+document.addEventListener("keydown", (e) => {
+  if (!(e.ctrlKey || e.metaKey) || e.shiftKey) return;
+  if (e.key !== "z" && e.key !== "Z") return;
+  const tag = (document.activeElement && document.activeElement.tagName) || "";
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
+  if (!editHistory.length) return;
+  e.preventDefault();
+  const prev = editHistory.pop();
+  picks = prev.picks;
+  current = prev.current;
+  hide(errorEl);
+  show(resultEl); // 전부 제거 후 되돌리기면 결과 다시 표시
+  renderTracklist(picks);
+  reconcilePlayer();
+  syncGraphToEdited();
+});
+
+// 편집 후 에너지 그래프를 '실제 배치'로 갱신(옵션 기능). 편집된 순서를 n개 연속 그룹으로 나눠
+// 각 그룹의 평균 에너지·곡수 비율로 세그먼트를 재구성한다. stageTouched는 건드리지 않아
+// 다음 요청 입력으로 새지 않는다(그래프는 반영만, 코멘트 #1 대안 2 원칙 유지).
+function syncGraphToEdited() {
+  if (!stageModel || !picks.length) return;
+  const n = Math.max(1, Math.min(stageModel.segments.length, picks.length));
+  const segments = [];
+  for (let i = 0; i < n; i++) {
+    const startIdx = Math.floor((i * picks.length) / n);
+    const endIdx = Math.floor(((i + 1) * picks.length) / n);
+    const slice = picks.slice(startIdx, Math.max(endIdx, startIdx + 1));
+    const mean = slice.reduce((a, p) => a + (typeof p.energy === "number" ? p.energy : 0), 0) / slice.length;
+    segments.push({ energy: clamp01(+mean.toFixed(2)), width: (endIdx - startIdx) / picks.length });
+  }
+  const wsum = segments.reduce((a, s) => a + s.width, 0) || 1;
+  segments.forEach((s) => (s.width = s.width / wsum));
+  stageModel = { totalMinutes: stageModel.totalMinutes, segments };
+  renderStageGraph();
 }
 
 // ── UI 헬퍼 ───────────────────────────────────────────────────────────────────

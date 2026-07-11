@@ -220,6 +220,32 @@ button.ghost {
 .badge.non_harmonic { color: var(--warn); }
 .badge.seed { color: var(--accent-2); }
 
+/* 트랙 편집 액션 — 호버 시 우측에 ⠿ 이동 핸들 / − 제거 노출 */
+.track-actions {
+  flex: 0 0 auto; align-self: center;
+  display: flex; flex-direction: column; gap: 4px;
+  opacity: 0; transition: opacity 0.12s;
+}
+.track:hover .track-actions, .track-actions:focus-within { opacity: 1; }
+.track-btn {
+  width: 26px; height: 26px; padding: 0;
+  display: grid; place-items: center;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 7px;
+  background: var(--card-2); color: var(--muted);
+  font-size: 0.95rem; line-height: 1; cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+.track-btn:hover { color: var(--text); border-color: rgba(124,108,255,0.6); }
+.track-btn.remove:hover { color: var(--err); border-color: var(--err); }
+.track-handle { cursor: grab; touch-action: none; }
+.track-handle:active { cursor: grabbing; }
+.track.dragging { opacity: 0.6; border-color: var(--accent); }
+
+/* 터치/호버 불가 환경에선 액션 상시 노출 */
+@media (hover: none) {
+  .track-actions { opacity: 1; }
+}
+
 @media (max-width: 520px) {
   .options-grid { grid-template-columns: 1fr; }
   .hero h1 { font-size: 1.6rem; }
