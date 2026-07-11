@@ -14,6 +14,9 @@ audio_cache/
 *.npy
 *.npz
 
+# 외부 참고 논문(저작권·대용량 바이너리 — 로컬 유지, R&D가 로컬에서 참조)
+docs/ref/**/*.pdf
+
 # python
 __pycache__/
 *.pyc
