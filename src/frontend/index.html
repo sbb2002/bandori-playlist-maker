@@ -8,14 +8,14 @@
   <!--
     API 베이스: 로컬 서빙(localhost)은 로컬 백엔드, 그 외(배포=GitHub Pages)는 Render 백엔드로
     자동 분기. Render 서비스명/URL이 바뀌면 아래 배포 URL만 고치면 됨.
-    umami 스크립트는 배포 시 아래 주석을 해제하고 website-id를 채운다.
   -->
   <script>
     window.SETLIST_API_BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
       ? "http://localhost:8000"
       : "https://bandori-playlist-maker.onrender.com";
   </script>
-  <!-- <script defer src="https://cloud.umami.is/script.js" data-website-id="YOUR-ID"></script> -->
+  <!-- umami 방문자 통계(cloud). app.js의 track()이 커스텀 이벤트를 이 스크립트로 전송. -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="7185d432-2c87-41e5-8166-46125dc76e33"></script>
 </head>
 <body>
   <main class="wrap">
