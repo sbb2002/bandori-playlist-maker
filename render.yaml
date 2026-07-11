@@ -21,7 +21,7 @@ services:
       # MOOD_INTERPRETER는 지정하지 않음 → 자동감지(키 있으면 openrouter, 없으면 stub).
       # 키를 아직 안 넣어도 앱은 stub로 기동됨(첫 배포 안전). 키 넣으면 openrouter로 전환.
       - key: GROQ_MODEL
-        value: nvidia/nemotron-3-nano-30b-a3b:free
+        value: openai/gpt-oss-20b
       - key: GROQ_RESPONSE_FORMAT
         value: none
       # 트래픽 급증 대비: 429/5xx 백오프 재시도 횟수(기본 2).

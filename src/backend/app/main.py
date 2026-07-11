@@ -4,19 +4,13 @@
 라우터 등록을 담당. 벤더 교체 = 아래 `_build_interpreter()` 주입 1지점 교체.
 
 주요 환경변수:
-    (OPENROUTER 사용 시)
-    GroqGROQ_API_KEY   있으면 OpenRouter 어댑터, 없으면 스텁(오프라인) 어댑터 사용.
-    OPENROUTER_MODEL     모델 ID override.
-    OPENROUTER_BASE_URL  베이스 URL override.
-
-    (GROQ 사용 시)
-    GROQ_API_KEY         Groq API 키.
-    GROQ_MODEL           모델 ID override.
+    GROQ_API_KEY         있으면 Groq 어댑터, 없으면 스텁(오프라인) 어댑터 사용.
+    GROQ_MODEL           모델 ID override(기본: groq_adapter.DEFAULT_MODEL).
     GROQ_BASE_URL        베이스 URL override.
-
-    (공통)
-    MOOD_INTERPRETER     "stub" | "openrouter" | "groq" 로 강제 선택(기본: 키 유무로 자동).
+    GROQ_MAX_RETRIES     429/5xx 백오프 재시도 횟수(기본 2).
+    MOOD_INTERPRETER     "stub" | "groq" 로 강제 선택(기본: 키 유무로 자동).
     FRONTEND_ORIGIN      CORS 허용 오리진(쉼표 구분). 개발용 localhost는 항상 허용.
+    TELEGRAM_BOT_TOKEN·TELEGRAM_CHAT_ID   운영 오류 Telegram 알림(선택, 둘 다 필요).
     SONGS_CSV            songs_master.csv 경로 override.
 """
 
@@ -106,32 +100,24 @@ def _build_interpreter() -> MoodInterpreter:
     OpenRouter 키가 있으면 운영 어댑터, 없으면 스텁 어댑터(오프라인 구동 검증용).
     """
     mode = os.environ.get("MOOD_INTERPRETER", "").strip().lower()
-    api_key = os.environ.get("GroqGROQ_API_KEY", "").strip()
+    api_key = os.environ.get("GROQ_API_KEY", "").strip()
 
-    use_openrouter = mode == "openrouter" or (mode != "stub" and bool(api_key))
+    use_llm = mode in ("groq", "openrouter") or (mode != "stub" and bool(api_key))
 
-    if use_openrouter:
+    if use_llm:
         if not api_key:
-            raise RuntimeError("MOOD_INTERPRETER=openrouter 인데 GroqGROQ_API_KEY가 없습니다.")
-        
-        # (OpenRouter 어댑터) OpenRouterMoodInterpreter를 주입.
-        # from .adapters.openrouter_adapter import DEFAULT_BASE_URL, DEFAULT_MODEL, OpenRouterMoodInterpreter
+            raise RuntimeError("MOOD_INTERPRETER로 LLM을 강제했지만 GROQ_API_KEY가 없습니다.")
 
-        # (Groq 어댑터) GroqMoodInterpreter를 주입.
+        # (Groq 어댑터) GroqMoodInterpreter를 주입. 벤더 교체 시 이 import·클래스만 바꾸면 된다.
         from .adapters.groq_adapter import DEFAULT_BASE_URL, DEFAULT_MODEL, GroqMoodInterpreter
 
-        MoodInterpreterClass = GroqMoodInterpreter  # OpenRouterMoodInterpreter
-
-        MODEL = "GROQ_MODEL"  # OpenRouter: "OPENROUTER_MODEL"
-        BASE_URL = "GROQ_BASE_URL"  # OpenRouter: "OPENRO
-
-        model = os.environ.get(MODEL, DEFAULT_MODEL)
-        base_url = os.environ.get(BASE_URL, DEFAULT_BASE_URL)
+        model = os.environ.get("GROQ_MODEL", DEFAULT_MODEL)
+        base_url = os.environ.get("GROQ_BASE_URL", DEFAULT_BASE_URL)
         referer = os.environ.get("FRONTEND_ORIGIN", "").split(",")[0].strip() or None
         response_format = os.environ.get("GROQ_RESPONSE_FORMAT", "none")
         max_retries = _env_int("GROQ_MAX_RETRIES", 2)  # 트래픽 급증 시 429 백오프 재시도 횟수
         logger.info("MoodInterpreter: Groq (model=%s, response_format=%s)", model, response_format)
-        return MoodInterpreterClass(
+        return GroqMoodInterpreter(
             api_key=api_key, model=model, base_url=base_url, referer=referer,
             response_format_mode=response_format, max_retries=max_retries,
         )
@@ -139,7 +125,7 @@ def _build_interpreter() -> MoodInterpreter:
     from .adapters.stub_adapter import StubMoodInterpreter
 
     logger.warning(
-        "MoodInterpreter: STUB (오프라인 휴리스틱). GroqGROQ_API_KEY 설정 시 OpenRouter로 자동 전환."
+        "MoodInterpreter: STUB (오프라인 휴리스틱). GROQ_API_KEY 설정 시 Groq로 자동 전환."
     )
     return StubMoodInterpreter()
 
