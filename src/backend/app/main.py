@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 from pathlib import Path
@@ -116,10 +117,15 @@ def _build_interpreter() -> MoodInterpreter:
         referer = os.environ.get("FRONTEND_ORIGIN", "").split(",")[0].strip() or None
         response_format = os.environ.get("GROQ_RESPONSE_FORMAT", "none")
         max_retries = _env_int("GROQ_MAX_RETRIES", 2)  # 트래픽 급증 시 429 백오프 재시도 횟수
-        logger.info("MoodInterpreter: Groq (model=%s, response_format=%s)", model, response_format)
+        rate_per_min = _env_int("GROQ_RATE_PER_MIN", 25)  # 프로액티브 RPM 준수(0=비활성)
+        logger.info(
+            "MoodInterpreter: Groq (model=%s, response_format=%s, rate_per_min=%s)",
+            model, response_format, rate_per_min,
+        )
         return GroqMoodInterpreter(
             api_key=api_key, model=model, base_url=base_url, referer=referer,
             response_format_mode=response_format, max_retries=max_retries,
+            rate_per_min=rate_per_min,
         )
 
     from .adapters.stub_adapter import StubMoodInterpreter
@@ -161,10 +167,69 @@ def _alert(request: Request, title: str, exc: Exception) -> None:
     task.add_done_callback(_bg_tasks.discard)
 
 
+class InflightLimitMiddleware:
+    """/api/setlist 동시 처리 수를 상한(REQUEST_QUEUE_MAX, 기본 200)으로 제한하는 ASGI 미들웨어.
+
+    스레드를 붙잡지 않고 이벤트 루프에서 in-flight 수를 카운트한다(단일 스레드라 락 불필요).
+    상한 초과 시 즉시 503 안내 + 개발자 알림(best-effort, 스로틀). CORS 헤더 유지를 위해
+    CORS 미들웨어 '안쪽'에 둔다(create_app에서 CORS보다 먼저 add → CORS가 바깥).
+    """
+
+    def __init__(self, app, limit: int = 200, path_prefix: str = "/api/setlist") -> None:
+        self.app = app
+        self.limit = max(1, limit)
+        self.path_prefix = path_prefix
+        self.count = 0
+
+    async def __call__(self, scope, receive, send) -> None:
+        if scope.get("type") != "http" or not scope.get("path", "").startswith(self.path_prefix):
+            await self.app(scope, receive, send)
+            return
+        if self.count >= self.limit:
+            self._alert_overload(scope)
+            await self._reject(send)
+            return
+        self.count += 1
+        try:
+            await self.app(scope, receive, send)
+        finally:
+            self.count -= 1
+
+    def _alert_overload(self, scope) -> None:
+        app = scope.get("app")
+        notifier = getattr(getattr(app, "state", None), "notifier", None)
+        if notifier is None:
+            return
+        try:
+            task = asyncio.create_task(
+                notifier.notify("OVERLOADED 503", f"동시 요청 상한({self.limit}) 초과 — 큐 가득")
+            )
+        except RuntimeError:
+            return
+        _bg_tasks.add(task)
+        task.add_done_callback(_bg_tasks.discard)
+
+    async def _reject(self, send) -> None:
+        payload = {"error": {"code": "OVERLOADED",
+                             "message": "요청이 너무 많아요 ㅠㅠ 나중에 다시 이용해주세요!"}}
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        await send({
+            "type": "http.response.start",
+            "status": 503,
+            "headers": [
+                (b"content-type", b"application/json; charset=utf-8"),
+                (b"content-length", str(len(body)).encode()),
+            ],
+        })
+        await send({"type": "http.response.body", "body": body})
+
+
 def create_app() -> FastAPI:
     _load_dotenv()  # 어댑터·CORS가 env를 읽기 전에 .env 주입.
     app = FastAPI(title="setlist-maker", version="0.1.0-pilot")
 
+    # 입장제어(in-flight 상한) — CORS보다 먼저 add해 CORS가 바깥에서 감싸도록(거절 응답에도 CORS 헤더).
+    app.add_middleware(InflightLimitMiddleware, limit=_env_int("REQUEST_QUEUE_MAX", 200))
     app.add_middleware(
         CORSMiddleware,
         allow_origins=_cors_origins(),  # 와일드카드 금지(backend/README §7)

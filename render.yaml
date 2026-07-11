@@ -27,6 +27,12 @@ services:
       # 트래픽 급증 대비: 429/5xx 백오프 재시도 횟수(기본 2).
       - key: GROQ_MAX_RETRIES
         value: "2"
+      # 프로액티브 RPM 준수(분당 요청 상한). Groq 모델 한도에 맞춰 조정(0=비활성).
+      - key: GROQ_RATE_PER_MIN
+        value: "25"
+      # 입장제어: /api/setlist 동시 처리 상한. 초과 시 503 안내 + 개발자 알림.
+      - key: REQUEST_QUEUE_MAX
+        value: "200"
       # 시크릿 — 커밋 금지. 대시보드에서 값 입력.
       - key: GROQ_API_KEY
         sync: false

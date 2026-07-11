@@ -158,12 +158,14 @@ async function loadBands() {
 function renderBands(bands) {
   bandListEl.replaceChildren();
   if (!bands.length) { bandListEl.textContent = "밴드 없음"; return; }
-  for (const b of bands) {
+  // 곡 추가 팝업과 동일하게 밴드 아이콘 + BAND_ORDER 순서로 표시.
+  const countByBand = new Map(bands.map((b) => [b.band, b.count]));
+  for (const band of bandsInSelectorOrder([...countByBand.keys()])) {
     const label = document.createElement("label");
     label.className = "band-item";
     const cb = document.createElement("input");
     cb.type = "checkbox";
-    cb.value = b.band;
+    cb.value = band;
     cb.className = "band-cb";
     // 사용자가 직접 토글한 것만 manualBands에 반영(요청 간 지속 대상). syncBandChecks의
     // 프로그램적 대입은 change를 발생시키지 않으므로 자동감지분은 여기 들어오지 않는다.
@@ -171,9 +173,11 @@ function renderBands(bands) {
       if (cb.checked) manualBands.add(cb.value);
       else manualBands.delete(cb.value);
     });
+    const icon = makeBandIcon(band, "band-item-icon");
     const span = document.createElement("span");
-    span.textContent = `${prettyBand(b.band)} (${b.count})`;
-    label.append(cb, span);
+    span.className = "band-item-label";
+    span.textContent = `${prettyBand(band)} (${countByBand.get(band)})`;
+    label.append(cb, icon, span);
     bandListEl.appendChild(label);
   }
 }

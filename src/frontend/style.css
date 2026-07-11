@@ -71,6 +71,11 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 }
 .band-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
 .band-item input { width: 15px; height: 15px; }
+.band-item-icon {
+  width: 18px; height: 18px; border-radius: 50%; object-fit: cover;
+  background: var(--card-2); flex: 0 0 auto;
+}
+.band-item-label { white-space: nowrap; }
 
 .type-filter { display: flex; gap: 18px; }
 .chk { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; }

@@ -18,6 +18,7 @@ from ..ports.mood_port import (
     MoodInterpretationError,
 )
 from . import prompt as prompt_mod
+from .rate_limiter import TokenBucketLimiter
 
 DEFAULT_BASE_URL = "https://api.groq.com/openai/v1"
 # 파일럿 기본: 무료 경량 모델(사용자 결정 — §④-3/§9 모델 오픈퀘스천 확정). env로 교체 가능.
@@ -41,6 +42,9 @@ class GroqMoodInterpreter:
         response_format_mode: str = "none",
         max_retries: int = 2,
         retry_base: float = 0.5,
+        rate_per_min: float = 0.0,
+        rate_max_wait: float = 20.0,
+        rate_max_waiters: int = 100,
     ) -> None:
         if not api_key:
             raise ValueError("Groq api_key가 비어 있습니다.")
@@ -52,10 +56,16 @@ class GroqMoodInterpreter:
         self._client = client or httpx.Client(timeout=timeout)
         self._referer = referer
         self._title = title
-        # 트래픽 급증 대비: 429/5xx는 지수 백오프(+지터)로 재시도해 자연 throttle.
-        # 세마포어 선블로킹은 동기 스레드풀을 고갈시켜 헬스체크를 위협할 수 있어 쓰지 않는다.
+        # 트래픽 급증 대비 2단: (1) 프로액티브 레이트리밋(RPM 준수 페이싱, rate_per_min>0 시),
+        # (2) 429/5xx 지수 백오프 재시도(사후 backstop). 세마포어 선블로킹은 스레드풀 고갈
+        # 위험이 있어 쓰지 않고, 리미터는 대기 상한(max_wait)·대기열 상한(max_waiters)으로 보호.
         self._max_retries = max(0, max_retries)
         self._retry_base = max(0.0, retry_base)
+        self._limiter = (
+            TokenBucketLimiter(rate_per_min, max_wait=rate_max_wait, max_waiters=rate_max_waiters)
+            if rate_per_min and rate_per_min > 0
+            else None
+        )
         # 응답 포맷 강제 모드: "none"(전 모델 호환, 프롬프트+관용 파서에 의존) |
         # "json_object"(JSON 모드) | "json_schema"(structured output — 지원 모델만).
         self._response_format_mode = response_format_mode.strip().lower()
@@ -83,6 +93,11 @@ class GroqMoodInterpreter:
         elif self._response_format_mode == "json_object":
             payload["response_format"] = {"type": "json_object"}
         # "none": response_format 미전송 — 강한 시스템 프롬프트 + 관용 파서로 처리(전 모델 호환).
+
+        # 프로액티브 레이트리밋(RPM 준수). 대기열/대기시간 초과 시 429로 즉시 안내.
+        if self._limiter is not None and not self._limiter.acquire():
+            raise LLMRateLimitError("요청이 많아 대기열이 가득 찼습니다(레이트리밋).")
+
         response = self._post_with_retry(payload)
 
         try:
