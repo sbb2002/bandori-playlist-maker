@@ -72,6 +72,10 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .band-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
 .band-item input { width: 15px; height: 15px; }
 
+.type-filter { display: flex; gap: 18px; }
+.chk { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; }
+.chk input { width: 16px; height: 16px; }
+
 /* 시간×에너지 텐션 그래프 편집기 */
 .stage-editor { margin-top: 12px; }
 .plot-row { display: flex; gap: 6px; }

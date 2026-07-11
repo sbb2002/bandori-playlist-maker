@@ -55,6 +55,19 @@ def test_missing_prompt_is_invalid_request(client):
     assert r.json()["error"]["code"] == "INVALID_REQUEST"
 
 
+def test_original_only_excludes_covers(client):
+    r = client.post("/api/setlist", json={"prompt": "아무거나", "include_original": True, "include_cover": False})
+    assert r.status_code == 200
+    assert all("(cover)" not in p["song"].lower() for p in r.json()["picks"])
+
+
+def test_cover_only_includes_only_covers(client):
+    r = client.post("/api/setlist", json={"prompt": "아무거나", "include_original": False, "include_cover": True})
+    assert r.status_code == 200
+    picks = r.json()["picks"]
+    assert picks and all("(cover)" in p["song"].lower() for p in picks)
+
+
 def test_out_of_range_minutes_is_invalid_request(client):
     r = client.post("/api/setlist", json={"prompt": "x", "target_minutes": 999})
     assert r.status_code == 400

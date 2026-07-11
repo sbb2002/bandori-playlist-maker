@@ -20,6 +20,20 @@ router = APIRouter()
 _DEFAULT_TARGET_MINUTES = 60
 
 
+def _is_cover(song) -> bool:
+    """커버 곡 판정 — 제목의 '(Cover)' 표기 기준(데이터 관례)."""
+    return "(cover)" in song.song.lower()
+
+
+def _apply_cover_filter(songs, include_original: bool, include_cover: bool):
+    """오리지널/커버 필터(사용자 추가제안). 둘 다 같으면(모두 체크/모두 해제) ALL."""
+    if include_original == include_cover:
+        return songs
+    if include_original:
+        return [s for s in songs if not _is_cover(s)]
+    return [s for s in songs if _is_cover(s)]
+
+
 @router.get("/api/health")
 def health() -> dict:
     return {"status": "ok"}
@@ -40,7 +54,9 @@ def list_bands(request: Request) -> dict:
 @router.post("/api/setlist")
 def create_setlist(payload: SetlistRequest, request: Request) -> dict:
     interpreter = request.app.state.interpreter
-    songs = request.app.state.songs
+    songs = _apply_cover_filter(
+        request.app.state.songs, payload.include_original, payload.include_cover
+    )
 
     params: MoodParameters = interpreter.interpret(payload.prompt)
 

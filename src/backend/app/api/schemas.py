@@ -32,6 +32,8 @@ class SetlistRequest(BaseModel):
     stage_count: int | None = Field(default=None, ge=2, le=5, description="에너지 단계 수 N")
     bands: list[str] | None = Field(default=None, max_length=50, description="밴드 필터(빈 목록/미지정=ALL)")
     stages: list[StageInput] | None = Field(default=None, min_length=1, max_length=8, description="단계 직접 지정")
+    include_original: bool = Field(default=True, description="오리지널 곡 포함(기본 True)")
+    include_cover: bool = Field(default=False, description="커버 곡 포함(기본 False). 둘 다 같으면 ALL")
 
     @field_validator("prompt")
     @classmethod

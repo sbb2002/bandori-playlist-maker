@@ -48,6 +48,8 @@ form.addEventListener("submit", async (e) => {
   if (bands.length) body.bands = bands;
   const customStages = collectStages();
   if (customStages) body.stages = customStages;
+  body.include_original = $("inc-original").checked;
+  body.include_cover = $("inc-cover").checked;
 
   showLoading(true);
   hide(errorEl);
