@@ -54,6 +54,7 @@ def serialize_setlist(setlist: Setlist) -> dict:
             "stage_count": setlist.params.stage_count,
             "target_minutes": setlist.params.target_minutes,
             "interpretation_summary": setlist.params.interpretation_summary,
+            "tags": setlist.params.tags or [],
         },
         "stages": [
             {"index": s.index, "energy_target": s.energy_target} for s in setlist.stages

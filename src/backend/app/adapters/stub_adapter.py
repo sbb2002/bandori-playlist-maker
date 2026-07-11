@@ -85,10 +85,7 @@ class StubMoodInterpreter:
 
         target_minutes = _extract_minutes(text)
 
-        summary = (
-            f"[스텁 해석] 밝기 {brightness:+.1f}, 에너지 {start_energy:.2f}→{end_energy:.2f}"
-            + (f", 목표 {target_minutes}분" if target_minutes else "")
-        )
+        summary, tags = _flavor(brightness, start_energy, end_energy, target_minutes)
 
         return MoodParameters(
             brightness=round(brightness, 3),
@@ -97,4 +94,29 @@ class StubMoodInterpreter:
             stage_count=DEFAULT_STAGE_COUNT,
             target_minutes=target_minutes,
             interpretation_summary=summary,
+            tags=tags,
         )
+
+
+def _flavor(brightness, start_energy, end_energy, target_minutes):
+    """수치 대신 감성 플레이버 텍스트 + 해시태그를 휴리스틱으로 만든다(스텁 품질)."""
+    mood = "밝고 경쾌한" if brightness > 0.3 else "차분하고 잔잔한" if brightness < -0.3 else "은은한"
+    diff = end_energy - start_energy
+    arc = "점점 달아오르는" if diff > 0.1 else "서서히 가라앉는" if diff < -0.1 else "한결같은 흐름의"
+    mins = f" 약 {target_minutes}분" if target_minutes else ""
+    summary = f"{mood} {arc}{mins} 세트리스트"
+
+    tags: list[str] = []
+    if brightness > 0.3:
+        tags.append("밝은")
+    elif brightness < -0.3:
+        tags.append("울적한")
+    if start_energy >= 0.55:
+        tags.append("신나는")
+    elif start_energy <= 0.3:
+        tags.append("잔잔한")
+    if diff > 0.1:
+        tags.append("고조되는")
+    elif diff < -0.1:
+        tags.append("잔잔해지는")
+    return summary, (tags[:5] or None)

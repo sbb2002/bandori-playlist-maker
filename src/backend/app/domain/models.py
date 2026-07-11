@@ -46,6 +46,8 @@ class MoodParameters:
     # 단계별 에너지 목표(비단조 아크 지원 — 유산소=준비↓→본운동↑→정리↓ 등). 주어지면
     # start/end/stage_count 대신 이 배열을 단계 목표로 쓴다(선형 보간 불필요). None이면 선형 아크.
     stage_energies: list[float] | None = None
+    # 인스타그램식 해시태그 키워드(# 없이, 최대 5개). 요약 카드에 감성 태그로 표시. None=없음.
+    tags: list[str] | None = None
 
 
 @dataclass(frozen=True)

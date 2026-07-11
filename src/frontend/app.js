@@ -376,6 +376,17 @@ loadBands();
 initStageModel();
 renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
 
+// 우하단 버전 표기 — 배포 시 커밋 SHA(GitHub Actions가 __COMMIT__ 치환), 로컬은 'dev'.
+(function initVersion() {
+  const el = $("app-version");
+  if (!el) return;
+  const raw = window.APP_VERSION || "";
+  const isSha = raw && raw !== "__COMMIT__";
+  el.textContent = "ver " + (isSha ? raw.slice(0, 7) : "dev");
+  if (isSha && window.APP_REPO) el.href = `${window.APP_REPO}/commit/${raw}`;
+  else el.removeAttribute("href");
+})();
+
 // ── 렌더 ─────────────────────────────────────────────────────────────────────
 function renderResult(data) {
   picks = data.picks || [];
@@ -410,20 +421,28 @@ function renderSummary(data) {
 
   const interp = document.createElement("p");
   interp.className = "interp";
-  interp.textContent = p.interpretation_summary || "요청을 해석해 세트리스트를 구성했어요.";
+  interp.textContent = p.interpretation_summary || "요청에 맞춰 세트리스트를 구성했어요.";
   summaryEl.appendChild(interp);
 
+  // 인스타그램식 해시태그(최대 5개).
+  const tags = Array.isArray(p.tags) ? p.tags.slice(0, 5) : [];
+  if (tags.length) {
+    const tagRow = document.createElement("div");
+    tagRow.className = "tags";
+    for (const t of tags) {
+      const span = document.createElement("span");
+      span.className = "tag";
+      span.textContent = "#" + String(t).replace(/^#+/, "").trim();
+      tagRow.appendChild(span);
+    }
+    summaryEl.appendChild(tagRow);
+  }
+
+  // 실용 메타만(곡수·재생시간). 밝기/에너지 수치는 플레이버·태그로 대체.
   const meta = document.createElement("div");
   meta.className = "meta";
   const mins = Math.round(estimatedTotal / 60);
-  const chips = [
-    `밝기 ${fmtSigned(p.brightness)}`,
-    `에너지 ${fmtNum(p.start_energy)} → ${fmtNum(p.end_energy)}`,
-    `${p.stage_count}단계`,
-    `${picks.length}곡`,
-    `약 ${mins}분`,
-  ];
-  for (const c of chips) {
+  for (const c of [`${picks.length}곡`, `약 ${mins}분`]) {
     const span = document.createElement("span");
     span.className = "chip";
     span.textContent = c;

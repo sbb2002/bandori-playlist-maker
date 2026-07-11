@@ -38,9 +38,13 @@ SYSTEM_PROMPT = (
     "활동은 자연스러운 흐름을 단계별로 담아라. 예: 유산소=[0.3,0.85,0.85,0.4](준비운동→본운동→정리운동). "
     "주면 start_energy/end_energy/stage_count보다 우선한다. 단순 상승/하강/일정 요청은 생략하고 start/end만.\n"
     "- target_minutes: 10~180 정수 또는 null. 발화에 재생시간이 있으면 분 단위로, 없으면 null.\n"
-    "- interpretation_summary: 120자 이내 한국어 요약(선택 이유 설명용).\n\n"
+    "- interpretation_summary: 이 플레이리스트의 분위기를 한 문장으로 따뜻하게 요약한 한국어 "
+    "플레이버 텍스트(80자 이내). 숫자·수치(밝기 0.7 같은) 나열 금지, 감성적으로.\n"
+    "- tags: 이 플레이리스트를 표현하는 인스타그램식 해시태그 키워드 배열(최대 5개, # 없이, "
+    "한국어 짧은 단어). 예: [\"드라이브\",\"밝은\",\"설렘\"]. 억지로 다 채우지 말고 어울리는 만큼만.\n\n"
     '예: {"brightness":0.7,"start_energy":0.35,"end_energy":0.85,"stage_count":3,'
-    '"target_minutes":60,"interpretation_summary":"주말을 여는 밝고 점점 고조되는 약 1시간 흐름"}'
+    '"target_minutes":60,"interpretation_summary":"주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",'
+    '"tags":["드라이브","설렘","주말","고조되는"]}'
 )
 
 # OpenRouter response_format용 JSON 스키마(structured output 지원 모델에서 사용).
@@ -60,6 +64,7 @@ RESPONSE_JSON_SCHEMA = {
                 "stage_energies": {"type": ["array", "null"], "items": {"type": "number"}},
                 "target_minutes": {"type": ["integer", "null"]},
                 "interpretation_summary": {"type": "string"},
+                "tags": {"type": ["array", "null"], "items": {"type": "string"}},
             },
             "required": [
                 "brightness",
@@ -69,6 +74,7 @@ RESPONSE_JSON_SCHEMA = {
                 "stage_energies",
                 "target_minutes",
                 "interpretation_summary",
+                "tags",
             ],
         },
     },
@@ -155,6 +161,8 @@ def parse_mood(raw_text: str) -> MoodParameters:
     else:
         stage_energies = None
 
+    tags = _clean_tags(obj.get("tags"))
+
     return MoodParameters(
         brightness=brightness,
         start_energy=start_energy,
@@ -163,4 +171,24 @@ def parse_mood(raw_text: str) -> MoodParameters:
         target_minutes=target_minutes,
         interpretation_summary=summary,
         stage_energies=stage_energies,
+        tags=tags,
     )
+
+
+def _clean_tags(raw: object) -> list[str] | None:
+    """해시태그 키워드 정제 — 문자열만, 선행 # 제거, 중복 제거, 최대 5개, 길이 20 캡."""
+    if not isinstance(raw, list):
+        return None
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in raw:
+        if not isinstance(item, str):
+            continue
+        tag = item.strip().lstrip("#").strip()[:20]
+        key = tag.lower()
+        if tag and key not in seen:
+            seen.add(key)
+            out.append(tag)
+        if len(out) >= 5:
+            break
+    return out or None

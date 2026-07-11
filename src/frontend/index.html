@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>setlist-maker — 밴드리 세트리스트 메이커</title>
+  <title>Bangdream Playlist Maker — 뱅드림 세트리스트 메이커</title>
   <link rel="stylesheet" href="style.css" />
   <!--
     API 베이스: 로컬 서빙(localhost)은 로컬 백엔드, 그 외(배포=GitHub Pages)는 Render 백엔드로
@@ -13,6 +13,9 @@
     window.SETLIST_API_BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
       ? "http://localhost:8000"
       : "https://bandori-playlist-maker.onrender.com";
+    // 배포 시 GitHub Actions가 __COMMIT__을 커밋 SHA로 치환(로컬은 그대로 → 'dev' 표기).
+    window.APP_VERSION = "__COMMIT__";
+    window.APP_REPO = "https://github.com/sbb2002/bandori-playlist-maker";
   </script>
   <!-- umami 방문자 통계(cloud). app.js의 track()이 커스텀 이벤트를 이 스크립트로 전송. -->
   <script defer src="https://cloud.umami.is/script.js" data-website-id="7185d432-2c87-41e5-8166-46125dc76e33"></script>
@@ -20,8 +23,8 @@
 <body>
   <main class="wrap">
     <header class="hero">
-      <h1>🎧 setlist-maker</h1>
-      <p class="sub">한 문장이면 됩니다. 기분·상황을 말하면 밴드리 곡으로 긴 재생 흐름을 만들어 드려요.</p>
+      <h1>🎧 Bangdream Playlist Maker</h1>
+      <p class="sub">한 문장이면 됩니다. 기분·상황을 말하면 뱅드림 곡으로 긴 재생 흐름을 만들어 드려요.</p>
     </header>
 
     <form id="request-form" class="card">
@@ -94,7 +97,15 @@
 
       <ol id="tracklist" class="tracklist"></ol>
     </section>
+
+    <footer class="disclaimer">
+      <p>* 본 프로젝트는 'BanG Dream!'의 팬이 제작한 비공식 프로젝트이며, 상업적 목적으로 사용되지 않습니다. 사용된 모든 이미지 및 음원의 권리는 ©BanG Dream! Project 및 각 저작권자에게 있습니다.</p>
+      <p>* This is a fan-made, non-official project inspired by 'BanG Dream!'. All rights to images and audio belong to ©BanG Dream! Project and their respective owners. This project is for non-commercial use only.</p>
+    </footer>
   </main>
+
+  <!-- 우하단 현재 버전(커밋 코드). app.js가 텍스트·링크 설정. -->
+  <a id="app-version" class="app-version" target="_blank" rel="noopener" aria-label="현재 버전"></a>
 
   <!-- 곡 추가 미니 브라우저(밴드 셀렉터 + 곡 리스트) — + 버튼으로 열림 -->
   <div id="song-picker" class="picker hidden" role="dialog" aria-modal="true" aria-label="곡 추가">
