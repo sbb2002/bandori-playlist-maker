@@ -435,28 +435,34 @@ function renderTracklist(list) {
   });
 }
 
-// 호버 시 나타나는 트랙 우측 액션 — ⠿ 순서 이동 핸들, − 제거. (곡 추가 +는 Phase 2.)
+// 트랙 우측 액션 버튼(참고: docs/ref/user-opinion/2026-07-11-song-buttons.png).
+// 좌→우: 노란 상하 셰브런(이동 핸들) · 빨간 원형 −(제거). 초록 +(곡 추가)는 Phase 2.
 function makeTrackActions(li, index) {
   const actions = elDiv("track-actions");
   actions.addEventListener("click", (e) => e.stopPropagation()); // 행 클릭(재생) 방지
 
-  const handle = document.createElement("button");
-  handle.type = "button";
-  handle.className = "track-btn track-handle";
-  handle.title = "드래그해서 순서 이동";
-  handle.setAttribute("aria-label", "순서 이동 핸들");
-  handle.textContent = "⠿";
-  handle.addEventListener("pointerdown", (e) => startReorder(handle, li, e));
+  const move = document.createElement("button");
+  move.type = "button";
+  move.className = "track-move";
+  move.title = "잡고 위아래로 드래그해 순서 이동";
+  move.setAttribute("aria-label", "순서 이동 (드래그)");
+  move.innerHTML =
+    '<svg viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2.6" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M5 6.5 L12 1.5 L19 6.5"/><path d="M5 9.5 L12 14.5 L19 9.5"/></svg>';
+  move.addEventListener("pointerdown", (e) => startReorder(move, li, e));
 
-  const removeBtn = document.createElement("button");
-  removeBtn.type = "button";
-  removeBtn.className = "track-btn remove";
-  removeBtn.title = "이 곡 제거";
-  removeBtn.setAttribute("aria-label", "곡 제거");
-  removeBtn.textContent = "−";
-  removeBtn.addEventListener("click", () => removeSong(index));
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "track-circle track-remove";
+  remove.title = "이 곡 제거";
+  remove.setAttribute("aria-label", "곡 제거");
+  remove.innerHTML =
+    '<svg viewBox="0 0 16 16" aria-hidden="true">' +
+    '<rect x="3.2" y="6.9" width="9.6" height="2.2" rx="1.1" fill="#fff"/></svg>';
+  remove.addEventListener("click", () => removeSong(index));
 
-  actions.append(handle, removeBtn);
+  actions.append(move, remove);
   return actions;
 }
 
@@ -577,47 +583,73 @@ function maybeFireHalf() {
 // 편집은 클라이언트 `picks` 배열 조작 + 재렌더로 처리(백엔드 무관). 재생 흐름은 loadedVideoId
 // 기준으로 정합해 편집 중에도 현재 곡이 유지되도록 한다.
 
-// ⠿ 핸들 포인터 드래그로 순서 이동. 드래그 중엔 DOM만 실시간 재배치하고, 놓을 때 picks를
-// 새 순서로 재구성한다(드래그 도중 재렌더로 드래그가 끊기지 않도록).
+// 순서 이동(floating drag): 핸들을 잡고 있는 동안 해당 곡이 마우스 Y를 따라 떠서 이동하고,
+// 나머지 곡들은 부드럽게 자리를 비켜 '놓일 위치'를 미리 보여준다. 릴리즈 시 그 위치에 배치.
+// DOM은 드래그 중 변형(transform)만 하고, 확정은 놓을 때 picks 배열 splice로 한 번에 반영한다.
 function startReorder(handle, li, e) {
   e.preventDefault();
   e.stopPropagation();
+  const rows = [...tracklistEl.children];
+  const from = rows.indexOf(li);
+  if (from < 0) return;
+
+  // 드래그 시작 시점의 각 행 중심 Y를 기준으로 목표 인덱스를 계산(행 높이 가변 대응).
+  const centers = rows.map((r) => { const b = r.getBoundingClientRect(); return b.top + b.height / 2; });
+  const gap = li.getBoundingClientRect().height + trackGapPx(li); // 열릴 빈칸 크기 = 드래그 곡 높이
+  const startY = e.clientY;
+  let target = from;
+
   handle.setPointerCapture(e.pointerId);
+  document.body.classList.add("reordering");
   li.classList.add("dragging");
+  li.style.transition = "none"; // 잡은 곡은 커서를 지연 없이 따라옴
+  rows.forEach((r) => { if (r !== li) r.style.transition = "transform 0.16s ease"; });
+
   const onMove = (ev) => {
-    const after = getDragAfterElement(tracklistEl, ev.clientY);
-    if (after == null) tracklistEl.appendChild(li);
-    else if (after !== li) tracklistEl.insertBefore(li, after);
+    const dy = ev.clientY - startY;
+    li.style.transform = `translateY(${dy}px)`;
+    const draggedCenter = centers[from] + dy;
+    let t = from;
+    while (t > 0 && draggedCenter < centers[t - 1]) t--;
+    while (t < rows.length - 1 && draggedCenter > centers[t + 1]) t++;
+    if (t !== target) { target = t; applyReorderGap(rows, li, from, target, gap); }
   };
   const onUp = () => {
-    li.classList.remove("dragging");
     try { handle.releasePointerCapture(e.pointerId); } catch (_) {/* 이미 해제됨 */}
     handle.removeEventListener("pointermove", onMove);
     handle.removeEventListener("pointerup", onUp);
-    commitReorderFromDom();
+    document.body.classList.remove("reordering");
+    li.classList.remove("dragging");
+    rows.forEach((r) => { r.style.transition = ""; r.style.transform = ""; });
+    commitMove(from, target);
   };
   handle.addEventListener("pointermove", onMove);
   handle.addEventListener("pointerup", onUp);
 }
 
-// 커서 Y 위로 들어온 첫 형제(드래그 중 항목 제외)를 찾아 그 앞에 삽입할 기준으로 삼는다.
-function getDragAfterElement(container, y) {
-  const els = [...container.querySelectorAll(".track:not(.dragging)")];
-  let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
-  for (const child of els) {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) closest = { offset, element: child };
-  }
-  return closest.element;
+// 행 사이 세로 간격(margin-bottom) px. 빈칸 애니메이션 크기 계산에 사용.
+function trackGapPx(li) {
+  const mb = parseFloat(getComputedStyle(li).marginBottom);
+  return Number.isNaN(mb) ? 8 : mb;
 }
 
-// DOM의 새 순서(각 li의 렌더시점 dataset.index)로 picks를 재구성한다.
-function commitReorderFromDom() {
-  const order = [...tracklistEl.children].map((li) => Number(li.dataset.index));
-  if (order.every((v, i) => v === i)) return; // 순서 변화 없음
+// from→target 사이의 행들을 곡 한 칸만큼 밀어 '놓일 자리'를 시각적으로 연다.
+function applyReorderGap(rows, li, from, target, gap) {
+  rows.forEach((r, j) => {
+    if (r === li) return;
+    let shift = 0;
+    if (target > from && j > from && j <= target) shift = -gap;
+    else if (target < from && j >= target && j < from) shift = gap;
+    r.style.transform = shift ? `translateY(${shift}px)` : "";
+  });
+}
+
+// from 위치의 곡을 target 위치로 옮겨 picks를 확정하고 재렌더한다.
+function commitMove(from, target) {
+  if (from === target) return; // 제자리 — 변화 없음
   pushHistory();
-  picks = order.map((i) => picks[i]);
+  const [moved] = picks.splice(from, 1);
+  picks.splice(target, 0, moved);
   renderTracklist(picks);
   reconcilePlayer();
   syncGraphToEdited();

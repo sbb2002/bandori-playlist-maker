@@ -220,31 +220,40 @@ button.ghost {
 .badge.non_harmonic { color: var(--warn); }
 .badge.seed { color: var(--accent-2); }
 
-/* 트랙 편집 액션 — 호버 시 우측에 ⠿ 이동 핸들 / − 제거 노출 */
+/* 트랙 편집 액션 — 우측에 이동 핸들·제거 (참고: docs/ref/user-opinion/2026-07-11-song-buttons.png) */
+.track { user-select: none; -webkit-user-select: none; } /* 곡 텍스트 드래그 선택 방지 */
 .track-actions {
   flex: 0 0 auto; align-self: center;
-  display: flex; flex-direction: column; gap: 4px;
-  opacity: 0; transition: opacity 0.12s;
+  display: flex; align-items: center; gap: 10px;
+  margin-left: 4px;
 }
-.track:hover .track-actions, .track-actions:focus-within { opacity: 1; }
-.track-btn {
-  width: 26px; height: 26px; padding: 0;
-  display: grid; place-items: center;
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 7px;
-  background: var(--card-2); color: var(--muted);
-  font-size: 0.95rem; line-height: 1; cursor: pointer;
-  transition: color 0.12s, border-color 0.12s;
+/* 이동 핸들 — 노란 상하 셰브런, 배경 없음 */
+.track-move {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 40px; padding: 0;
+  border: none; background: transparent; color: var(--warn);
+  cursor: grab; touch-action: none;
 }
-.track-btn:hover { color: var(--text); border-color: rgba(124,108,255,0.6); }
-.track-btn.remove:hover { color: var(--err); border-color: var(--err); }
-.track-handle { cursor: grab; touch-action: none; }
-.track-handle:active { cursor: grabbing; }
-.track.dragging { opacity: 0.6; border-color: var(--accent); }
-
-/* 터치/호버 불가 환경에선 액션 상시 노출 */
-@media (hover: none) {
-  .track-actions { opacity: 1; }
+.track-move:active { cursor: grabbing; }
+.track-move:hover { filter: brightness(1.15); }
+.track-move svg { width: 22px; height: 15px; display: block; }
+/* 원형 액션(제거/추가) */
+.track-circle {
+  width: 34px; height: 34px; padding: 0; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  border: 2px solid transparent; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: transform 0.1s, filter 0.12s;
 }
+.track-circle svg { width: 16px; height: 16px; display: block; }
+.track-circle:hover { filter: brightness(1.12); }
+.track-circle:active { transform: scale(0.9); }
+.track-remove { background: #e5484d; border-color: #ff8a8d; }
+/* 드래그 중인 곡 — 떠오른 느낌 */
+.track.dragging {
+  position: relative; z-index: 10; opacity: 0.97;
+  border-color: var(--accent); box-shadow: 0 12px 30px rgba(0,0,0,0.55);
+}
+body.reordering { cursor: grabbing; user-select: none; -webkit-user-select: none; }
 
 @media (max-width: 520px) {
   .options-grid { grid-template-columns: 1fr; }
