@@ -107,7 +107,9 @@ def test_band_filter_restricts_to_selected(client):
 def test_prompt_band_name_auto_filters(client):
     r = client.post("/api/setlist", json={"prompt": "라스 노래로 신나게 틀어줘"})
     assert r.status_code == 200
-    assert {p["band"] for p in r.json()["picks"]} == {"raise_a_suilen"}
+    body = r.json()
+    assert {p["band"] for p in body["picks"]} == {"raise_a_suilen"}
+    assert body["applied_bands"] == ["raise_a_suilen"]  # 프론트 체크박스 동기화용
 
 
 def test_empty_bands_is_all(client):

@@ -95,4 +95,7 @@ def create_setlist(payload: SetlistRequest, request: Request) -> dict:
         songs, effective, target_seconds=minutes * 60,
         band_filter=band_filter, stage_specs=stage_specs,
     )
-    return serialize_setlist(setlist)
+    result = serialize_setlist(setlist)
+    # 실제 적용된 밴드 필터(프롬프트 자동감지 포함) — 프론트가 체크박스 동기화에 사용.
+    result["applied_bands"] = sorted(band_filter) if band_filter else []
+    return result

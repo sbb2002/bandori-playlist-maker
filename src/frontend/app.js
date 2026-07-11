@@ -337,6 +337,7 @@ function renderResult(data) {
 
   renderSummary(data);
   renderTracklist(picks);
+  syncBandChecks(data.applied_bands); // 적용된 밴드(프롬프트 자동감지 포함)를 체크박스에 반영
   syncGraphToParams(data.params); // 그래프에 이번 해석 아크 반영(미조정 시)
   show(resultEl);
 
@@ -525,6 +526,21 @@ function maybeFireHalf() {
 // ── UI 헬퍼 ───────────────────────────────────────────────────────────────────
 $("next-btn").addEventListener("click", () => playSong(current + 1, false));
 $("prev-btn").addEventListener("click", () => playSong(current - 1, false));
+
+// 전체 세트리스트를 YouTube 익명 재생목록(watch_videos)으로 열기 — OAuth 불필요, 공유 가능한 링크.
+// (계정 저장형 재생목록은 OAuth+Data API 필요 — 다음 단계, PRD §5-4.)
+$("yt-playlist-btn").addEventListener("click", () => {
+  if (!picks.length) return;
+  const ids = picks.map((p) => p.video_id).join(",");
+  window.open(`https://www.youtube.com/watch_videos?video_ids=${ids}`, "_blank", "noopener");
+  track("playlist_shared", { count: picks.length });
+});
+
+// 프롬프트 자동감지 등으로 실제 적용된 밴드 필터를 체크박스에 반영(체크박스 미표시 버그 수정).
+function syncBandChecks(bands) {
+  const applied = new Set(bands || []);
+  document.querySelectorAll(".band-cb").forEach((cb) => { cb.checked = applied.has(cb.value); });
+}
 
 function highlight(index) {
   [...tracklistEl.children].forEach((li, i) => li.classList.toggle("active", i === index));
