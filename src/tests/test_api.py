@@ -97,6 +97,18 @@ def test_bands_endpoint(client):
     assert counts == sorted(counts, reverse=True)
 
 
+def test_songs_endpoint(client):
+    r = client.get("/api/songs")
+    assert r.status_code == 200
+    songs = r.json()["songs"]
+    assert songs, "곡 목록이 비어 있으면 안 됨"
+    s0 = songs[0]
+    assert {"idx", "band", "song", "video_id", "camelot", "energy"} <= set(s0)
+    # 밴드→곡 순 정렬
+    keys = [(s["band"], s["song"].lower()) for s in songs]
+    assert keys == sorted(keys)
+
+
 def test_band_filter_restricts_to_selected(client):
     r = client.post("/api/setlist", json={"prompt": "신나는 곡", "bands": ["poppin_party"]})
     assert r.status_code == 200

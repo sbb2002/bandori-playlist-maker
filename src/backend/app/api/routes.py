@@ -51,6 +51,25 @@ def list_bands(request: Request) -> dict:
     return {"bands": bands}
 
 
+@router.get("/api/songs")
+def list_songs(request: Request) -> dict:
+    """전체 곡 목록 — 프론트 '곡 추가' 미니 브라우저용(밴드/곡 선택). 삽입·재생에 필요한
+    필드만 반환(idx·band·song·video_id·camelot·energy). 밴드→곡 순 정렬."""
+    songs = [
+        {
+            "idx": s.idx,
+            "band": s.band,
+            "song": s.song,
+            "video_id": s.video_id,
+            "camelot": s.camelot,
+            "energy": round(s.energy, 3),
+        }
+        for s in request.app.state.songs
+    ]
+    songs.sort(key=lambda x: (x["band"], x["song"].lower()))
+    return {"songs": songs}
+
+
 @router.post("/api/setlist")
 def create_setlist(payload: SetlistRequest, request: Request) -> dict:
     interpreter = request.app.state.interpreter

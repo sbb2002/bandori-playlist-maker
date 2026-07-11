@@ -92,6 +92,23 @@
     </section>
   </main>
 
+  <!-- 곡 추가 미니 브라우저(밴드 셀렉터 + 곡 리스트) — + 버튼으로 열림 -->
+  <div id="song-picker" class="picker hidden" role="dialog" aria-modal="true" aria-label="곡 추가">
+    <div class="picker-backdrop" data-close></div>
+    <div class="picker-panel">
+      <div class="picker-head">
+        <strong>곡 추가</strong>
+        <span id="picker-where" class="picker-where"></span>
+        <button type="button" id="picker-close" class="link-btn" data-close>닫기 ✕</button>
+      </div>
+      <input id="picker-search" type="search" placeholder="곡·밴드 검색" autocomplete="off" />
+      <div class="picker-body">
+        <div id="picker-bands" class="picker-bands"></div>
+        <ul id="picker-songs" class="picker-songs"></ul>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
