@@ -91,6 +91,12 @@ def test_band_filter_restricts_to_selected(client):
     assert {p["band"] for p in body["picks"]} == {"poppin_party"}
 
 
+def test_prompt_band_name_auto_filters(client):
+    r = client.post("/api/setlist", json={"prompt": "라스 노래로 신나게 틀어줘"})
+    assert r.status_code == 200
+    assert {p["band"] for p in r.json()["picks"]} == {"raise_a_suilen"}
+
+
 def test_empty_bands_is_all(client):
     r = client.post("/api/setlist", json={"prompt": "신나는 곡", "bands": []})
     assert r.status_code == 200

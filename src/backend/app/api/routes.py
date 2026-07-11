@@ -12,6 +12,7 @@ from fastapi import APIRouter, Request
 
 from ..domain.models import MoodParameters, StageSpec
 from ..domain.selection import DEFAULT_AVG_SONG_SECONDS, build_setlist
+from .band_aliases import detect_bands
 from .schemas import SetlistRequest, serialize_setlist
 
 router = APIRouter()
@@ -45,6 +46,7 @@ def create_setlist(payload: SetlistRequest, request: Request) -> dict:
 
     # 밴드 필터(설정 §5-1b): 빈 목록/미지정 = ALL.
     band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
+    band_names |= detect_bands(payload.prompt)  # 프롬프트에 밴드명(별명) 언급 시 자동 필터
     band_filter = band_names or None
 
     # 사용자 지정 단계(설정 §5-1a): 있으면 에너지 아크·곡 수를 강제.
