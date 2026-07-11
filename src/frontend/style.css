@@ -278,6 +278,7 @@ body.reordering { cursor: grabbing; user-select: none; -webkit-user-select: none
 .badge.added { color: var(--ok); border: 1px solid rgba(62,207,142,0.5); }
 
 /* ── 곡 추가 미니 브라우저(모달) ─────────────────────────────────────────────── */
+body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 스크롤 잠금 */
 .picker { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; }
 .picker.hidden { display: none; }
 .picker-backdrop { position: absolute; inset: 0; background: rgba(6,7,12,0.6); backdrop-filter: blur(2px); }
@@ -297,20 +298,32 @@ body.reordering { cursor: grabbing; user-select: none; -webkit-user-select: none
   background: var(--card-2); color: var(--text);
   border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; font-size: 0.95rem;
 }
-.picker-body { display: grid; grid-template-columns: 150px 1fr; gap: 12px; min-height: 0; flex: 1 1 auto; }
-.picker-bands { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; padding-right: 4px; }
+.picker-body { display: grid; grid-template-columns: 168px 1fr; gap: 12px; min-height: 0; flex: 1 1 auto; }
+/* overscroll-behavior: contain — 리스트 끝에서 스크롤이 메인 화면으로 전파되지 않음 */
+.picker-bands { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
 .picker-band {
-  text-align: left; padding: 7px 10px; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  text-align: left; padding: 6px 8px; border-radius: 8px; cursor: pointer;
   background: transparent; border: 1px solid transparent; color: var(--muted); font-size: 0.85rem;
 }
 .picker-band:hover { background: var(--card-2); color: var(--text); }
 .picker-band.active { background: var(--card-2); color: var(--text); border-color: rgba(124,108,255,0.6); }
-.picker-songs { list-style: none; margin: 0; padding: 0; overflow-y: auto; }
+.picker-band-icon {
+  flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%;
+  object-fit: cover; background: var(--card-2);
+}
+.picker-band-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.picker-band-all { color: var(--text); font-weight: 600; }
+.picker-songs { list-style: none; margin: 0; padding: 0; overflow-y: auto; overscroll-behavior: contain; }
 .picker-song {
   display: flex; align-items: center; gap: 10px;
   padding: 8px 10px; border-radius: 9px; border: 1px solid transparent;
 }
 .picker-song:hover { background: var(--card-2); border-color: rgba(255,255,255,0.06); }
+.picker-song-icon {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px;
+  object-fit: cover; background: var(--card-2);
+}
 .picker-song-info { flex: 1 1 auto; min-width: 0; }
 .picker-song-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .picker-song-band { color: var(--muted); font-size: 0.8rem; }

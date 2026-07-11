@@ -763,6 +763,47 @@ let allSongs = null;      // /api/songs 캐시(첫 열람 시 로드)
 let insertAtIndex = 0;    // 삽입점(+)이 가리키는 picks 배열 위치
 let pickerBand = null;    // 선택된 밴드(null=전체)
 
+// bandori-song-sorter와 동일한 밴드 나열 순서 + 아이콘 애셋(assets/bands/<band>.png, 미포함은 뒤).
+const BAND_ORDER = [
+  "poppin_party", "afterglow", "pastel_palettes", "roselia",
+  "hello_happy_world", "morfonica", "raise_a_suilen", "mygo",
+  "ave_mujica", "mugendai_mutype", "millsage", "ikka_dumb_rock",
+];
+const BAND_ICON_BASE = "assets/bands";
+
+function bandsInSelectorOrder(present) {
+  const ordered = BAND_ORDER.filter((b) => present.includes(b));
+  const rest = present.filter((b) => !BAND_ORDER.includes(b)).sort();
+  return [...ordered, ...rest];
+}
+
+// 밴드 아이콘 img(로드 실패 시 _fallback로 1회 대체). bandori-song-sorter 애셋 재사용.
+function makeBandIcon(band, cls) {
+  const img = document.createElement("img");
+  img.className = cls;
+  img.src = `${BAND_ICON_BASE}/${band}.png`;
+  img.alt = "";
+  img.loading = "lazy";
+  img.addEventListener("error", () => {
+    if (img.dataset.fallback) return;
+    img.dataset.fallback = "1";
+    img.src = `${BAND_ICON_BASE}/_fallback.png`;
+  });
+  return img;
+}
+
+// 모달 열림 동안 메인 페이지 스크롤 잠금(스크롤 체이닝 방지). 스크롤바 폭만큼 보정해 레이아웃 밀림 방지.
+function lockBodyScroll(lock) {
+  if (lock) {
+    const sw = window.innerWidth - document.documentElement.clientWidth;
+    if (sw > 0) document.body.style.paddingRight = `${sw}px`;
+    document.body.classList.add("modal-open");
+  } else {
+    document.body.classList.remove("modal-open");
+    document.body.style.paddingRight = "";
+  }
+}
+
 async function ensureSongs() {
   if (allSongs) return allSongs;
   const res = await fetch(`${API_BASE}/api/songs`);
@@ -777,6 +818,7 @@ async function openSongPickerAt(atIndex) {
   pickerSearchEl.value = "";
   pickerWhereEl.textContent = atIndex <= 0 ? "맨 앞에 삽입" : `${atIndex}번 다음에 삽입`;
   show(pickerEl);
+  lockBodyScroll(true);
   pickerBandsEl.replaceChildren();
   pickerSongsEl.replaceChildren();
   pickerSongsEl.textContent = "곡 목록 불러오는 중…";
@@ -790,24 +832,29 @@ async function openSongPickerAt(atIndex) {
   }
 }
 
-function closeSongPicker() { hide(pickerEl); }
+function closeSongPicker() { hide(pickerEl); lockBodyScroll(false); }
 
 function renderPickerBands() {
   const counts = new Map();
   for (const s of allSongs) counts.set(s.band, (counts.get(s.band) || 0) + 1);
-  const bands = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   pickerBandsEl.replaceChildren();
   pickerBandsEl.appendChild(pickerBandChip("전체", null, allSongs.length));
-  for (const [band, n] of bands) pickerBandsEl.appendChild(pickerBandChip(prettyBand(band), band, n));
+  for (const band of bandsInSelectorOrder([...counts.keys()])) {
+    pickerBandsEl.appendChild(pickerBandChip(prettyBand(band), band, counts.get(band)));
+  }
   markActiveBand();
 }
 
 function pickerBandChip(label, band, n) {
   const b = document.createElement("button");
   b.type = "button";
-  b.className = "picker-band";
+  b.className = "picker-band" + (band === null ? " picker-band-all" : "");
   b.dataset.band = band === null ? "" : band;
-  b.textContent = `${label} (${n})`;
+  if (band !== null) b.appendChild(makeBandIcon(band, "picker-band-icon"));
+  const txt = document.createElement("span");
+  txt.className = "picker-band-label";
+  txt.textContent = `${label} (${n})`;
+  b.appendChild(txt);
   b.addEventListener("click", () => { pickerBand = band; markActiveBand(); renderPickerSongs(); });
   return b;
 }
@@ -840,7 +887,7 @@ function renderPickerSongs() {
     const addBtn = document.createElement("button");
     addBtn.type = "button"; addBtn.className = "picker-add"; addBtn.textContent = "추가";
     addBtn.addEventListener("click", () => insertSong(s));
-    li.append(info, addBtn);
+    li.append(makeBandIcon(s.band, "picker-song-icon"), info, addBtn);
     li.addEventListener("dblclick", () => insertSong(s));
     pickerSongsEl.appendChild(li);
   }
