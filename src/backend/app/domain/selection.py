@@ -40,7 +40,9 @@ DEFAULT_AVG_SONG_SECONDS = 213
 # 2단계 엔진 파라미터(R&D §4.2 권장 기본값). 파일럿 후 실사용 피드백으로 튜닝.
 _TOL = 0.08              # Stage A 강도 허용창(목표에서 이 이내만 후보)
 _BRIGHTNESS_BUCKET = 0.25  # Stage A 밝기 근접 버킷 폭(같은 버킷 내에선 rng 변주)
-_CONT_WINDOW = 0.15      # Stage B 경계 연속성 창(최근접 대비 이 범위 내 후보는 랜덤 — 다양성)
+# Stage B 시퀀싱: 경계갭 + 하모닉을 다목적 비용으로 최소화. (검증 하네스로 튜닝 — R&D §8.)
+_RANDOM_SLACK = 0.05     # 최소 비용 대비 이 범위 내 후보는 랜덤(곡 선택 변주는 Stage A가 담당)
+_HARMONIC_PENALTY = 0.15  # 비하모닉 전환 비용(경계갭과 동일 단위; 경계 최소화와 하모닉 균형점)
 
 
 def _clamp(value: float, lo: float, hi: float) -> float:
@@ -78,18 +80,28 @@ def _sequence_by_continuity(
       소프트 우선하고 그 안에서 랜덤 선택(사용자 '랜덤 셀렉트' + 다양성).
     """
     if prev_outro is None:
-        seed = min(members, key=lambda s: (abs(s.energy - target), s.idx))
+        # 오프너(전체 첫 곡): 강도 부합 후보 중 **인트로 텐션이 가장 높은** 곡으로 시드한다
+        # (에너지 있는 시작 — 파티/운동 요청의 조용한 인트로 오프너 문제 해소, R&D §8-3).
+        by_fit = sorted(members, key=lambda s: (abs(s.energy - target), s.idx))
+        fit_window = [s for s in by_fit if abs(s.energy - target) <= _TOL] or by_fit[:5]
+        seed = max(fit_window, key=lambda s: (s.intro_energy, -s.idx))
     else:
+        # 스테이지 경계 접합: 이전 스테이지 아웃트로와 인트로가 가장 가까운 곡.
         seed = min(members, key=lambda s: (abs(prev_outro - s.intro_energy), s.idx))
     seq = [seed]
     rem = [s for s in members if s.idx != seed.idx]
     while rem:
         current = seq[-1]
-        rem.sort(key=lambda c: (abs(current.outro_energy - c.intro_energy), c.idx))
-        nearest = abs(current.outro_energy - rem[0].intro_energy)
-        window = [c for c in rem if abs(current.outro_energy - c.intro_energy) <= nearest + _CONT_WINDOW]
-        compatible = [c for c in window if is_compatible(current.camelot, c.camelot)]
-        pick = rng.choice(compatible or window)
+
+        def cost(candidate: Song, cur: Song = current) -> float:
+            gap = abs(cur.outro_energy - candidate.intro_energy)
+            penalty = 0.0 if is_compatible(cur.camelot, candidate.camelot) else _HARMONIC_PENALTY
+            return gap + penalty
+
+        rem.sort(key=lambda c: (cost(c), c.idx))
+        best = cost(rem[0])
+        window = [c for c in rem if cost(c) <= best + _RANDOM_SLACK]
+        pick = rng.choice(window)
         seq.append(pick)
         rem.remove(pick)
     return seq
