@@ -47,7 +47,8 @@ def test_adjacent_intensity_transitions_are_smooth():
 def test_formerly_misjudged_loud_songs_now_rate_high():
     """전곡 재추출 후, 과거 발췌 편향으로 조용 오판되던 시끄러운 곡이 조용 밴드 위(≥0.28)에 있어야 한다."""
     by_title = {s.song: s for s in load_songs()}
-    for title in ["灼熱 Bonfire!", "ドラマチック", "はいよろこんで", "黒のバースデイ", "FIRE BIRD"]:
+    for title in ["灼熱 Bonfire!", "ドラマチック", "はいよろこんで", "黒のバースデイ", "FIRE BIRD",
+                  "Steer to Utopia", "Re:birth day"]:
         song = next((v for k, v in by_title.items() if k.startswith(title)), None)
         assert song is not None, f"{title} 미발견"
         assert song.energy >= 0.28, f"{song.song} intensity={song.energy:.3f} (조용 밴드에 누출)"

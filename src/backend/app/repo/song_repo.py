@@ -60,8 +60,8 @@ def _to_song(row: dict[str, str], energy: float) -> Song:
     )
 
 
-# 강도(intensity) soft-OR power-mean 지수. energy_full(전곡)과 acousticness를 결합.
-_INTENSITY_P = 2
+# 강도(intensity) soft-OR power-mean 지수. 여러 독립 신호를 결합(어느 하나라도 시끄러우면 시끄럽게).
+_INTENSITY_P = 3
 
 
 def _percentile_ranker(values: list[float]) -> Callable[[float], float]:
@@ -87,18 +87,18 @@ def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
     """songs_master.csv를 읽어 전체 곡 목록을 반환한다.
 
     eligible 여부와 무관하게 전 행을 적재한다(후보 필터링은 선곡 엔진이 수행).
-    `Song.energy`는 무드 **강도(intensity)** — `energy_full`(전곡 재추출)과 acousticness를
-    soft-OR(power-mean p=2)로 결합해 산출한다.
+    `Song.energy`는 무드 **강도(intensity)** — 서로 다른 곡을 잡는 독립 신호들을 soft-OR
+    (power-mean p=3)로 결합해 산출한다. "어느 한 신호라도 시끄럽다면 시끄럽게" 본다.
 
     데이터 검증(2026-07-11) 및 전곡 재추출 보고서:
-    - `energy` 컬럼(EMOI-MAP 펄스용)은 무드와 무관/역전 → 폐기.
-    - `energy_proxy`·`acousticness_proxy`는 **발췌 구간만** 반영 → 조용한 인트로 곡을 오판.
-      데이터팀이 로컬 전곡 오디오에서 지각 에너지 복합(perc·onset·zcr·centroid·flatness의
-      전곡 평균 + rms 피크)을 재추출해 `energy_full`(전곡, 0~1) 신설
-      (`src/scripts/data/build_energy_full.py`, `docs/research/2026-07-11-full-track-energy-extraction.md`).
-    - 최종 강도 = soft-OR(`energy_full`, `−acousticness_proxy` 백분위): 전곡 에너지가 높거나
-      비어쿠스틱하면 시끄럽게 본다. 발췌 편향으로 못 잡던 곡(헤비메탈 黒のバースデイ 등)을 구제.
-    - `energy_full` 결측 시 acousticness 백분위로 폴백.
+    - `energy`(EMOI-MAP 펄스용)·`energy_proxy`·`acousticness_proxy`는 발췌 구간만 반영 → 오판.
+    - 데이터팀이 로컬 전곡 오디오에서 재추출한 두 신호를 사용:
+      · `energy_full`(전곡 지각에너지 복합, 0~1) — party/rock 곡을 잡음.
+      · 시간분절 강도 `i_mean`·`i_min`·`i_end`(전곡 프레임별 강도 시계열의 통계) — 특히 `i_min`은
+        "한 번도 조용해지지 않는" 곡(Steer to Utopia 등)을, `i_end`는 조용한 인트로+시끄러운
+        본체 곡을 잡는다(`src/scripts/data/extract_temporal_intensity.py`).
+    - 결합 신호: [`energy_full`, `−acousticness_proxy` 백분위(헤비메탈 黒 등), `i_min`·`i_mean`·
+      `i_end` 백분위]. 결측 컬럼은 자동 제외. (근거: `docs/research/2026-07-11-*.md`.)
 
     Raises:
         FileNotFoundError: CSV가 없는 경우.
@@ -113,12 +113,24 @@ def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
     # 백분위는 후보가 되는 eligible 풀 분포 기준(밴드 필터와 무관하게 안정).
     eligible = [r for r in rows if str(r["eligible_band"]).strip().lower() == "true"]
     rank_acoustic = _percentile_ranker([-float(r["acousticness_proxy"]) for r in eligible])
+    # 시간분절 신호(있을 때만). i_min=가장 조용한 순간, i_end=아웃트로, i_mean=전곡 평균.
+    _temporal = ("i_min", "i_mean", "i_end")
+    rankers = {
+        col: _percentile_ranker([float(r[col]) for r in eligible if (r.get(col) or "").strip()])
+        for col in _temporal
+        if any((r.get(col) or "").strip() for r in eligible)
+    }
     p = _INTENSITY_P
 
     def intensity(row: dict[str, str]) -> float:
-        pa = rank_acoustic(-float(row["acousticness_proxy"]))  # 1=가장 비어쿠스틱(시끄러움)
+        signals = [rank_acoustic(-float(row["acousticness_proxy"]))]  # 1=가장 비어쿠스틱(시끄러움)
         ef_raw = (row.get("energy_full") or "").strip()
-        ef = float(ef_raw) if ef_raw else pa  # 전곡 에너지(0~1). 결측 시 acousticness로 폴백
-        return ((ef ** p + pa ** p) / 2.0) ** (1.0 / p)
+        if ef_raw:
+            signals.append(float(ef_raw))  # 전곡 에너지(0~1)
+        for col, ranker in rankers.items():
+            v = (row.get(col) or "").strip()
+            if v:
+                signals.append(ranker(float(v)))
+        return (sum(s ** p for s in signals) / len(signals)) ** (1.0 / p)
 
     return [_to_song(r, intensity(r)) for r in rows]

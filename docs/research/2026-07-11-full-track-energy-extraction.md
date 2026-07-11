@@ -64,7 +64,24 @@ misjudged가 조용 **밑→위**로 역전).
 - 그라운드트루스가 소규모·수작업(36곡)이라 방향성 근거. 실사용 청취 로그로 확장 권장.
 - key 재검증(§5-4)은 미실행(하모닉 정확도 개선 여지, 후속).
 
+## 7b. 시간분절(temporal) 강도 정밀화 (사용자 제안, 2026-07-11 추가)
+`energy_full`(단일 스칼라)은 **"평균은 낮지만 한 번도 조용해지지 않는" 곡**(Steer to Utopia,
+Re:birth day)을 여전히 낮게 봤다. 사용자 제안대로 **프레임별 강도 시계열**을 추출해 시간분절
+통계를 뽑았다(`extract_temporal_intensity.py` → `data/temporal_intensity.csv`, 660곡):
+`i_mean·i_std·i_max·i_min·i_start·i_end` (프레임별 강도 = centroid·bandwidth·zcr·flatness·onset·rms의
+전역 robust-z 평균).
+- 핵심: **`i_min`(가장 조용한 순간)** 이 "절대 조용해지지 않는" 곡을 잡는다 — Steer to Utopia는
+  i_min 백분위 0.60(조용 순간 없음), 栞은 0.07(조용 순간 있음). `i_end`는 조용 인트로+시끄러운
+  본체(黒)를 잡는다.
+- **최종 강도(§4 갱신)**: 서로 다른 곡을 잡는 독립 신호를 soft-OR(power-mean **p=3**)로 결합:
+  `intensity = softOR(energy_full, pctl(−acousticness), pctl(i_min), pctl(i_mean), pctl(i_end))`.
+  "어느 한 신호라도 시끄럽다면 시끄럽게" — QUIET-vs-LOUD **AUC 0.981**.
+- 결과: Steer to Utopia 0.13→**0.48**, Re:birth day →**0.31**, 処救生 0.05→**0.29**(전부 조용 밴드
+  밖으로). 栞 0.04·過惰幻 0.05 유지. **실 LLM '조용하고 잔잔한' 3회: 오판곡 0/17, 최고강도 0.28.**
+  §6의 処救生 잔여 한계도 시간분절로 해소됨.
+
 ## 7. 산출물
-- `src/scripts/data/extract_full_energy.py`, `build_energy_full.py`
-- `data/full_audio_features.csv`(원시 서브피처 660), `data/songs_master.csv`에 `energy_full` 컬럼 병합
-- 통합: `src/backend/app/repo/song_repo.py`(intensity 재정의)
+- `src/scripts/data/extract_full_energy.py`, `build_energy_full.py`, `extract_temporal_intensity.py`
+- `data/full_audio_features.csv`(원시 서브피처), `data/temporal_intensity.csv`(시간분절 통계),
+  `data/songs_master.csv`에 `energy_full` + `i_*` 컬럼 병합
+- 통합: `src/backend/app/repo/song_repo.py`(intensity = 다신호 soft-OR)
