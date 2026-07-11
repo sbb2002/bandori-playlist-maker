@@ -35,8 +35,8 @@ def _apply_cover_filter(songs, include_original: bool, include_cover: bool):
 
 
 @router.get("/api/health")
-def health() -> dict:
-    return {"status": "ok"}
+def health(request: Request) -> dict:
+    return {"status": "ok", "version": getattr(request.app.state, "version", "dev")}
 
 
 @router.get("/api/bands")

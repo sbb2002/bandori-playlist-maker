@@ -158,11 +158,12 @@ async function loadBands() {
 function renderBands(bands) {
   bandListEl.replaceChildren();
   if (!bands.length) { bandListEl.textContent = "밴드 없음"; return; }
-  // 곡 추가 팝업과 동일하게 밴드 아이콘 + BAND_ORDER 순서로 표시.
+  // 표처럼 가지런한 그리드: 밴드 아이콘 + 곡 수(이름 생략, 툴팁으로 제공). 순서=BAND_ORDER.
   const countByBand = new Map(bands.map((b) => [b.band, b.count]));
   for (const band of bandsInSelectorOrder([...countByBand.keys()])) {
     const label = document.createElement("label");
     label.className = "band-item";
+    label.title = prettyBand(band); // 이름은 툴팁으로
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.value = band;
@@ -174,10 +175,10 @@ function renderBands(bands) {
       else manualBands.delete(cb.value);
     });
     const icon = makeBandIcon(band, "band-item-icon");
-    const span = document.createElement("span");
-    span.className = "band-item-label";
-    span.textContent = `${prettyBand(band)} (${countByBand.get(band)})`;
-    label.append(cb, icon, span);
+    const count = document.createElement("span");
+    count.className = "band-item-count";
+    count.textContent = countByBand.get(band);
+    label.append(cb, icon, count);
     bandListEl.appendChild(label);
   }
 }
@@ -388,14 +389,22 @@ loadBands();
 initStageModel();
 renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
 
-// 우하단 버전 표기 — 배포 시 커밋 SHA(GitHub Actions가 __COMMIT__ 치환), 로컬은 'dev'.
-(function initVersion() {
+// 우하단 버전 표기 = 현재 커밋 SHA. 배포 프론트는 빌드시 __COMMIT__을 SHA로 주입하고,
+// 로컬(또는 주입 실패) 시엔 백엔드 /api/health의 version(RENDER_GIT_COMMIT 또는 git)을 가져온다.
+(async function initVersion() {
   const el = $("app-version");
   if (!el) return;
   const raw = window.APP_VERSION || "";
-  const isSha = raw && raw !== "__COMMIT__";
-  el.textContent = "ver " + (isSha ? raw.slice(0, 7) : "dev");
-  if (isSha && window.APP_REPO) el.href = `${window.APP_REPO}/commit/${raw}`;
+  let ver = raw && raw !== "__COMMIT__" ? raw.slice(0, 7) : "";
+  if (!ver) {
+    try {
+      const res = await fetch(`${API_BASE}/api/health`);
+      const d = await res.json();
+      ver = (d && d.version) || "dev";
+    } catch (_) { ver = "dev"; }
+  }
+  el.textContent = "ver " + ver;
+  if (ver && ver !== "dev" && window.APP_REPO) el.href = `${window.APP_REPO}/commit/${ver}`;
   else el.removeAttribute("href");
 })();
 

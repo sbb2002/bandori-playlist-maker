@@ -18,7 +18,9 @@ def client():
 def test_health(client):
     r = client.get("/api/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    body = r.json()
+    assert body["status"] == "ok"
+    assert "version" in body  # 프론트 우하단 버전 표기용
 
 
 def test_setlist_happy_path(client):

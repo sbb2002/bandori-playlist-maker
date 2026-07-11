@@ -95,6 +95,28 @@ def _env_int(key: str, default: int) -> int:
         return default
 
 
+def _compute_version() -> str:
+    """현재 커밋 SHA(짧은형). Render는 RENDER_GIT_COMMIT, 로컬은 git, 둘 다 없으면 'dev'.
+
+    프론트 우하단 버전 표기에 노출(/api/health). 배포 프론트는 빌드시 SHA를 직접 주입하지만,
+    로컬·주입 실패 시 이 값을 폴백으로 쓴다.
+    """
+    sha = os.environ.get("RENDER_GIT_COMMIT", "").strip()
+    if sha:
+        return sha[:7]
+    try:
+        import subprocess
+
+        root = Path(__file__).resolve().parents[3]  # repo root
+        out = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=str(root), stderr=subprocess.DEVNULL, timeout=2,
+        )
+        return out.decode().strip() or "dev"
+    except Exception:  # noqa: BLE001 — git 미존재/오류 시 폴백
+        return "dev"
+
+
 def _build_interpreter() -> MoodInterpreter:
     """환경에 따라 MoodInterpreter 구현을 선택한다(composition root 주입 지점).
 
@@ -239,6 +261,7 @@ def create_app() -> FastAPI:
     )
 
     # composition root: 어댑터·데이터를 app.state에 주입.
+    app.state.version = _compute_version()
     app.state.interpreter = _build_interpreter()
     app.state.notifier = _build_notifier()
     app.state.songs = load_songs()

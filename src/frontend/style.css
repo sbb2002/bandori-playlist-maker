@@ -64,18 +64,28 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .toggle input { width: 16px; height: 16px; }
 
+/* 표처럼 가지런한 그리드: 각 셀 = 밴드 아이콘 + 곡 수(이름 생략). 선택 시 셀 강조. */
 .band-list {
-  display: flex; flex-wrap: wrap; gap: 6px 10px;
-  max-height: 160px; overflow-y: auto;
-  color: var(--muted); font-size: 0.85rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 8px;
+  max-height: 240px; overflow-y: auto;
 }
-.band-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-.band-item input { width: 15px; height: 15px; }
+.band-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 4px; border-radius: 10px; cursor: pointer;
+  background: var(--card-2); border: 1px solid transparent;
+  transition: border-color 0.12s, background 0.12s;
+}
+.band-item:hover { border-color: rgba(124,108,255,0.45); }
+.band-item:has(.band-cb:checked) { border-color: var(--accent); background: rgba(124,108,255,0.14); }
+.band-cb { display: none; } /* 숨김 — 선택 상태는 :has로 셀 강조, 토글은 label 클릭 */
 .band-item-icon {
-  width: 18px; height: 18px; border-radius: 50%; object-fit: cover;
-  background: var(--card-2); flex: 0 0 auto;
+  width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: var(--card);
 }
-.band-item-label { white-space: nowrap; }
+.band-item-count {
+  font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums;
+}
 
 .type-filter { display: flex; gap: 18px; }
 .chk { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; }
