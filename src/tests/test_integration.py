@@ -75,6 +75,38 @@ def test_boundary_tension_continuity_is_smooth():
     assert statistics.mean(gaps) < 0.40  # 베이스라인(연속성 미적용) ~0.56 → 개선
 
 
+def _rising_params() -> MoodParameters:
+    return MoodParameters(
+        brightness=0.6, start_energy=0.35, end_energy=0.85,
+        stage_count=3, target_minutes=60, interpretation_summary="",
+    )
+
+
+def test_rising_arc_direction_is_monotonic():
+    """상승 요청: 단계 평균 강도가 단계별 증가(아크 방향 정합, R&D §9 필수 게이트)."""
+    songs = load_songs()
+    sl = build_setlist(songs, _rising_params(), target_seconds=60 * 60, rng=random.Random(0))
+    stage_means = []
+    for k in range(3):
+        energies = [p.energy for p in sl.picks if p.stage_index == k]
+        if energies:
+            stage_means.append(sum(energies) / len(energies))
+    assert stage_means == sorted(stage_means)
+
+
+def test_arc_target_adherence():
+    """단계별 실제 평균 강도가 단계 목표에 근접(MAE ≤ 0.15, R&D §9 필수 게이트)."""
+    songs = load_songs()
+    sl = build_setlist(songs, _rising_params(), target_seconds=60 * 60, rng=random.Random(0))
+    targets = [s.energy_target for s in sl.stages]
+    errors = []
+    for k, target in enumerate(targets):
+        energies = [p.energy for p in sl.picks if p.stage_index == k]
+        if energies:
+            errors.append(abs(sum(energies) / len(energies) - target))
+    assert sum(errors) / len(errors) <= 0.15
+
+
 def test_seed_reproducible_on_real_data():
     songs = load_songs()
     params = _quiet_params()
