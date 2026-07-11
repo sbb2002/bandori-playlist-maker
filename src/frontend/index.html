@@ -6,11 +6,15 @@
   <title>setlist-maker — 밴드리 세트리스트 메이커</title>
   <link rel="stylesheet" href="style.css" />
   <!--
-    배포 설정: 백엔드(Render 등)와 프론트(GitHub Pages)가 다른 오리진에서 서빙되므로
-    아래 API 베이스를 백엔드 URL로 바꾼다. 로컬 개발 기본값은 http://localhost:8000.
+    API 베이스: 로컬 서빙(localhost)은 로컬 백엔드, 그 외(배포=GitHub Pages)는 Render 백엔드로
+    자동 분기. Render 서비스명/URL이 바뀌면 아래 배포 URL만 고치면 됨.
     umami 스크립트는 배포 시 아래 주석을 해제하고 website-id를 채운다.
   -->
-  <script>window.SETLIST_API_BASE = "http://localhost:8000";</script>
+  <script>
+    window.SETLIST_API_BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+      ? "http://localhost:8000"
+      : "https://bandori-playlist-maker.onrender.com";
+  </script>
   <!-- <script defer src="https://cloud.umami.is/script.js" data-website-id="YOUR-ID"></script> -->
 </head>
 <body>
