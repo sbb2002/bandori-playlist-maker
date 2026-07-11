@@ -91,6 +91,12 @@ const bandListEl = $("band-list");
 const stageEditorEl = $("stage-editor");
 let stageTouched = false; // 사용자가 그래프를 조정했는지 — 조정 전엔 LLM 에너지 자동 사용
 
+// 사용자가 '직접' 체크한 밴드만 요청 간 지속한다. 프롬프트 자동감지 밴드는 매 요청 일회성이어야
+// 하므로(자연어 요청 = 매번 새 의도), 체크박스의 시각 상태와 분리해 별도 집합으로 추적한다.
+// 이 집합은 오직 사용자의 change 이벤트로만 갱신 — 프로그램적 .checked 대입은 change를 발생시키지
+// 않으므로 syncBandChecks가 여기 섞이지 않는다(요청 간 밴드 누적 버그의 근본 차단).
+const manualBands = new Set();
+
 async function loadBands() {
   try {
     const res = await fetch(`${API_BASE}/api/bands`);
@@ -111,6 +117,12 @@ function renderBands(bands) {
     cb.type = "checkbox";
     cb.value = b.band;
     cb.className = "band-cb";
+    // 사용자가 직접 토글한 것만 manualBands에 반영(요청 간 지속 대상). syncBandChecks의
+    // 프로그램적 대입은 change를 발생시키지 않으므로 자동감지분은 여기 들어오지 않는다.
+    cb.addEventListener("change", () => {
+      if (cb.checked) manualBands.add(cb.value);
+      else manualBands.delete(cb.value);
+    });
     const span = document.createElement("span");
     span.textContent = `${prettyBand(b.band)} (${b.count})`;
     label.append(cb, span);
@@ -119,10 +131,13 @@ function renderBands(bands) {
 }
 
 function collectBands() {
-  return [...document.querySelectorAll(".band-cb:checked")].map((c) => c.value);
+  // 수동 선택분만 요청에 싣는다. 프롬프트 자동감지 밴드는 백엔드가 이번 프롬프트에서 매번 새로
+  // 더하므로 프론트가 재전송하면 안 된다(이전 요청 밴드 누적 방지).
+  return [...manualBands];
 }
 
 $("band-clear").addEventListener("click", () => {
+  manualBands.clear();
   document.querySelectorAll(".band-cb:checked").forEach((c) => (c.checked = false));
 });
 
@@ -536,10 +551,14 @@ $("yt-playlist-btn").addEventListener("click", () => {
   track("playlist_shared", { count: picks.length });
 });
 
-// 프롬프트 자동감지 등으로 실제 적용된 밴드 필터를 체크박스에 반영(체크박스 미표시 버그 수정).
+// 이번 요청에 실제 적용된 밴드(수동선택 ∪ 프롬프트 자동감지)를 체크박스에 시각 반영한다.
+// manualBands는 건드리지 않는다(자동감지분이 다음 요청에 지속되지 않도록). 프로그램적 .checked
+// 대입이므로 change 이벤트가 발생하지 않아 manualBands가 오염되지 않는다.
 function syncBandChecks(bands) {
   const applied = new Set(bands || []);
-  document.querySelectorAll(".band-cb").forEach((cb) => { cb.checked = applied.has(cb.value); });
+  document.querySelectorAll(".band-cb").forEach((cb) => {
+    cb.checked = manualBands.has(cb.value) || applied.has(cb.value);
+  });
 }
 
 function highlight(index) {

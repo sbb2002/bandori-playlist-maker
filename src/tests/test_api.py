@@ -118,6 +118,22 @@ def test_empty_bands_is_all(client):
     assert len({p["band"] for p in r.json()["picks"]}) >= 1
 
 
+def test_prompt_bands_do_not_carry_across_requests(client):
+    """요청 간 밴드 누적 방지(긴급버그): 프론트가 자동감지분을 재전송하지 않는 계약을 백엔드에서 고정.
+
+    1차 프롬프트가 여러 밴드를 자동감지해도, 2차 요청(bands=[] + 다른 밴드 프롬프트)에는
+    1차 밴드가 섞이지 않아야 한다 — 백엔드는 무상태로 이번 프롬프트 감지분만 적용.
+    """
+    r1 = client.post("/api/setlist", json={"prompt": "로젤리아랑 라스 노래로"})
+    assert r1.status_code == 200
+    assert set(r1.json()["applied_bands"]) == {"roselia", "raise_a_suilen"}
+
+    r2 = client.post("/api/setlist", json={"prompt": "몰포 노래로", "bands": []})
+    assert r2.status_code == 200
+    assert r2.json()["applied_bands"] == ["morfonica"]
+    assert {p["band"] for p in r2.json()["picks"]} == {"morfonica"}
+
+
 def test_custom_stages_override(client):
     r = client.post("/api/setlist", json={
         "prompt": "아무거나",
