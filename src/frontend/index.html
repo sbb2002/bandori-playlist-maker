@@ -113,6 +113,26 @@
     </div>
   </div>
 
+  <!-- 공유 팝업(B2) — 'YouTube 재생목록' 버튼으로 열림. 안내 + URL 복사 + 유튜브 듣기. -->
+  <div id="share-modal" class="picker hidden" role="dialog" aria-modal="true" aria-label="플레이리스트 공유">
+    <div class="picker-backdrop" data-close></div>
+    <div class="picker-panel share-panel">
+      <div class="picker-head">
+        <strong>플레이리스트가 생성되었어요 🎉</strong>
+        <button type="button" class="link-btn" data-close>닫기 ✕</button>
+      </div>
+      <p class="share-desc">아래 링크를 공유하면 누구나 같은 곡·순서로 들을 수 있어요.</p>
+      <div class="share-url-row">
+        <input id="share-url" type="text" readonly aria-label="공유 링크" />
+        <button type="button" id="share-copy" class="ghost">복사</button>
+      </div>
+      <div class="share-actions">
+        <button type="button" id="share-open" class="primary">유튜브에서 듣기 ↗</button>
+      </div>
+      <p class="share-note">※ 유튜브 임시 재생목록이라 제목은 "Untitled List"로 표시돼요.</p>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

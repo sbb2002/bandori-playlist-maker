@@ -935,14 +935,59 @@ document.addEventListener("keydown", (e) => {
 $("next-btn").addEventListener("click", () => playSong(current + 1, false));
 $("prev-btn").addEventListener("click", () => playSong(current - 1, false));
 
-// 전체 세트리스트를 YouTube 익명 재생목록(watch_videos)으로 열기 — OAuth 불필요, 공유 가능한 링크.
-// (계정 저장형 재생목록은 OAuth+Data API 필요 — 다음 단계, PRD §5-4.)
+// 전체 세트리스트 공유(B2) — 'YouTube 재생목록' 버튼 → 공유 팝업(안내·URL 복사·유튜브 듣기).
+// watch_videos 익명 링크라 OAuth 불필요하고 링크만 있으면 같은 곡·순서로 재생 가능.
+// (제목·공개 설정된 계정 저장형은 OAuth+Data API 필요 — 백로그 B1.)
+const shareModalEl = $("share-modal");
+const shareUrlInputEl = $("share-url");
+let shareUrl = "";
+
 $("yt-playlist-btn").addEventListener("click", () => {
   if (!picks.length) return;
   const ids = picks.map((p) => p.video_id).join(",");
-  window.open(`https://www.youtube.com/watch_videos?video_ids=${ids}`, "_blank", "noopener");
+  shareUrl = `https://www.youtube.com/watch_videos?video_ids=${ids}`;
+  shareUrlInputEl.value = shareUrl;
+  resetCopyBtn();
+  show(shareModalEl);
+  lockBodyScroll(true);
   track("playlist_shared", { count: picks.length });
 });
+
+$("share-open").addEventListener("click", () => {
+  if (shareUrl) window.open(shareUrl, "_blank", "noopener");
+});
+$("share-copy").addEventListener("click", copyShareUrl);
+shareModalEl.addEventListener("click", (e) => {
+  if (e.target instanceof HTMLElement && e.target.dataset && "close" in e.target.dataset) closeShareModal();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !shareModalEl.classList.contains("hidden")) closeShareModal();
+});
+
+function closeShareModal() { hide(shareModalEl); lockBodyScroll(false); }
+function resetCopyBtn() {
+  const btn = $("share-copy");
+  btn.textContent = "복사";
+  btn.classList.remove("copied");
+}
+
+async function copyShareUrl() {
+  const btn = $("share-copy");
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    ok = true;
+  } catch (_) {
+    // 폴백: input 선택 후 execCommand(구형·클립보드 차단 환경).
+    shareUrlInputEl.focus();
+    shareUrlInputEl.select();
+    try { ok = document.execCommand("copy"); } catch (_2) { ok = false; }
+  }
+  btn.textContent = ok ? "복사됨 ✓" : "직접 복사하세요";
+  btn.classList.toggle("copied", ok);
+  setTimeout(resetCopyBtn, 1500);
+  if (ok) track("playlist_link_copied", { count: picks.length });
+}
 
 // 이번 요청에 실제 적용된 밴드(수동선택 ∪ 프롬프트 자동감지)를 체크박스에 시각 반영한다.
 // manualBands는 건드리지 않는다(자동감지분이 다음 요청에 지속되지 않도록). 프로그램적 .checked
