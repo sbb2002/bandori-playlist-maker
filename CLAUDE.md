@@ -16,10 +16,9 @@ contradict them (see "Open questions" below — several infra decisions are stil
 Because the beta is serving users, **do not merge to `main` on your own.** For each task:
 
 1. Create a **new branch** for that task.
-2. Commit and push that branch only.
-3. **Stop there — never merge to `main` unless the repo owner explicitly asks for it.**
-
-Merge approval is per-request; it does not carry over to the next task.
+2. Commit and push that branch.
+3. **Open a PR against `main`, then stop.** The repo owner reviews the PR and merges it —
+   you never merge `main` yourself, and you don't wait to be asked to open the PR.
 
 ## What this project is
 
