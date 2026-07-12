@@ -577,6 +577,14 @@ function renderResult(data) {
   lastAppliedBands = data.applied_bands || [];
   lastStages = data.stages || [];
 
+  // 백엔드가 재생 형태 override를 존중하지 않았다면(1회차·의도 변경 → honored_overrides=false) 사용자가
+  // 만졌던 '재생 형태' 플래그를 풀어, 그래프·재생시간이 새 해석을 반영하도록 한다(고착 방지). 밴드·커버는
+  // 스코프 필터라 항상 유지(리셋하지 않음). 프리셋 복원(honored_overrides 없음)에는 영향 없음(=== false).
+  if (data.honored_overrides === false) {
+    stageTouched = false;
+    minutesTouched = false;
+  }
+
   renderSummary(data);
   renderTracklist(picks);
   syncBandChecks(data.applied_bands); // 적용된 밴드(프롬프트 자동감지 포함)를 체크박스에 반영

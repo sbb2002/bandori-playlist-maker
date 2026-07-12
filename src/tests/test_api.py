@@ -77,6 +77,16 @@ def test_changed_prompt_drops_stale_overrides(client):
     assert r.json()["params"]["stage_count"] == 3
 
 
+def test_response_exposes_honored_overrides(client):
+    """응답의 honored_overrides로 프론트가 자동 해석(false) 시 그래프/재생시간을 되돌릴 수 있어야 한다."""
+    r1 = client.post("/api/setlist", json={"prompt": "차분한 곡"})
+    assert r1.json()["honored_overrides"] is False  # 1회차 → 자동
+    r2 = client.post("/api/setlist", json={"prompt": "차분한 곡", "previous_prompt": "차분한 곡"})
+    assert r2.json()["honored_overrides"] is True   # 같은 의도 → 재생 형태 override 존중
+    r3 = client.post("/api/setlist", json={"prompt": "신나는 파티", "previous_prompt": "조용한 수면 명상"})
+    assert r3.json()["honored_overrides"] is False  # 의도 변경 → 자동
+
+
 def test_empty_prompt_is_invalid_request(client):
     r = client.post("/api/setlist", json={"prompt": "   "})
     assert r.status_code == 400
@@ -90,20 +100,14 @@ def test_missing_prompt_is_invalid_request(client):
 
 
 def test_original_only_excludes_covers(client):
-    # 커버/오리지널 체크박스 override는 의도가 같을 때만 적용 → previous_prompt 동봉.
-    r = client.post("/api/setlist", json={
-        "prompt": "아무거나", "previous_prompt": "아무거나",
-        "include_original": True, "include_cover": False,
-    })
+    # 커버/오리지널은 스코프 필터라 previous_prompt 없이(1회차)도 항상 명시값 적용.
+    r = client.post("/api/setlist", json={"prompt": "아무거나", "include_original": True, "include_cover": False})
     assert r.status_code == 200
     assert all("(cover)" not in p["song"].lower() for p in r.json()["picks"])
 
 
 def test_cover_only_includes_only_covers(client):
-    r = client.post("/api/setlist", json={
-        "prompt": "아무거나", "previous_prompt": "아무거나",
-        "include_original": False, "include_cover": True,
-    })
+    r = client.post("/api/setlist", json={"prompt": "아무거나", "include_original": False, "include_cover": True})
     assert r.status_code == 200
     picks = r.json()["picks"]
     assert picks and all("(cover)" in p["song"].lower() for p in picks)
@@ -170,21 +174,21 @@ def test_songs_endpoint(client):
 
 
 def test_band_filter_restricts_to_selected(client):
-    # 수동 밴드 필터는 의도가 같을 때만 적용 → previous_prompt 동봉.
-    r = client.post("/api/setlist", json={
-        "prompt": "신나는 곡", "previous_prompt": "신나는 곡", "bands": ["poppin_party"],
-    })
+    r = client.post("/api/setlist", json={"prompt": "신나는 곡", "bands": ["poppin_party"]})
     assert r.status_code == 200
     body = r.json()
     assert {p["band"] for p in body["picks"]} == {"poppin_party"}
 
 
-def test_first_request_ignores_manual_band_filter(client):
-    """1회차(previous_prompt 없음)에는 수동 밴드 필터를 무시(프롬프트 자동감지만 적용)."""
-    r = client.post("/api/setlist", json={"prompt": "신나는 곡", "bands": ["poppin_party"]})
+def test_manual_band_filter_always_applies_even_on_intent_change(client):
+    """밴드는 스코프 필터라 의도가 바뀐 2회차에도 항상 적용된다(honor와 무관)."""
+    r = client.post("/api/setlist", json={
+        "prompt": "조용한 수면 음악", "previous_prompt": "신나는 파티 음악",
+        "bands": ["poppin_party"],
+    })
     assert r.status_code == 200
-    # 수동 밴드가 무시되고 '신나는 곡'엔 밴드명 자동감지도 없어 필터 미적용(applied_bands 비어 있음).
-    assert r.json()["applied_bands"] == []
+    assert r.json()["applied_bands"] == ["poppin_party"]
+    assert {p["band"] for p in r.json()["picks"]} == {"poppin_party"}
 
 
 def test_prompt_band_name_auto_filters(client):

@@ -101,25 +101,21 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
 
     params: MoodParameters = interpreter.interpret(payload.prompt, payload.previous_prompt)
 
-    # 핫픽스(세부설정 우선순위): 직전 요청이 함께 왔고 그 의도가 현재와 '본질적으로 같을' 때만
-    # 사용자가 건드린 세부설정 override를 존중한다. 1회차이거나 의도가 바뀌면(honor=False) 사용자가
-    # 남긴 값은 무시하고 모델이 전 파라미터를 새로 제어한다 — 프롬프트를 바꿔도 이전 세부설정이
-    # 고착되던 버그의 해소점. (프롬프트 자동감지 밴드는 '현재' 프롬프트 기준이라 honor와 무관하게 적용.)
+    # 핫픽스(세부설정 우선순위): 'honor'는 **재생 형태 설정**(에너지 아크·단계 수·재생시간)에만 적용.
+    # 직전 요청과 의도가 본질적으로 같을 때만 사용자가 건드린 이 값들을 존중하고, 1회차이거나 의도가
+    # 바뀌면(honor=False) 무시하고 모델이 새로 제어한다(프롬프트 바꿔도 옛 아크가 고착되던 버그 해소).
+    # ※ **스코프 필터(밴드·커버)는 honor와 무관하게 항상 적용** — 사용자가 명시적으로 좁힌 범위라
+    #   프롬프트 mood와 독립적으로 지속되어야 한다(밴드 셀렉터가 2회차에 무시되던 문제 해소).
     honor = bool(payload.previous_prompt) and bool(params.same_as_previous)
 
-    # 커버/오리지널: honor일 때만 사용자 체크박스를 존중, 아니면 LLM song_type으로 결정(기본 ALL).
-    if honor:
-        inc_original, inc_cover = _resolve_song_type(
-            payload.include_original, payload.include_cover, params.song_type
-        )
-    else:
-        inc_original, inc_cover = _resolve_song_type(None, None, params.song_type)
+    # 커버/오리지널(스코프 필터): 프롬프트 의도와 무관하게 항상 사용자 명시값을 존중(없으면 LLM song_type).
+    inc_original, inc_cover = _resolve_song_type(
+        payload.include_original, payload.include_cover, params.song_type
+    )
     songs = _apply_cover_filter(request.app.state.songs, inc_original, inc_cover)
 
-    # 밴드 필터(설정 §5-1b): 현재 프롬프트 자동감지는 항상, 수동 선택 밴드는 honor일 때만.
-    band_names: set[str] = set()
-    if honor:
-        band_names |= {b.strip() for b in (payload.bands or []) if b and b.strip()}
+    # 밴드 필터(설정 §5-1b, 스코프 필터): 항상 적용 — 수동 선택 밴드 ∪ 현재 프롬프트 자동감지.
+    band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
     band_names |= detect_bands(payload.prompt)  # 현재 프롬프트에 밴드명(별명) 언급 시 자동 필터
     band_filter = band_names or None
 
@@ -159,4 +155,7 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     # 실제 적용된 곡 종류(커버/오리지널) — 프론트가 체크박스 반영에 사용.
     result["include_original"] = inc_original
     result["include_cover"] = inc_cover
+    # 재생 형태 override(에너지 아크·단계·재생시간)를 존중했는지 — 프론트가 자동 해석 시 그래프/재생시간을
+    # 새 해석으로 되돌리는 데 사용(밴드·커버 스코프 필터는 항상 적용이라 무관).
+    result["honored_overrides"] = honor
     return result
