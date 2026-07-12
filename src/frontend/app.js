@@ -303,7 +303,7 @@ function renderStageGraph() {
   stageEditorEl.append(plotRow, xRow, hint);
 
   // 우클릭(데스크톱)·길게누름(모바일)으로 구간 추가/제거(핫픽스 제안2).
-  attachGraphMenu(plot, dots);
+  attachGraphMenu(plot);
 
   function update() {
     const segs = stageModel.segments, n = segs.length, total = stageModel.totalMinutes;
@@ -433,32 +433,38 @@ document.addEventListener("pointercancel", clearGraphLongPress, true);
 
 // plot에 우클릭·길게누름 핸들러를 건다. renderStageGraph가 매 렌더에 새 plot으로 호출하므로 이전
 // plot 리스너는 함께 폐기된다(누수 없음). 문서 레벨 리스너는 위에서 1회만 등록.
-function attachGraphMenu(plot, dots) {
-  const openFor = (clientX, clientY, target) => {
-    const dot = target && target.closest ? target.closest(".energy-dot") : null;
-    const di = dot ? dots.indexOf(dot) : -1;
-    if (di >= 0) {
-      openGraphMenu(clientX, clientY, [
-        { label: "구간 제거", disabled: stageModel.segments.length <= MIN_SEGMENTS,
-          onClick: () => removeSegmentAt(di) },
-      ]);
-    } else {
-      const rect = plot.getBoundingClientRect();
-      const fx = clamp01((clientX - rect.left) / rect.width);
-      openGraphMenu(clientX, clientY, [
-        { label: "구간 추가", disabled: stageModel.segments.length >= MAX_SEGMENTS,
-          onClick: () => addSegmentAt(fx) },
-      ]);
-    }
+function attachGraphMenu(plot) {
+  // 어느 좌표에서 우클릭/길게눌러도 두 옵션을 모두 제공(사용자 검수). 상한/하한은 각 함수가
+  // showGraphNotice로 안내하므로 항상 enabled로 둔다. 추가=클릭 x, 제거=클릭 최근접 포인트 기준.
+  const openFor = (clientX, clientY) => {
+    const rect = plot.getBoundingClientRect();
+    const fx = clamp01((clientX - rect.left) / rect.width);
+    openGraphMenu(clientX, clientY, [
+      { label: "여기에 에너지 단계 추가", onClick: () => addSegmentAt(fx) },
+      { label: "이 에너지 단계를 제거", onClick: () => removeSegmentAt(nearestSegmentIndex(fx)) },
+    ]);
   };
-  plot.addEventListener("contextmenu", (e) => { e.preventDefault(); openFor(e.clientX, e.clientY, e.target); });
+  plot.addEventListener("contextmenu", (e) => { e.preventDefault(); openFor(e.clientX, e.clientY); });
   plot.addEventListener("pointerdown", (e) => {
     if (e.pointerType === "mouse") return; // 데스크톱은 contextmenu 사용
-    const x = e.clientX, y = e.clientY, target = e.target;
+    const x = e.clientX, y = e.clientY;
     if (lpTimer) clearTimeout(lpTimer);
     lpStartXY = { x, y };
-    lpTimer = setTimeout(() => { lpTimer = null; openFor(x, y, target); }, LONGPRESS_MS);
+    lpTimer = setTimeout(() => { lpTimer = null; openFor(x, y); }, LONGPRESS_MS);
   });
+}
+
+// 클릭 x(0~1)에 가장 가까운 에너지 포인트(구간 중심)의 구간 index — '이 에너지 단계 제거' 대상.
+function nearestSegmentIndex(fx) {
+  const segs = stageModel.segments;
+  const cum = [0];
+  segs.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
+  let best = 0, bestDist = Infinity;
+  for (let i = 0; i < segs.length; i++) {
+    const d = Math.abs((cum[i] + cum[i + 1]) / 2 - fx);
+    if (d < bestDist) { bestDist = d; best = i; }
+  }
+  return best;
 }
 
 function addSegmentAt(fx) {
@@ -471,8 +477,10 @@ function addSegmentAt(fx) {
   while (i < segs.length - 1 && fx >= cum[i + 1]) i++;
   let lw = fx - cum[i], rw = cum[i + 1] - fx;
   if (lw < MIN_WIDTH || rw < MIN_WIDTH) { lw = segs[i].width / 2; rw = segs[i].width / 2; } // 너무 얇으면 반반
-  const e = segs[i].energy; // 새 두 구간은 원 구간 에너지를 이어받음
-  segs.splice(i, 1, { energy: e, width: lw }, { energy: e, width: rw });
+  const e = segs[i].energy;                          // 좌 구간은 원 에너지 유지
+  const nextE = i + 1 < segs.length ? segs[i + 1].energy : e;
+  const newE = clamp01(+(((e + nextE) / 2).toFixed(2))); // 신규(우) 구간 = 앞뒤 값의 평균(사용자 검수)
+  segs.splice(i, 1, { energy: e, width: lw }, { energy: newE, width: rw });
   stageTouched = true; // 사용자가 아크를 직접 구성 → 이후 요청에 이 아크 적용
   renderStageGraph();
 }

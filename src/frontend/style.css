@@ -55,9 +55,7 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .options { margin: 14px 0; }
 .options summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
 .options-guide {
-  margin: 12px 0 4px; padding: 10px 12px; font-size: 0.82rem; line-height: 1.5;
-  color: var(--muted); background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07); border-radius: 8px;
+  margin: 12px 0 4px; color: var(--muted); font-size: 0.72rem; line-height: 1.55;
 }
 .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; max-width: 240px; }
 
