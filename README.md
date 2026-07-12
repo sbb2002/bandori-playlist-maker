@@ -1,4 +1,4 @@
-# 🎧 setlist-maker
+# 🎧 Bandori-Playlist-Maker
 
 > 한 문장이면 됩니다. 기분·상황을 말하면 **밴드리(BanG Dream!) 곡으로 긴 재생 흐름**을 만들어 드려요.
 
