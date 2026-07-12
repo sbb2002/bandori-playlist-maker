@@ -214,7 +214,7 @@ const MIN_WIDTH = 0.08;  // 구간 최소 폭(전체 대비)
 const MIN_SEGMENTS = 2;  // 구간 최소 개수
 const MAX_SEGMENTS = 11; // 구간 최대 개수(= 분리선 최대 10개, 핫픽스 제안2)
 const DEFAULT_STAGE_COUNT = 3; // 단계 수 텍스트박스 제거 후 기본 구간 수
-const LONGPRESS_MS = 550;      // 모바일 길게누름 → 구간 추가/제거 메뉴
+const LONGPRESS_MS = 1000;     // 모바일 길게누름(1초) → 구간 추가/제거 메뉴 (우클릭 대체)
 const GRAPH_HINT_TEXT = "● 점 위·아래 = 에너지  ·  ◆ 경계 좌·우 = 구간 길이  ·  우클릭/길게눌러 구간 추가·제거";
 
 let stageModel = null; // { totalMinutes, segments: [{energy(0~1), width(합=1)}] }
