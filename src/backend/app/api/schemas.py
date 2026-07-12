@@ -31,7 +31,7 @@ class SetlistRequest(BaseModel):
     target_minutes: int | None = Field(default=None, ge=10, le=180, description="목표 재생시간(분)")
     stage_count: int | None = Field(default=None, ge=2, le=5, description="에너지 단계 수 N")
     bands: list[str] | None = Field(default=None, max_length=50, description="밴드 필터(빈 목록/미지정=ALL)")
-    stages: list[StageInput] | None = Field(default=None, min_length=1, max_length=8, description="단계 직접 지정")
+    stages: list[StageInput] | None = Field(default=None, min_length=1, max_length=11, description="단계 직접 지정(그래프 편집 시 최대 11구간=분리선 10개)")
     # None = 사용자가 체크박스를 안 건드림 → LLM의 song_type으로 결정(둘 다 미지정=ALL 기본).
     # 명시 시(둘 다) 그 값이 우선. 둘 다 같으면(모두 포함/모두 제외) ALL.
     include_original: bool | None = Field(default=None, description="오리지널 포함(None=LLM 판단)")

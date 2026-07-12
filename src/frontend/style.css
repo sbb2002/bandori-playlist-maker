@@ -104,6 +104,7 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
   position: relative; flex: 1; height: 180px; background: var(--card-2);
   border-left: 1px solid rgba(255,255,255,0.16); border-bottom: 1px solid rgba(255,255,255,0.16);
   border-radius: 0 8px 0 0; overflow: visible; touch-action: none; user-select: none;
+  -webkit-touch-callout: none; /* iOS 롱프레스 시 기본 콜아웃 대신 커스텀 메뉴 사용 */
 }
 .graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .grid { stroke: rgba(255,255,255,0.06); stroke-width: 1; vector-effect: non-scaling-stroke; }
@@ -142,6 +143,31 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .x-tick { position: absolute; top: 0; transform: translateX(-50%); font-size: 0.68rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .x-unit { position: absolute; right: -16px; top: 0; font-size: 0.68rem; color: var(--muted); }
 .graph-hint { margin-top: 8px; font-size: 0.75rem; color: var(--muted); }
+
+/* 에너지 단계 추가·제거 메뉴(우클릭/롱프레스) */
+.stage-menu {
+  position: fixed; z-index: 50; min-width: 168px;
+  background: var(--card-2); border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  padding: 4px; display: flex; flex-direction: column; gap: 2px;
+}
+.stage-menu button {
+  appearance: none; background: transparent; border: none; color: var(--text);
+  text-align: left; font-size: 0.82rem; padding: 8px 10px; border-radius: 6px;
+  cursor: pointer; white-space: nowrap;
+}
+.stage-menu button:hover:not(:disabled) { background: rgba(255,255,255,0.08); }
+.stage-menu button:disabled { color: var(--muted); opacity: 0.5; cursor: default; }
+
+/* 그래프 안내 토스트(예: 구간 최대치) */
+.stage-toast, #graph-toast {
+  position: fixed; left: 50%; bottom: 24px; z-index: 60; max-width: 90vw;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(0,0,0,0.85); color: #fff; text-align: center;
+  padding: 10px 14px; border-radius: 10px; font-size: 0.8rem;
+  opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s;
+}
+.stage-toast.show, #graph-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 button {
   font-family: inherit;
