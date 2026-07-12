@@ -16,7 +16,7 @@ BAND_ALIASES: dict[str, tuple[str, ...]] = {
     "hello_happy_world": ("hello_happy_world", "hello happy world", "hello happy", "헬로해피월드", "헬로해피", "하로하피", "하로핫삐", "하로하삐", "코코로", "콕코로", "꿔꿔러", "꼬꼬로"),
     "morfonica": ("morfonica", "모르포니카", "몰포니카", "몰포", "마시로", "시롱이", "시롱"),
     "mygo": ("mygo", "마이고", "미아", "토모리", "돌모리", "돌갈비"),
-    "ave_mujica": ("ave_mujica", "ave mujica", "아베무지카", "아베무", "아베", "우이카", "이모", "조카", "우이코"),
+    "ave_mujica": ("ave_mujica", "ave mujica", "아베무지카", "아베무", "아베", "우이카", "이모", "조카", "우이코", "쎄하다"),
     "mugendai_mutype": ("mugendai_mutype", "mugendai mutype", "mutype", "뮤타입", "믂타입", "무겐다이 뮤타입", "유메미타", "윾메미타", "아라레", "어레일"),
 }
 
