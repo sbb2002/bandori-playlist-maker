@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 문서 취급 규칙 (중요)
+
+`docs/ref/` 이하(특히 `docs/ref/user-opinion/`)는 **사용자가 세션에 전달하는 참조 문서**다.
+**읽기 전용으로 참조만** 하고, 사용자의 **명시적 허락 없이 편집·삭제·이동·이름변경하지 말 것.**
+브랜치 전환 등으로 워킹트리에서 보이지 않더라도 파일은 건드리지 말고, 필요한 내용은 인용·요약만 한다.
+
 ## Project status
 
 This repository currently contains **only a PRD** (`docs/PRD.md`) — no code has been written yet.
