@@ -51,10 +51,13 @@ SYSTEM_PROMPT = (
     "- tags: 이 플레이리스트를 표현하는 인스타그램식 해시태그 키워드 배열(최대 5개, # 없이, "
     "한국어 짧은 단어). 예: [\"드라이브\",\"밝은\",\"설렘\"]. 억지로 다 채우지 말고 어울리는 만큼만.\n"
     "- song_type: \"all\" | \"original\" | \"cover\". 사용자가 '커버곡만/커버로'라 하면 \"cover\", "
-    "'오리지널만/원곡만'이면 \"original\", 언급이 없으면 \"all\".\n\n"
+    "'오리지널만/원곡만'이면 \"original\", 언급이 없으면 \"all\".\n"
+    "- same_as_previous: 불리언. **직전 요청이 함께 제공된 경우에만** 의미가 있다. 직전 요청과 현재 "
+    "요청이 본질적으로 같은 의도(같은 상황·목적, 표현·군더더기만 다름)면 true, 의도가 달라졌으면 false. "
+    "직전 요청이 제공되지 않으면 false.\n\n"
     '예: {"brightness":0.7,"start_energy":0.35,"end_energy":0.85,"stage_count":3,'
     '"target_minutes":60,"interpretation_summary":"주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",'
-    '"tags":["드라이브","설렘","주말","고조되는"],"song_type":"all"}'
+    '"tags":["드라이브","설렘","주말","고조되는"],"song_type":"all","same_as_previous":false}'
 )
 
 # OpenRouter response_format용 JSON 스키마(structured output 지원 모델에서 사용).
@@ -76,6 +79,7 @@ RESPONSE_JSON_SCHEMA = {
                 "interpretation_summary": {"type": "string"},
                 "tags": {"type": ["array", "null"], "items": {"type": "string"}},
                 "song_type": {"type": "string", "enum": ["all", "original", "cover"]},
+                "same_as_previous": {"type": "boolean"},
             },
             "required": [
                 "brightness",
@@ -87,17 +91,31 @@ RESPONSE_JSON_SCHEMA = {
                 "interpretation_summary",
                 "tags",
                 "song_type",
+                "same_as_previous",
             ],
         },
     },
 }
 
 
-def build_messages(user_prompt: str) -> list[dict]:
-    """OpenRouter chat/completions messages 배열을 만든다."""
+def build_messages(user_prompt: str, previous_prompt: str | None = None) -> list[dict]:
+    """OpenRouter/Groq chat/completions messages 배열을 만든다.
+
+    previous_prompt가 주어지면(2회차+ 요청) 직전 요청과 현재 요청을 함께 제시하고, 두 요청이
+    '본질적으로 같은 의도'인지 same_as_previous로 판정하게 한다(핫픽스: 세부설정 우선순위 결정).
+    파라미터는 항상 '현재 요청' 기준으로 산출한다.
+    """
+    if previous_prompt and previous_prompt.strip():
+        user_content = (
+            "아래는 직전 회차 요청과 현재 회차 요청이다. 두 요청이 본질적으로 같은 의도인지 판단해 "
+            "same_as_previous(true/false)로 표기하라. 나머지 파라미터는 반드시 '현재 요청' 기준으로 산출한다.\n"
+            f"[직전 요청]\n{previous_prompt.strip()}\n\n[현재 요청]\n{user_prompt}"
+        )
+    else:
+        user_content = user_prompt
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": user_prompt},
+        {"role": "user", "content": user_content},
     ]
 
 
@@ -179,6 +197,11 @@ def parse_mood(raw_text: str) -> MoodParameters:
     if song_type not in ("all", "original", "cover"):
         song_type = "all"
 
+    # 직전 요청과 같은 의도인지 LLM 판정(직전 프롬프트가 제공된 경우만 의미). 불리언이 아니면 None
+    # → 라우트가 previous_prompt 존재 여부와 함께 override 적용 여부를 안전하게 가른다.
+    raw_same = obj.get("same_as_previous")
+    same_as_previous = raw_same if isinstance(raw_same, bool) else None
+
     return MoodParameters(
         brightness=brightness,
         start_energy=start_energy,
@@ -189,6 +212,7 @@ def parse_mood(raw_text: str) -> MoodParameters:
         stage_energies=stage_energies,
         tags=tags,
         song_type=song_type,
+        same_as_previous=same_as_previous,
     )
 
 

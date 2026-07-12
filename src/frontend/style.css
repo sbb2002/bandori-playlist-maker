@@ -54,7 +54,12 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 
 .options { margin: 14px 0; }
 .options summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
-.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.options-guide {
+  margin: 12px 0 4px; padding: 10px 12px; font-size: 0.82rem; line-height: 1.5;
+  color: var(--muted); background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07); border-radius: 8px;
+}
+.options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; max-width: 240px; }
 
 /* 설정 블록 */
 .setting-block { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); }
@@ -142,6 +147,21 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .x-tick { position: absolute; top: 0; transform: translateX(-50%); font-size: 0.68rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .x-unit { position: absolute; right: -16px; top: 0; font-size: 0.68rem; color: var(--muted); }
 .graph-hint { margin-top: 8px; font-size: 0.75rem; color: var(--muted); }
+.graph-hint.notice { color: var(--accent); font-weight: 600; }
+
+/* 구간 추가/제거 컨텍스트 메뉴(우클릭·길게누름) */
+.graph-menu {
+  position: fixed; z-index: 1000; min-width: 120px; padding: 4px;
+  background: #1b1f2a; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+.graph-menu-item {
+  display: block; width: 100%; text-align: left; padding: 8px 12px;
+  background: transparent; border: none; border-radius: 6px;
+  color: var(--text); font-size: 0.85rem;
+}
+.graph-menu-item:hover:not(:disabled) { background: rgba(255,255,255,0.08); }
+.graph-menu-item:disabled { color: var(--muted); cursor: default; opacity: 0.6; }
 
 button {
   font-family: inherit;

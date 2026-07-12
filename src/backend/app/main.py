@@ -263,6 +263,7 @@ def create_app() -> FastAPI:
     # composition root: 어댑터·데이터를 app.state에 주입.
     app.state.version = _compute_version()
     app.state.interpreter = _build_interpreter()
+    app.state.interpreter_name = type(app.state.interpreter).__name__  # /api/health 진단(stub|groq 확인)
     app.state.notifier = _build_notifier()
     app.state.songs = load_songs()
     logger.info("곡 %d건 적재 완료.", len(app.state.songs))

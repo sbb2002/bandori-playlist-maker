@@ -51,6 +51,11 @@ class MoodParameters:
     # 곡 종류 필터 의도: "all" | "original" | "cover". 사용자가 커버/오리지널만 원하면 그에 맞게,
     # 아니면 "all". 사용자가 체크박스를 명시하면 그게 우선(라우트에서 조정).
     song_type: str = "all"
+    # 직전 요청과 현재 요청이 '본질적으로 같은 의도'인지 LLM 판정(핫픽스: 세부설정 우선순위).
+    # 직전 프롬프트가 함께 주어졌을 때만 의미가 있다. True면 사용자가 건드린 세부설정 override를
+    # 존중하고, False/None이면(1회차 또는 의도가 바뀜) 모델이 전 파라미터를 새로 제어한다.
+    # 라우트가 이 값(과 previous_prompt 존재 여부)으로 override 적용 여부를 가른다.
+    same_as_previous: bool | None = None
 
 
 @dataclass(frozen=True)

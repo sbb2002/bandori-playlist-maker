@@ -89,6 +89,7 @@ bandori-playlist-maker/
 | `stage_count` (N) | integer, 2~5 | 3 | 경계 클램프 |
 | `target_minutes` | integer\|null, 10~180 | null→API가 60 적용 | 발화에서 추출 |
 | `interpretation_summary` | string ≤120자 | "" | 설명 전용(로직 무영향) |
+| `same_as_previous` | boolean\|null | null | 직전 요청(`previous_prompt`) 제공 시만 판정. 현재와 의도가 같으면 true. §5-1 세부설정 override 존중 여부를 라우트가 이 값으로 가름 |
 
 검증 실패: 누락 필드 기본값 주입 / 완전 파싱 불가 시 `MoodInterpretationError`(재시도 없음, §7).
 
@@ -122,10 +123,19 @@ prev_camelot, brightness_fit, text}`.
 ### 스키마 3 — 백엔드 API
 
 ```
-POST /api/setlist   { "prompt": str, "target_minutes"?: int|null, "stage_count"?: int }
-  → 200: Setlist 객체 그대로
+POST /api/setlist   { "prompt": str, "previous_prompt"?: str|null,
+                      "target_minutes"?: int|null, "stage_count"?: int,
+                      "bands"?: str[], "stages"?: {energy, minutes|song_count}[](최대 11구간),
+                      "include_original"?: bool, "include_cover"?: bool }
+  → 200: Setlist 객체 그대로 (+ applied_bands, include_original, include_cover)
 GET /api/health     → 200 { "status": "ok" }
 ```
+
+**세부설정 우선순위(§5-1, 핫픽스 2026-07)**: 사용자가 건드린 override(`target_minutes`·`stage_count`·
+`stages`·`bands`·`include_*`)는 **직전 요청(`previous_prompt`)과 의도가 본질적으로 같을 때만** 적용된다
+(LLM `same_as_previous` 판정). 1회차이거나 프롬프트 의도가 바뀌면 override를 무시하고 모델이 전 파라미터를
+새로 제어한다 — 프롬프트를 바꿔도 이전 세부설정이 고착되던 문제 해소. (프롬프트 밴드 자동감지는 '현재'
+프롬프트 기준이라 이 게이팅과 무관하게 항상 적용.) 수동 에너지 그래프는 최대 11구간(분리선 10개).
 
 **CORS**: `FRONTEND_ORIGIN` 환경변수(GitHub Pages 오리진)만 명시 허용 + 개발용 localhost.
 와일드카드 금지.

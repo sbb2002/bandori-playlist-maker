@@ -176,3 +176,34 @@ def test_unparseable_content_raises_mood_error():
     interp = _make(FakeClient(response=_chat_response("이건 JSON이 아니에요")))
     with pytest.raises(MoodInterpretationError):
         interp.interpret("x")
+
+
+# ── 프롬프트 의도 동일성(핫픽스: 세부설정 우선순위) ───────────────────────────────
+def test_build_messages_includes_previous_prompt():
+    from app.adapters.prompt import build_messages
+    user = build_messages("현재 요청 텍스트", "직전 요청 텍스트")[-1]["content"]
+    assert "직전 요청 텍스트" in user and "현재 요청 텍스트" in user and "same_as_previous" in user
+
+
+def test_build_messages_without_previous_is_plain():
+    from app.adapters.prompt import build_messages
+    assert build_messages("현재 요청 텍스트")[-1]["content"] == "현재 요청 텍스트"
+
+
+def test_parse_mood_same_as_previous_extracted():
+    from app.adapters.prompt import parse_mood
+    p = parse_mood('{"brightness":0,"start_energy":0.4,"end_energy":0.4,"stage_count":3,'
+                   '"target_minutes":null,"interpretation_summary":"","same_as_previous":true}')
+    assert p.same_as_previous is True
+
+
+def test_parse_mood_same_as_previous_absent_is_none():
+    from app.adapters.prompt import parse_mood
+    assert parse_mood(_OK_JSON).same_as_previous is None
+
+
+def test_interpret_forwards_previous_prompt():
+    client = FakeClient(response=_chat_response(_OK_JSON))
+    _make(client).interpret("현재 요청", "직전 요청")
+    sent = client.calls[0]["json"]["messages"][-1]["content"]
+    assert "현재 요청" in sent and "직전 요청" in sent
