@@ -89,6 +89,7 @@ bandori-playlist-maker/
 | `stage_count` (N) | integer, 2~5 | 3 | 경계 클램프 |
 | `target_minutes` | integer\|null, 10~180 | null→API가 60 적용 | 발화에서 추출 |
 | `interpretation_summary` | string ≤120자 | "" | 설명 전용(로직 무영향) |
+| `same_as_previous` | boolean\|null | null | 직전 요청(`previous_prompt`) 제공 시만 판정. 현재와 의도가 같으면 true. §5-1 세부설정 override 존중 여부를 라우트가 이 값으로 가름 |
 
 검증 실패: 누락 필드 기본값 주입 / 완전 파싱 불가 시 `MoodInterpretationError`(재시도 없음, §7).
 
@@ -122,10 +123,22 @@ prev_camelot, brightness_fit, text}`.
 ### 스키마 3 — 백엔드 API
 
 ```
-POST /api/setlist   { "prompt": str, "target_minutes"?: int|null, "stage_count"?: int }
-  → 200: Setlist 객체 그대로
-GET /api/health     → 200 { "status": "ok" }
+POST /api/setlist   { "prompt": str, "previous_prompt"?: str|null,
+                      "target_minutes"?: int|null, "stage_count"?: int,
+                      "bands"?: str[], "stages"?: {energy, minutes|song_count}[](최대 11구간),
+                      "include_original"?: bool, "include_cover"?: bool }
+  → 200: Setlist 객체 그대로 (+ applied_bands, include_original, include_cover, honored_overrides)
+GET /api/health     → 200 { "status": "ok", "version", "interpreter": "stub"|"groq" }
 ```
+
+**세부설정 우선순위(§5-1, 핫픽스 2026-07)** — 설정을 두 부류로 나눠 다룬다:
+- **재생 형태 설정**(`target_minutes`·`stage_count`·`stages` 에너지 아크)은 **직전 요청(`previous_prompt`)과
+  의도가 본질적으로 같을 때만** 적용(LLM `same_as_previous` 판정). 1회차이거나 의도가 바뀌면 무시하고
+  모델이 새로 제어 — 프롬프트를 바꿔도 이전 아크가 고착되던 문제 해소. 응답의 `honored_overrides`(bool)로
+  이 존중 여부를 노출해, 프론트가 자동 해석 시 그래프·재생시간을 새 해석으로 되돌린다.
+- **스코프 필터**(`bands`·`include_*`)는 **의도와 무관하게 항상 적용** — 사용자가 명시적으로 좁힌 범위라
+  프롬프트 mood와 독립적으로 지속(밴드 셀렉터가 2회차에 무시되던 문제 해소). 프롬프트 밴드 자동감지도
+  '현재' 프롬프트 기준으로 항상 적용. 수동 에너지 그래프는 최대 11구간(분리선 10개).
 
 **CORS**: `FRONTEND_ORIGIN` 환경변수(GitHub Pages 오리진)만 명시 허용 + 개발용 localhost.
 와일드카드 금지.

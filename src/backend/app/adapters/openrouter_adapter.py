@@ -71,10 +71,10 @@ class OpenRouterMoodInterpreter:
             headers["HTTP-Referer"] = self._referer
         return headers
 
-    def interpret(self, prompt: str) -> MoodParameters:
+    def interpret(self, prompt: str, previous_prompt: str | None = None) -> MoodParameters:
         payload = {
             "model": self._model,
-            "messages": prompt_mod.build_messages(prompt),
+            "messages": prompt_mod.build_messages(prompt, previous_prompt),
             "temperature": 0.2,
         }
         if self._response_format_mode == "json_schema":

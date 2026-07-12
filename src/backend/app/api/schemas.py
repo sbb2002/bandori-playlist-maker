@@ -28,10 +28,13 @@ class SetlistRequest(BaseModel):
     """POST /api/setlist 요청 바디."""
 
     prompt: str = Field(..., min_length=1, max_length=500, description="자연어 요청 한 문장")
+    # 직전 회차 요청(2회차+). 주어지면 백엔드가 LLM에 함께 넘겨 '의도가 같은지'를 판정하고,
+    # 같을 때만 아래 사용자 override(target_minutes·stage_count·stages·bands·cover)를 적용한다.
+    previous_prompt: str | None = Field(default=None, max_length=500, description="직전 회차 요청(의도 동일성 판정용)")
     target_minutes: int | None = Field(default=None, ge=10, le=180, description="목표 재생시간(분)")
-    stage_count: int | None = Field(default=None, ge=2, le=5, description="에너지 단계 수 N")
+    stage_count: int | None = Field(default=None, ge=2, le=11, description="에너지 단계 수 N")
     bands: list[str] | None = Field(default=None, max_length=50, description="밴드 필터(빈 목록/미지정=ALL)")
-    stages: list[StageInput] | None = Field(default=None, min_length=1, max_length=8, description="단계 직접 지정")
+    stages: list[StageInput] | None = Field(default=None, min_length=1, max_length=11, description="단계 직접 지정(그래프 수동, 최대 11구간)")
     # None = 사용자가 체크박스를 안 건드림 → LLM의 song_type으로 결정(둘 다 미지정=ALL 기본).
     # 명시 시(둘 다) 그 값이 우선. 둘 다 같으면(모두 포함/모두 제외) ALL.
     include_original: bool | None = Field(default=None, description="오리지널 포함(None=LLM 판단)")

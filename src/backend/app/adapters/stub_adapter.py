@@ -53,10 +53,31 @@ def _count(text: str, words: tuple[str, ...]) -> int:
     return sum(1 for w in words if w.lower() in text)
 
 
+def _norm(text: str) -> str:
+    """동일성 비교용 정규화 — 소문자·공백 축약·양끝 제거."""
+    return re.sub(r"\s+", " ", text.strip().lower())
+
+
+def _essentially_same(prompt: str, previous_prompt: str) -> bool:
+    """직전 요청과 현재 요청이 본질적으로 같은 의도인지 휴리스틱 판정(스텁 품질).
+
+    정규화 후 완전 일치이거나, 단어 집합 Jaccard 유사도가 높으면 같다고 본다. 진짜 의미
+    이해가 아니라 근사이며, 운영 품질은 LLM 어댑터의 same_as_previous가 담당한다.
+    """
+    a, b = _norm(prompt), _norm(previous_prompt)
+    if a == b:
+        return True
+    wa, wb = set(a.split()), set(b.split())
+    if not wa or not wb:
+        return False
+    jaccard = len(wa & wb) / len(wa | wb)
+    return jaccard >= 0.6
+
+
 class StubMoodInterpreter:
     """키워드 휴리스틱 기반 MoodInterpreter(오프라인·결정적)."""
 
-    def interpret(self, prompt: str) -> MoodParameters:
+    def interpret(self, prompt: str, previous_prompt: str | None = None) -> MoodParameters:
         text = prompt.lower()
 
         # 밝기: 밝음/어두움 키워드 카운트 차이를 -1~1로 스케일.
@@ -100,6 +121,11 @@ class StubMoodInterpreter:
         else:
             song_type = "all"
 
+        # 직전 요청이 주어졌을 때만 의도 동일 여부를 판정(핫픽스: 세부설정 우선순위).
+        same_as_previous = (
+            _essentially_same(prompt, previous_prompt) if previous_prompt is not None else None
+        )
+
         return MoodParameters(
             brightness=round(brightness, 3),
             start_energy=round(start_energy, 3),
@@ -109,6 +135,7 @@ class StubMoodInterpreter:
             interpretation_summary=summary,
             tags=tags,
             song_type=song_type,
+            same_as_previous=same_as_previous,
         )
 
 
