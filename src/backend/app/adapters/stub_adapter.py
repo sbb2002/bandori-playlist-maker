@@ -12,6 +12,7 @@ from __future__ import annotations
 import re
 
 from ..domain.models import MoodParameters
+from ..domain.tags import ensure_min_tags
 from .prompt import (
     DEFAULT_BRIGHTNESS,
     DEFAULT_STAGE_COUNT,
@@ -132,4 +133,5 @@ def _flavor(brightness, start_energy, end_energy, target_minutes):
         tags.append("고조되는")
     elif diff < -0.1:
         tags.append("잔잔해지는")
-    return summary, (tags[:5] or None)
+    # 휴리스틱 태그가 0~1개여도 요약 카드가 허전하지 않도록 최소 2개를 보장한다.
+    return summary, ensure_min_tags(tags, brightness, start_energy, end_energy, target_minutes)

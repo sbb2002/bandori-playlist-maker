@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 
 from ..domain.models import MoodParameters
+from ..domain.tags import ensure_min_tags
 from ..ports.mood_port import MoodInterpretationError
 
 # 스키마1 기본값·범위(architecture.md §③ 스키마1 표).
@@ -48,8 +49,9 @@ SYSTEM_PROMPT = (
     "출퇴근≈40분, 파티≈120분). 정말 아무 단서도 없을 때만 null.\n"
     "- interpretation_summary: 이 플레이리스트의 분위기를 한 문장으로 따뜻하게 요약한 한국어 "
     "플레이버 텍스트(80자 이내). 숫자·수치(밝기 0.7 같은) 나열 금지, 감성적으로.\n"
-    "- tags: 이 플레이리스트를 표현하는 인스타그램식 해시태그 키워드 배열(최대 5개, # 없이, "
-    "한국어 짧은 단어). 예: [\"드라이브\",\"밝은\",\"설렘\"]. 억지로 다 채우지 말고 어울리는 만큼만.\n"
+    "- tags: 이 플레이리스트를 표현하는 인스타그램식 해시태그 키워드 배열(**반드시 2~5개**, "
+    "# 없이, 한국어 짧은 단어). interpretation_summary의 분위기를 대표하는 핵심 키워드로 채운다. "
+    "예: [\"드라이브\",\"밝은\",\"설렘\"]. **절대 비우지 말 것 — 최소 2개는 필수.**\n"
     "- song_type: \"all\" | \"original\" | \"cover\". 사용자가 '커버곡만/커버로'라 하면 \"cover\", "
     "'오리지널만/원곡만'이면 \"original\", 언급이 없으면 \"all\".\n\n"
     '예: {"brightness":0.7,"start_energy":0.35,"end_energy":0.85,"stage_count":3,'
@@ -74,7 +76,7 @@ RESPONSE_JSON_SCHEMA = {
                 "stage_energies": {"type": ["array", "null"], "items": {"type": "number"}},
                 "target_minutes": {"type": ["integer", "null"]},
                 "interpretation_summary": {"type": "string"},
-                "tags": {"type": ["array", "null"], "items": {"type": "string"}},
+                "tags": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 5},
                 "song_type": {"type": "string", "enum": ["all", "original", "cover"]},
             },
             "required": [
@@ -173,7 +175,15 @@ def parse_mood(raw_text: str) -> MoodParameters:
     else:
         stage_energies = None
 
-    tags = _clean_tags(obj.get("tags"))
+    # LLM이 태그를 누락/부족(0~1개)하게 줘도 요약 카드가 허전하지 않도록 최소 2개 보장.
+    # 부족분은 산출된 무드 파라미터에서 대표 키워드를 결정론적으로 파생해 채운다.
+    tags = ensure_min_tags(
+        _clean_tags(obj.get("tags")),
+        brightness,
+        start_energy,
+        end_energy,
+        target_minutes,
+    )
 
     song_type = str(obj.get("song_type", "all")).strip().lower()
     if song_type not in ("all", "original", "cover"):

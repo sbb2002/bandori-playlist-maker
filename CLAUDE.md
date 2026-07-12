@@ -2,12 +2,24 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project status
+## Project status — BETA (live)
 
-This repository currently contains **only a PRD** (`docs/PRD.md`) — no code has been written yet.
-There is no build/lint/test tooling to run. Before writing code, read `docs/PRD.md` in full; it is
-the source of truth for scope, data model, and architectural constraints. Do not invent stack choices
-that contradict it (see "Open questions" below — several infra decisions are explicitly undecided).
+**This app is in BETA and serving real users** (beta launched 2026-07). It is well past the
+"PRD only" stage: there is a working FastAPI backend (`src/backend/app`, hexagonal split — see
+`docs/architecture.md`), a static frontend (`src/frontend`), and a pytest suite (`src/tests`, run
+with `python -m pytest` from `src/`). `docs/PRD.md` + `docs/architecture.md` remain the source of
+truth for scope, data model, and architectural constraints; don't invent stack choices that
+contradict them (see "Open questions" below — several infra decisions are still undecided).
+
+### Working agreement (IMPORTANT — beta is live)
+
+Because the beta is serving users, **do not merge to `main` on your own.** For each task:
+
+1. Create a **new branch** for that task.
+2. Commit and push that branch only.
+3. **Stop there — never merge to `main` unless the repo owner explicitly asks for it.**
+
+Merge approval is per-request; it does not carry over to the next task.
 
 ## What this project is
 
