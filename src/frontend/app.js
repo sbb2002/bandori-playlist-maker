@@ -1365,11 +1365,12 @@ document.addEventListener("keydown", (e) => {
 $("next-btn").addEventListener("click", () => playSong(current + 1, false));
 $("prev-btn").addEventListener("click", () => playSong(current - 1, false));
 
-// 전체 세트리스트 공유(B2) — 'YouTube 재생목록' 버튼 → 공유 팝업(안내·URL 복사·유튜브 듣기).
-// watch_videos 익명 링크라 OAuth 불필요하고 링크만 있으면 같은 곡·순서로 재생 가능.
-// (제목·공개 설정된 계정 저장형은 OAuth+Data API 필요 — 백로그 B1.)
+// 전체 세트리스트 공유(B2) — 'YouTube 재생목록' 버튼 → 공유 팝업(안내·URL 복사·내 재생목록에 넣기).
+// URL 복사는 watch_videos 익명 링크(OAuth 불필요). '내 재생목록에 넣기'는 사용자 자신의 Google
+// 계정에 실제 YouTube 재생목록을 생성한다(OAuth + Data API, 클라이언트 사이드 토큰 플로우).
 const shareModalEl = $("share-modal");
 const shareUrlInputEl = $("share-url");
+const ytSaveStatusEl = $("yt-save-status");
 let shareUrl = "";
 
 $("yt-playlist-btn").addEventListener("click", () => {
@@ -1378,14 +1379,13 @@ $("yt-playlist-btn").addEventListener("click", () => {
   shareUrl = `https://www.youtube.com/watch_videos?video_ids=${ids}`;
   shareUrlInputEl.value = shareUrl;
   resetCopyBtn();
+  hide(ytSaveStatusEl);
   show(shareModalEl);
   lockBodyScroll(true);
   track("playlist_shared", { count: picks.length });
 });
 
-$("share-open").addEventListener("click", () => {
-  if (shareUrl) window.open(shareUrl, "_blank", "noopener");
-});
+$("share-open").addEventListener("click", saveToYouTubePlaylist);
 $("share-copy").addEventListener("click", copyShareUrl);
 shareModalEl.addEventListener("click", (e) => {
   if (e.target instanceof HTMLElement && e.target.dataset && "close" in e.target.dataset) closeShareModal();
@@ -1417,6 +1417,146 @@ async function copyShareUrl() {
   btn.classList.toggle("copied", ok);
   setTimeout(resetCopyBtn, 1500);
   if (ok) track("playlist_link_copied", { count: picks.length });
+}
+
+// ── '내 재생목록에 넣기' — Google OAuth(GIS 토큰 클라이언트) + YouTube Data API v3 ──────────────
+// 백엔드 미관여(client secret 없음, 브라우저에서 직접 access token 발급·API 호출). 실패 시
+// picks/현재 재생 상태는 절대 건드리지 않고 조기 반환한다(요구사항: 앱 상태 그대로 유지).
+const YT_SCOPE = "https://www.googleapis.com/auth/youtube.force-ssl";
+let ytAccessToken = null;
+let ytTokenClient = null;
+
+function getYouTubeTokenClient() {
+  if (!ytTokenClient) {
+    ytTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: window.GOOGLE_CLIENT_ID,
+      scope: YT_SCOPE,
+      callback: "", // requestAccessToken 호출마다 동적으로 지정
+    });
+  }
+  return ytTokenClient;
+}
+
+function ensureYouTubeToken({ forcePrompt = false } = {}) {
+  if (ytAccessToken && !forcePrompt) return Promise.resolve(ytAccessToken);
+  return new Promise((resolve, reject) => {
+    const client = getYouTubeTokenClient();
+    client.callback = (resp) => {
+      if (resp && resp.error) { reject(new Error(resp.error)); return; }
+      ytAccessToken = resp.access_token;
+      resolve(ytAccessToken);
+    };
+    client.requestAccessToken({ prompt: forcePrompt ? "consent" : "" });
+  });
+}
+
+async function createYouTubePlaylist(token, title) {
+  const res = await fetch("https://www.googleapis.com/youtube/v3/playlists?part=snippet,status", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      snippet: { title, description: "Bandori Playlist Maker에서 생성됨" },
+      status: { privacyStatus: "unlisted" },
+    }),
+  });
+  if (!res.ok) {
+    const err = new Error(`playlists.insert failed: ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
+  const data = await res.json();
+  return data.id;
+}
+
+async function addVideoToPlaylist(token, playlistId, videoId, position) {
+  const res = await fetch("https://www.googleapis.com/youtube/v3/playlistItems?part=snippet", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      snippet: { playlistId, position, resourceId: { kind: "youtube#video", videoId } },
+    }),
+  });
+  if (!res.ok) throw new Error(`playlistItems.insert failed: ${res.status}`);
+}
+
+// YouTube Data API v3에 배치 삽입 엔드포인트가 없어(HTTP batch는 2020년경 지원 종료) 순차 호출한다.
+// 병렬 호출은 할당량을 더 빨리 태우고 순서 보장이 깨질 수 있어 피한다.
+async function addAllVideosToPlaylist(token, playlistId, picksToAdd, onProgress) {
+  const succeeded = [];
+  const failed = [];
+  for (let i = 0; i < picksToAdd.length; i++) {
+    const p = picksToAdd[i];
+    try {
+      await addVideoToPlaylist(token, playlistId, p.video_id, i);
+      succeeded.push(p.video_id);
+    } catch (e) {
+      failed.push({ video_id: p.video_id, error: String(e) });
+    }
+    onProgress(i + 1, picksToAdd.length);
+  }
+  return { succeeded, failed };
+}
+
+function setYtSaveStatus(text) {
+  ytSaveStatusEl.textContent = text;
+  show(ytSaveStatusEl);
+}
+
+async function saveToYouTubePlaylist() {
+  if (!picks.length) return;
+  const btn = $("share-open");
+  btn.disabled = true;
+  setYtSaveStatus("Google 로그인 확인 중...");
+
+  let token;
+  try {
+    token = await ensureYouTubeToken();
+  } catch (_) {
+    setYtSaveStatus("Google 로그인이 취소됐어요");
+    btn.disabled = false;
+    track("playlist_save_auth_failed", { count: picks.length });
+    return; // picks/재생 상태 불변
+  }
+
+  setYtSaveStatus("재생목록 만드는 중...");
+  const title = (lastParams && lastParams.interpretation_summary)
+    || `뱅드림 세트리스트 (${new Date().toISOString().slice(0, 10)})`;
+  let playlistId;
+  try {
+    playlistId = await createYouTubePlaylist(token, title);
+  } catch (e) {
+    if (e.status === 401) {
+      try {
+        token = await ensureYouTubeToken({ forcePrompt: true });
+        playlistId = await createYouTubePlaylist(token, title);
+      } catch (_2) {
+        playlistId = null;
+      }
+    }
+    if (!playlistId) {
+      setYtSaveStatus("재생목록을 만들지 못했어요(잠시 후 다시 시도해주세요)");
+      btn.disabled = false;
+      track("playlist_save_create_failed", { count: picks.length });
+      return;
+    }
+  }
+
+  const { succeeded, failed } = await addAllVideosToPlaylist(token, playlistId, picks, (n, total) => {
+    setYtSaveStatus(`곡 추가 중... (${n}/${total})`);
+  });
+
+  const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
+  if (failed.length === 0) {
+    setYtSaveStatus("완료 ✓");
+    window.open(playlistUrl, "_blank", "noopener");
+  } else if (succeeded.length > 0) {
+    setYtSaveStatus(`${picks.length}곡 중 ${succeeded.length}곡만 추가됐어요. 나머지는 YouTube에서 직접 추가해주세요.`);
+    window.open(playlistUrl, "_blank", "noopener");
+  } else {
+    setYtSaveStatus("곡을 추가하지 못했어요");
+  }
+  btn.disabled = false;
+  track("playlist_saved_to_account", { count: picks.length, succeeded: succeeded.length, failed: failed.length });
 }
 
 // 이번 요청에 실제 적용된 밴드(수동선택 ∪ 프롬프트 자동감지)를 체크박스에 시각 반영한다.

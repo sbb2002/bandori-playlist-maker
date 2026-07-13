@@ -16,7 +16,12 @@
     // 배포 시 GitHub Actions가 __COMMIT__을 커밋 SHA로 치환(로컬은 그대로 → 'dev' 표기).
     window.APP_VERSION = "__COMMIT__";
     window.APP_REPO = "https://github.com/sbb2002/bandori-playlist-maker";
+    // Google OAuth Client ID(시크릿 아님, 공개 노출 가능). "내 재생목록에 넣기" 기능에 사용.
+    // 발급: docs/DEPLOY.md "Google OAuth(YouTube 재생목록 저장)" 절 참고.
+    window.GOOGLE_CLIENT_ID = "133851480554-havnne5ab43n92fn6pkl7di8hn9iqr4a.apps.googleusercontent.com";
   </script>
+  <!-- Google Identity Services(GIS) — YouTube 재생목록 저장용 OAuth 토큰 클라이언트. -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- umami 방문자 통계(cloud). app.js의 track()이 커스텀 이벤트를 이 스크립트로 전송. -->
   <script defer src="https://cloud.umami.is/script.js" data-website-id="7185d432-2c87-41e5-8166-46125dc76e33"></script>
 </head>
@@ -109,6 +114,7 @@
     <footer class="disclaimer">
       <p>* 본 프로젝트는 'BanG Dream!'의 팬이 제작한 비공식 프로젝트이며, 상업적 목적으로 사용되지 않습니다. 사용된 모든 이미지 및 음원의 권리는 ©BanG Dream! Project 및 각 저작권자에게 있습니다.</p>
       <p>* This is a fan-made, non-official project inspired by 'BanG Dream!'. All rights to images and audio belong to ©BanG Dream! Project and their respective owners. This project is for non-commercial use only.</p>
+      <p><a href="privacy.html">개인정보처리방침 · Privacy Policy</a></p>
     </footer>
   </main>
 
@@ -146,9 +152,10 @@
         <button type="button" id="share-copy" class="ghost">복사</button>
       </div>
       <div class="share-actions">
-        <button type="button" id="share-open" class="primary">유튜브에서 듣기 ↗</button>
+        <button type="button" id="share-open" class="primary">내 재생목록에 넣기</button>
       </div>
-      <p class="share-note">※ 유튜브 임시 재생목록이라 제목은 "Untitled List"로 표시돼요.</p>
+      <p id="yt-save-status" class="share-note hidden" aria-live="polite"></p>
+      <p class="share-note">※ Google 로그인 후 내 계정에 실제 YouTube 재생목록으로 저장돼요(비공개).</p>
     </div>
   </div>
 
