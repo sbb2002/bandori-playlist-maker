@@ -1629,6 +1629,7 @@ const playbarEl = $("playbar");
 const playbarProgressEl = $("playbar-progress");
 const playbarProgressFillEl = $("playbar-progress-fill");
 const playbarTitleEl = $("playbar-title");
+const playbarTitleTextEl = $("playbar-title-text");
 const playbarBandEl = $("playbar-band");
 const playbarTimeEl = $("playbar-time");
 const playbarCountEl = $("playbar-count");
@@ -1637,18 +1638,60 @@ const playbarRepeatBtn = $("playbar-repeat");
 let repeatOne = false;
 let playbarProgressTimer = null;
 
+// 재생/일시정지 아이콘 — 나머지 컨트롤과 동일한 currentColor 인라인 SVG(이모지 혼용 방지).
+const ICON_PLAY =
+  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+  '<path d="M8 5.6c0-.8.9-1.3 1.6-.8l9 6.4c.6.4.6 1.3 0 1.7l-9 6.4c-.7.4-1.6 0-1.6-.9V5.6z"/></svg>';
+const ICON_PAUSE =
+  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+  '<rect x="6.6" y="5" width="4" height="14" rx="1.3"/><rect x="13.4" y="5" width="4" height="14" rx="1.3"/></svg>';
+
 function showPlaybar() { playbarEl.classList.add("show"); }
 function hidePlaybar() { playbarEl.classList.remove("show"); stopPlaybarProgressTimer(); }
 
 function updatePlaybarInfo(p) {
-  playbarTitleEl.textContent = p.song;
+  playbarTitleTextEl.textContent = p.song;
   playbarBandEl.textContent = prettyBand(p.band);
-  playbarCountEl.textContent = `${current + 1}/${picks.length}`;
+
+  // 현재곡/전체곡 — 현재 번호만 강조(흰색·큰 글자), 구분자·전체는 흐리게.
+  playbarCountEl.replaceChildren();
+  const cur = document.createElement("span");
+  cur.className = "playbar-count-cur";
+  cur.textContent = String(current + 1);
+  const sep = document.createElement("span");
+  sep.className = "playbar-count-sep";
+  sep.textContent = "/";
+  const total = document.createElement("span");
+  total.className = "playbar-count-total";
+  total.textContent = String(picks.length);
+  playbarCountEl.append(cur, sep, total);
+
   updatePlaybarProgressUI(0, 0); // 곡 전환 시 진행률 리셋, 다음 PLAYING/타이머가 실측치로 갱신
+  updateTitleMarquee();
 }
 
+// 곡 이름이 바 폭을 넘칠 때만 마퀴를 켠다. 넘침 폭(px)만큼 좌우 왕복하도록 CSS 변수로 주입하고,
+// 이동 거리에 비례해 속도를 맞춘다(≈40px/s + 양 끝 정지 시간). 넘치지 않으면 말줄임 그대로.
+function updateTitleMarquee() {
+  playbarTitleEl.classList.remove("marquee");
+  playbarTitleEl.style.removeProperty("--marquee-shift");
+  playbarTitleEl.style.removeProperty("--marquee-duration");
+  // 클래스/텍스트 반영 후의 실제 레이아웃을 측정해야 하므로 다음 프레임에 잰다.
+  requestAnimationFrame(() => {
+    const overflow = playbarTitleTextEl.scrollWidth - playbarTitleEl.clientWidth;
+    if (overflow <= 2) return;
+    playbarTitleEl.style.setProperty("--marquee-shift", `-${overflow}px`);
+    playbarTitleEl.style.setProperty("--marquee-duration", `${(overflow / 40 + 3).toFixed(1)}s`);
+    playbarTitleEl.classList.add("marquee");
+  });
+}
+// 화면 폭이 바뀌면 넘침 여부가 달라지므로 다시 잰다(회전·창 크기 변경).
+window.addEventListener("resize", () => {
+  if (playbarEl.classList.contains("show")) updateTitleMarquee();
+});
+
 function setPlaybarPlaying(isPlaying) {
-  playbarPlayBtn.textContent = isPlaying ? "⏸" : "▶";
+  playbarPlayBtn.innerHTML = isPlaying ? ICON_PAUSE : ICON_PLAY;
   playbarPlayBtn.setAttribute("aria-label", isPlaying ? "일시정지" : "재생");
   playbarPlayBtn.title = isPlaying ? "일시정지" : "재생";
 }
@@ -1715,9 +1758,9 @@ playbarPlayBtn.addEventListener("click", () => {
 playbarRepeatBtn.addEventListener("click", () => {
   repeatOne = !repeatOne;
   playbarRepeatBtn.classList.toggle("active", repeatOne);
-  const label = repeatOne ? "반복 끄기" : "반복 켜기";
-  playbarRepeatBtn.setAttribute("aria-label", label);
-  playbarRepeatBtn.title = label;
+  playbarRepeatBtn.setAttribute("aria-pressed", repeatOne ? "true" : "false");
+  playbarRepeatBtn.setAttribute("aria-label", repeatOne ? "한 곡 반복 끄기" : "한 곡 반복 켜기");
+  playbarRepeatBtn.title = repeatOne ? "한 곡 반복 (켜짐)" : "한 곡 반복 (꺼짐)";
 });
 // 곡 정보 클릭 → 플레이어로 스크롤(진행바가 있으니 필수는 아니지만, 큰 화면으로 보고 싶을 때 유용).
 $("playbar-info").addEventListener("click", () => {
