@@ -78,3 +78,27 @@
 
 **무료 플랜 전체 다운(월 사용량 초과·슬립)**: 앱이 죽은 상태라 인앱 알림으론 못 잡음 → 외부 업타임 모니터
 필요(백로그 B6). Render도 사용량 이메일을 보냄.
+
+## 6. Google OAuth(YouTube 재생목록 저장)
+
+사용자가 "내 재생목록에 넣기"를 누르면 프론트가 Google Identity Services로 access token을 받아
+브라우저에서 직접 YouTube Data API v3(`playlists.insert`, `playlistItems.insert`)를 호출한다.
+백엔드는 관여하지 않음(client secret 없음, refresh token 저장 없음, 토큰은 세션 메모리에만 존재).
+
+**최초 설정(1회, Google Cloud Console)**
+1. https://console.cloud.google.com → 프로젝트 생성 → "YouTube Data API v3" 사용 설정.
+2. OAuth 동의 화면(외부) 구성 → 스코프에 `youtube.force-ssl` 추가 → 테스트 사용자 등록.
+3. 사용자 인증 정보 → OAuth 클라이언트 ID(웹 애플리케이션) 발급.
+   - 승인된 자바스크립트 원본: `https://sbb2002.github.io`, `http://localhost:5500`.
+   - 리디렉션 URI 불필요(팝업 기반 토큰 플로우).
+4. 발급된 Client ID를 `src/frontend/index.html`의 `window.GOOGLE_CLIENT_ID`에 입력 후 배포.
+
+**운영 메모(중요)**
+- 일일 할당량 10,000유닛은 이 Cloud 프로젝트의 전체 사용자 합산이다. 17곡 재생목록 1개는
+  약 900유닛(재생목록 생성 50 + 곡당 50). 하루 약 11회가 사실상 상한 — 초과 시 "재생목록을
+  만들지 못했어요" 에러가 뜬다. 늘리려면 Cloud Console에서 할당량 증가를 요청한다.
+- `youtube.force-ssl`은 민감 스코프라 OAuth 앱이 미인증 상태에서는 테스트 사용자 100명까지만
+  로그인 가능하고, 그 외 사용자에겐 "확인되지 않은 앱" 경고가 뜬다. 베타 사용자가 100명을
+  넘거나 경고 없이 공개하려면 Google OAuth 앱 인증(verification) 심사를 신청해야 한다
+  (수일에서 수주 소요, 개인정보처리방침 URL 등 필요).
+- Client ID는 시크릿이 아니므로 커밋해도 무방하다(공개 GitHub Pages 소스에도 그대로 노출된다).
