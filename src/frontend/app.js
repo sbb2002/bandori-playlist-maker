@@ -1371,6 +1371,8 @@ $("prev-btn").addEventListener("click", () => playSong(current - 1, false));
 const shareModalEl = $("share-modal");
 const shareUrlInputEl = $("share-url");
 const ytSaveStatusEl = $("yt-save-status");
+const ytSaveProgressEl = $("yt-save-progress");
+const ytSaveProgressBarEl = $("yt-save-progress-bar");
 let shareUrl = "";
 
 $("yt-playlist-btn").addEventListener("click", () => {
@@ -1502,10 +1504,21 @@ function setYtSaveStatus(text) {
   show(ytSaveStatusEl);
 }
 
+function setYtProgress(n, total) {
+  ytSaveProgressBarEl.style.width = `${Math.round((n / total) * 100)}%`;
+  show(ytSaveProgressEl);
+}
+
+function hideYtProgress() {
+  hide(ytSaveProgressEl);
+  ytSaveProgressBarEl.style.width = "0%";
+}
+
 async function saveToYouTubePlaylist() {
   if (!picks.length) return;
   const btn = $("share-open");
   btn.disabled = true;
+  hideYtProgress();
   setYtSaveStatus("Google 로그인 확인 중...");
 
   let token;
@@ -1543,7 +1556,9 @@ async function saveToYouTubePlaylist() {
 
   const { succeeded, failed } = await addAllVideosToPlaylist(token, playlistId, picks, (n, total) => {
     setYtSaveStatus(`곡 추가 중... (${n}/${total})`);
+    setYtProgress(n, total);
   });
+  hideYtProgress();
 
   const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
   if (failed.length === 0) {
