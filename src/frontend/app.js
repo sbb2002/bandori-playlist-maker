@@ -1629,6 +1629,7 @@ const playbarEl = $("playbar");
 const playbarProgressEl = $("playbar-progress");
 const playbarProgressFillEl = $("playbar-progress-fill");
 const playbarTitleEl = $("playbar-title");
+const playbarTitleTrackEl = $("playbar-title-track");
 const playbarTitleTextEl = $("playbar-title-text");
 const playbarBandEl = $("playbar-band");
 const playbarTimeEl = $("playbar-time");
@@ -1670,18 +1671,34 @@ function updatePlaybarInfo(p) {
   updateTitleMarquee();
 }
 
-// 곡 이름이 바 폭을 넘칠 때만 마퀴를 켠다. 넘침 폭(px)만큼 좌우 왕복하도록 CSS 변수로 주입하고,
-// 이동 거리에 비례해 속도를 맞춘다(≈40px/s + 양 끝 정지 시간). 넘치지 않으면 말줄임 그대로.
+// 곡 이름이 바 폭을 넘칠 때만 마퀴를 켠다. 사본을 하나 덧붙여 [원본][간격][사본]으로 만들고,
+// 한 벌 길이(글자폭+간격)만큼 왼쪽으로 밀면 사본이 원본 자리에 정확히 겹쳐 무한 루프로 이어진다.
+// 속도는 이동 거리에 비례(≈45px/s)해 길이와 무관하게 체감 속도를 일정하게 유지한다.
+const MARQUEE_GAP_PX = 44;
+const MARQUEE_SPEED_PX_PER_SEC = 45;
+
 function updateTitleMarquee() {
   playbarTitleEl.classList.remove("marquee");
-  playbarTitleEl.style.removeProperty("--marquee-shift");
+  playbarTitleEl.style.removeProperty("--marquee-distance");
   playbarTitleEl.style.removeProperty("--marquee-duration");
-  // 클래스/텍스트 반영 후의 실제 레이아웃을 측정해야 하므로 다음 프레임에 잰다.
+  const oldClone = playbarTitleTrackEl.querySelector(".playbar-title-clone");
+  if (oldClone) oldClone.remove();
+
+  // 클래스·텍스트·사본 제거가 레이아웃에 반영된 뒤라야 순수 글자폭을 잴 수 있다(다음 프레임).
   requestAnimationFrame(() => {
-    const overflow = playbarTitleTextEl.scrollWidth - playbarTitleEl.clientWidth;
-    if (overflow <= 2) return;
-    playbarTitleEl.style.setProperty("--marquee-shift", `-${overflow}px`);
-    playbarTitleEl.style.setProperty("--marquee-duration", `${(overflow / 40 + 3).toFixed(1)}s`);
+    const textWidth = playbarTitleTextEl.scrollWidth;
+    if (textWidth - playbarTitleEl.clientWidth <= 2) return; // 안 넘치면 말줄임 유지
+
+    const clone = document.createElement("span");
+    clone.className = "playbar-title-text playbar-title-clone";
+    clone.setAttribute("aria-hidden", "true"); // 스크린리더에 곡명이 두 번 읽히지 않도록
+    clone.textContent = playbarTitleTextEl.textContent;
+    playbarTitleTrackEl.appendChild(clone);
+
+    const distance = textWidth + MARQUEE_GAP_PX;
+    playbarTitleEl.style.setProperty("--marquee-distance", `${distance}px`);
+    playbarTitleEl.style.setProperty("--marquee-gap", `${MARQUEE_GAP_PX}px`);
+    playbarTitleEl.style.setProperty("--marquee-duration", `${(distance / MARQUEE_SPEED_PX_PER_SEC).toFixed(1)}s`);
     playbarTitleEl.classList.add("marquee");
   });
 }
@@ -1735,6 +1752,7 @@ function seekToFraction(fx) {
   };
   playbarProgressEl.addEventListener("pointerdown", (e) => {
     dragging = true;
+    playbarProgressEl.classList.add("dragging"); // 드래그 중엔 굵은 선·손잡이 유지(터치 포함)
     playbarProgressEl.setPointerCapture(e.pointerId);
     seekAt(e.clientX);
   });
@@ -1742,6 +1760,7 @@ function seekToFraction(fx) {
   const endDrag = (e) => {
     if (!dragging) return;
     dragging = false;
+    playbarProgressEl.classList.remove("dragging");
     try { playbarProgressEl.releasePointerCapture(e.pointerId); } catch (_) {/* 이미 해제됨 */}
   };
   playbarProgressEl.addEventListener("pointerup", endDrag);
