@@ -157,6 +157,9 @@
         <button type="button" id="share-open" class="primary">내 재생목록에 넣기</button>
       </div>
       <p id="yt-save-status" class="share-note hidden" aria-live="polite"></p>
+      <!-- 저장 결과(또는 폴백) 열기 링크. window.open은 팝업 차단으로 막힐 수 있어(OAuth 팝업이
+           닫힌 뒤라 사용자 제스처와 끊김) 반드시 눌러서 열 수 있는 경로를 함께 제공한다. -->
+      <a id="yt-open-link" class="yt-open-link hidden" target="_blank" rel="noopener"></a>
       <div id="yt-save-progress" class="yt-progress hidden">
         <div id="yt-save-progress-bar" class="yt-progress-bar"></div>
       </div>
