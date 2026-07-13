@@ -591,6 +591,7 @@ function renderResult(data) {
   syncGraphToParams(data.params); // 그래프에 이번 해석 아크 반영(미조정 시)
   reflectSettings(data); // 재생시간·단계 수·커버 필터를 세부 설정 UI에 반영(미조정 시)
   show(resultEl);
+  showPlaybar();
 
   track("playlist_created", { count: picks.length, minutes: Math.round(estimatedTotal / 60) });
 
@@ -801,10 +802,22 @@ function onPlayerStateChange(e) {
   if (e.data === YT.PlayerState.PLAYING) {
     errorSkips = 0; // 정상 재생 시 스킵 가드 리셋
     playbackStarted = true; // 이후 편집 시 load(자동재생) 허용
+    setPlaybarPlaying(true);
+    startPlaybarProgressTimer();
+  } else if (e.data === YT.PlayerState.PAUSED) {
+    setPlaybarPlaying(false);
+    stopPlaybarProgressTimer();
   } else if (e.data === YT.PlayerState.ENDED) {
+    stopPlaybarProgressTimer();
+    setPlaybarPlaying(false);
     playedSeconds += safeDuration();
     maybeFireHalf();
-    if (current + 1 < picks.length) playSong(current + 1, true);
+    if (repeatOne) {
+      player.seekTo(0, true);
+      player.playVideo();
+    } else if (current + 1 < picks.length) {
+      playSong(current + 1, true);
+    }
   }
 }
 
@@ -937,6 +950,7 @@ function removeSong(index) {
   picks.splice(index, 1);
   if (!picks.length) {
     hide(resultEl);
+    hidePlaybar();
     showError("모든 곡을 제거했어요. 새 요청을 만들거나 되돌리기(Ctrl+Z) 하세요.");
     return;
   }
@@ -998,6 +1012,7 @@ document.addEventListener("keydown", (e) => {
   current = action.current;
   hide(errorEl);
   show(resultEl); // 전부 제거 후 되돌리기면 결과 다시 표시
+  showPlaybar();
   renderTracklist(picks);
   reconcilePlayer();
   syncGraphToEdited();
@@ -1604,7 +1619,111 @@ function updateNowPlaying(p) {
   link.rel = "noopener";
   link.textContent = "YouTube에서 열기 ↗";
   nowPlayingEl.append(strong, band, link);
+  updatePlaybarInfo(p);
 }
+
+// ── 하단 고정 플레이바 (사용자 제안 2026-07-13) ─────────────────────────────────
+// 트랙리스트를 스크롤 중에도 현재 곡 정보·진행률·재생 조작이 가능한 상시 노출 바.
+// 플레이리스트 생성 전엔 숨겨져 있다가(transform: translateY(100%)), 생성 시 아래에서 올라온다.
+const playbarEl = $("playbar");
+const playbarProgressEl = $("playbar-progress");
+const playbarProgressFillEl = $("playbar-progress-fill");
+const playbarTitleEl = $("playbar-title");
+const playbarBandEl = $("playbar-band");
+const playbarTimeEl = $("playbar-time");
+const playbarCountEl = $("playbar-count");
+const playbarPlayBtn = $("playbar-play");
+const playbarRepeatBtn = $("playbar-repeat");
+let repeatOne = false;
+let playbarProgressTimer = null;
+
+function showPlaybar() { playbarEl.classList.add("show"); }
+function hidePlaybar() { playbarEl.classList.remove("show"); stopPlaybarProgressTimer(); }
+
+function updatePlaybarInfo(p) {
+  playbarTitleEl.textContent = p.song;
+  playbarBandEl.textContent = prettyBand(p.band);
+  playbarCountEl.textContent = `${current + 1}/${picks.length}`;
+  updatePlaybarProgressUI(0, 0); // 곡 전환 시 진행률 리셋, 다음 PLAYING/타이머가 실측치로 갱신
+}
+
+function setPlaybarPlaying(isPlaying) {
+  playbarPlayBtn.textContent = isPlaying ? "⏸" : "▶";
+  playbarPlayBtn.setAttribute("aria-label", isPlaying ? "일시정지" : "재생");
+  playbarPlayBtn.title = isPlaying ? "일시정지" : "재생";
+}
+
+function startPlaybarProgressTimer() {
+  stopPlaybarProgressTimer();
+  updatePlaybarProgressFromPlayer();
+  playbarProgressTimer = setInterval(updatePlaybarProgressFromPlayer, 1000);
+}
+function stopPlaybarProgressTimer() {
+  if (playbarProgressTimer) { clearInterval(playbarProgressTimer); playbarProgressTimer = null; }
+}
+function updatePlaybarProgressFromPlayer() {
+  if (!player || typeof player.getCurrentTime !== "function") return;
+  updatePlaybarProgressUI(player.getCurrentTime() || 0, player.getDuration() || 0);
+}
+function updatePlaybarProgressUI(cur, dur) {
+  const pct = dur > 0 ? clamp((cur / dur) * 100, 0, 100) : 0;
+  playbarProgressFillEl.style.width = `${pct}%`;
+  playbarProgressEl.setAttribute("aria-valuenow", String(Math.round(pct)));
+  playbarTimeEl.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+}
+function fmtTime(seconds) {
+  const s = Math.max(0, Math.floor(seconds || 0));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+// 진행바 클릭·드래그 = seek(player.seekTo). duration 미확보(로딩 중 등) 시 무시.
+function seekToFraction(fx) {
+  if (!player || typeof player.getDuration !== "function") return;
+  const dur = player.getDuration() || 0;
+  if (dur <= 0) return;
+  player.seekTo(dur * fx, true);
+  updatePlaybarProgressUI(dur * fx, dur);
+}
+(function bindPlaybarSeek() {
+  let dragging = false;
+  const seekAt = (clientX) => {
+    const r = playbarProgressEl.getBoundingClientRect();
+    seekToFraction(clamp01((clientX - r.left) / r.width));
+  };
+  playbarProgressEl.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    playbarProgressEl.setPointerCapture(e.pointerId);
+    seekAt(e.clientX);
+  });
+  playbarProgressEl.addEventListener("pointermove", (e) => { if (dragging) seekAt(e.clientX); });
+  const endDrag = (e) => {
+    if (!dragging) return;
+    dragging = false;
+    try { playbarProgressEl.releasePointerCapture(e.pointerId); } catch (_) {/* 이미 해제됨 */}
+  };
+  playbarProgressEl.addEventListener("pointerup", endDrag);
+  playbarProgressEl.addEventListener("pointercancel", endDrag);
+})();
+
+$("playbar-prev").addEventListener("click", () => playSong(current - 1, false));
+$("playbar-next").addEventListener("click", () => playSong(current + 1, false));
+playbarPlayBtn.addEventListener("click", () => {
+  if (!player || typeof player.getPlayerState !== "function") return;
+  if (player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+  else player.playVideo();
+});
+playbarRepeatBtn.addEventListener("click", () => {
+  repeatOne = !repeatOne;
+  playbarRepeatBtn.classList.toggle("active", repeatOne);
+  const label = repeatOne ? "반복 끄기" : "반복 켜기";
+  playbarRepeatBtn.setAttribute("aria-label", label);
+  playbarRepeatBtn.title = label;
+});
+// 곡 정보 클릭 → 플레이어로 스크롤(진행바가 있으니 필수는 아니지만, 큰 화면으로 보고 싶을 때 유용).
+$("playbar-info").addEventListener("click", () => {
+  const el = document.querySelector(".player-card");
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+});
 
 function prettyBand(band) {
   return String(band).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

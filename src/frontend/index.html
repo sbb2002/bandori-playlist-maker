@@ -164,6 +164,33 @@
     </div>
   </div>
 
+  <!-- 하단 고정 플레이바 — 플레이리스트 생성 시에만 아래에서 올라옴. 트랙리스트를 스크롤 중에도
+       현재 곡 정보·진행률·재생 조작이 가능하도록 상시 노출. -->
+  <div id="playbar" class="playbar" role="region" aria-label="재생 바">
+    <div id="playbar-progress" class="playbar-progress" role="slider" aria-label="재생 위치"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div id="playbar-progress-fill" class="playbar-progress-fill"></div>
+    </div>
+    <div class="playbar-inner">
+      <div class="playbar-main">
+        <button type="button" id="playbar-info" class="playbar-info" aria-label="플레이어로 이동">
+          <span id="playbar-title" class="playbar-title"></span>
+          <span id="playbar-band" class="playbar-band"></span>
+        </button>
+        <span id="playbar-time" class="playbar-time">0:00 / 0:00</span>
+      </div>
+      <div class="playbar-side">
+        <div class="playbar-controls">
+          <button type="button" id="playbar-prev" class="playbar-btn" title="이전 곡" aria-label="이전 곡">⏮</button>
+          <button type="button" id="playbar-play" class="playbar-btn playbar-play" title="재생" aria-label="재생">▶</button>
+          <button type="button" id="playbar-next" class="playbar-btn" title="다음 곡" aria-label="다음 곡">⏭</button>
+          <button type="button" id="playbar-repeat" class="playbar-btn" title="반복" aria-label="반복 켜기">🔁</button>
+        </div>
+        <span id="playbar-count" class="playbar-count"></span>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
