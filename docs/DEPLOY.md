@@ -102,3 +102,44 @@
   넘거나 경고 없이 공개하려면 Google OAuth 앱 인증(verification) 심사를 신청해야 한다
   (수일에서 수주 소요, 개인정보처리방침 URL 등 필요).
 - Client ID는 시크릿이 아니므로 커밋해도 무방하다(공개 GitHub Pages 소스에도 그대로 노출된다).
+
+**Google 인증(verification) 심사 신청 — 제출 필드 초안**
+
+동의 화면이 "프로덕션(In production)"으로 게시된 뒤, 경고 화면 없이 모든 사용자가 쓰게 하려면
+아래 필드를 채워 심사를 신청한다. Cloud Console → API 및 서비스 → OAuth 동의 화면 → "확인 준비"
+에서 입력.
+
+| 필드 | 값(초안) |
+|---|---|
+| 앱 이름 | Bangdream Playlist Maker (Bandori Playlist Maker) |
+| 앱 로고 | `docs/user_manual_pictures/logo-yumemita.png` 등 정사각형 로고 업로드(120x120px 권장) |
+| 앱 홈페이지 | `https://sbb2002.github.io/bandori-playlist-maker/` |
+| 개인정보처리방침 링크 | `https://sbb2002.github.io/bandori-playlist-maker/privacy.html` |
+| 승인된 도메인 | `github.io` (Search Console로 `sbb2002.github.io` 소유권 인증 필요) |
+| 개발자 연락처 이메일 | sbb4113@gmail.com |
+
+**스코프 사용 근거(justification) — `youtube.force-ssl` 입력란에 붙여넣을 텍스트**
+
+한국어(제출은 영어 권장, 아래 영문 사용):
+
+> 이 앱은 자연어 요청을 밴드리(BanG Dream!) 음악 플레이리스트로 변환하는 비상업적 팬 프로젝트다.
+> "내 재생목록에 넣기" 버튼을 눌렀을 때만 스코프를 요청하며, 목적은 딱 하나 — 생성된 곡 순서
+> 그대로 사용자 본인의 YouTube 계정에 새 재생목록을 만들고 곡을 추가하는 것뿐이다. 채널 정보
+> 열람, 구독 관리, 기존 영상 수정 등 다른 어떤 동작도 하지 않는다. 더 좁은 스코프(`youtube.readonly`
+> 등)로는 재생목록 생성·곡 추가(쓰기 동작)가 불가능해 `youtube.force-ssl`이 필요한 최소 스코프다.
+
+영문(그대로 제출용):
+
+> This app is a non-commercial fan project that turns a natural-language request into a BanG Dream!
+> music playlist. The scope is only requested when the user clicks "Save to my playlist," and is used
+> for exactly one purpose: creating a new playlist in the user's own YouTube account and adding the
+> generated songs to it, in order. The app never reads channel info, manages subscriptions, or
+> modifies existing videos. A read-only scope cannot perform the write operations (playlist creation,
+> item insertion) this feature requires, so `youtube.force-ssl` is the minimum scope needed.
+
+**심사 제출 시 함께 요구되는 것**
+- 데모 영상(YouTube "목록에 표시 안 함" 업로드): 실제 배포 사이트에서 로그인 → **동의 화면(요청
+  스코프 목록이 보이는 화면) 노출** → 동의 → 실제 YouTube 계정(youtube.com)에서 생성된 재생목록
+  확인까지 전 과정이 끊기지 않고 담겨야 한다. localhost 녹화나 동의 화면 생략은 반려 사유가 된다.
+- 위 표의 홈페이지·개인정보처리방침 URL이 실제로 접근 가능해야 한다(이 PR이 `main`에 머지되어
+  GitHub Pages에 배포된 뒤에 신청할 것).
