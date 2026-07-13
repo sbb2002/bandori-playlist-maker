@@ -591,6 +591,7 @@ function renderResult(data) {
   syncGraphToParams(data.params); // 그래프에 이번 해석 아크 반영(미조정 시)
   reflectSettings(data); // 재생시간·단계 수·커버 필터를 세부 설정 UI에 반영(미조정 시)
   show(resultEl);
+  showPlaybar();
 
   track("playlist_created", { count: picks.length, minutes: Math.round(estimatedTotal / 60) });
 
@@ -801,10 +802,22 @@ function onPlayerStateChange(e) {
   if (e.data === YT.PlayerState.PLAYING) {
     errorSkips = 0; // 정상 재생 시 스킵 가드 리셋
     playbackStarted = true; // 이후 편집 시 load(자동재생) 허용
+    setPlaybarPlaying(true);
+    startPlaybarProgressTimer();
+  } else if (e.data === YT.PlayerState.PAUSED) {
+    setPlaybarPlaying(false);
+    stopPlaybarProgressTimer();
   } else if (e.data === YT.PlayerState.ENDED) {
+    stopPlaybarProgressTimer();
+    setPlaybarPlaying(false);
     playedSeconds += safeDuration();
     maybeFireHalf();
-    if (current + 1 < picks.length) playSong(current + 1, true);
+    if (repeatOne) {
+      player.seekTo(0, true);
+      player.playVideo();
+    } else if (current + 1 < picks.length) {
+      playSong(current + 1, true);
+    }
   }
 }
 
@@ -937,6 +950,7 @@ function removeSong(index) {
   picks.splice(index, 1);
   if (!picks.length) {
     hide(resultEl);
+    hidePlaybar();
     showError("모든 곡을 제거했어요. 새 요청을 만들거나 되돌리기(Ctrl+Z) 하세요.");
     return;
   }
@@ -998,6 +1012,7 @@ document.addEventListener("keydown", (e) => {
   current = action.current;
   hide(errorEl);
   show(resultEl); // 전부 제거 후 되돌리기면 결과 다시 표시
+  showPlaybar();
   renderTracklist(picks);
   reconcilePlayer();
   syncGraphToEdited();
@@ -1371,6 +1386,9 @@ $("prev-btn").addEventListener("click", () => playSong(current - 1, false));
 const shareModalEl = $("share-modal");
 const shareUrlInputEl = $("share-url");
 const ytSaveStatusEl = $("yt-save-status");
+const ytOpenLinkEl = $("yt-open-link");
+const ytSaveProgressEl = $("yt-save-progress");
+const ytSaveProgressBarEl = $("yt-save-progress-bar");
 let shareUrl = "";
 
 $("yt-playlist-btn").addEventListener("click", () => {
@@ -1380,6 +1398,7 @@ $("yt-playlist-btn").addEventListener("click", () => {
   shareUrlInputEl.value = shareUrl;
   resetCopyBtn();
   hide(ytSaveStatusEl);
+  hide(ytOpenLinkEl); // 지난 회차의 결과 링크가 남지 않도록 초기화
   show(shareModalEl);
   lockBodyScroll(true);
   track("playlist_shared", { count: picks.length });
@@ -1425,13 +1444,31 @@ async function copyShareUrl() {
 const YT_SCOPE = "https://www.googleapis.com/auth/youtube.force-ssl";
 let ytAccessToken = null;
 let ytTokenClient = null;
+let ytTokenPending = null; // 진행 중인 토큰 요청의 { resolve, reject } — 콜백에서 한 번만 결착
+let ytSaving = false;      // 저장 진행 중 재진입 방지
+
+function settleToken(ok, value) {
+  if (!ytTokenPending) return;
+  const pending = ytTokenPending;
+  ytTokenPending = null;
+  if (ok) pending.resolve(value);
+  else pending.reject(value);
+}
 
 function getYouTubeTokenClient() {
   if (!ytTokenClient) {
     ytTokenClient = google.accounts.oauth2.initTokenClient({
       client_id: window.GOOGLE_CLIENT_ID,
       scope: YT_SCOPE,
-      callback: "", // requestAccessToken 호출마다 동적으로 지정
+      callback: (resp) => {
+        if (resp && resp.error) settleToken(false, new Error(resp.error));
+        else { ytAccessToken = resp.access_token; settleToken(true, ytAccessToken); }
+      },
+      // 팝업을 닫거나(popup_closed) 팝업이 아예 안 뜨면(popup_failed_to_open) GIS는 callback이
+      // 아니라 이쪽으로 알린다. 이걸 안 달면 약속이 영영 결착되지 않아 버튼이 잠긴 채 멈춘다
+      // — 인증 심사 중인 앱에서 비테스트 계정은 '차단' 화면을 닫는 것 외엔 할 게 없으므로
+      // 사실상 모든 일반 사용자가 그 상태에 빠졌다.
+      error_callback: (err) => settleToken(false, new Error((err && err.type) || "popup_error")),
     });
   }
   return ytTokenClient;
@@ -1440,13 +1477,9 @@ function getYouTubeTokenClient() {
 function ensureYouTubeToken({ forcePrompt = false } = {}) {
   if (ytAccessToken && !forcePrompt) return Promise.resolve(ytAccessToken);
   return new Promise((resolve, reject) => {
-    const client = getYouTubeTokenClient();
-    client.callback = (resp) => {
-      if (resp && resp.error) { reject(new Error(resp.error)); return; }
-      ytAccessToken = resp.access_token;
-      resolve(ytAccessToken);
-    };
-    client.requestAccessToken({ prompt: forcePrompt ? "consent" : "" });
+    settleToken(false, new Error("superseded")); // 이전 요청이 남아 있으면 먼저 정리
+    ytTokenPending = { resolve, reject };
+    getYouTubeTokenClient().requestAccessToken({ prompt: forcePrompt ? "consent" : "" });
   });
 }
 
@@ -1502,61 +1535,101 @@ function setYtSaveStatus(text) {
   show(ytSaveStatusEl);
 }
 
+function setYtProgress(n, total) {
+  ytSaveProgressBarEl.style.width = `${Math.round((n / total) * 100)}%`;
+  show(ytSaveProgressEl);
+}
+
+function hideYtProgress() {
+  hide(ytSaveProgressEl);
+  ytSaveProgressBarEl.style.width = "0%";
+}
+
+// 결과(또는 폴백) 열기 링크를 띄운다. window.open도 함께 시도하지만, OAuth 팝업이 닫힌 뒤라
+// 사용자 제스처가 끊겨 팝업 차단에 막히는 경우가 많고 noopener면 성공 여부도 알 수 없다
+// → 눌러서 확실히 열 수 있는 링크를 항상 함께 제공한다.
+function offerYtOpenLink(url, label) {
+  ytOpenLinkEl.href = url;
+  ytOpenLinkEl.textContent = label;
+  show(ytOpenLinkEl);
+  window.open(url, "_blank", "noopener");
+}
+
+// 내 계정 저장이 불가능한 예외 상황(인증 심사 중 계정 차단·할당량 소진 등)의 폴백 —
+// 이 기능 도입 전의 동작인 익명 watch_videos 임시 재생목록(YouTube에 'Untitled List'로 표시)으로
+// 되돌린다. picks/재생 상태는 건드리지 않는다.
+function openAnonymousPlaylistFallback(reason) {
+  setYtSaveStatus(`${reason} 대신 임시 재생목록으로 들을 수 있어요(내 계정에는 저장되지 않아요).`);
+  offerYtOpenLink(shareUrl, "임시 재생목록으로 열기 ↗");
+  track("playlist_save_fallback_anonymous", { count: picks.length });
+}
+
 async function saveToYouTubePlaylist() {
-  if (!picks.length) return;
+  if (!picks.length || ytSaving) return;
   const btn = $("share-open");
+  ytSaving = true;
   btn.disabled = true;
+  hideYtProgress();
+  hide(ytOpenLinkEl);
   setYtSaveStatus("Google 로그인 확인 중...");
 
-  let token;
   try {
-    token = await ensureYouTubeToken();
-  } catch (_) {
-    setYtSaveStatus("Google 로그인이 취소됐어요");
-    btn.disabled = false;
-    track("playlist_save_auth_failed", { count: picks.length });
-    return; // picks/재생 상태 불변
-  }
+    let token;
+    try {
+      token = await ensureYouTubeToken();
+    } catch (e) {
+      // 로그인 취소·팝업 닫힘, 그리고 인증(verification) 심사 중이라 계정이 차단된 경우가 모두 여기로 온다.
+      track("playlist_save_auth_failed", { count: picks.length, reason: String((e && e.message) || e) });
+      openAnonymousPlaylistFallback("Google 계정에 저장하지 못했어요.");
+      return; // picks/재생 상태 불변
+    }
 
-  setYtSaveStatus("재생목록 만드는 중...");
-  const title = (lastParams && lastParams.interpretation_summary)
-    || `뱅드림 세트리스트 (${new Date().toISOString().slice(0, 10)})`;
-  let playlistId;
-  try {
-    playlistId = await createYouTubePlaylist(token, title);
-  } catch (e) {
-    if (e.status === 401) {
-      try {
-        token = await ensureYouTubeToken({ forcePrompt: true });
-        playlistId = await createYouTubePlaylist(token, title);
-      } catch (_2) {
-        playlistId = null;
+    setYtSaveStatus("재생목록 만드는 중...");
+    const title = (lastParams && lastParams.interpretation_summary)
+      || `뱅드림 세트리스트 (${new Date().toISOString().slice(0, 10)})`;
+    let playlistId;
+    try {
+      playlistId = await createYouTubePlaylist(token, title);
+    } catch (e) {
+      if (e.status === 401) {
+        try {
+          token = await ensureYouTubeToken({ forcePrompt: true });
+          playlistId = await createYouTubePlaylist(token, title);
+        } catch (_2) {
+          playlistId = null;
+        }
+      }
+      if (!playlistId) {
+        track("playlist_save_create_failed", { count: picks.length });
+        openAnonymousPlaylistFallback("재생목록을 만들지 못했어요.");
+        return;
       }
     }
-    if (!playlistId) {
-      setYtSaveStatus("재생목록을 만들지 못했어요(잠시 후 다시 시도해주세요)");
-      btn.disabled = false;
-      track("playlist_save_create_failed", { count: picks.length });
+
+    const { succeeded, failed } = await addAllVideosToPlaylist(token, playlistId, picks, (n, total) => {
+      setYtSaveStatus(`곡 추가 중... (${n}/${total})`);
+      setYtProgress(n, total);
+    });
+    hideYtProgress();
+
+    const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
+    if (failed.length === 0) {
+      setYtSaveStatus("내 계정에 저장했어요 ✓");
+      offerYtOpenLink(playlistUrl, "내 재생목록 열기 ↗");
+    } else if (succeeded.length > 0) {
+      setYtSaveStatus(`${picks.length}곡 중 ${succeeded.length}곡만 추가됐어요. 나머지는 YouTube에서 직접 추가해주세요.`);
+      offerYtOpenLink(playlistUrl, "내 재생목록 열기 ↗");
+    } else {
+      openAnonymousPlaylistFallback("곡을 추가하지 못했어요.");
       return;
     }
+    track("playlist_saved_to_account", { count: picks.length, succeeded: succeeded.length, failed: failed.length });
+  } finally {
+    // 어떤 경로로 빠져나가든 버튼은 반드시 되살린다(예외가 나도 잠기지 않게).
+    ytSaving = false;
+    btn.disabled = false;
+    hideYtProgress();
   }
-
-  const { succeeded, failed } = await addAllVideosToPlaylist(token, playlistId, picks, (n, total) => {
-    setYtSaveStatus(`곡 추가 중... (${n}/${total})`);
-  });
-
-  const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
-  if (failed.length === 0) {
-    setYtSaveStatus("완료 ✓");
-    window.open(playlistUrl, "_blank", "noopener");
-  } else if (succeeded.length > 0) {
-    setYtSaveStatus(`${picks.length}곡 중 ${succeeded.length}곡만 추가됐어요. 나머지는 YouTube에서 직접 추가해주세요.`);
-    window.open(playlistUrl, "_blank", "noopener");
-  } else {
-    setYtSaveStatus("곡을 추가하지 못했어요");
-  }
-  btn.disabled = false;
-  track("playlist_saved_to_account", { count: picks.length, succeeded: succeeded.length, failed: failed.length });
 }
 
 // 이번 요청에 실제 적용된 밴드(수동선택 ∪ 프롬프트 자동감지)를 체크박스에 시각 반영한다.
@@ -1589,7 +1662,173 @@ function updateNowPlaying(p) {
   link.rel = "noopener";
   link.textContent = "YouTube에서 열기 ↗";
   nowPlayingEl.append(strong, band, link);
+  updatePlaybarInfo(p);
 }
+
+// ── 하단 고정 플레이바 (사용자 제안 2026-07-13) ─────────────────────────────────
+// 트랙리스트를 스크롤 중에도 현재 곡 정보·진행률·재생 조작이 가능한 상시 노출 바.
+// 플레이리스트 생성 전엔 숨겨져 있다가(transform: translateY(100%)), 생성 시 아래에서 올라온다.
+const playbarEl = $("playbar");
+const playbarProgressEl = $("playbar-progress");
+const playbarProgressFillEl = $("playbar-progress-fill");
+const playbarTitleEl = $("playbar-title");
+const playbarTitleTrackEl = $("playbar-title-track");
+const playbarTitleTextEl = $("playbar-title-text");
+const playbarBandEl = $("playbar-band");
+const playbarTimeEl = $("playbar-time");
+const playbarCountEl = $("playbar-count");
+const playbarPlayBtn = $("playbar-play");
+const playbarRepeatBtn = $("playbar-repeat");
+let repeatOne = false;
+let playbarProgressTimer = null;
+
+// 재생/일시정지 아이콘 — 나머지 컨트롤과 동일한 currentColor 인라인 SVG(이모지 혼용 방지).
+const ICON_PLAY =
+  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+  '<path d="M8 5.6c0-.8.9-1.3 1.6-.8l9 6.4c.6.4.6 1.3 0 1.7l-9 6.4c-.7.4-1.6 0-1.6-.9V5.6z"/></svg>';
+const ICON_PAUSE =
+  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+  '<rect x="6.6" y="5" width="4" height="14" rx="1.3"/><rect x="13.4" y="5" width="4" height="14" rx="1.3"/></svg>';
+
+function showPlaybar() { playbarEl.classList.add("show"); }
+function hidePlaybar() { playbarEl.classList.remove("show"); stopPlaybarProgressTimer(); }
+
+function updatePlaybarInfo(p) {
+  playbarTitleTextEl.textContent = p.song;
+  playbarBandEl.textContent = prettyBand(p.band);
+
+  // 현재곡/전체곡 — 현재 번호만 강조(흰색·큰 글자), 구분자·전체는 흐리게.
+  playbarCountEl.replaceChildren();
+  const cur = document.createElement("span");
+  cur.className = "playbar-count-cur";
+  cur.textContent = String(current + 1);
+  const sep = document.createElement("span");
+  sep.className = "playbar-count-sep";
+  sep.textContent = "/";
+  const total = document.createElement("span");
+  total.className = "playbar-count-total";
+  total.textContent = String(picks.length);
+  playbarCountEl.append(cur, sep, total);
+
+  updatePlaybarProgressUI(0, 0); // 곡 전환 시 진행률 리셋, 다음 PLAYING/타이머가 실측치로 갱신
+  updateTitleMarquee();
+}
+
+// 곡 이름이 바 폭을 넘칠 때만 마퀴를 켠다. 사본을 하나 덧붙여 [원본][간격][사본]으로 만들고,
+// 한 벌 길이(글자폭+간격)만큼 왼쪽으로 밀면 사본이 원본 자리에 정확히 겹쳐 무한 루프로 이어진다.
+// 속도는 이동 거리에 비례(≈45px/s)해 길이와 무관하게 체감 속도를 일정하게 유지한다.
+const MARQUEE_GAP_PX = 44;
+const MARQUEE_SPEED_PX_PER_SEC = 45;
+
+function updateTitleMarquee() {
+  playbarTitleEl.classList.remove("marquee");
+  playbarTitleEl.style.removeProperty("--marquee-distance");
+  playbarTitleEl.style.removeProperty("--marquee-duration");
+  const oldClone = playbarTitleTrackEl.querySelector(".playbar-title-clone");
+  if (oldClone) oldClone.remove();
+
+  // 클래스·텍스트·사본 제거가 레이아웃에 반영된 뒤라야 순수 글자폭을 잴 수 있다(다음 프레임).
+  requestAnimationFrame(() => {
+    const textWidth = playbarTitleTextEl.scrollWidth;
+    if (textWidth - playbarTitleEl.clientWidth <= 2) return; // 안 넘치면 말줄임 유지
+
+    const clone = document.createElement("span");
+    clone.className = "playbar-title-text playbar-title-clone";
+    clone.setAttribute("aria-hidden", "true"); // 스크린리더에 곡명이 두 번 읽히지 않도록
+    clone.textContent = playbarTitleTextEl.textContent;
+    playbarTitleTrackEl.appendChild(clone);
+
+    const distance = textWidth + MARQUEE_GAP_PX;
+    playbarTitleEl.style.setProperty("--marquee-distance", `${distance}px`);
+    playbarTitleEl.style.setProperty("--marquee-gap", `${MARQUEE_GAP_PX}px`);
+    playbarTitleEl.style.setProperty("--marquee-duration", `${(distance / MARQUEE_SPEED_PX_PER_SEC).toFixed(1)}s`);
+    playbarTitleEl.classList.add("marquee");
+  });
+}
+// 화면 폭이 바뀌면 넘침 여부가 달라지므로 다시 잰다(회전·창 크기 변경).
+window.addEventListener("resize", () => {
+  if (playbarEl.classList.contains("show")) updateTitleMarquee();
+});
+
+function setPlaybarPlaying(isPlaying) {
+  playbarPlayBtn.innerHTML = isPlaying ? ICON_PAUSE : ICON_PLAY;
+  playbarPlayBtn.setAttribute("aria-label", isPlaying ? "일시정지" : "재생");
+  playbarPlayBtn.title = isPlaying ? "일시정지" : "재생";
+}
+
+function startPlaybarProgressTimer() {
+  stopPlaybarProgressTimer();
+  updatePlaybarProgressFromPlayer();
+  playbarProgressTimer = setInterval(updatePlaybarProgressFromPlayer, 1000);
+}
+function stopPlaybarProgressTimer() {
+  if (playbarProgressTimer) { clearInterval(playbarProgressTimer); playbarProgressTimer = null; }
+}
+function updatePlaybarProgressFromPlayer() {
+  if (!player || typeof player.getCurrentTime !== "function") return;
+  updatePlaybarProgressUI(player.getCurrentTime() || 0, player.getDuration() || 0);
+}
+function updatePlaybarProgressUI(cur, dur) {
+  const pct = dur > 0 ? clamp((cur / dur) * 100, 0, 100) : 0;
+  playbarProgressFillEl.style.width = `${pct}%`;
+  playbarProgressEl.setAttribute("aria-valuenow", String(Math.round(pct)));
+  playbarTimeEl.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+}
+function fmtTime(seconds) {
+  const s = Math.max(0, Math.floor(seconds || 0));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+// 진행바 클릭·드래그 = seek(player.seekTo). duration 미확보(로딩 중 등) 시 무시.
+function seekToFraction(fx) {
+  if (!player || typeof player.getDuration !== "function") return;
+  const dur = player.getDuration() || 0;
+  if (dur <= 0) return;
+  player.seekTo(dur * fx, true);
+  updatePlaybarProgressUI(dur * fx, dur);
+}
+(function bindPlaybarSeek() {
+  let dragging = false;
+  const seekAt = (clientX) => {
+    const r = playbarProgressEl.getBoundingClientRect();
+    seekToFraction(clamp01((clientX - r.left) / r.width));
+  };
+  playbarProgressEl.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    playbarProgressEl.classList.add("dragging"); // 드래그 중엔 굵은 선·손잡이 유지(터치 포함)
+    playbarProgressEl.setPointerCapture(e.pointerId);
+    seekAt(e.clientX);
+  });
+  playbarProgressEl.addEventListener("pointermove", (e) => { if (dragging) seekAt(e.clientX); });
+  const endDrag = (e) => {
+    if (!dragging) return;
+    dragging = false;
+    playbarProgressEl.classList.remove("dragging");
+    try { playbarProgressEl.releasePointerCapture(e.pointerId); } catch (_) {/* 이미 해제됨 */}
+  };
+  playbarProgressEl.addEventListener("pointerup", endDrag);
+  playbarProgressEl.addEventListener("pointercancel", endDrag);
+})();
+
+$("playbar-prev").addEventListener("click", () => playSong(current - 1, false));
+$("playbar-next").addEventListener("click", () => playSong(current + 1, false));
+playbarPlayBtn.addEventListener("click", () => {
+  if (!player || typeof player.getPlayerState !== "function") return;
+  if (player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+  else player.playVideo();
+});
+playbarRepeatBtn.addEventListener("click", () => {
+  repeatOne = !repeatOne;
+  playbarRepeatBtn.classList.toggle("active", repeatOne);
+  playbarRepeatBtn.setAttribute("aria-pressed", repeatOne ? "true" : "false");
+  playbarRepeatBtn.setAttribute("aria-label", repeatOne ? "한 곡 반복 끄기" : "한 곡 반복 켜기");
+  playbarRepeatBtn.title = repeatOne ? "한 곡 반복 (켜짐)" : "한 곡 반복 (꺼짐)";
+});
+// 곡 정보 클릭 → 플레이어로 스크롤(진행바가 있으니 필수는 아니지만, 큰 화면으로 보고 싶을 때 유용).
+$("playbar-info").addEventListener("click", () => {
+  const el = document.querySelector(".player-card");
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+});
 
 function prettyBand(band) {
   return String(band).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

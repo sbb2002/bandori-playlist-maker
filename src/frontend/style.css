@@ -23,10 +23,11 @@ body {
   min-height: 100vh;
 }
 
-.wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 80px; }
+.wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 100px; } /* 하단: 고정 플레이바 높이 여유 */
 
 .hero { text-align: center; margin-bottom: 24px; }
-.hero h1 { font-size: 2rem; margin: 0 0 6px; }
+.hero h1 { font-size: 2rem; margin: 0 0 6px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.brand-logo { width: 40px; height: 40px; object-fit: contain; }
 .sub { color: var(--muted); margin: 0; }
 
 .card {
@@ -376,6 +377,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 
 /* 공유 팝업(B2) — .picker 오버레이/백드롭/패널 재사용 + 좁은 폭 */
 .share-panel { width: min(460px, calc(100vw - 32px)); max-height: none; }
+.share-panel .picker-head { padding-right: 30px; }
 .share-desc { color: var(--muted); font-size: 0.9rem; margin: 0 0 14px; }
 .share-url-row { display: flex; gap: 8px; margin-bottom: 14px; }
 #share-url {
@@ -383,9 +385,52 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   background: var(--card-2); color: var(--text);
   border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; font-size: 0.85rem;
 }
+.share-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 0 0 14px; }
 .share-actions { display: flex; }
 .share-actions .primary { width: 100%; }
 .share-note { color: var(--muted); font-size: 0.78rem; margin: 12px 0 0; }
+
+/* 저장 결과·폴백 열기 링크(버튼 모양) — 팝업 차단으로 자동 열기가 막혔을 때의 확실한 경로 */
+.yt-open-link {
+  display: block; margin-top: 10px; padding: 10px;
+  text-align: center; text-decoration: none; font-size: 0.9rem; font-weight: 600;
+  color: var(--text); background: var(--card-2);
+  border: 1px solid rgba(124,108,255,0.5); border-radius: 10px;
+}
+.yt-open-link:hover { background: rgba(124,108,255,0.16); border-color: var(--accent); }
+
+/* 유튜브 재생목록 곡 추가 진행률 — 흐르는 사선 패턴 */
+.yt-progress {
+  height: 8px; border-radius: 4px; margin: 10px 0 0; overflow: hidden;
+  background: var(--card-2);
+}
+.yt-progress-bar {
+  height: 100%; width: 0%; border-radius: 4px;
+  background-color: var(--accent);
+  background-image: linear-gradient(
+    45deg,
+    rgba(255,255,255,0.28) 25%, transparent 25%,
+    transparent 50%, rgba(255,255,255,0.28) 50%,
+    rgba(255,255,255,0.28) 75%, transparent 75%, transparent
+  );
+  background-size: 18px 18px;
+  animation: yt-progress-flow 0.9s linear infinite;
+  transition: width 0.25s ease;
+}
+@keyframes yt-progress-flow {
+  from { background-position: 0 0; }
+  to { background-position: 18px 0; }
+}
+
+/* 우측 상단 동그라미 닫기 버튼(공유 팝업) */
+.picker-close-x {
+  position: absolute; top: 12px; right: 12px; z-index: 1;
+  width: 28px; height: 28px; padding: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card-2); color: var(--muted);
+  border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; line-height: 1;
+}
+.picker-close-x:hover { color: var(--text); background: rgba(255,255,255,0.14); }
 #share-copy { flex: 0 0 auto; white-space: nowrap; }
 #share-copy.copied { color: var(--ok); border-color: var(--ok); }
 
@@ -397,6 +442,15 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 }
 .disclaimer p { margin: 0 0 4px; }
 .disclaimer p:last-child { margin: 0; }
+.disclaimer a { color: var(--accent); text-decoration: none; }
+.disclaimer a:hover { text-decoration: underline; }
+/* YouTube API 이용 고지 — 약관·방침 링크가 한눈에 보이도록 살짝 강조(심사 요건: 브랜딩 노출) */
+.yt-attrib {
+  margin-top: 10px; padding: 8px 10px;
+  background: rgba(255,255,255,0.03); border-left: 2px solid var(--accent-2); border-radius: 4px;
+}
+.footer-links { margin-top: 10px; }
+.footer-links span { margin: 0 4px; opacity: 0.5; }
 
 /* 우하단 현재 버전(커밋 코드) */
 .app-version {
@@ -478,6 +532,137 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 .preset-del svg { width: 16px; height: 16px; display: block; }
 .preset-del:hover { color: var(--err); background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.35); }
 
+/* ── 하단 고정 플레이바 ───────────────────────────────────────────────────────── */
+.playbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 42;
+  /* 카드와 같은 톤이되 살짝 어둡고 블러 — 위로 스크롤되는 트랙 카드들과 시각적으로 분리된다. */
+  background: rgba(20,22,32,0.88);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.45);
+  transform: translateY(100%); transition: transform 0.28s ease;
+  pointer-events: none;
+  padding-bottom: env(safe-area-inset-bottom, 0); /* 노치 기기 하단 안전영역 */
+}
+.playbar.show { transform: translateY(0); pointer-events: auto; }
+
+/* 진행바: 보이는 선은 얇게 두되, 클릭·터치 판정은 투명 여백을 포함한 바깥 상자가 받는다
+   (선 자체를 두껍게 하지 않고도 판정만 키움). 호버·드래그 시 선이 두꺼워지고 손잡이가 나온다. */
+.playbar-progress {
+  position: relative; display: flex; align-items: center;
+  height: 15px; cursor: pointer; touch-action: none;
+}
+.playbar-progress-track {
+  position: relative; width: 100%; height: 5px;
+  background: rgba(255,255,255,0.12);
+  transition: height 0.14s ease;
+}
+.playbar-progress:hover .playbar-progress-track,
+.playbar-progress.dragging .playbar-progress-track { height: 9px; }
+.playbar-progress-fill {
+  position: relative; height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+.playbar-progress-fill::after { /* 현재 위치 손잡이 — 평소 숨김, 호버·드래그 시 등장 */
+  content: ""; position: absolute; right: 0; top: 50%;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 5px rgba(0,0,0,0.55);
+  transform: translate(50%, -50%) scale(0);
+  transition: transform 0.14s ease;
+}
+.playbar-progress:hover .playbar-progress-fill::after,
+.playbar-progress.dragging .playbar-progress-fill::after { transform: translate(50%, -50%) scale(1); }
+/* 터치 환경(호버 없음) — 호버로 커지는 판정을 못 쓰므로 판정 상자를 더 키우고, 선도 두껍게,
+   손잡이는 상시 노출해 '끌 수 있다'는 어포던스를 준다. */
+@media (hover: none) {
+  .playbar-progress { height: 24px; }
+  .playbar-progress-track { height: 7px; }
+  .playbar-progress-fill::after { transform: translate(50%, -50%) scale(1); width: 15px; height: 15px; }
+}
+
+.playbar-inner {
+  display: flex; align-items: center; gap: 14px;
+  max-width: 1000px; margin: 0 auto; padding: 10px 16px;
+}
+.playbar-main { display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0; }
+.playbar-info {
+  display: flex; flex-direction: column; align-items: flex-start; min-width: 0; max-width: 100%;
+  background: none; border: none; padding: 3px 8px; border-radius: 8px; text-align: left;
+}
+.playbar-info:hover { background: var(--card-2); }
+.playbar-title {
+  display: block; max-width: 100%; overflow: hidden;
+  font-weight: 700; font-size: 1.05rem; color: #fff;
+  white-space: nowrap; text-overflow: ellipsis;
+}
+/* 곡 이름이 바 폭을 넘치면 한 방향(왼쪽)으로 끊김 없이 흐른다. JS가 사본을 하나 덧붙여
+   [원본][간격][사본] 을 만들고, 한 벌 길이(--marquee-distance)만큼 밀면 사본이 정확히 원본
+   자리에 오므로 루프가 이어져 보인다. 넘치지 않으면 클래스가 없어 말줄임 유지. */
+.playbar-title-track { display: inline-flex; }
+.playbar-title-text { display: inline-block; white-space: nowrap; }
+.playbar-title.marquee { text-overflow: clip; }
+.playbar-title.marquee .playbar-title-text { padding-right: var(--marquee-gap, 44px); }
+.playbar-title.marquee .playbar-title-track {
+  animation: playbar-marquee var(--marquee-duration, 8s) linear infinite;
+}
+@keyframes playbar-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-1 * var(--marquee-distance, 0px))); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .playbar-title.marquee .playbar-title-track { animation: none; }
+}
+.playbar-band {
+  color: var(--muted); font-size: 0.82rem; max-width: 100%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.playbar-time {
+  flex: 0 0 auto; color: var(--muted); font-size: 0.8rem;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.playbar-side { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.playbar-controls { display: flex; align-items: center; gap: 4px; }
+.playbar-btn {
+  position: relative; /* 반복 ON 표시 점(::after)의 기준점 */
+  width: 36px; height: 36px; padding: 0; border-radius: 50%;
+  display: grid; place-items: center; background: transparent; color: var(--text);
+  border: 1px solid transparent;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.playbar-btn svg { display: block; width: 19px; height: 19px; }
+.playbar-btn:hover { background: var(--card-2); border-color: rgba(255,255,255,0.09); }
+.playbar-play {
+  width: 42px; height: 42px; color: #fff;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  box-shadow: 0 3px 12px rgba(124,108,255,0.35);
+}
+.playbar-play svg { width: 20px; height: 20px; }
+.playbar-play:hover {
+  filter: brightness(1.12);
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+}
+/* 반복 ON — 강조색 + 테두리 + 하단 점으로 토글 상태를 분명히 드러낸다. */
+.playbar-repeat.active {
+  color: var(--accent-2);
+  background: rgba(255,108,196,0.16);
+  border-color: rgba(255,108,196,0.55);
+}
+.playbar-repeat.active:hover { background: rgba(255,108,196,0.24); border-color: rgba(255,108,196,0.7); }
+.playbar-repeat.active::after {
+  content: ""; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%; background: currentColor;
+}
+/* 현재곡/전체곡 — 알약 배지. 현재 번호만 흰색으로 키워 가시성 확보. */
+.playbar-count {
+  flex: 0 0 auto; display: flex; align-items: baseline; gap: 2px;
+  padding: 4px 11px; border-radius: 999px;
+  background: var(--card-2); border: 1px solid rgba(255,255,255,0.08);
+  font-variant-numeric: tabular-nums; line-height: 1.25;
+}
+.playbar-count-cur { color: #fff; font-size: 1rem; font-weight: 700; }
+.playbar-count-sep, .playbar-count-total { color: var(--muted); font-size: 0.85rem; font-weight: 500; }
+
 @media (max-width: 520px) {
   .wrap { padding: 56px 14px 76px; } /* 상단 여백: 좌상단 메뉴 버튼과 겹침 방지 */
   .hero h1 { font-size: 1.6rem; }
@@ -486,4 +671,10 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   .picker-bands { flex-direction: row; flex-wrap: wrap; max-height: 110px; }
   .picker-panel { padding: 14px; }
   .app-version { right: 6px; bottom: 6px; }
+
+  /* 좁은 화면: 곡 정보/시간 한 줄 + 조작 버튼/카운트 한 줄로 스택 */
+  .playbar-inner { flex-wrap: wrap; padding: 8px 10px 10px; gap: 4px 10px; }
+  .playbar-main { flex: 1 1 100%; }
+  .playbar-side { flex: 1 1 100%; justify-content: space-between; }
+  .wrap { padding-bottom: 152px; } /* 2단 플레이바(+터치용 진행바 판정) 높이만큼 여유 */
 }
