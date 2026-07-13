@@ -115,8 +115,15 @@
 | 앱 로고 | `docs/user_manual_pictures/logo-yumemita.png` 등 정사각형 로고 업로드(120x120px 권장) |
 | 앱 홈페이지 | `https://sbb2002.github.io/bandori-playlist-maker/` |
 | 개인정보처리방침 링크 | `https://sbb2002.github.io/bandori-playlist-maker/privacy.html` |
-| 승인된 도메인 | `github.io` (Search Console로 `sbb2002.github.io` 소유권 인증 필요) |
+| 승인된 도메인 | `sbb2002.github.io` (전체 `github.io`가 아니라 이 서브도메인 단위로 입력 — `github.io`는 Public Suffix List 등재 도메인이라 공유 소유권 인증이 불가능함) |
 | 개발자 연락처 이메일 | sbb4113@gmail.com |
+
+**승인된 도메인 인증 절차** (위 서브도메인을 입력하기 전에 필요)
+1. [Google Search Console](https://search.google.com/search-console) → 속성 추가 → "URL 접두어"
+   유형으로 `https://sbb2002.github.io/` 입력.
+2. 소유권 인증(HTML 파일 업로드 방식 권장): Search Console이 발급하는 `google*.html` 인증 파일을
+   `src/frontend/`에 추가해 배포.
+3. 인증 완료 후 Cloud Console "승인된 도메인"에 `sbb2002.github.io` 입력.
 
 **스코프 사용 근거(justification) — `youtube.force-ssl` 입력란에 붙여넣을 텍스트**
 
