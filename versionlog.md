@@ -72,3 +72,73 @@
 - 포함 내용: 그 이전까지의 모든 베타 기능/수정 (PR #1 ~ #12, 위 Beta 절 참고)
 - 관련 PR: [#11](https://github.com/sbb2002/bandori-playlist-maker/pull/11) `docs: git-rules.md
   브랜치 전략 전면 개편` — **머지 완료(MERGED)**. v1.0.0 공표 확정.
+
+---
+
+## v1.1.0 — 2026-07-13
+
+"내 재생목록에 넣기" — 사용자 본인의 Google 계정에 실제 YouTube 재생목록을 생성한다. 백엔드는
+관여하지 않는 순수 클라이언트 사이드 OAuth 토큰 플로우(GIS `initTokenClient`)로, client secret도
+refresh token도 두지 않는다. 기존 "유튜브에서 듣기"(익명 `watch_videos` 링크) 버튼을 대체.
+
+- 기준 커밋: `111f5c5`
+- 관련 PR: [#15](https://github.com/sbb2002/bandori-playlist-maker/pull/15)
+
+## v1.2.0 — 2026-07-13
+
+Google Search Console 사이트 소유권 확인 파일 추가(OAuth 앱 인증의 승인된 도메인 요건).
+
+- 기준 커밋: `99eda85`
+- 관련 PR: [#16](https://github.com/sbb2002/bandori-playlist-maker/pull/16)
+
+## v1.3.0 — 2026-07-13
+
+소유권 확인 파일을 올바른 Google 계정(Cloud 프로젝트 소유 계정)의 것으로 교체.
+
+- 기준 커밋: `c4c690d`
+- 관련 PR: [#17](https://github.com/sbb2002/bandori-playlist-maker/pull/17)
+
+## v1.4.0 — 2026-07-13
+
+홈페이지 헤더에 앱 로고를 노출(OAuth 인증의 "브랜딩이 사용자에게 표시되지 않음" 지적 대응).
+
+- 기준 커밋: `2543e43`
+- 관련 PR: [#18](https://github.com/sbb2002/bandori-playlist-maker/pull/18)
+
+## v1.5.0 — 2026-07-13
+
+공유 팝업 UI/문구 보강 — 안내문구 2단 구분(공유 링크 / 계정 저장), 우측 상단 동그라미 닫기 버튼,
+곡 추가 진행률에 흐르는 사선 패턴 프로그레스 바. 버튼 라벨을 "내 플리 공유하기"로 변경.
+
+- 기준 커밋: `058d287`
+- 관련 PR: [#19](https://github.com/sbb2002/bandori-playlist-maker/pull/19)
+
+## v1.6.0 — 2026-07-14
+
+하단 고정 플레이바 신설. 곡명·밴드명·재생시간·순번(n/N) 표시, 이전/재생·일시정지/다음/한 곡 반복
+조작, 1초 폴링 진행바(클릭·드래그 seek). 곡명이 길면 한 방향 무한 마퀴. PC·모바일 반응형이며,
+터치 환경은 진행바 판정 상자를 키우고 손잡이를 상시 노출한다.
+
+- 기준 커밋: `1a6f79b`
+- 관련 PR: [#21](https://github.com/sbb2002/bandori-playlist-maker/pull/21)
+
+## v1.6.1 — 2026-07-14
+
+**계정 저장 실패 시 앱이 영구히 잠기던 버그 수정.** GIS는 팝업 닫힘(`popup_closed`)을 `callback`이
+아니라 `error_callback`으로 알리는데 그것을 달지 않아 Promise가 결착되지 않았다 — 인증 심사 중이라
+차단 화면을 닫을 수밖에 없는 비테스트 계정 전원이 이 상태에 빠졌다. `error_callback` 추가 +
+`try/finally`로 버튼 복구를 보장하고, 계정 저장이 불가능한 예외 상황(심사 중 차단·할당량 소진)에는
+익명 임시 재생목록으로 폴백한다.
+
+- 기준 커밋: `a3a1c8f`
+- 관련 PR: [#22](https://github.com/sbb2002/bandori-playlist-maker/pull/22)
+
+## v1.6.2 — 2026-07-14
+
+YouTube Data API 할당량 증설 심사(audit)의 필수 증빙 요건에 맞춰 정책 문서를 정비. `privacy.html`에
+YouTube API 서비스 이용 고지·YouTube 약관/Google 방침 링크·데이터 삭제 정책을 신설하고, 재생목록
+공개 범위 오기("비공개" → 실제는 `unlisted`/일부공개)를 정정. `terms.html`(서비스 약관) 신설.
+홈페이지 푸터에 YouTube API 이용 고지(브랜딩)와 방침·약관 링크를 노출.
+
+- 기준 커밋: `8f0fa78`
+- 관련 PR: [#23](https://github.com/sbb2002/bandori-playlist-maker/pull/23)
