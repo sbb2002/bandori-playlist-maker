@@ -10,10 +10,13 @@
 
 표준 라이브러리만 사용한다 (csv, json, pathlib, sys, collections).
 
-조인 키는 전역 ``idx`` (0-659) 단 하나다. band+song 조인은 금지 — 동일 제목의
-별개 레코딩이 2쌍 존재한다 (raise_a_suilen/R・I・O・T idx 501·525,
-roselia/Neo-Aspect idx 570·588). ``audio_map.json``의 ``songs`` 배열은
-위치(리스트 인덱스) == idx 이다 (별도 idx 필드 없음).
+조인 키는 전역 ``idx`` (0-659) 단 하나다. band+song 조인은 원칙적으로 금지 —
+단, title이 겹치는 2쌍(raise_a_suilen/R・I・O・T idx 501·525, roselia/Neo-Aspect
+idx 570·588)은 2026-07-13 사용자 직접 청취 + key/camelot/tempo_excerpt 완전
+일치로 "별개 레코딩이 아니라 동일 음원의 중복 업로드"임이 확인되어, 낮은 idx만
+남기고 제거한다(``_CONFIRMED_DUPLICATE_UPLOADS``). 그 결과 master는 658행이다.
+``audio_map.json``의 ``songs`` 배열은 위치(리스트 인덱스) == idx 이다(별도 idx
+필드 없음).
 
 재실행 가능(멱등): ``data/`` 하위 산출 파일은 매 실행마다 덮어쓴다.
 
@@ -92,12 +95,16 @@ _MASTER_COLUMNS = [
     "eligible_band",
 ]
 
-# 실측 확인된 title 충돌 2쌍 (band, song) -> idx 집합. 별개 레코딩이며 진짜 중복이
-# 아니다. build 후 이 idx들이 모두 별개 행으로 master에 살아있는지 검증한다.
-_KNOWN_TITLE_COLLISIONS = {
-    ("raise_a_suilen", "R・I・O・T"): {501, 525},
-    ("roselia", "Neo-Aspect"): {570, 588},
+# 실측 확인된 title 충돌 2쌍 (band, song). 애초에 "별개 레코딩"으로 추정했으나
+# 2026-07-13 사용자가 두 영상을 직접 청취해 완전히 동일한 곡임을 확인했고, key·
+# camelot·tempo_excerpt까지 소수점 단위로 일치해 교차검증됨 (같은 음원의 중복
+# 업로드). band+song 조인은 여전히 원칙적으로 금지하되, 이 2쌍만 확인된 예외로
+# 낮은 idx만 남기고 나머지를 제거한다.
+_CONFIRMED_DUPLICATE_UPLOADS = {
+    ("raise_a_suilen", "R・I・O・T"): {"keep": 501, "drop": 525},
+    ("roselia", "Neo-Aspect"): {"keep": 570, "drop": 588},
 }
+_DROPPED_DUPLICATE_IDXS = {pair["drop"] for pair in _CONFIRMED_DUPLICATE_UPLOADS.values()}
 
 
 def _copy_sources() -> None:
@@ -208,6 +215,8 @@ def build() -> dict[str, object]:
     master_rows: list[dict[str, object]] = []
     video_ids: set[str] = set()
     for idx in range(_EXPECTED_ROW_COUNT):
+        if idx in _DROPPED_DUPLICATE_IDXS:
+            continue
         sf = songs_full[idx]
         ft = features[idx]
         am = audio_songs[idx]
@@ -239,26 +248,21 @@ def build() -> dict[str, object]:
         }
         master_rows.append(row)
 
-    assert len(master_rows) == _EXPECTED_ROW_COUNT, (
-        f"master 행 수 불일치: {len(master_rows)} != {_EXPECTED_ROW_COUNT}"
+    _expected_master_rows = _EXPECTED_ROW_COUNT - len(_DROPPED_DUPLICATE_IDXS)
+    assert len(master_rows) == _expected_master_rows, (
+        f"master 행 수 불일치: {len(master_rows)} != {_expected_master_rows}"
     )
 
-    # --- title 충돌 2쌍이 별개 행(별개 idx)으로 유지되는지 검증 ---
+    # --- 확인된 중복 업로드 2쌍이 정확히 "keep" idx만 남기고 제거됐는지 검증 ---
     idx_by_row = {r["idx"]: r for r in master_rows}
-    for (band, song), expected_idxs in _KNOWN_TITLE_COLLISIONS.items():
-        for idx in expected_idxs:
-            r = idx_by_row[idx]
-            assert r["band"] == band and r["song"] == song, (
-                f"title 충돌 idx {idx}가 예상 (band,song)과 불일치: "
-                f"{r['band']!r},{r['song']!r} != {band!r},{song!r}"
-            )
-        # 동일 (band,song)을 가진 idx 집합이 정확히 기대한 idx들을 포함하는지도 확인
-        actual_idxs = {
-            r["idx"] for r in master_rows if r["band"] == band and r["song"] == song
-        }
-        assert expected_idxs.issubset(actual_idxs), (
-            f"title 충돌 (band,song)={band,song} 의 idx 집합이 예상과 다름: "
-            f"{actual_idxs} !⊇ {expected_idxs}"
+    for (band, song), pair in _CONFIRMED_DUPLICATE_UPLOADS.items():
+        assert pair["drop"] not in idx_by_row, (
+            f"중복 업로드 idx {pair['drop']}가 제거되지 않고 master에 남아있음"
+        )
+        kept = idx_by_row[pair["keep"]]
+        assert kept["band"] == band and kept["song"] == song, (
+            f"중복 업로드 kept idx {pair['keep']}가 예상 (band,song)과 불일치: "
+            f"{kept['band']!r},{kept['song']!r} != {band!r},{song!r}"
         )
 
     # --- eligible_band False 정확히 7행 ---
@@ -272,14 +276,14 @@ def build() -> dict[str, object]:
         f"eligible_band False 밴드 구성 불일치: {dict(false_bands)} != {expected_false_bands}"
     )
 
-    # --- video_id 660개 전부 11자 (개별 검증은 위 루프에서 완료, 총량 재확인) ---
+    # --- video_id 전부 11자 (개별 검증은 위 루프에서 완료, 총량 재확인) ---
     assert (
-        sum(1 for r in master_rows if len(r["video_id"]) == 11) == _EXPECTED_ROW_COUNT
+        sum(1 for r in master_rows if len(r["video_id"]) == 11) == _expected_master_rows
     ), "video_id 11자 검증 실패"
 
-    # --- camelot 660행 매핑 누락 0 ---
+    # --- camelot 매핑 누락 0 ---
     assert (
-        sum(1 for r in master_rows if r["camelot"]) == _EXPECTED_ROW_COUNT
+        sum(1 for r in master_rows if r["camelot"]) == _expected_master_rows
     ), "camelot 매핑 누락 존재"
 
     # --- master 파일 기록 (UTF-8, idx 오름차순) ---
@@ -294,10 +298,7 @@ def build() -> dict[str, object]:
         "eligible_false_count": len(false_rows),
         "eligible_false_bands": dict(false_bands),
         "unique_video_id_count": len(video_ids),
-        "title_collision_idx_pairs": {
-            f"{band}/{song}": sorted(idxs)
-            for (band, song), idxs in _KNOWN_TITLE_COLLISIONS.items()
-        },
+        "dropped_duplicate_upload_idxs": sorted(_DROPPED_DUPLICATE_IDXS),
         "output_files": [
             str(_DST_SONGS_FULL),
             str(_DST_FEATURES),
@@ -333,7 +334,7 @@ def main() -> None:
     print(f"  eligible_band False 행 수: {stats['eligible_false_count']}")
     print(f"  eligible_band False 밴드별 구성: {stats['eligible_false_bands']}")
     print(f"  고유 video_id 수: {stats['unique_video_id_count']}")
-    print(f"  title 충돌 idx 쌍: {stats['title_collision_idx_pairs']}")
+    print(f"  제거된 중복 업로드 idx: {stats['dropped_duplicate_upload_idxs']}")
     print("  산출 파일:")
     for path in stats["output_files"]:
         print(f"    - {path}")
