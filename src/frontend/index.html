@@ -142,20 +142,22 @@
   <div id="share-modal" class="picker hidden" role="dialog" aria-modal="true" aria-label="플레이리스트 공유">
     <div class="picker-backdrop" data-close></div>
     <div class="picker-panel share-panel">
+      <button type="button" class="picker-close-x" data-close aria-label="닫기">✕</button>
       <div class="picker-head">
         <strong>플레이리스트가 생성되었어요 🎉</strong>
-        <button type="button" class="link-btn" data-close>닫기 ✕</button>
       </div>
-      <p class="share-desc">아래 링크를 공유하면 누구나 같은 곡·순서로 들을 수 있어요.</p>
+      <p class="share-desc">내 플리를 다른 방붕이에게 공유하려면...</p>
       <div class="share-url-row">
         <input id="share-url" type="text" readonly aria-label="공유 링크" />
         <button type="button" id="share-copy" class="ghost">복사</button>
       </div>
+      <hr class="share-divider" />
+      <p class="share-desc">이 플리를 내 YouTube 계정에 추가하려면...</p>
       <div class="share-actions">
         <button type="button" id="share-open" class="primary">내 재생목록에 넣기</button>
       </div>
       <p id="yt-save-status" class="share-note hidden" aria-live="polite"></p>
-      <p class="share-note">※ Google 로그인 후 내 계정에 실제 YouTube 재생목록으로 저장돼요(비공개).</p>
+      <p class="share-note">※ Google 로그인 후 내 계정에 실제 YouTube 재생목록으로 저장돼요(일부공개).</p>
     </div>
   </div>
 
