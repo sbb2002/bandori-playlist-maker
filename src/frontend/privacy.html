@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>개인정보처리방침 — Bangdream Playlist Maker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>개인정보처리방침</h1>
+      <p class="sub">Bangdream Playlist Maker (Bandori Playlist Maker)</p>
+    </header>
+
+    <section class="card">
+      <p><strong>시행일자: 2026-07-13</strong></p>
+      <p>
+        본 서비스(이하 "서비스")는 'BanG Dream!'의 팬이 비상업적 목적으로 제작한 개인 프로젝트입니다.
+        서비스는 회원가입이나 로그인 없이 누구나 사용할 수 있으며, 아래는 서비스 이용 과정에서
+        어떤 정보가 어떻게 처리되는지를 설명합니다. 문의는 페이지 하단 연락처로 해주세요.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>1. 서버에 저장되는 개인 정보</h2>
+      <p><strong>없습니다.</strong> 서비스는 별도의 회원 데이터베이스나 사용자 계정 시스템을 운영하지
+        않습니다. 입력하신 요청 문장(프롬프트)은 플레이리스트를 구성하는 데만 즉시 사용되고, 응답을
+        반환한 뒤 서버에 저장되지 않습니다.</p>
+      <p>요청 해석을 위해 프롬프트 텍스트가 LLM 제공사인 <strong>Groq</strong>로 전송됩니다(무드·에너지
+        해석 목적). Groq의 데이터 처리 방침은 Groq 자체 정책을 따릅니다.</p>
+    </section>
+
+    <section class="card">
+      <h2>2. 브라우저에만 저장되는 정보</h2>
+      <p>생성한 플레이리스트를 "저장된 플레이리스트" 메뉴에서 다시 열어볼 수 있도록, 브라우저의
+        <code>localStorage</code>에 최대 50개까지 보관합니다. 이 데이터는 <strong>사용자의 기기에만
+        저장</strong>되며 서비스 서버로 전송되지 않습니다. 브라우저 데이터를 지우거나 메뉴에서 직접
+        삭제하면 함께 삭제됩니다.</p>
+    </section>
+
+    <section class="card">
+      <h2>3. Google 계정 연동 — "내 재생목록에 넣기" 기능</h2>
+      <p>플레이리스트 생성 후 <strong>"내 재생목록에 넣기"</strong> 버튼을 누르면, 사용자 자신의 Google
+        계정으로 로그인해 <strong>사용자 본인의 YouTube 계정</strong>에 실제 재생목록(비공개)을
+        생성합니다.</p>
+      <ul>
+        <li><strong>요청하는 권한(스코프)</strong>: <code>youtube.force-ssl</code> — 오직 재생목록
+          생성과 곡 추가에만 사용하며, 그 외 채널 정보 열람·구독 관리 등 다른 어떤 동작도 수행하지
+          않습니다.</li>
+        <li><strong>토큰 처리</strong>: 로그인 후 발급되는 접근 토큰(access token)은 <strong>브라우저
+          메모리에서만</strong> 존재하며, 서비스 서버로 전송되거나 저장되지 않습니다. 페이지를
+          새로고침하거나 닫으면 즉시 사라집니다. YouTube 재생목록 생성 API 호출은 사용자의 브라우저가
+          Google 서버로 직접 수행합니다(서버 경유 없음).</li>
+        <li><strong>생성 위치</strong>: 재생목록은 반드시 <strong>사용자 본인의 계정</strong>에만
+          생성되며, 개발자 계정이나 다른 어떤 저장소에도 생성되지 않습니다.</li>
+        <li><strong>권한 철회</strong>: 언제든지
+          <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google 계정 —
+          타사 앱 및 서비스 액세스 권한</a> 페이지에서 이 앱의 접근 권한을 철회할 수 있습니다.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>4. 이용하는 제3자 서비스</h2>
+      <ul>
+        <li><strong>Groq</strong> — 요청 문장의 무드·에너지 해석(LLM API)</li>
+        <li><strong>Google(YouTube Data API / OAuth)</strong> — "내 재생목록에 넣기" 기능(선택 사용)</li>
+        <li><strong>Render</strong> — 백엔드(API 서버) 호스팅</li>
+        <li><strong>GitHub Pages</strong> — 프론트엔드(웹페이지) 호스팅</li>
+        <li><strong>umami</strong> — 방문자 통계. 쿠키를 사용하지 않고 개인을 식별하지 않는 방식으로
+          집계됩니다(예: 페이지뷰 수, 플레이리스트 생성 횟수 등 이벤트 카운트).</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>5. 아동의 개인정보</h2>
+      <p>본 서비스는 특정 연령층을 대상으로 개인 정보를 의도적으로 수집하지 않으며, 만 14세 미만
+        아동으로부터 개인 정보를 고의로 수집하지 않습니다.</p>
+    </section>
+
+    <section class="card">
+      <h2>6. 방침 변경</h2>
+      <p>서비스 변경에 따라 본 방침이 갱신될 수 있으며, 변경 시 이 페이지의 "시행일자"를 갱신합니다.</p>
+    </section>
+
+    <section class="card">
+      <h2>7. 문의</h2>
+      <p>개인정보 처리에 관한 문의는 아래 이메일로 연락해 주세요.</p>
+      <p><a href="mailto:sbb4113@gmail.com">sbb4113@gmail.com</a></p>
+    </section>
+
+    <hr style="border-color: rgba(255,255,255,0.08); margin: 32px 0;" />
+
+    <section class="card">
+      <h2 style="margin-top:0">Privacy Policy (English summary)</h2>
+      <p>This service is a non-commercial fan project. No account system or server-side database is
+        used — your prompt text is sent to Groq (LLM provider) only to interpret your request and is
+        not stored on our server. Saved playlists live only in your browser's <code>localStorage</code>.
+      </p>
+      <p>The "Save to my playlist" feature uses Google Sign-In with the <code>youtube.force-ssl</code>
+        scope solely to create a private playlist and add songs to <strong>your own</strong> YouTube
+        account. The access token stays in your browser's memory only, is never sent to or stored by
+        our server, and disappears on refresh/close. You can revoke access anytime at
+        <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account
+        — Third-party apps &amp; services</a>. Contact: <a href="mailto:sbb4113@gmail.com">sbb4113@gmail.com</a>.
+      </p>
+    </section>
+
+    <p style="text-align:center; margin-top: 24px;"><a href="index.html">← 서비스로 돌아가기</a></p>
+
+    <footer class="disclaimer">
+      <p>* 본 프로젝트는 'BanG Dream!'의 팬이 제작한 비공식 프로젝트이며, 상업적 목적으로 사용되지 않습니다.</p>
+    </footer>
+  </main>
+</body>
+</html>
