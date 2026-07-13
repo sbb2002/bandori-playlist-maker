@@ -1,7 +1,9 @@
 # Git Branch Workflow
 
+```
 > Merge 정책(누가 언제 `main`에 Merge하는지)은 `CLAUDE.md`의 "Working agreement"가 원칙이다.
 > 이 문서는 그 원칙 위에서 **브랜치 종류별 생성·재사용 규칙, 영역 격리에 따른 Rebase 정책, 그리고 배포 태깅 규칙**을 다룬다.
+```
 
 ## Branch Types
 
@@ -106,6 +108,10 @@
   * `feature/*` ➡️ `main` 머지 시: **Minor(Y) 버전 버프** 및 `vX.Y.0` 태그 자동 생성
   * `hotfix/*` ➡️ `main` 머지 시: **Patch(Z) 버전 버프** 및 `vX.Y.Z` 태그 자동 생성
   * `data` 또는 `docs` ➡️ `main` 머지 시: **태깅 생략 (Skip)**
+* **[필수]** 버전이 올라갈 때마다(자동 태깅이든 수동 공표든) 그 사실을 리포지토리 루트의
+  `versionlog.md`에도 함께 기록한다 — 버전, 날짜, 무엇이 바뀌었는지, 관련 PR 번호를 남긴다.
+  자동 태깅 CI가 아직 구축되지 않은 현재는 이 `versionlog.md` 기록이 유일한 버전 이력이므로
+  반드시 빠짐없이 남긴다.
 
 ---
 
