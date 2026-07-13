@@ -81,3 +81,6 @@ flagging it: default/min/max energy stage count N; which OpenRouter model; hosti
 introduce request queuing; minimum sample-size threshold for excluding low-count bands (e.g. n<10,
 poppin_party=115 vs. some bands=1); whether to surface "why this song was picked" explanations to
 users; whether the reused audio features need re-extraction for mood-matching accuracy.
+
+## Git-Rules
+브랜치 관리를 위해 `git-rules.md`의 규칙을 따른다.
