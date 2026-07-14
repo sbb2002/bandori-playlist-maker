@@ -9,7 +9,7 @@
     "The starting values here were picked to be roughly the same ORDER OF MAGNITUDE as a real",
     "measurement taken on 2026-07-10 (one heavy multi-project week produced ~880K raw tokens in a",
     "single busy transcript file and ~350M raw tokens summed across all projects in 7 days -- see",
-    "docs/reports/ for the ticket report with exact figures). They are NOT derived from any",
+    "document-archive branch's archive/reports/ for the ticket report with exact figures). They are NOT derived from any",
     "published Anthropic quota and will be wrong for a different plan tier (Pro vs Max 5x vs Max",
     "20x) or usage pattern.",
     "Calibrate these values against your own plan: run `/usage` in Claude Code, note the displayed",

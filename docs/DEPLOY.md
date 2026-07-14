@@ -57,7 +57,7 @@
 
 ## 5. 트래픽 급증·오류 대비 (운영 하드닝)
 
-배포 문서: `docs/ref/user-opinion/2026-07-11-beta-service-scenario.md`.
+배포 문서: `document-archive` 브랜치의 `archive/ref/user-opinion/2026-07-11-beta-service-scenario.md`.
 
 **레이트리밋(공개 직후 동시 요청 폭주)**
 - OpenRouter 429/5xx는 **지수 백오프+지터로 재시도**(`OPENROUTER_MAX_RETRIES`, 기본 2). Retry-After 헤더 존중.
@@ -112,7 +112,7 @@
 | 필드 | 값(초안) |
 |---|---|
 | 앱 이름 | Bangdream Playlist Maker (Bandori Playlist Maker) |
-| 앱 로고 | `docs/user_manual_pictures/logo-yumemita.png` 등 정사각형 로고 업로드(120x120px 권장) |
+| 앱 로고 | `document-archive` 브랜치 `archive/user_manual_pictures/logo-yumemita.png` 등 정사각형 로고 업로드(120x120px 권장) |
 | 앱 홈페이지 | `https://sbb2002.github.io/bandori-playlist-maker/` |
 | 개인정보처리방침 링크 | `https://sbb2002.github.io/bandori-playlist-maker/privacy.html` |
 | 승인된 도메인 | `sbb2002.github.io` (전체 `github.io`가 아니라 이 서브도메인 단위로 입력 — `github.io`는 Public Suffix List 등재 도메인이라 공유 소유권 인증이 불가능함) |

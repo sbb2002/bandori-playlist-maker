@@ -1,7 +1,7 @@
 # NEXT STEPS / 인수인계 (2026-07-14 기준)
 
 다른 로컬·다른 세션에서 이어가기 위한 자체 완결형 요약. 상세 요구사항 원본은
-`docs/ref/user-opinion/`의 사용자 의견 문서 참조.
+`document-archive` 브랜치의 `archive/ref/user-opinion/`에 있는 사용자 의견 문서 참조.
 
 **현재 배포 버전: `v1.6.2`** (= `main` HEAD). 태그 이력은 루트 `versionlog.md` 참조.
 
@@ -54,8 +54,8 @@ PR 검수 후 직접. (CLAUDE.md·`git-rules.md`에도 명시.)
 ---
 
 ## 진행 중 PR (소유자 검수/머지 대기)
-- **PR #14** (`docs` 브랜치) — boundary_tension 조사 메모 + DEPLOY.md 정정 + v1.1.0~v1.6.2 버전 이력
-  + audit_evidence gitignore + 이 문서.
+- **PR #14** (`docs` 브랜치, 현 `document-archive`) — boundary_tension 조사 메모 + DEPLOY.md 정정 +
+  v1.1.0~v1.6.2 버전 이력 + audit_evidence gitignore + 이 문서.
 - **PR #20** (`research/boundary-tension-sensitivity`) — 아래 참조.
 
 ---
@@ -68,13 +68,14 @@ PR 검수 후 직접. (CLAUDE.md·`git-rules.md`에도 명시.)
   percentile**로 계산하기 때문이다. 곡이 몇 개만 빠져도 나머지 전곡의 energy가 미세 재계산되어
   Stage A 정렬 키(`abs(energy-target), idx`)의 동점 근방 순서가 뒤집히고, 같은 seed라도 선곡이 달라진다.
 - **함의**: 곡 데이터가 추가/제거될 때마다(신곡 오토로더가 도입되면 상시 발생) 기존 회귀 테스트 실측값이
-  흔들린다. 상세는 `docs/research/2026-07-14-boundary-tension-rng-sensitivity-verified.md`.
+  흔들린다. 상세는 `document-archive` 브랜치의
+  `archive/research/2026-07-14-boundary-tension-rng-sensitivity-verified.md`.
 - **다음 결정**: 이를 실제 결함으로 보고 고칠지(예: energy를 절대 스케일로 고정), 아니면 특성으로 두고
   테스트 임계값만 관리할지. 고치기로 하면 **새 `feature/*` 브랜치**에서 작업한다(research 브랜치를
   그대로 main에 머지하지 않는다 — `git-rules.md`).
 
 ### 2. PR 자동머지 GitHub Actions
-출처: `docs/ref/user-opinion/2026-07-12-pr_rules.md`.
+출처: `document-archive` 브랜치의 `archive/ref/user-opinion/2026-07-12-pr_rules.md`.
 - **매일 AM 04:00**에 열린 PR을 자동 머지(머지·버전 패치로 인한 사용자 다운타임을 새벽에 최소화).
 - 소유자가 Actions 실행 전 PR을 반려(close)하면 큐가 비므로 그냥 종료.
 - 04:00에 PR 2개 이상이면 **시간 순** 수행. 패치성 PR은 작업 시점 최신 브랜치 기준으로 만들어 충돌 제거,

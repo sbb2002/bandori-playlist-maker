@@ -1,6 +1,6 @@
 """선곡 엔진 — `build_setlist()` 순수·결정적 함수 (진입점).
 
-2단계 설계(R&D 보고서 docs/research/2026-07-11-playlist-sequencing-strategy.md §2):
+2단계 설계(R&D 보고서 document-archive 브랜치 archive/research/2026-07-11-playlist-sequencing-strategy.md §2):
 - **Stage A — SELECT**: 각 단계 강도(intensity) 목표에 부합하는 곡을 하드하게 선택(무드 누출 차단).
 - **Stage B — SEQUENCE**: 이미 무드가 맞는 곡을 가중 특징공간에서 HAM-2로 정렬(전환 매끄러움).
 
