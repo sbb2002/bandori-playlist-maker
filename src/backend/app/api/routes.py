@@ -18,6 +18,7 @@ from .schemas import SetlistRequest, serialize_setlist
 router = APIRouter()
 
 _DEFAULT_TARGET_MINUTES = 60
+_MAX_TARGET_MINUTES = 180  # 최장 3시간 — 사용자 입력·LLM·단계 그래프 어느 경로로 와도 이 값으로 고정
 
 
 def _is_cover(song) -> bool:
@@ -131,6 +132,13 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
             )
             for st in payload.stages
         ]
+        # 단계별로는 각각 180분/60곡 이하로 제한돼 있지만(schemas.py), 최대 11단계 합산은
+        # 그 상한을 훌쩍 넘길 수 있다 — 합산 재생시간도 최장 3시간으로 비례 축소.
+        max_total_songs = max(1, round(_MAX_TARGET_MINUTES * 60 / DEFAULT_AVG_SONG_SECONDS))
+        total_songs = sum(s.song_count for s in stage_specs)
+        if total_songs > max_total_songs:
+            scale = max_total_songs / total_songs
+            stage_specs = [replace(s, song_count=max(1, round(s.song_count * scale))) for s in stage_specs]
 
     # 요청이 명시한 값은(honor일 때만) LLM 해석을 override(architecture.md 스키마3).
     if stage_specs is not None:
@@ -142,7 +150,7 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
         minutes = payload.target_minutes if (honor and payload.target_minutes is not None) else params.target_minutes
         if minutes is None:
             minutes = _DEFAULT_TARGET_MINUTES
-        minutes = max(10, min(180, minutes))
+        minutes = max(10, min(_MAX_TARGET_MINUTES, minutes))
 
     effective = replace(params, stage_count=stage_count, target_minutes=minutes)
     setlist = build_setlist(

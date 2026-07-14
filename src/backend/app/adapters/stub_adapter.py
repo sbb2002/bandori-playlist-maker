@@ -111,6 +111,8 @@ class StubMoodInterpreter:
         target_minutes = _extract_minutes(text)
 
         summary, tags = _flavor(brightness, start_energy, end_energy, target_minutes)
+        # 스텁(오프라인 휴리스틱) 산출임을 요약 카드에서 바로 알 수 있도록 명시(진짜 LLM 응답과 혼동 방지).
+        summary = f"{summary} (이 문구는 stub입니다.)"
 
         cover_hits = _count(text, _COVER_WORDS)
         orig_hits = _count(text, _ORIGINAL_WORDS)
