@@ -17,4 +17,4 @@
 ## 주의
 
 - `token_gate.py`(트랜스크립트 집계)는 **폐기 예고** 상태 — 세션 수치를 신뢰하지 말 것.
-  MCP 관찰 도구로 전환 예정: `docs/reports/2026-07-10-token-gate-mcp-transition.md`.
+  MCP 관찰 도구로 전환 예정: document-archive 브랜치 `archive/reports/2026-07-10-token-gate-mcp-transition.md`.

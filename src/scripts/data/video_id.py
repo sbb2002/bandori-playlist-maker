@@ -1,7 +1,7 @@
 """Pure-function helper for extracting a YouTube video_id from a URL.
 
-Standard-library only. See docs/PRD.md §6 and
-docs/reports/2026-07-10-data-team-lead-ticket-design.md §⑤ (ticket 2).
+Standard-library only. See docs/PRD.md §6 and the document-archive branch's
+archive/reports/2026-07-10-data-team-lead-ticket-design.md §⑤ (ticket 2).
 
 Confirmed input format (bandori-song-sorter/src/content/cluster/songs_full.csv,
 660 rows, 2026-07-10 measurement): every row is

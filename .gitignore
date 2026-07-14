@@ -14,7 +14,9 @@ audio_cache/
 *.npy
 *.npz
 
-# 외부 참고 논문(저작권·대용량 바이너리 — 로컬 유지, R&D가 로컬에서 참조)
+# 외부 참고 논문(저작권·대용량 바이너리 — 로컬 유지, R&D가 로컬에서 참조).
+# docs/ref/는 더 이상 main의 추적 경로가 아님(document-archive 브랜치의 archive/ref/로 이동) —
+# 이 규칙은 로컬 스크래치 폴더 관례로만 남겨둔다.
 docs/ref/**/*.pdf
 
 # YouTube API 심사(할당량 증설·OAuth 인증) 제출용 증빙 캡처.

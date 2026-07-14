@@ -1,7 +1,8 @@
 # setlist-maker 아키텍처 설계서 (파일럿)
 
 작성: 코드설계팀 팀장 (opus) · 2026-07-10 · 부장 검수 승인
-근거: PRD §4/§8/§9, 데이터팀 인계노트 7건(docs/reports/2026-07-10-data-team-complete.md),
+근거: PRD §4/§8/§9, 데이터팀 인계노트 7건(document-archive 브랜치
+archive/reports/2026-07-10-data-team-complete.md),
 `songs_master.csv` 실측 스키마, `camelot.py`/`video_id.py` 인터페이스
 
 ## ① 목표
