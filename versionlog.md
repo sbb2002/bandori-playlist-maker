@@ -159,3 +159,16 @@ YouTube API 서비스 이용 고지·YouTube 약관/Google 방침 링크·데이
 
 - 기준 커밋: `488b8c5`
 - 관련 PR: [#27](https://github.com/sbb2002/bandori-playlist-maker/pull/27)
+
+## v1.7.0 — 2026-07-15
+
+신곡 오토로더(`src/scripts/autoloader/`) 신설 — 형제 프로젝트가 main에 반영한 신곡을 감별해
+다운로드(yt-dlp, 집 IP)하고 **이 앱의 파라미터**(45s excerpt 특징·proxy·energy_full·시간분절
+i_*·camelot)로 분석한 뒤 `data/` 6파일에 원자 반영하는 로컬 원커맨드. 파생 컬럼은 **동결
+norm** 원칙(기존 658행 바이트 불변, 신곡만 원래 분포에 대입)으로 산출하며, 동결 상수는
+`data/*.json` 3종으로 영속화하고 최초 구축 시 기존 행 재계산 대조로 검증했다(proxy 최대오차 0,
+energy_full exact 658/658). 데이터 커밋은 `data` 브랜치 + main 대상 PR(소유자 머지 —
+`data` 브랜치의 "바로 머지" 규칙은 PR 자동머지 Actions 도입 후 적용).
+
+- 기준 커밋: `d369745`
+- 관련 PR: [#32](https://github.com/sbb2002/bandori-playlist-maker/pull/32)
