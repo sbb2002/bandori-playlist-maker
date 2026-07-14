@@ -148,6 +148,9 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .graph-hint { margin-top: 8px; font-size: 0.75rem; color: var(--muted); }
 .graph-hint.notice { color: var(--accent); font-weight: 600; }
 
+.field-hint { font-size: 0.75rem; color: var(--muted); min-height: 1em; }
+.field-hint.notice { color: var(--warn); font-weight: 600; }
+
 /* 구간 추가/제거 컨텍스트 메뉴(우클릭·길게누름) */
 .graph-menu {
   position: fixed; z-index: 1000; min-width: 120px; padding: 4px;
