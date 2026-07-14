@@ -1754,7 +1754,75 @@ function setPlaybarPlaying(isPlaying) {
   playbarPlayBtn.innerHTML = isPlaying ? ICON_PAUSE : ICON_PLAY;
   playbarPlayBtn.setAttribute("aria-label", isPlaying ? "일시정지" : "재생");
   playbarPlayBtn.title = isPlaying ? "일시정지" : "재생";
+  playWaveEngine.playing = isPlaying;
 }
+
+// ── 재생 버튼 어쿠스틱 웨이브 링 ──────────────────────────────────────────────
+// 사인파로 바깥 반지름을 변조한 "링(도넛)" 경로를 절차적으로 생성(핸드코딩 path data 아님).
+// 바깥 경계는 물결(outerBase + amp*sin), 안쪽 경계는 원(innerR) — evenodd로 사이 띠만 채운다.
+function playWaveRingPath(cx, cy, innerR, outerBase, amp, lobes, points) {
+  const outer = [];
+  const inner = [];
+  for (let i = 0; i <= points; i++) {
+    const t = (i / points) * Math.PI * 2;
+    const rad = outerBase + amp * Math.sin(lobes * t);
+    outer.push([cx + rad * Math.cos(t), cy + rad * Math.sin(t)]);
+    inner.push([cx + innerR * Math.cos(t), cy + innerR * Math.sin(t)]);
+  }
+  const ring = (pts) => pts.map((p, i) => (i === 0 ? "M" : "L") + p[0].toFixed(2) + "," + p[1].toFixed(2)).join(" ") + " Z";
+  return ring(outer) + " " + ring(inner);
+}
+
+const playWaveA = $("play-wave-a");
+const playWaveB = $("play-wave-b");
+playWaveA.setAttribute("fill-rule", "evenodd");
+playWaveB.setAttribute("fill-rule", "evenodd");
+const playWaveFlowAEl = document.getElementById("playWaveFlowA");
+const playWaveFlowBEl = document.getElementById("playWaveFlowB");
+
+// 재생↔일시정지 전환 시 회전 속도·색 흐름 속도·링 크기가 모두 같은 "가속/감속 곡선"을 따라
+// 서서히 목표치로 수렴한다(지수 감쇠). 일시정지의 목표는 속도 0·크기 0(=버튼 테두리 반지름까지
+// 줄어들어 소멸)이라, 감속될수록 링이 자연스럽게 원(버튼) 쪽으로 오그라들며 사라진다.
+const PLAY_WAVE_COLLAPSE_R = 27; // 완전히 오그라들었을 때 반지름 = 버튼 테두리
+const PLAY_WAVE_REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const PLAY_WAVE_RATE = PLAY_WAVE_REDUCED_MOTION ? 40 : 2.4; // reduced-motion이면 사실상 즉시 스냅
+const playWaveEngine = {
+  playing: false,
+  a: { innerFull: 27, outerFull: 34, ampFull: 3.2, lobes: 4, rotFull: 360 / 16, flowFull: 64 / 10, flowPeriod: 64,
+       angle: 0, vel: 0, extent: 0, flowOff: 0, flowVel: 0, el: playWaveA, gradEl: playWaveFlowAEl },
+  b: { innerFull: 30, outerFull: 35, ampFull: 2.4, lobes: 3, rotFull: -360 / 40, flowFull: -84 / 14, flowPeriod: 84,
+       angle: 0, vel: 0, extent: 0, flowOff: 0, flowVel: 0, el: playWaveB, gradEl: playWaveFlowBEl },
+};
+function playWaveLerp(a, b, t) { return a + (b - a) * t; }
+function stepPlayWave(w, dt) {
+  const targetVel = playWaveEngine.playing ? w.rotFull : 0;
+  const targetExtent = playWaveEngine.playing ? 1 : 0;
+  const targetFlowVel = playWaveEngine.playing ? w.flowFull : 0;
+  const f = 1 - Math.exp(-PLAY_WAVE_RATE * dt);
+  w.vel += (targetVel - w.vel) * f;
+  w.extent += (targetExtent - w.extent) * f;
+  w.flowVel += (targetFlowVel - w.flowVel) * f;
+  w.angle = (w.angle + w.vel * dt) % 360;
+  w.flowOff = (w.flowOff + w.flowVel * dt) % w.flowPeriod;
+
+  const innerR = playWaveLerp(PLAY_WAVE_COLLAPSE_R, w.innerFull, w.extent);
+  const outerBase = playWaveLerp(PLAY_WAVE_COLLAPSE_R, w.outerFull, w.extent);
+  const amp = w.ampFull * w.extent;
+  w.el.setAttribute("d", playWaveRingPath(50, 50, innerR, outerBase, amp, w.lobes, 90));
+  w.el.style.transform = "rotate(" + w.angle.toFixed(2) + "deg)";
+  w.el.style.opacity = w.extent.toFixed(3);
+  w.gradEl.setAttribute("gradientTransform", "translate(" + w.flowOff.toFixed(2) + " 0)");
+}
+let playWaveLastT = null;
+function playWaveFrame(t) {
+  if (playWaveLastT == null) playWaveLastT = t;
+  const dt = Math.min((t - playWaveLastT) / 1000, 0.05);
+  playWaveLastT = t;
+  stepPlayWave(playWaveEngine.a, dt);
+  stepPlayWave(playWaveEngine.b, dt);
+  requestAnimationFrame(playWaveFrame);
+}
+requestAnimationFrame(playWaveFrame);
 
 function startPlaybarProgressTimer() {
   stopPlaybarProgressTimer();
