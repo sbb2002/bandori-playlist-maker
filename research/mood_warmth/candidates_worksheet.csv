@@ -1,0 +1,31 @@
+﻿rank,idx,band,song,url,dist,mode_score,harmonic_ratio,contrast,rms,voiced_frac_mix,similarity_rating_1to5,listener_note
+1,219,morfonica,QUEEN (Cover),https://youtu.be/_FiExtFisto,1.316,-0.157,0.855,22.52,0.342,0.537,2,"단조 느낌, 가련하다는 느낌은 아니지만, 말광량이 아가씨 느낌남."
+2,217,morfonica,音がえしのセレナーデ,https://youtu.be/sUaDAY9u4y8,1.362,-0.002,0.857,22.95,0.321,0.527,4,장조 느낌. 비슷한 음색임. 그러나 밝은 느낌.
+3,202,morfonica,Angel's Ladder,https://youtu.be/7Hml249yhKg,1.392,-0.031,0.842,22.31,0.324,0.425,5,장조 느낌. 아주 밝은 느낌. 게다가 힘차고 맑은 날의 감상이 느껴짐.
+4,197,morfonica,両翼のBrilliance,https://youtu.be/O0jB7IA5tZg,1.418,-0.254,0.854,22.3,0.336,0.644,3,"단조같긴한데, 비장하고 세련된 느낌. 중후하기 까지 함. 가련한 느낌은 아님."
+5,192,morfonica,Ever Sky Blue,https://youtu.be/Ar7QtswUNGw,1.459,-0.145,0.849,22.59,0.303,0.324,3,힘차고 결심에 다찬 느낌. 마치 긍정적인 다짐을 다지는 느낌도 듦.
+6,191,morfonica,誓いのWingbeat,https://youtu.be/nnpD32__lAY,1.465,-0.147,0.825,22.01,0.321,0.429,2,세련되고 우아한 느낌. 인트로때문인가? 그런데 전체적으로 우아하게 질주한다는 느낌이 듦.
+7,190,morfonica,"寄る辺のSunny, Sunny",https://youtu.be/6C4NOz-t3QA,1.47,-0.157,0.807,22.35,0.315,0.46,5,아주 맑은 느낌. 아련하기 까지 함.
+8,235,morfonica,V.I.P (Cover),https://youtu.be/B4O27f5P8Dk,1.511,0.065,0.888,22.57,0.302,0.574,3,밝은 느낌.
+9,91,ave_mujica,in your blue eyes,https://youtu.be/kVMuEQ3uXWc,1.556,-0.087,0.823,22.75,0.318,0.642,1,esora no clover보다 좀 더 어둡고 가련한 느낌. 그리고 음색도 보컬과 코러스가 오페라하는 듯한 고음과 악기세션의 소리가 헤비메탈 사운드를 담아 극적으로 더 어둡게 들림. 그러나 화성은 장조같다는 거임.
+10,218,morfonica,蒼穹へのトレイル,https://youtu.be/eAjX1Ihvtac,1.57,-0.146,0.854,21.9,0.348,0.57,4,밝은 느낌이 지배적
+11,223,morfonica,祝福 (Cover),https://youtu.be/A8BRPZIHCs4,1.6,0.022,0.868,23.03,0.295,0.457,4,"밝고, 힘차게 나아가는 느낌도 듦."
+12,201,morfonica,Secret Dawn,https://youtu.be/eWqv5RB6jng,1.603,-0.009,0.887,23.2,0.263,0.509,5,새벽녘같은 느낌이 남. 밝아오는 느낌.
+13,200,morfonica,ティリカモニカリラ,https://youtu.be/d32zOmV118k,1.673,-0.109,0.847,22.71,0.3,0.703,2,약간은 잔혹한 동화 속에 갇힌 느낌. 어둡고 무언가에 쫓기는 느낌. 그러나 너무 어둡지 않게 동화적으로 통통 튀는 느낌.
+14,204,morfonica,Tempest,https://youtu.be/OWTf5lEPT_g,1.677,-0.04,0.842,22.21,0.307,0.521,3,"폭풍처럼 질주하는 느낌남. 그도 그럴게 템포가 아주 빠르게 인트로부터 몰아치는데, 바이올린도 섬세한 선율로 받쳐주고 버스1이 시작됨."
+15,216,morfonica,Shining Leaves,https://youtu.be/HkruyxEhOPI,1.681,0.036,0.868,22.78,0.34,0.42,5,밝은 느낌. 
+16,198,morfonica,Steer to Utopia,https://youtu.be/wjpVRH7GOFc,1.684,-0.114,0.826,22.13,0.354,0.454,5,아주 따뜻하고 밝아오는 아침햇살 같은 노래. 그리고 힘찬 발걸음 느낌도 남.
+17,206,morfonica,MUGEN Reverberate!,https://youtu.be/B6602-OMtZI,1.709,-0.218,0.831,22.32,0.241,0.562,2,아주 약간 어두운 동화느낌남. 그러나 템포가 빨라 질주하는 느낌도 남. 수수께끼의 숲에서 헤메이며 달리는 느낌.
+18,344,pastel_palettes,Y.O.L.O！！！！！(パスパレver.),https://youtu.be/yKkCyuTOi8Q,1.71,-0.062,0.82,22.34,0.295,0.347,5,완전 밝은 느낌.
+19,97,ave_mujica,碧い瞳の中に,https://youtu.be/bLOb7kC9Jns,1.715,-0.075,0.821,22.79,0.272,0.645,-,"랭크 9번과 동일. 이 곡은 중복건이라 추후 삭제요망. 이번 연구에서도 9번에서 값을 넣었기 때문에 2번써서는 안됨. 참고로 저작권 때문에 영문명, 일어명으로 나뉜듯함. 일어명을 기준으로 하면 됨."
+20,181,morfonica,メランコリックララバイ,https://youtu.be/D_uUbtZUOPc,1.795,-0.093,0.847,22.12,0.291,0.339,3,"경쾌하고 통통튀는 느낌, 그리고 캉캉 춤추는 느낌. 드럼과 기타, 베이스가 은근 중후하게 받쳐주는데, 바이올린과 보컬, 코러스가 밝게 묶어주는 느낌."
+21,221,morfonica,輪舞-revolution (Cover),https://youtu.be/RquM6y7cTZU,1.795,-0.191,0.798,23.0,0.324,0.456,3,약간 가련한 느낌. 그러나 아직은 희망을 잃지 않은듯한 느낌. 템포와 리듬에서 그런 느낌을 받음.
+22,229,morfonica,青空のラプソディ (Cover),https://youtu.be/ZK7DbX4BApQ,1.864,-0.206,0.832,22.78,0.346,0.324,5,완전 밝고 발랄한 느낌.
+23,232,morfonica,COLORFUL BOX (Cover),https://youtu.be/bdjK1IZSudQ,1.88,-0.101,0.808,23.14,0.286,0.507,5,밝은 느낌.
+24,571,roselia,BLACK SHOUT,https://youtu.be/MmnU-s1TdsI,1.89,-0.219,0.801,22.37,0.261,0.635,2,"고딕하고 경건한 느낌이 인트로를 지배, 이어 버스1로 들어서면서 파워코드가 지배적으로 들리면서 헤비한 사운드가 중후한 느낌을 받쳐줌. 그러나 가련한 느낌은 아님. 도리어 연약하지만서도 강건한 느낌."
+25,184,morfonica,カラフルリバティー,https://youtu.be/HqDa4NOAt8w,1.89,-0.033,0.851,22.38,0.301,0.663,5,기타와 바이올린이 밝은 느낌을 자아내는 곡.
+26,224,morfonica,Overdose (Cover),https://youtu.be/ILjUR5nQQPA,1.895,-0.044,0.828,22.33,0.287,0.56,2,"해가 다 저문 저녁같은 어두운 노래. 약간은 피폐하지만 리듬감에 절어 고통을 잊고자 몸부림치는, 몸부림이 리듬이 된건지 그런 상상이 드는 느낌. 리듬감과 사이사이 바이올린이 파고드는 선율이 이쁜 노래."
+27,556,raise_a_suilen,Get Wild (Cover),https://youtu.be/ezQiWaCbpug,1.934,-0.104,0.808,21.68,0.318,0.513,3,"일렉트로 사운드가 질주감을 일으키는 노래. 그렇게 밝지도, 어둡지도 않지만, 아주 힘차게 질주하는 사이버펑크 오토바이같은 노래."
+28,73,ave_mujica,"Georgette Me, Georgette You",https://youtu.be/vKDa7yfpd2M,1.955,-0.012,0.813,23.05,0.329,0.461,1,아주 가련한 선율이 인트로를 길게 감싸는 노래. 오히려 너무 슬퍼서 오페라로 절제하며 절규하는 듯한 노래. 이윽고 인트로가 끝나면 가련함을 광기로 돌변하는 노래.
+29,225,morfonica,かくれんぼ (Cover),https://youtu.be/GGYr_vW75pI,1.967,-0.098,0.842,22.08,0.372,0.447,4,새벽 동틀 녘같은 밝아오는 느낌을 주는 노래.
+30,227,morfonica,ALIVE (Cover),https://youtu.be/fzIHYLmJcy4,1.972,-0.004,0.822,22.72,0.33,0.449,4,"인트로 바이올린 선율이 시선을 빼앗고, 인트로 이후에는 연약하지만 희망을 외치는 느낌."
