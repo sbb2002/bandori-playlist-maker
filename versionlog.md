@@ -186,3 +186,17 @@ YouTube API 서비스 이용 고지·YouTube 약관/Google 방침 링크·데이
 
 - 기준 커밋: `d627c28`
 - 관련 PR: [#34](https://github.com/sbb2002/bandori-playlist-maker/pull/34)
+
+## v1.8.1 — 2026-07-16
+
+문서 정합성 정리(코드 변경 없음). `git-rules.md`의 `tool/*` 패턴 절을 실제 확정된 단일 `tools`
+브랜치(신곡 오토로더가 `feature/song-autoloader`에서 이관·구브랜치 삭제됨) 서술로 교체.
+`CLAUDE.md`·`docs/PRD.md`·`docs/architecture.md`에 남아있던 "OpenRouter" 서술을 실제 구현
+벤더인 **Groq**로 정정하고, "호스팅 플랫폼 미정" 오픈 퀘스천을 **Resolved**로 표시(프론트
+GitHub Pages, 백엔드 Render 무료 플랜 — 이미 `render.yaml`/`pages.yml`로 배포되어 있었음).
+`render.yaml`의 시크릿 안내 주석이 여전히 `OPENROUTER_API_KEY`를 언급하던 것을 실제 키 이름인
+`GROQ_API_KEY`로 정정. 이 로그의 v1.6.4 항목이 v1.7.0 뒤로 밀려 잘못 붙어있던 인용 줄도
+제자리로 복구. (원래 v1.7.1로 태깅했으나, PR #34가 먼저 v1.8.0으로 머지되어 v1.8.1로 재태깅.)
+
+- 기준 커밋: (PR 오픈 직전 커밋)
+- 관련 PR: [#35](https://github.com/sbb2002/bandori-playlist-maker/pull/35)

@@ -1,6 +1,6 @@
 # Render Blueprint — setlist-maker 백엔드(FastAPI).
 # 사용법: Render 대시보드 → New → Blueprint → 이 리포 연결 → 자동 구성.
-#   OPENROUTER_API_KEY는 시크릿이라 커밋 금지(sync: false) → 최초 배포 시 대시보드에서 값 입력.
+#   GROQ_API_KEY는 시크릿이라 커밋 금지(sync: false) → 최초 배포 시 대시보드에서 값 입력.
 # 무료 플랜은 15분 유휴 후 슬립 → 첫 요청 cold start(~50s). 프론트가 이 지연을 안내함.
 services:
   - type: web
@@ -18,8 +18,8 @@ services:
       # CORS 허용 오리진 = GitHub Pages 오리진(경로 제외). 프론트가 다른 곳이면 여기 변경.
       - key: FRONTEND_ORIGIN
         value: https://sbb2002.github.io
-      # MOOD_INTERPRETER는 지정하지 않음 → 자동감지(키 있으면 openrouter, 없으면 stub).
-      # 키를 아직 안 넣어도 앱은 stub로 기동됨(첫 배포 안전). 키 넣으면 openrouter로 전환.
+      # MOOD_INTERPRETER는 지정하지 않음 → 자동감지(GROQ_API_KEY 있으면 groq, 없으면 stub).
+      # 키를 아직 안 넣어도 앱은 stub로 기동됨(첫 배포 안전). 키 넣으면 groq로 전환.
       - key: GROQ_MODEL
         value: openai/gpt-oss-20b
       - key: GROQ_RESPONSE_FORMAT
