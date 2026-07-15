@@ -184,5 +184,5 @@ YouTube API 서비스 이용 고지·YouTube 약관/Google 방침 링크·데이
 `CLAUDE.md`·`docs/PRD.md`의 관련 오픈퀘스천도 해결됨으로 갱신. sparse 밴드만 필터링해 긴
 재생시간을 요청하는 경우의 선곡 엔진 동작은 별개의 미해결 이슈로 남겨둠.
 
-- 기준 커밋: (PR 오픈 직전 커밋)
-- 관련 PR: (예정)
+- 기준 커밋: `d627c28`
+- 관련 PR: [#34](https://github.com/sbb2002/bandori-playlist-maker/pull/34)
