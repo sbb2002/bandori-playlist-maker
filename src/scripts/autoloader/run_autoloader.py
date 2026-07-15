@@ -10,14 +10,16 @@
   ③ 곡별: yt-dlp 다운로드(집 IP) → 45s excerpt 특징+proxy → 전곡 서브피처 →
      energy_full → 시간분절 i_* → audio_map(bpm/energy/shape) 조인
   ④ data/ 6파일 반영(merge_data.py — 원자적, 실패 시 전체 롤백)
-  ⑤ (옵션 --git) `data` 브랜치에서 커밋·푸시 후 main 대상 PR 오픈 —
-     **직접 main 머지는 하지 않는다**(CLAUDE.md Working agreement; git-rules.md의
-     `data` 브랜치 자동 머지는 PR 자동머지 Actions 도입 후에 적용).
+  ⑤ `data` 브랜치에서 커밋·푸시(기본 동작, `--no-git`으로 생략 가능) — **PR 없음, main 병합도
+     없음**(2026-07-15 확정, git-rules.md). `data`는 main에 아예 병합되지 않는 독립 브랜치이고,
+     배포된 backend가 런타임에 이 브랜치를 직접 원격 fetch하므로(`src/backend/app/repo/
+     remote_source.py`) main 병합 자체가 애초에 불필요하다.
 
 사용(오디오 스택 env: numpy/librosa/soundfile/scipy + yt-dlp):
-  python src/scripts/autoloader/run_autoloader.py --dry     # 검증(파일 미변경)
-  python src/scripts/autoloader/run_autoloader.py           # data/ 반영(git 없음)
-  python src/scripts/autoloader/run_autoloader.py --repo-root <data브랜치 워크트리> --git
+  python src/scripts/autoloader/run_autoloader.py --dry      # 검증(파일 미변경)
+  python src/scripts/autoloader/run_autoloader.py --repo-root <data브랜치 워크트리>
+                                                               # data/ 반영 + data 브랜치 자동 커밋·푸시
+  python src/scripts/autoloader/run_autoloader.py --no-git    # data/ 반영만, 커밋·푸시 생략
   python src/scripts/autoloader/run_autoloader.py --soft    # 아래 참고
 
 soft-run(--soft): 원본 전곡 wav 캐시가 불완전해 intensity_norm 부트스트랩이 불가능한
@@ -242,8 +244,12 @@ def _process_song(cand: dict, wav: Path, p_norms: dict,
         return None
 
 
-def _git_data_branch(repo_root: Path, landed: list[dict]) -> None:
-    """`data` 브랜치에서 데이터 커밋·푸시 + main 대상 PR 오픈(머지는 소유자)."""
+def _commit_and_push_data(repo_root: Path, landed: list[dict]) -> None:
+    """`data` 브랜치에서 데이터 커밋·푸시(PR 없음 — data는 main에 병합되지 않는다, git-rules.md).
+
+    배포된 backend는 이 브랜치를 런타임에 직접 원격 fetch하므로(`src/backend/app/repo/
+    remote_source.py`) main과의 병합 자체가 애초에 불필요하다.
+    """
     def g(*args: str, check: bool = True) -> subprocess.CompletedProcess:
         p = subprocess.run(["git", "-C", str(repo_root), *args],
                            capture_output=True, text=True, encoding="utf-8")
@@ -253,7 +259,7 @@ def _git_data_branch(repo_root: Path, landed: list[dict]) -> None:
 
     branch = g("branch", "--show-current").stdout.strip()
     if branch != "data":
-        raise SystemExit(f"‼️ --git은 `data` 브랜치에서만 실행(현재: {branch}). "
+        raise SystemExit(f"‼️ data 커밋·푸시는 `data` 브랜치에서만 실행(현재: {branch}). "
                          "git-rules.md의 data 브랜치 규칙 참조.")
     # provisional_intensity.json은 조건부 산출물이라 존재할 때만 add 대상에 포함
     # (git add는 없는 pathspec에 에러를 내므로).
@@ -267,15 +273,7 @@ def _git_data_branch(repo_root: Path, landed: list[dict]) -> None:
                      f"(idx={s['cand']['idx']}, {s['cand']['video_id']})" for s in landed)
     g("commit", "-m", f"data: 신곡 자동 반영 {len(landed)}곡 — {titles} [auto]\n\n{body}")
     g("push", "-u", "origin", "data")
-    pr = subprocess.run(
-        ["gh", "pr", "create", "--base", "main", "--head", "data",
-         "--title", f"data: 신곡 자동 반영 {len(landed)}곡 — {titles}",
-         "--body", body + "\n\n(자동 생성 — run_autoloader.py. 머지는 저장소 소유자가 수행)"],
-        cwd=str(repo_root), capture_output=True, text=True, encoding="utf-8")
-    if pr.returncode == 0:
-        print(f"PR 오픈: {pr.stdout.strip()}")
-    else:
-        print(f"⚠️ gh pr create 실패(수동으로 PR 필요): {pr.stderr.strip()[:300]}")
+    print("data 브랜치 커밋·푸시 완료(PR 없음).")
 
 
 def main(argv=None) -> int:
@@ -290,8 +288,8 @@ def main(argv=None) -> int:
     ap.add_argument("--dry", action="store_true", help="분석까지 하되 data/ 미변경")
     ap.add_argument("--limit", type=int, default=0, help="이번 실행 최대 곡 수(0=전체)")
     ap.add_argument("--workers", type=int, default=6, help="부트스트랩 병렬 worker")
-    ap.add_argument("--git", action="store_true",
-                    help="반영 후 data 브랜치 커밋·푸시 + PR 오픈(브랜치=data 필수)")
+    ap.add_argument("--no-git", action="store_true",
+                    help="data 반영 후 커밋·푸시 생략(기본은 자동 커밋·푸시 — 테스트/로컬 확인용)")
     ap.add_argument("--soft", action="store_true",
                     help="intensity_norm 준비 불가 시 중단 대신 i_*를 밴드 평균으로 "
                          "임시 대체하고 provisional 기록(모듈 docstring 참고)")
@@ -376,11 +374,11 @@ def main(argv=None) -> int:
         print(f"⚠️ provisional i_* {len(provisional_landed)}곡 기록 — "
               f"{PROVISIONAL_JSON_REL}. intensity_norm 준비되는 run에서 자동 백필됨.")
 
-    # ⑦ git(옵션)
-    if a.git:
-        _git_data_branch(repo_root, landed)
+    # ⑦ git(기본 동작 — data 브랜치 커밋·푸시, --no-git으로 생략 가능)
+    if not a.no_git:
+        _commit_and_push_data(repo_root, landed)
     else:
-        print("(git 미실행 — data 브랜치 커밋·PR은 --git 또는 수동으로)")
+        print("(--no-git — data 브랜치 커밋·푸시 생략)")
     return 0
 
 
