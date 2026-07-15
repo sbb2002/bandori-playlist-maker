@@ -80,11 +80,12 @@ class AssembleRowTest(unittest.TestCase):
 
 
 class BandEligibilityTest(unittest.TestCase):
-    def test_threshold(self):
-        rows = [{"band": "big"}] * 10 + [{"band": "small"}] * 9
+    def test_no_band_excluded_regardless_of_sample_size(self):
+        """B1 정책(n<10 제외) 폐기(2026-07-15) — 표본이 적어도 항상 eligible."""
+        rows = [{"band": "big"}] * 10 + [{"band": "tiny"}] * 1
         elig = merge_data.band_eligibility(rows)
         self.assertTrue(elig["big"])
-        self.assertFalse(elig["small"])
+        self.assertTrue(elig["tiny"])
 
 
 class MergeTest(unittest.TestCase):
