@@ -1,0 +1,105 @@
+[separate] 30 tracks
+[1/30] separating afterglow__000 ...
+    ok
+[2/30] separating afterglow__001 ...
+    ok
+[3/30] separating afterglow__002 ...
+    ok
+[4/30] separating ave_mujica__072 ...
+    ok
+[5/30] separating ave_mujica__073 ...
+    ok
+[6/30] separating ave_mujica__074 ...
+    ok
+[7/30] separating hello_happy_world__106 ...
+    ok
+[8/30] separating hello_happy_world__107 ...
+    ok
+[9/30] separating hello_happy_world__108 ...
+    ok
+[10/30] separating morfonica__180 ...
+    ok
+[11/30] separating morfonica__181 ...
+    ok
+[12/30] separating morfonica__182 ...
+    ok
+[13/30] separating mugendai_mutype__237 ...
+    ok
+[14/30] separating mugendai_mutype__238 ...
+    ok
+[15/30] separating mugendai_mutype__239 ...
+    ok
+[16/30] separating mygo__260 ...
+    ok
+[17/30] separating mygo__261 ...
+    ok
+[18/30] separating mygo__262 ...
+    ok
+[19/30] separating pastel_palettes__301 ...
+    ok
+[20/30] separating pastel_palettes__302 ...
+    ok
+[21/30] separating pastel_palettes__303 ...
+    ok
+[22/30] MISSING SOURCE poppin_party__375
+[23/30] MISSING SOURCE poppin_party__376
+[24/30] MISSING SOURCE poppin_party__377
+[25/30] MISSING SOURCE raise_a_suilen__490
+[26/30] MISSING SOURCE raise_a_suilen__491
+[27/30] MISSING SOURCE raise_a_suilen__492
+[28/30] MISSING SOURCE roselia__570
+[29/30] MISSING SOURCE roselia__571
+[30/30] MISSING SOURCE roselia__572
+
+[separate] done=21 skipped=0 failed=9
+  poppin_party__375: no source audio
+  poppin_party__376: no source audio
+  poppin_party__377: no source audio
+  raise_a_suilen__490: no source audio
+  raise_a_suilen__491: no source audio
+  raise_a_suilen__492: no source audio
+  roselia__570: no source audio
+  roselia__571: no source audio
+  roselia__572: no source audio
+[separate] 30 tracks
+[1/30] skip afterglow__000 (already separated)
+[2/30] skip afterglow__001 (already separated)
+[3/30] skip afterglow__002 (already separated)
+[4/30] skip ave_mujica__072 (already separated)
+[5/30] skip ave_mujica__073 (already separated)
+[6/30] skip ave_mujica__074 (already separated)
+[7/30] skip hello_happy_world__106 (already separated)
+[8/30] skip hello_happy_world__107 (already separated)
+[9/30] skip hello_happy_world__108 (already separated)
+[10/30] skip morfonica__180 (already separated)
+[11/30] skip morfonica__181 (already separated)
+[12/30] skip morfonica__182 (already separated)
+[13/30] skip mugendai_mutype__237 (already separated)
+[14/30] skip mugendai_mutype__238 (already separated)
+[15/30] skip mugendai_mutype__239 (already separated)
+[16/30] skip mygo__260 (already separated)
+[17/30] skip mygo__261 (already separated)
+[18/30] skip mygo__262 (already separated)
+[19/30] skip pastel_palettes__301 (already separated)
+[20/30] skip pastel_palettes__302 (already separated)
+[21/30] skip pastel_palettes__303 (already separated)
+[22/30] separating poppin_party__375 ...
+    ok
+[23/30] separating poppin_party__376 ...
+    ok
+[24/30] separating poppin_party__377 ...
+    ok
+[25/30] separating raise_a_suilen__490 ...
+    ok
+[26/30] separating raise_a_suilen__491 ...
+    ok
+[27/30] separating raise_a_suilen__492 ...
+    ok
+[28/30] separating roselia__570 ...
+    ok
+[29/30] separating roselia__571 ...
+    ok
+[30/30] separating roselia__572 ...
+    ok
+
+[separate] done=9 skipped=21 failed=0

@@ -1,0 +1,8 @@
+# 재생성 가능한 대용량 바이너리는 커밋하지 않는다(스크립트+figs+csv만 버전관리).
+# 오디오 원본/분리 스템은 select_songs → download_missing → separate_vocals로 재생성.
+stems/
+audio_dl/
+*.wav
+*.webm
+*.mp3
+__pycache__/
