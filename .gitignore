@@ -30,6 +30,10 @@ __pycache__/
 venv/
 .venv/
 
+# backend가 런타임에 `data` 브랜치에서 fetch해 캐시하는 songs_master.csv(remote_source.py).
+# main엔 data/가 없으므로 이 캐시는 로컬 실행/배포 시마다 새로 채워진다 — 커밋 대상 아님.
+src/backend/.cache/
+
 # env / secrets
 .env
 secret*.json

@@ -62,6 +62,20 @@ These features were extracted for `bandori-song-sorter`'s EMOI-MAP pulse animati
 validated for mood-matching — PRD §6/§9 flags this as something to re-check during the pilot, and the
 `key` column's pitch-detection accuracy is explicitly unverified (§7).
 
+## Data branch — how the deployed backend actually gets data (2026-07-15)
+
+`main` does **not** contain a `data/` directory — the processed dataset (`songs_master.csv` etc.)
+lives only on the separate `data` branch (single-branch, bot-owned, commits skip PR — see
+`git-rules.md`). The deployed backend fetches `data/songs_master.csv` from the `data` branch at
+runtime over HTTP (`src/backend/app/repo/remote_source.py`, `raw.githubusercontent.com` — repo is
+public, no auth needed), both at boot and on a periodic refresh loop (`DATA_REFRESH_INTERVAL_SEC`,
+default 30 min). This is deliberate: `render.yaml` auto-deploys on every `main` push, so merging
+data-branch commits into `main` used to force a redeploy/sleep cycle per new song. Decoupling them
+means new songs reach production without touching `main` at all.
+Local dev/tests: set `SONGS_CSV` to skip the remote fetch (points at any local CSV, e.g. a `data`
+branch worktree), or rely on `src/tests/fixtures/songs_master.csv` (a static snapshot the test
+suite already uses via `conftest.py` — not live-updated by the autoloader).
+
 ## Pilot scope (PRD §4) — must-have only
 
 1. Natural-language request input.
