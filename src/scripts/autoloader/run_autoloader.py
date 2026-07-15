@@ -59,14 +59,17 @@ DATA_PATHS = [
 
 
 def _prepare_norms(repo_root: Path, master_rows: list[dict], audio_dir: Path,
-                   workers: int) -> tuple[dict, norms.EnergyFullFrozen, tuple]:
-    """동결 norm 3계열 준비(최초 구축 시 기존 행 재현 검증 후 영속화).
+                   workers: int) -> tuple[dict, norms.EnergyFullFrozen, tuple, dict]:
+    """동결 norm 4계열 준비(최초 구축 시 기존 행 재현 검증 후 영속화).
 
     구축 실패(재현 불일치)는 RuntimeError로 즉시 중단 — 자로 쓸 분포가 원본과
     다르면 신곡 값 전체가 오염되기 때문."""
     data = repo_root / "data"
     p_norms = norms.load_or_build_proxy_norms(
         data / "song_features_with_proxies.csv", data / "feature_norms.json")
+    shape_norms = norms.load_or_build_shape_norms(
+        data / "song_features_with_proxies.csv", data / "audio_map.json",
+        data / "shape_norm.json")
 
     # energy_full 분포의 eligibility는 원시 songs_full(중복 업로드 포함) 밴드 카운트.
     with (data / "songs_full.csv").open(encoding="utf-8", newline="") as f:
@@ -92,12 +95,12 @@ def _prepare_norms(repo_root: Path, master_rows: list[dict], audio_dir: Path,
             norm_json.unlink(missing_ok=True)
             raise SystemExit("‼️ i_* 동결 상수 검증 실패 — extract_temporal_intensity 대조 필요")
     med, mad = norms.load_intensity_norm(norm_json)
-    return p_norms, ef, (med, mad)
+    return p_norms, ef, (med, mad), shape_norms
 
 
 def _process_song(cand: dict, wav: Path, p_norms: dict,
                   ef: norms.EnergyFullFrozen, med, mad,
-                  audio_entries: dict[int, dict]) -> dict | None:
+                  audio_entries: dict[int, dict], shape_norms: dict) -> dict | None:
     """신곡 1곡 분석(fail-soft). 성공 시 merge_data.merge용 landed dict."""
     idx = cand["idx"]
     try:
@@ -108,6 +111,7 @@ def _process_song(cand: dict, wav: Path, p_norms: dict,
         t0 = time.time()
         excerpt = extract_from_wav(wav)                       # 45s excerpt(r5)
         proxies = norms.compute_proxies(excerpt, p_norms)     # 동결 z
+        shape = norms.compute_shape(excerpt, shape_norms)     # 동결 z(형제 audio_map 미의존)
         full = extract_features(wav)                          # 전곡 서브피처
         full["extract_sec"] = round(time.time() - t0, 2)
         frames = norms.compute_frames_for(wav)                # 프레임 강도
@@ -117,7 +121,7 @@ def _process_song(cand: dict, wav: Path, p_norms: dict,
         print(f"  ✅ {cand['band']} · {cand['song']}  (idx={idx} key={excerpt['key']} "
               f"energy_full={energy_full:.3f} i_mean={intensity['i_mean']})")
         return {"cand": cand, "excerpt": excerpt, "proxies": proxies,
-                "full_feats": full, "audio_entry": entry,
+                "full_feats": full, "audio_entry": entry, "shape": shape,
                 "energy_full": energy_full, "intensity": intensity}
     except Exception as exc:  # noqa: BLE001 — 곡별 격리(fail-soft)
         print(f"  ✗ 분석 실패(스킵·다음 실행 재시도): {cand['band']} · {cand['song']} — {exc!r}")
@@ -195,8 +199,8 @@ def main(argv=None) -> int:
         cands = cands[:a.limit]
 
     # ② 동결 norm
-    p_norms, ef, (med, mad) = _prepare_norms(repo_root, master_rows, audio_dir,
-                                             a.workers)
+    p_norms, ef, (med, mad), shape_norms = _prepare_norms(
+        repo_root, master_rows, audio_dir, a.workers)
 
     # ③ 곡별 처리
     audio_entries = sources.audio_map_entries_by_idx(audio_map)
@@ -208,7 +212,7 @@ def main(argv=None) -> int:
             print(f"  ✗ 다운로드 실패(스킵): {c['band']} · {c['song']}")
             failed.append(c)
             continue
-        res = _process_song(c, wav, p_norms, ef, med, mad, audio_entries)
+        res = _process_song(c, wav, p_norms, ef, med, mad, audio_entries, shape_norms)
         (landed if res else failed).append(res or c)
 
     print(f"\n반영 {len(landed)}곡 · 실패 {len(failed)}곡")
@@ -223,7 +227,7 @@ def main(argv=None) -> int:
             row = merge_data.assemble_master_row(
                 s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
                 s["energy_full"], s["intensity"],
-                True)  # dry에서는 eligible 근사 표기(실반영 시 재계산)
+                True, s["shape"])  # dry에서는 eligible 근사 표기(실반영 시 재계산)
             print(f"  {row}")
         return 0
 

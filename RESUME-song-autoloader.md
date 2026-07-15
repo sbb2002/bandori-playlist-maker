@@ -18,31 +18,40 @@
 - wav 3개는 형제 데브 캐시에 확보됨(재실행 시 다운로드 생략):
   `bandori-song-sorter/src/content/cluster/audio_full/mygo__66{0,1,2}.wav`
 
-## 발견된 버그 1건 (dry 출력 단계에서 KeyError — 내일 첫 수정 대상)
+## 버그 1건 — 수정 완료(다른 로컬, 2026-07-15 후속 세션)
 
-`merge_data.assemble_master_row`가 `audio_entry["energy"]`/`["shape"]`를 요구하지만,
-**형제 audio_map.json의 신곡 엔트리에는 이 키가 없다**(실측, pipeline 클론 songs[660]):
+`merge_data.assemble_master_row`가 `audio_entry["energy"]`/`["shape"]`를 요구했지만,
+**형제 audio_map.json의 신곡 엔트리에는 이 키가 없어** KeyError로 dry 출력이 죽던 문제.
+경로/오디오 데이터가 다른 별도 로컬(`bandori-playlist-maker`, 캐시 wav 없음)에서 코드
+리뷰 + 로컬 660곡 실데이터로 다음과 같이 수정·검증했다:
 
-- 신곡 엔트리 키: `band, song, url, x, y, bpm`  (energy 없음, shape 없음)
-- 구엔트리 키:   `band, song, url, x, y, bpm, energy`  (shape는 구엔트리에도 없음!)
-- 즉 master의 `shape`는 예전 스냅샷(우리 `data/audio_map.json` 사본)에만 있고,
-  형제 최신 audio_map에는 더 이상 없다. `energy`도 신곡부터는 안 만들어진다.
+- `energy`: song_repo 비소비 레거시 컬럼 → `audio_entry.get("energy", "")`로 공란 허용.
+- `shape`: song_repo가 **소비함**(Song.shape). 형제 `add_pulse_shape.py`
+  (`bandori-song-sorter/src/tools/cluster/add_pulse_shape.py`)의 채널 산식을 확인해
+  이식(①번 방향 채택) — `acoustic=z(harmonic_ratio)`, `bright=mean(z(centroid,rolloff,
+  zcr,flatness))`, `shimmer=z(flux)`, 최댓값 채택·gap<0.4면 neutral(z-score ddof=0).
+  형제 audio_map에 더 이상 의존하지 않고 우리 발췌 특징(`excerpt_features.extract_from_wav`
+  가 이미 6개 원시 컬럼을 전부 반환)에서 직접 계산 — `norms.py`에 4번째 동결 norm
+  (`data/shape_norm.json`)으로 추가(`build_shape_norms`/`compute_shape`/
+  `load_or_build_shape_norms`/`verify_shape_norms`).
+- **로컬 660곡 실데이터 재현 검증**: exact 659/660. 유일한 불일치는 `roselia/Neo-Aspect`
+  (idx 570·588, 동명곡) — 형제 스크립트 자체 docstring이 "song 제목만으로는 조인이
+  애매하다"고 경고한 기존 한계로, 우리 포팅 문제가 아님(원본도 둘 중 하나는 틀렸을
+  가능성). 99% 문턱은 통과하므로 자동 구축엔 지장 없음.
+- `merge_data.assemble_master_row`/`run_autoloader.py`/`test_merge_data.py`/
+  `test_norms.py` 전부 갱신, 합성 데이터 기반 단위테스트 추가(실오디오 불필요).
+  `python -m pytest scripts/autoloader -q` 35 passed, 전체 `python -m pytest` 231 passed.
+- **주의**: 컬럼 스키마(harmonic_ratio 등)는 `research/mood-warmth-feature` 브랜치에서
+  새 변수를 연구 중이라 나중에 바뀔 수 있음 — 이번 수정엔 반영 안 함(사용자 확정
+  2026-07-15).
 
-수정 방향(내일 결정·구현):
-- master `energy`(EMOI 펄스 발췌 에너지) / `bpm`: 앱(song_repo)이 **소비하지 않는** 레거시
-  컬럼 → 신곡은 `energy=""` 허용이 간단. bpm은 엔트리에 있으니 그대로.
-- master `shape`: song_repo가 **소비함**(Song.shape). 형제 소스가 사라졌으니
-  ① 형제의 shape 산출 로직(build_audio_map.py / append_song_map.py에서 확인)을 이식해
-  직접 계산하거나 ② mode_score 기반 근사(bright/neutral/dark 경계값을 기존 데이터에서 역산)
-  중 택1. **먼저 형제 레포에서 shape가 어떻게 계산됐는지 확인할 것.**
-- `_post_checks`의 신규 행 파싱 검증도 energy 공란 허용으로 맞출 것.
-- 수정 후 `test_merge_data.py`에 "신곡 엔트리에 energy/shape 없음" 케이스 추가.
+## 다음 재개 순서 (원래 로컬 — 실오디오·캐시 wav 있는 환경)
 
-## 내일 재개 순서
-
-1. 위 버그 수정(+테스트) → `python -m pytest scripts/autoloader -q`
+1. 위 코드 수정을 이 브랜치에서 pull(또는 병합) → `data/shape_norm.json`이 최초
+   실행 시 자동 구축됨(기존 `feature_norms.json`/`energy_full_norm.json`과 동일 패턴).
 2. dry run 재실행(다운로드는 캐시라 수 초):
    `python src/scripts/autoloader/run_autoloader.py --repo-root C:\Users\User\Documents\pyworks\bpm-data-branch --dry`
+   — 이번엔 KeyError 없이 신곡 3곡 shape까지 포함한 행이 출력돼야 함.
 3. 산출 행 검수 후 실반영(같은 명령에서 --dry 제거) → 데이터 검증
    (master 661행, song_repo.load_songs() 스모크, src/ pytest)
 4. **이 파일 삭제** → versionlog v1.7.0의 PR 번호 확인·확정 → `v1.7.0` 태그 →

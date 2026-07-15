@@ -123,6 +123,53 @@ class EnergyFullFrozenTest(unittest.TestCase):
             path.unlink(missing_ok=True)
 
 
+class ShapeNormsTest(unittest.TestCase):
+    """형제 add_pulse_shape.py 채널 산식 이식 — ddof=0 z-score + neutral gap."""
+
+    def _rows(self):
+        base = [
+            {"harmonic_ratio": 0.9, "centroid": 1000.0, "rolloff": 2000.0,
+             "flatness": 0.01, "flux": 0.5, "zcr": 0.05},    # acoustic 극단
+            {"harmonic_ratio": 0.3, "centroid": 6000.0, "rolloff": 9000.0,
+             "flatness": 0.30, "flux": 1.0, "zcr": 0.40},    # bright 극단
+            {"harmonic_ratio": 0.5, "centroid": 3000.0, "rolloff": 5000.0,
+             "flatness": 0.10, "flux": 3.0, "zcr": 0.15},    # shimmer 극단
+            {"harmonic_ratio": 0.55, "centroid": 3200.0, "rolloff": 5200.0,
+             "flatness": 0.11, "flux": 1.1, "zcr": 0.16},    # neutral(뚜렷한 성분 없음)
+        ]
+        return [{k: str(v) for k, v in r.items()} | {"idx": str(i)}
+                for i, r in enumerate(base)]
+
+    def test_zscore_is_ddof0(self):
+        rows = self._rows()
+        n = norms.build_shape_norms(rows)
+        v = np.array([0.9, 0.3, 0.5, 0.55])
+        self.assertAlmostEqual(n["harmonic_ratio"]["mean"], v.mean(), places=12)
+        self.assertAlmostEqual(n["harmonic_ratio"]["std"], v.std(ddof=0), places=12)
+
+    def test_classifies_dominant_channel(self):
+        rows = self._rows()
+        n = norms.build_shape_norms(rows)
+        self.assertEqual(norms.compute_shape(rows[0], n), "acoustic")
+        self.assertEqual(norms.compute_shape(rows[1], n), "bright")
+        self.assertEqual(norms.compute_shape(rows[2], n), "shimmer")
+        self.assertEqual(norms.compute_shape(rows[3], n), "neutral")
+
+    def test_verify_roundtrip_matches_stored_shape(self):
+        rows = self._rows()
+        n = norms.build_shape_norms(rows)
+        audio_map_songs = [{"shape": norms.compute_shape(r, n)} for r in rows]
+        ok, total = norms.verify_shape_norms(rows, n, audio_map_songs)
+        self.assertEqual((ok, total), (len(rows), len(rows)))
+
+    def test_missing_stored_shape_is_skipped_not_counted(self):
+        rows = self._rows()
+        n = norms.build_shape_norms(rows)
+        audio_map_songs = [{"band": "x"} for _ in rows]   # 신곡 엔트리처럼 shape 없음
+        ok, total = norms.verify_shape_norms(rows, n, audio_map_songs)
+        self.assertEqual((ok, total), (0, 0))
+
+
 class AggregateIntensityTest(unittest.TestCase):
     def test_formulas_and_format(self):
         n_frames = norms._SEG_FRAMES * 3

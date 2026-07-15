@@ -52,9 +52,13 @@ def band_eligibility(songs_full_rows: list[dict]) -> dict[str, bool]:
 
 def assemble_master_row(cand: dict, excerpt: dict, proxies: dict,
                         audio_entry: dict, energy_full: float,
-                        intensity: dict, eligible: bool) -> dict:
+                        intensity: dict, eligible: bool, shape: str) -> dict:
     """songs_master.csv 1행(23컬럼) 조립. 포맷은 기존 빌드 스크립트들과 동일:
-    tempo_excerpt·mode_score=r5, proxy=full float, energy_full='%.6f', i_*='%.5f'."""
+    tempo_excerpt·mode_score=r5, proxy=full float, energy_full='%.6f', i_*='%.5f'.
+
+    shape는 상류(norms.compute_shape)가 우리 발췌 특징에서 직접 계산한 값을 받는다
+    — 형제 audio_map의 신곡 엔트리에는 shape 키가 없어(2026-07-15 확인) audio_entry에
+    더 이상 의존하지 않는다. energy(레거시, song_repo 비소비)는 있으면 쓰고 없으면 공란."""
     key = excerpt["key"]
     camelot = to_camelot(key)   # 매핑 누락 시 ValueError → 상위에서 롤백
     row = {
@@ -71,8 +75,8 @@ def assemble_master_row(cand: dict, excerpt: dict, proxies: dict,
         "acousticness_proxy": proxies["acousticness_proxy"],
         "instrumentalness_proxy": proxies["instrumentalness_proxy"],
         "bpm": audio_entry["bpm"],
-        "energy": audio_entry["energy"],
-        "shape": audio_entry["shape"],
+        "energy": audio_entry.get("energy", ""),
+        "shape": shape,
         "eligible_band": eligible,
         "energy_full": f"{energy_full:.6f}",
         **{k: intensity[k] for k in
@@ -116,7 +120,8 @@ def merge(repo_root: Path, landed: list[dict],
 
     landed 항목 스키마(run_autoloader가 조립):
       cand(idx/band/song/url/video_id), excerpt(원시), proxies, full_feats(원시+extract_sec),
-      audio_entry(bpm/energy/shape), energy_full(float), intensity(i_* 문자열), eligible(bool)
+      audio_entry(bpm, +구형식이면 energy), shape(str, norms.compute_shape 산출),
+      energy_full(float), intensity(i_* 문자열), eligible(bool)
     """
     paths = {rel: repo_root / rel for rel in ALL_TARGETS}
     snapshot = {p: p.read_bytes() for p in paths.values() if p.exists()}
@@ -155,7 +160,8 @@ def merge(repo_root: Path, landed: list[dict],
         _append_rows(paths[REL_MASTER], [
             assemble_master_row(s["cand"], s["excerpt"], s["proxies"],
                                 s["audio_entry"], s["energy_full"],
-                                s["intensity"], elig[s["cand"]["band"]])
+                                s["intensity"], elig[s["cand"]["band"]],
+                                s["shape"])
             for s in landed])
 
         _post_checks(paths, snapshot, master_before, landed)

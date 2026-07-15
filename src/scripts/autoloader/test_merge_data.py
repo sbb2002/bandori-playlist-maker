@@ -38,7 +38,8 @@ def _landed(idx: int, band: str = "mygo", vid: str = "NEWVID00000") -> dict:
                        "onset_p90": 2.0, "onset_rate": 3.0, "rms_mean": 0.27,
                        "rms_p90": 0.35, "extract_sec": 1.0},
         "audio_entry": {"band": band, "song": f"신곡{idx}", "bpm": 120.0,
-                        "energy": 0.5, "shape": "neutral"},
+                        "energy": 0.5},
+        "shape": "neutral",
         "energy_full": 0.75,
         "intensity": {"i_mean": "0.10000", "i_std": "0.50000", "i_max": "1.00000",
                       "i_min": "-0.50000", "i_start": "0.00000", "i_end": "0.20000"},
@@ -50,20 +51,32 @@ class AssembleRowTest(unittest.TestCase):
         s = _landed(660)
         row = merge_data.assemble_master_row(
             s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
-            s["energy_full"], s["intensity"], True)
+            s["energy_full"], s["intensity"], True, s["shape"])
         self.assertEqual(row["idx"], 660)
         self.assertEqual(row["key"], "Amaj")
         self.assertTrue(row["camelot"])                    # camelot.py 매핑 성공
         self.assertEqual(row["energy_full"], "0.750000")   # %.6f
         self.assertEqual(row["i_mean"], "0.10000")         # %.5f 유지
         self.assertIs(row["eligible_band"], True)          # csv에서 'True'로 직렬화
+        self.assertEqual(row["shape"], "neutral")          # audio_entry가 아닌 상류 계산값
 
     def test_column_set_matches_master_header(self):
         s = _landed(660)
         row = merge_data.assemble_master_row(
             s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
-            s["energy_full"], s["intensity"], False)
+            s["energy_full"], s["intensity"], False, s["shape"])
         self.assertEqual(set(row), set(MASTER_HEADER.split(",")))
+
+    def test_missing_energy_key_defaults_to_blank(self):
+        """형제 audio_map 신곡 엔트리에는 energy 키가 없다(2026-07-15 확인) —
+        KeyError 없이 공란으로 처리돼야 한다(song_repo 비소비 레거시 컬럼)."""
+        s = _landed(660)
+        s["audio_entry"] = {"band": "mygo", "song": "신곡660", "bpm": 120.0}
+        row = merge_data.assemble_master_row(
+            s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
+            s["energy_full"], s["intensity"], True, s["shape"])
+        self.assertEqual(row["energy"], "")
+        self.assertEqual(row["bpm"], 120.0)
 
 
 class BandEligibilityTest(unittest.TestCase):
