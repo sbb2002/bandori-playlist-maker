@@ -44,6 +44,10 @@
 - **주의**: 컬럼 스키마(harmonic_ratio 등)는 `research/mood-warmth-feature` 브랜치에서
   새 변수를 연구 중이라 나중에 바뀔 수 있음 — 이번 수정엔 반영 안 함(사용자 확정
   2026-07-15).
+- 동결 norm의 median/MAD 정규성 가정(1.4826) 검토·백분위-순위 소비 구조 덕에 무해함을
+  실측으로 확인한 상세 내용은 `document-archive` 브랜치
+  `archive/reports/2026-07-15-song-autoloader-shape-fix-and-norm-methodology.md` 참고
+  (`git show document-archive:archive/reports/2026-07-15-...`).
 
 ## 다음 재개 순서 (원래 로컬 — 실오디오·캐시 wav 있는 환경)
 
