@@ -92,8 +92,7 @@
             "x": 16.57,
             "y": 33.52,
             "bpm": 123.0,
-            "energy": 0.822,
-            "shape": "neutral"
+            "energy": 0.822
         },
         {
             "band": "afterglow",
@@ -102,8 +101,7 @@
             "x": 8.38,
             "y": 15.71,
             "bpm": 117.5,
-            "energy": 0.396,
-            "shape": "bright"
+            "energy": 0.396
         },
         {
             "band": "afterglow",
@@ -112,8 +110,7 @@
             "x": 19.81,
             "y": -3.98,
             "bpm": 136.0,
-            "energy": 0.159,
-            "shape": "neutral"
+            "energy": 0.159
         },
         {
             "band": "afterglow",
@@ -122,8 +119,7 @@
             "x": 31.19,
             "y": 30.9,
             "bpm": 99.4,
-            "energy": 0.7,
-            "shape": "acoustic"
+            "energy": 0.7
         },
         {
             "band": "afterglow",
@@ -132,8 +128,7 @@
             "x": 11.18,
             "y": 50.34,
             "bpm": 95.7,
-            "energy": 0.449,
-            "shape": "shimmer"
+            "energy": 0.449
         },
         {
             "band": "afterglow",
@@ -142,8 +137,7 @@
             "x": 31.26,
             "y": 15.32,
             "bpm": 161.5,
-            "energy": 0.367,
-            "shape": "bright"
+            "energy": 0.367
         },
         {
             "band": "afterglow",
@@ -152,8 +146,7 @@
             "x": 24.57,
             "y": 53.1,
             "bpm": 136.0,
-            "energy": 0.636,
-            "shape": "neutral"
+            "energy": 0.636
         },
         {
             "band": "afterglow",
@@ -162,8 +155,7 @@
             "x": -0.92,
             "y": 54.11,
             "bpm": 99.4,
-            "energy": 0.413,
-            "shape": "acoustic"
+            "energy": 0.413
         },
         {
             "band": "afterglow",
@@ -172,8 +164,7 @@
             "x": -3.86,
             "y": 21.95,
             "bpm": 123.0,
-            "energy": 0.184,
-            "shape": "neutral"
+            "energy": 0.184
         },
         {
             "band": "afterglow",
@@ -182,8 +173,7 @@
             "x": 20.3,
             "y": -31.12,
             "bpm": 103.4,
-            "energy": 0.058,
-            "shape": "neutral"
+            "energy": 0.058
         },
         {
             "band": "afterglow",
@@ -192,8 +182,7 @@
             "x": 44.14,
             "y": 41.42,
             "bpm": 103.4,
-            "energy": 0.475,
-            "shape": "bright"
+            "energy": 0.475
         },
         {
             "band": "afterglow",
@@ -202,8 +191,7 @@
             "x": 2.78,
             "y": 37.14,
             "bpm": 123.0,
-            "energy": 0.845,
-            "shape": "neutral"
+            "energy": 0.845
         },
         {
             "band": "afterglow",
@@ -212,8 +200,7 @@
             "x": 0.58,
             "y": 25.92,
             "bpm": 117.5,
-            "energy": 0.522,
-            "shape": "shimmer"
+            "energy": 0.522
         },
         {
             "band": "afterglow",
@@ -222,8 +209,7 @@
             "x": 15.72,
             "y": -24.78,
             "bpm": 129.2,
-            "energy": 0.596,
-            "shape": "shimmer"
+            "energy": 0.596
         },
         {
             "band": "afterglow",
@@ -232,8 +218,7 @@
             "x": 27.22,
             "y": 3.01,
             "bpm": 136.0,
-            "energy": 0.768,
-            "shape": "bright"
+            "energy": 0.768
         },
         {
             "band": "afterglow",
@@ -242,8 +227,7 @@
             "x": -24.87,
             "y": 54.83,
             "bpm": 123.0,
-            "energy": 0.232,
-            "shape": "bright"
+            "energy": 0.232
         },
         {
             "band": "afterglow",
@@ -252,8 +236,7 @@
             "x": 34.19,
             "y": 44.8,
             "bpm": 103.4,
-            "energy": 0.697,
-            "shape": "neutral"
+            "energy": 0.697
         },
         {
             "band": "afterglow",
@@ -262,8 +245,7 @@
             "x": 2.9,
             "y": 48.07,
             "bpm": 95.7,
-            "energy": 0.618,
-            "shape": "neutral"
+            "energy": 0.618
         },
         {
             "band": "afterglow",
@@ -272,8 +254,7 @@
             "x": 14.3,
             "y": 49.99,
             "bpm": 152.0,
-            "energy": 0.282,
-            "shape": "neutral"
+            "energy": 0.282
         },
         {
             "band": "afterglow",
@@ -282,8 +263,7 @@
             "x": -33.44,
             "y": 31.22,
             "bpm": 123.0,
-            "energy": 0.552,
-            "shape": "acoustic"
+            "energy": 0.552
         },
         {
             "band": "afterglow",
@@ -292,8 +272,7 @@
             "x": 11.14,
             "y": -11.16,
             "bpm": 123.0,
-            "energy": 0.733,
-            "shape": "acoustic"
+            "energy": 0.733
         },
         {
             "band": "afterglow",
@@ -302,8 +281,7 @@
             "x": 12.45,
             "y": 44.51,
             "bpm": 123.0,
-            "energy": 0.382,
-            "shape": "neutral"
+            "energy": 0.382
         },
         {
             "band": "afterglow",
@@ -312,8 +290,7 @@
             "x": 7.3,
             "y": -13.88,
             "bpm": 143.6,
-            "energy": 0.514,
-            "shape": "neutral"
+            "energy": 0.514
         },
         {
             "band": "afterglow",
@@ -322,8 +299,7 @@
             "x": -7.37,
             "y": 4.82,
             "bpm": 107.7,
-            "energy": 0.757,
-            "shape": "acoustic"
+            "energy": 0.757
         },
         {
             "band": "afterglow",
@@ -332,8 +308,7 @@
             "x": 22.66,
             "y": 24.71,
             "bpm": 117.5,
-            "energy": 0.496,
-            "shape": "bright"
+            "energy": 0.496
         },
         {
             "band": "afterglow",
@@ -342,8 +317,7 @@
             "x": 29.91,
             "y": 20.71,
             "bpm": 112.3,
-            "energy": 0.595,
-            "shape": "acoustic"
+            "energy": 0.595
         },
         {
             "band": "afterglow",
@@ -352,8 +326,7 @@
             "x": 25.88,
             "y": 29.5,
             "bpm": 117.5,
-            "energy": 0.302,
-            "shape": "neutral"
+            "energy": 0.302
         },
         {
             "band": "afterglow",
@@ -362,8 +335,7 @@
             "x": 11.81,
             "y": -23.96,
             "bpm": 136.0,
-            "energy": 0.639,
-            "shape": "neutral"
+            "energy": 0.639
         },
         {
             "band": "afterglow",
@@ -372,8 +344,7 @@
             "x": 27.11,
             "y": 21.67,
             "bpm": 136.0,
-            "energy": 0.504,
-            "shape": "shimmer"
+            "energy": 0.504
         },
         {
             "band": "afterglow",
@@ -382,8 +353,7 @@
             "x": 46.32,
             "y": -2.1,
             "bpm": 112.3,
-            "energy": 0.73,
-            "shape": "bright"
+            "energy": 0.73
         },
         {
             "band": "afterglow",
@@ -392,8 +362,7 @@
             "x": 34.94,
             "y": 19.36,
             "bpm": 117.5,
-            "energy": 0.476,
-            "shape": "shimmer"
+            "energy": 0.476
         },
         {
             "band": "afterglow",
@@ -402,8 +371,7 @@
             "x": -44.94,
             "y": 56.64,
             "bpm": 129.2,
-            "energy": 0.134,
-            "shape": "acoustic"
+            "energy": 0.134
         },
         {
             "band": "afterglow",
@@ -412,8 +380,7 @@
             "x": 8.47,
             "y": -27.51,
             "bpm": 136.0,
-            "energy": 0.24,
-            "shape": "neutral"
+            "energy": 0.24
         },
         {
             "band": "afterglow",
@@ -422,8 +389,7 @@
             "x": 14.93,
             "y": 34.51,
             "bpm": 112.3,
-            "energy": 0.838,
-            "shape": "bright"
+            "energy": 0.838
         },
         {
             "band": "afterglow",
@@ -432,8 +398,7 @@
             "x": 19.67,
             "y": 25.21,
             "bpm": 99.4,
-            "energy": 0.549,
-            "shape": "neutral"
+            "energy": 0.549
         },
         {
             "band": "afterglow",
@@ -442,8 +407,7 @@
             "x": 25.46,
             "y": 9.69,
             "bpm": 123.0,
-            "energy": 0.724,
-            "shape": "shimmer"
+            "energy": 0.724
         },
         {
             "band": "afterglow",
@@ -452,8 +416,7 @@
             "x": 24.34,
             "y": -26.34,
             "bpm": 129.2,
-            "energy": 0.747,
-            "shape": "shimmer"
+            "energy": 0.747
         },
         {
             "band": "afterglow",
@@ -462,8 +425,7 @@
             "x": 23.67,
             "y": 19.09,
             "bpm": 123.0,
-            "energy": 0.728,
-            "shape": "shimmer"
+            "energy": 0.728
         },
         {
             "band": "afterglow",
@@ -472,8 +434,7 @@
             "x": 18.08,
             "y": 48.73,
             "bpm": 129.2,
-            "energy": 0.909,
-            "shape": "neutral"
+            "energy": 0.909
         },
         {
             "band": "afterglow",
@@ -482,8 +443,7 @@
             "x": -7.35,
             "y": -6.91,
             "bpm": 99.4,
-            "energy": 0.778,
-            "shape": "shimmer"
+            "energy": 0.778
         },
         {
             "band": "afterglow",
@@ -492,8 +452,7 @@
             "x": 25.22,
             "y": -2.16,
             "bpm": 129.2,
-            "energy": 0.92,
-            "shape": "acoustic"
+            "energy": 0.92
         },
         {
             "band": "afterglow",
@@ -502,8 +461,7 @@
             "x": 5.71,
             "y": 15.06,
             "bpm": 117.5,
-            "energy": 0.836,
-            "shape": "acoustic"
+            "energy": 0.836
         },
         {
             "band": "afterglow",
@@ -512,8 +470,7 @@
             "x": -7.56,
             "y": 16.45,
             "bpm": 117.5,
-            "energy": 0.897,
-            "shape": "acoustic"
+            "energy": 0.897
         },
         {
             "band": "afterglow",
@@ -522,8 +479,7 @@
             "x": -0.48,
             "y": 27.4,
             "bpm": 99.4,
-            "energy": 0.904,
-            "shape": "neutral"
+            "energy": 0.904
         },
         {
             "band": "afterglow",
@@ -532,8 +488,7 @@
             "x": 39.42,
             "y": 45.2,
             "bpm": 143.6,
-            "energy": 0.548,
-            "shape": "bright"
+            "energy": 0.548
         },
         {
             "band": "afterglow",
@@ -542,8 +497,7 @@
             "x": 17.15,
             "y": 7.25,
             "bpm": 117.5,
-            "energy": 0.592,
-            "shape": "shimmer"
+            "energy": 0.592
         },
         {
             "band": "afterglow",
@@ -552,8 +506,7 @@
             "x": 33.03,
             "y": -22.26,
             "bpm": 123.0,
-            "energy": 0.678,
-            "shape": "shimmer"
+            "energy": 0.678
         },
         {
             "band": "afterglow",
@@ -562,8 +515,7 @@
             "x": -9.72,
             "y": 1.1,
             "bpm": 107.7,
-            "energy": 0.203,
-            "shape": "shimmer"
+            "energy": 0.203
         },
         {
             "band": "afterglow",
@@ -572,8 +524,7 @@
             "x": -14.68,
             "y": 48.8,
             "bpm": 99.4,
-            "energy": 0.457,
-            "shape": "shimmer"
+            "energy": 0.457
         },
         {
             "band": "afterglow",
@@ -582,8 +533,7 @@
             "x": 5.61,
             "y": 7.94,
             "bpm": 99.4,
-            "energy": 0.41,
-            "shape": "acoustic"
+            "energy": 0.41
         },
         {
             "band": "afterglow",
@@ -592,8 +542,7 @@
             "x": 12.66,
             "y": 19.92,
             "bpm": 95.7,
-            "energy": 0.824,
-            "shape": "bright"
+            "energy": 0.824
         },
         {
             "band": "afterglow",
@@ -602,8 +551,7 @@
             "x": 23.83,
             "y": 0.79,
             "bpm": 152.0,
-            "energy": 0.39,
-            "shape": "shimmer"
+            "energy": 0.39
         },
         {
             "band": "afterglow",
@@ -612,8 +560,7 @@
             "x": 14.45,
             "y": -23.45,
             "bpm": 143.6,
-            "energy": 0.51,
-            "shape": "shimmer"
+            "energy": 0.51
         },
         {
             "band": "afterglow",
@@ -622,8 +569,7 @@
             "x": 30.41,
             "y": 8.58,
             "bpm": 103.4,
-            "energy": 0.478,
-            "shape": "shimmer"
+            "energy": 0.478
         },
         {
             "band": "afterglow",
@@ -632,8 +578,7 @@
             "x": -9.3,
             "y": 27.54,
             "bpm": 152.0,
-            "energy": 0.686,
-            "shape": "neutral"
+            "energy": 0.686
         },
         {
             "band": "afterglow",
@@ -642,8 +587,7 @@
             "x": 24.46,
             "y": 44.91,
             "bpm": 136.0,
-            "energy": 0.71,
-            "shape": "neutral"
+            "energy": 0.71
         },
         {
             "band": "afterglow",
@@ -652,8 +596,7 @@
             "x": 18.31,
             "y": 20.75,
             "bpm": 99.4,
-            "energy": 0.744,
-            "shape": "shimmer"
+            "energy": 0.744
         },
         {
             "band": "afterglow",
@@ -662,8 +605,7 @@
             "x": 17.81,
             "y": 58.91,
             "bpm": 123.0,
-            "energy": 0.704,
-            "shape": "acoustic"
+            "energy": 0.704
         },
         {
             "band": "afterglow",
@@ -672,8 +614,7 @@
             "x": 25.33,
             "y": -4.19,
             "bpm": 112.3,
-            "energy": 0.599,
-            "shape": "neutral"
+            "energy": 0.599
         },
         {
             "band": "afterglow",
@@ -682,8 +623,7 @@
             "x": 18.38,
             "y": 45.76,
             "bpm": 123.0,
-            "energy": 0.085,
-            "shape": "neutral"
+            "energy": 0.085
         },
         {
             "band": "afterglow",
@@ -692,8 +632,7 @@
             "x": 0.34,
             "y": 49.8,
             "bpm": 99.4,
-            "energy": 0.05,
-            "shape": "shimmer"
+            "energy": 0.05
         },
         {
             "band": "afterglow",
@@ -702,8 +641,7 @@
             "x": 7.9,
             "y": -22.18,
             "bpm": 129.2,
-            "energy": 0.337,
-            "shape": "neutral"
+            "energy": 0.337
         },
         {
             "band": "afterglow",
@@ -712,8 +650,7 @@
             "x": 31.09,
             "y": 19.44,
             "bpm": 92.3,
-            "energy": 0.448,
-            "shape": "neutral"
+            "energy": 0.448
         },
         {
             "band": "afterglow",
@@ -722,8 +659,7 @@
             "x": 17.57,
             "y": -12.54,
             "bpm": 99.4,
-            "energy": 0.709,
-            "shape": "shimmer"
+            "energy": 0.709
         },
         {
             "band": "afterglow",
@@ -732,8 +668,7 @@
             "x": -1.09,
             "y": 21.26,
             "bpm": 136.0,
-            "energy": 0.34,
-            "shape": "acoustic"
+            "energy": 0.34
         },
         {
             "band": "afterglow",
@@ -742,8 +677,7 @@
             "x": 32.54,
             "y": -0.86,
             "bpm": 129.2,
-            "energy": 0.44,
-            "shape": "neutral"
+            "energy": 0.44
         },
         {
             "band": "afterglow",
@@ -752,8 +686,7 @@
             "x": -8.19,
             "y": 39.83,
             "bpm": 112.3,
-            "energy": 0.464,
-            "shape": "shimmer"
+            "energy": 0.464
         },
         {
             "band": "afterglow",
@@ -762,8 +695,7 @@
             "x": 33.08,
             "y": -7.23,
             "bpm": 152.0,
-            "energy": 0.361,
-            "shape": "neutral"
+            "energy": 0.361
         },
         {
             "band": "afterglow",
@@ -772,8 +704,7 @@
             "x": 37.12,
             "y": 0.55,
             "bpm": 123.0,
-            "energy": 0.343,
-            "shape": "bright"
+            "energy": 0.343
         },
         {
             "band": "afterglow",
@@ -782,8 +713,7 @@
             "x": 1.82,
             "y": 11.58,
             "bpm": 123.0,
-            "energy": 0.888,
-            "shape": "neutral"
+            "energy": 0.888
         },
         {
             "band": "afterglow",
@@ -792,8 +722,7 @@
             "x": 10.23,
             "y": 16.51,
             "bpm": 123.0,
-            "energy": 0.486,
-            "shape": "neutral"
+            "energy": 0.486
         },
         {
             "band": "afterglow",
@@ -802,8 +731,7 @@
             "x": 24.42,
             "y": -7.58,
             "bpm": 129.2,
-            "energy": 0.783,
-            "shape": "bright"
+            "energy": 0.783
         },
         {
             "band": "ave_mujica",
@@ -812,8 +740,7 @@
             "x": 5.81,
             "y": -33.02,
             "bpm": 136.0,
-            "energy": 0.613,
-            "shape": "acoustic"
+            "energy": 0.613
         },
         {
             "band": "ave_mujica",
@@ -822,8 +749,7 @@
             "x": -56.64,
             "y": -16.13,
             "bpm": 143.6,
-            "energy": 0.094,
-            "shape": "acoustic"
+            "energy": 0.094
         },
         {
             "band": "ave_mujica",
@@ -832,8 +758,7 @@
             "x": -70.0,
             "y": 21.99,
             "bpm": 107.7,
-            "energy": 0.011,
-            "shape": "neutral"
+            "energy": 0.011
         },
         {
             "band": "ave_mujica",
@@ -842,8 +767,7 @@
             "x": -12.31,
             "y": -1.34,
             "bpm": 103.4,
-            "energy": 0.352,
-            "shape": "neutral"
+            "energy": 0.352
         },
         {
             "band": "ave_mujica",
@@ -852,8 +776,7 @@
             "x": 25.64,
             "y": 18.09,
             "bpm": 112.3,
-            "energy": 0.674,
-            "shape": "bright"
+            "energy": 0.674
         },
         {
             "band": "ave_mujica",
@@ -862,8 +785,7 @@
             "x": 34.9,
             "y": -10.15,
             "bpm": 143.6,
-            "energy": 0.93,
-            "shape": "bright"
+            "energy": 0.93
         },
         {
             "band": "ave_mujica",
@@ -872,8 +794,7 @@
             "x": -6.15,
             "y": 46.21,
             "bpm": 129.2,
-            "energy": 0.88,
-            "shape": "acoustic"
+            "energy": 0.88
         },
         {
             "band": "ave_mujica",
@@ -882,8 +803,7 @@
             "x": 40.85,
             "y": -21.81,
             "bpm": 99.4,
-            "energy": 0.816,
-            "shape": "shimmer"
+            "energy": 0.816
         },
         {
             "band": "ave_mujica",
@@ -892,8 +812,7 @@
             "x": 31.33,
             "y": -27.72,
             "bpm": 117.5,
-            "energy": 0.669,
-            "shape": "acoustic"
+            "energy": 0.669
         },
         {
             "band": "ave_mujica",
@@ -902,8 +821,7 @@
             "x": 28.57,
             "y": -33.63,
             "bpm": 99.4,
-            "energy": 0.716,
-            "shape": "neutral"
+            "energy": 0.716
         },
         {
             "band": "ave_mujica",
@@ -912,8 +830,7 @@
             "x": 12.17,
             "y": -10.07,
             "bpm": 117.5,
-            "energy": 0.792,
-            "shape": "acoustic"
+            "energy": 0.792
         },
         {
             "band": "ave_mujica",
@@ -922,8 +839,7 @@
             "x": 38.16,
             "y": -10.68,
             "bpm": 95.7,
-            "energy": 0.871,
-            "shape": "neutral"
+            "energy": 0.871
         },
         {
             "band": "ave_mujica",
@@ -932,8 +848,7 @@
             "x": 41.18,
             "y": -37.69,
             "bpm": 112.3,
-            "energy": 0.003,
-            "shape": "neutral"
+            "energy": 0.003
         },
         {
             "band": "ave_mujica",
@@ -942,8 +857,7 @@
             "x": 21.11,
             "y": -8.35,
             "bpm": 117.5,
-            "energy": 0.982,
-            "shape": "acoustic"
+            "energy": 0.982
         },
         {
             "band": "ave_mujica",
@@ -952,8 +866,7 @@
             "x": 32.31,
             "y": -6.47,
             "bpm": 99.4,
-            "energy": 0.983,
-            "shape": "bright"
+            "energy": 0.983
         },
         {
             "band": "ave_mujica",
@@ -962,8 +875,7 @@
             "x": -70.0,
             "y": 11.99,
             "bpm": 95.7,
-            "energy": 0.097,
-            "shape": "acoustic"
+            "energy": 0.097
         },
         {
             "band": "ave_mujica",
@@ -972,8 +884,7 @@
             "x": -7.79,
             "y": 7.7,
             "bpm": 143.6,
-            "energy": 0.948,
-            "shape": "acoustic"
+            "energy": 0.948
         },
         {
             "band": "ave_mujica",
@@ -982,8 +893,7 @@
             "x": -10.78,
             "y": 8.37,
             "bpm": 123.0,
-            "energy": 0.95,
-            "shape": "acoustic"
+            "energy": 0.95
         },
         {
             "band": "ave_mujica",
@@ -992,8 +902,7 @@
             "x": 11.5,
             "y": 14.92,
             "bpm": 99.4,
-            "energy": 0.756,
-            "shape": "neutral"
+            "energy": 0.756
         },
         {
             "band": "ave_mujica",
@@ -1002,8 +911,7 @@
             "x": -48.77,
             "y": -32.7,
             "bpm": 143.6,
-            "energy": 0.313,
-            "shape": "acoustic"
+            "energy": 0.313
         },
         {
             "band": "ave_mujica",
@@ -1012,8 +920,7 @@
             "x": 3.33,
             "y": -3.82,
             "bpm": 136.0,
-            "energy": 0.812,
-            "shape": "neutral"
+            "energy": 0.812
         },
         {
             "band": "ave_mujica",
@@ -1022,8 +929,7 @@
             "x": -65.02,
             "y": -2.96,
             "bpm": 129.2,
-            "energy": 0.124,
-            "shape": "acoustic"
+            "energy": 0.124
         },
         {
             "band": "ave_mujica",
@@ -1032,8 +938,7 @@
             "x": 18.75,
             "y": 10.86,
             "bpm": 117.5,
-            "energy": 0.977,
-            "shape": "neutral"
+            "energy": 0.977
         },
         {
             "band": "ave_mujica",
@@ -1042,8 +947,7 @@
             "x": 6.29,
             "y": -13.13,
             "bpm": 136.0,
-            "energy": 0.255,
-            "shape": "acoustic"
+            "energy": 0.255
         },
         {
             "band": "ave_mujica",
@@ -1052,8 +956,7 @@
             "x": 27.65,
             "y": -16.99,
             "bpm": 107.7,
-            "energy": 0.98,
-            "shape": "acoustic"
+            "energy": 0.98
         },
         {
             "band": "ave_mujica",
@@ -1062,8 +965,7 @@
             "x": -49.27,
             "y": -32.67,
             "bpm": 143.6,
-            "energy": 0.083,
-            "shape": "acoustic"
+            "energy": 0.083
         },
         {
             "band": "ave_mujica",
@@ -1072,8 +974,7 @@
             "x": 24.04,
             "y": -1.18,
             "bpm": 103.4,
-            "energy": 0.903,
-            "shape": "neutral"
+            "energy": 0.903
         },
         {
             "band": "ave_mujica",
@@ -1082,8 +983,7 @@
             "x": -2.1,
             "y": -2.38,
             "bpm": 117.5,
-            "energy": 0.945,
-            "shape": "shimmer"
+            "energy": 0.945
         },
         {
             "band": "ave_mujica",
@@ -1092,8 +992,7 @@
             "x": 2.74,
             "y": -16.85,
             "bpm": 95.7,
-            "energy": 0.847,
-            "shape": "shimmer"
+            "energy": 0.847
         },
         {
             "band": "various_artists",
@@ -1102,8 +1001,7 @@
             "x": -20.56,
             "y": -3.91,
             "bpm": 123.0,
-            "energy": 0.329,
-            "shape": "acoustic"
+            "energy": 0.329
         },
         {
             "band": "various_artists",
@@ -1112,8 +1010,7 @@
             "x": -30.43,
             "y": 57.27,
             "bpm": 123.0,
-            "energy": 0.231,
-            "shape": "shimmer"
+            "energy": 0.231
         },
         {
             "band": "various_artists",
@@ -1122,8 +1019,7 @@
             "x": -25.13,
             "y": 61.16,
             "bpm": 117.5,
-            "energy": 0.17,
-            "shape": "neutral"
+            "energy": 0.17
         },
         {
             "band": "various_artists",
@@ -1132,8 +1028,7 @@
             "x": -46.52,
             "y": 51.69,
             "bpm": 123.0,
-            "energy": 0.791,
-            "shape": "shimmer"
+            "energy": 0.791
         },
         {
             "band": "various_artists",
@@ -1142,8 +1037,7 @@
             "x": 8.42,
             "y": 55.11,
             "bpm": 123.0,
-            "energy": 0.297,
-            "shape": "neutral"
+            "energy": 0.297
         },
         {
             "band": "hello_happy_world",
@@ -1152,8 +1046,7 @@
             "x": -43.11,
             "y": 49.14,
             "bpm": 123.0,
-            "energy": 0.249,
-            "shape": "neutral"
+            "energy": 0.249
         },
         {
             "band": "hello_happy_world",
@@ -1162,8 +1055,7 @@
             "x": -0.09,
             "y": 39.99,
             "bpm": 99.4,
-            "energy": 0.375,
-            "shape": "bright"
+            "energy": 0.375
         },
         {
             "band": "hello_happy_world",
@@ -1172,8 +1064,7 @@
             "x": -46.68,
             "y": -6.99,
             "bpm": 152.0,
-            "energy": 0.355,
-            "shape": "acoustic"
+            "energy": 0.355
         },
         {
             "band": "hello_happy_world",
@@ -1182,8 +1073,7 @@
             "x": -36.09,
             "y": 19.04,
             "bpm": 152.0,
-            "energy": 0.185,
-            "shape": "neutral"
+            "energy": 0.185
         },
         {
             "band": "hello_happy_world",
@@ -1192,8 +1082,7 @@
             "x": -5.14,
             "y": 13.01,
             "bpm": 112.3,
-            "energy": 0.156,
-            "shape": "shimmer"
+            "energy": 0.156
         },
         {
             "band": "hello_happy_world",
@@ -1202,8 +1091,7 @@
             "x": -0.04,
             "y": 1.11,
             "bpm": 129.2,
-            "energy": 0.572,
-            "shape": "neutral"
+            "energy": 0.572
         },
         {
             "band": "hello_happy_world",
@@ -1212,8 +1100,7 @@
             "x": -17.9,
             "y": 8.13,
             "bpm": 117.5,
-            "energy": 0.161,
-            "shape": "shimmer"
+            "energy": 0.161
         },
         {
             "band": "hello_happy_world",
@@ -1222,8 +1109,7 @@
             "x": -14.1,
             "y": -16.81,
             "bpm": 107.7,
-            "energy": 0.417,
-            "shape": "neutral"
+            "energy": 0.417
         },
         {
             "band": "hello_happy_world",
@@ -1232,8 +1118,7 @@
             "x": -4.37,
             "y": -12.77,
             "bpm": 117.5,
-            "energy": 0.243,
-            "shape": "neutral"
+            "energy": 0.243
         },
         {
             "band": "hello_happy_world",
@@ -1242,8 +1127,7 @@
             "x": -34.35,
             "y": 54.91,
             "bpm": 136.0,
-            "energy": 0.03,
-            "shape": "shimmer"
+            "energy": 0.03
         },
         {
             "band": "hello_happy_world",
@@ -1252,8 +1136,7 @@
             "x": -43.77,
             "y": 61.56,
             "bpm": 112.3,
-            "energy": 0.053,
-            "shape": "acoustic"
+            "energy": 0.053
         },
         {
             "band": "hello_happy_world",
@@ -1262,8 +1145,7 @@
             "x": -35.27,
             "y": 16.11,
             "bpm": 123.0,
-            "energy": 0.331,
-            "shape": "neutral"
+            "energy": 0.331
         },
         {
             "band": "hello_happy_world",
@@ -1272,8 +1154,7 @@
             "x": 6.84,
             "y": 41.83,
             "bpm": 117.5,
-            "energy": 0.622,
-            "shape": "shimmer"
+            "energy": 0.622
         },
         {
             "band": "hello_happy_world",
@@ -1282,8 +1163,7 @@
             "x": -28.02,
             "y": -20.13,
             "bpm": 129.2,
-            "energy": 0.077,
-            "shape": "shimmer"
+            "energy": 0.077
         },
         {
             "band": "hello_happy_world",
@@ -1292,8 +1172,7 @@
             "x": -16.07,
             "y": 54.34,
             "bpm": 129.2,
-            "energy": 0.452,
-            "shape": "acoustic"
+            "energy": 0.452
         },
         {
             "band": "hello_happy_world",
@@ -1302,8 +1181,7 @@
             "x": -12.22,
             "y": 30.61,
             "bpm": 117.5,
-            "energy": 0.422,
-            "shape": "neutral"
+            "energy": 0.422
         },
         {
             "band": "hello_happy_world",
@@ -1312,8 +1190,7 @@
             "x": -39.07,
             "y": 36.22,
             "bpm": 129.2,
-            "energy": 0.086,
-            "shape": "shimmer"
+            "energy": 0.086
         },
         {
             "band": "hello_happy_world",
@@ -1322,8 +1199,7 @@
             "x": -2.03,
             "y": 37.37,
             "bpm": 172.3,
-            "energy": 0.246,
-            "shape": "shimmer"
+            "energy": 0.246
         },
         {
             "band": "hello_happy_world",
@@ -1332,8 +1208,7 @@
             "x": 2.91,
             "y": -20.52,
             "bpm": 123.0,
-            "energy": 0.675,
-            "shape": "shimmer"
+            "energy": 0.675
         },
         {
             "band": "hello_happy_world",
@@ -1342,8 +1217,7 @@
             "x": -19.85,
             "y": 19.99,
             "bpm": 161.5,
-            "energy": 0.602,
-            "shape": "shimmer"
+            "energy": 0.602
         },
         {
             "band": "hello_happy_world",
@@ -1352,8 +1226,7 @@
             "x": -9.3,
             "y": 19.07,
             "bpm": 161.5,
-            "energy": 0.502,
-            "shape": "bright"
+            "energy": 0.502
         },
         {
             "band": "hello_happy_world",
@@ -1362,8 +1235,7 @@
             "x": -47.19,
             "y": 42.19,
             "bpm": 136.0,
-            "energy": 0.106,
-            "shape": "neutral"
+            "energy": 0.106
         },
         {
             "band": "hello_happy_world",
@@ -1372,8 +1244,7 @@
             "x": -32.64,
             "y": 53.17,
             "bpm": 92.3,
-            "energy": 0.499,
-            "shape": "bright"
+            "energy": 0.499
         },
         {
             "band": "hello_happy_world",
@@ -1382,8 +1253,7 @@
             "x": -1.89,
             "y": 12.49,
             "bpm": 136.0,
-            "energy": 0.354,
-            "shape": "shimmer"
+            "energy": 0.354
         },
         {
             "band": "hello_happy_world",
@@ -1392,8 +1262,7 @@
             "x": -17.86,
             "y": 7.68,
             "bpm": 129.2,
-            "energy": 0.542,
-            "shape": "neutral"
+            "energy": 0.542
         },
         {
             "band": "hello_happy_world",
@@ -1402,8 +1271,7 @@
             "x": -70.0,
             "y": 50.76,
             "bpm": 161.5,
-            "energy": 0.067,
-            "shape": "acoustic"
+            "energy": 0.067
         },
         {
             "band": "hello_happy_world",
@@ -1412,8 +1280,7 @@
             "x": -13.33,
             "y": 37.95,
             "bpm": 107.7,
-            "energy": 0.344,
-            "shape": "shimmer"
+            "energy": 0.344
         },
         {
             "band": "hello_happy_world",
@@ -1422,8 +1289,7 @@
             "x": 3.63,
             "y": -0.45,
             "bpm": 143.6,
-            "energy": 0.436,
-            "shape": "shimmer"
+            "energy": 0.436
         },
         {
             "band": "hello_happy_world",
@@ -1432,8 +1298,7 @@
             "x": -26.8,
             "y": 39.44,
             "bpm": 117.5,
-            "energy": 0.296,
-            "shape": "neutral"
+            "energy": 0.296
         },
         {
             "band": "hello_happy_world",
@@ -1442,8 +1307,7 @@
             "x": -14.44,
             "y": 40.47,
             "bpm": 161.5,
-            "energy": 0.349,
-            "shape": "neutral"
+            "energy": 0.349
         },
         {
             "band": "hello_happy_world",
@@ -1452,8 +1316,7 @@
             "x": -32.29,
             "y": 32.14,
             "bpm": 136.0,
-            "energy": 0.118,
-            "shape": "neutral"
+            "energy": 0.118
         },
         {
             "band": "hello_happy_world",
@@ -1462,8 +1325,7 @@
             "x": -47.28,
             "y": 36.57,
             "bpm": 143.6,
-            "energy": 0.046,
-            "shape": "shimmer"
+            "energy": 0.046
         },
         {
             "band": "hello_happy_world",
@@ -1472,8 +1334,7 @@
             "x": -14.05,
             "y": 42.18,
             "bpm": 143.6,
-            "energy": 0.111,
-            "shape": "neutral"
+            "energy": 0.111
         },
         {
             "band": "hello_happy_world",
@@ -1482,8 +1343,7 @@
             "x": -21.49,
             "y": 44.67,
             "bpm": 117.5,
-            "energy": 0.173,
-            "shape": "shimmer"
+            "energy": 0.173
         },
         {
             "band": "hello_happy_world",
@@ -1492,8 +1352,7 @@
             "x": 9.17,
             "y": 1.57,
             "bpm": 129.2,
-            "energy": 0.209,
-            "shape": "shimmer"
+            "energy": 0.209
         },
         {
             "band": "hello_happy_world",
@@ -1502,8 +1361,7 @@
             "x": -7.97,
             "y": 7.64,
             "bpm": 117.5,
-            "energy": 0.401,
-            "shape": "shimmer"
+            "energy": 0.401
         },
         {
             "band": "hello_happy_world",
@@ -1512,8 +1370,7 @@
             "x": -11.07,
             "y": 21.54,
             "bpm": 129.2,
-            "energy": 0.103,
-            "shape": "neutral"
+            "energy": 0.103
         },
         {
             "band": "hello_happy_world",
@@ -1522,8 +1379,7 @@
             "x": -27.06,
             "y": 21.45,
             "bpm": 161.5,
-            "energy": 0.707,
-            "shape": "shimmer"
+            "energy": 0.707
         },
         {
             "band": "hello_happy_world",
@@ -1532,8 +1388,7 @@
             "x": -31.02,
             "y": 2.58,
             "bpm": 136.0,
-            "energy": 0.228,
-            "shape": "neutral"
+            "energy": 0.228
         },
         {
             "band": "hello_happy_world",
@@ -1542,8 +1397,7 @@
             "x": -9.87,
             "y": 33.84,
             "bpm": 152.0,
-            "energy": 0.801,
-            "shape": "acoustic"
+            "energy": 0.801
         },
         {
             "band": "hello_happy_world",
@@ -1552,8 +1406,7 @@
             "x": 5.41,
             "y": 55.96,
             "bpm": 161.5,
-            "energy": 0.693,
-            "shape": "shimmer"
+            "energy": 0.693
         },
         {
             "band": "hello_happy_world",
@@ -1562,8 +1415,7 @@
             "x": 14.9,
             "y": -3.6,
             "bpm": 136.0,
-            "energy": 0.933,
-            "shape": "neutral"
+            "energy": 0.933
         },
         {
             "band": "hello_happy_world",
@@ -1572,8 +1424,7 @@
             "x": -18.44,
             "y": 45.56,
             "bpm": 112.3,
-            "energy": 0.657,
-            "shape": "shimmer"
+            "energy": 0.657
         },
         {
             "band": "hello_happy_world",
@@ -1582,8 +1433,7 @@
             "x": -30.25,
             "y": 2.75,
             "bpm": 129.2,
-            "energy": 0.687,
-            "shape": "acoustic"
+            "energy": 0.687
         },
         {
             "band": "hello_happy_world",
@@ -1592,8 +1442,7 @@
             "x": -35.49,
             "y": 0.63,
             "bpm": 112.3,
-            "energy": 0.628,
-            "shape": "acoustic"
+            "energy": 0.628
         },
         {
             "band": "hello_happy_world",
@@ -1602,8 +1451,7 @@
             "x": -39.52,
             "y": 37.62,
             "bpm": 143.6,
-            "energy": 0.07,
-            "shape": "shimmer"
+            "energy": 0.07
         },
         {
             "band": "hello_happy_world",
@@ -1612,8 +1460,7 @@
             "x": 5.72,
             "y": 9.33,
             "bpm": 129.2,
-            "energy": 0.071,
-            "shape": "neutral"
+            "energy": 0.071
         },
         {
             "band": "hello_happy_world",
@@ -1622,8 +1469,7 @@
             "x": -3.52,
             "y": 22.22,
             "bpm": 117.5,
-            "energy": 0.162,
-            "shape": "shimmer"
+            "energy": 0.162
         },
         {
             "band": "hello_happy_world",
@@ -1632,8 +1478,7 @@
             "x": 4.98,
             "y": -13.23,
             "bpm": 99.4,
-            "energy": 0.278,
-            "shape": "shimmer"
+            "energy": 0.278
         },
         {
             "band": "hello_happy_world",
@@ -1642,8 +1487,7 @@
             "x": -8.95,
             "y": -29.44,
             "bpm": 143.6,
-            "energy": 0.158,
-            "shape": "shimmer"
+            "energy": 0.158
         },
         {
             "band": "hello_happy_world",
@@ -1652,8 +1496,7 @@
             "x": -16.88,
             "y": 9.42,
             "bpm": 123.0,
-            "energy": 0.178,
-            "shape": "shimmer"
+            "energy": 0.178
         },
         {
             "band": "hello_happy_world",
@@ -1662,8 +1505,7 @@
             "x": -20.41,
             "y": 13.49,
             "bpm": 136.0,
-            "energy": 0.155,
-            "shape": "shimmer"
+            "energy": 0.155
         },
         {
             "band": "hello_happy_world",
@@ -1672,8 +1514,7 @@
             "x": -28.89,
             "y": 47.95,
             "bpm": 129.2,
-            "energy": 0.187,
-            "shape": "neutral"
+            "energy": 0.187
         },
         {
             "band": "hello_happy_world",
@@ -1682,8 +1523,7 @@
             "x": -15.44,
             "y": -5.15,
             "bpm": 143.6,
-            "energy": 0.215,
-            "shape": "shimmer"
+            "energy": 0.215
         },
         {
             "band": "hello_happy_world",
@@ -1692,8 +1532,7 @@
             "x": -38.7,
             "y": 24.08,
             "bpm": 161.5,
-            "energy": 0.558,
-            "shape": "neutral"
+            "energy": 0.558
         },
         {
             "band": "hello_happy_world",
@@ -1702,8 +1541,7 @@
             "x": -12.66,
             "y": 55.58,
             "bpm": 123.0,
-            "energy": 0.074,
-            "shape": "shimmer"
+            "energy": 0.074
         },
         {
             "band": "hello_happy_world",
@@ -1712,8 +1550,7 @@
             "x": 10.77,
             "y": -23.11,
             "bpm": 112.3,
-            "energy": 0.797,
-            "shape": "shimmer"
+            "energy": 0.797
         },
         {
             "band": "hello_happy_world",
@@ -1722,8 +1559,7 @@
             "x": -21.57,
             "y": 22.65,
             "bpm": 143.6,
-            "energy": 0.138,
-            "shape": "bright"
+            "energy": 0.138
         },
         {
             "band": "hello_happy_world",
@@ -1732,8 +1568,7 @@
             "x": -4.87,
             "y": -3.41,
             "bpm": 152.0,
-            "energy": 0.035,
-            "shape": "neutral"
+            "energy": 0.035
         },
         {
             "band": "hello_happy_world",
@@ -1742,8 +1577,7 @@
             "x": 1.27,
             "y": -24.07,
             "bpm": 143.6,
-            "energy": 0.108,
-            "shape": "shimmer"
+            "energy": 0.108
         },
         {
             "band": "hello_happy_world",
@@ -1752,8 +1586,7 @@
             "x": 16.71,
             "y": -26.64,
             "bpm": 107.7,
-            "energy": 0.091,
-            "shape": "shimmer"
+            "energy": 0.091
         },
         {
             "band": "hello_happy_world",
@@ -1762,8 +1595,7 @@
             "x": -9.13,
             "y": 2.95,
             "bpm": 136.0,
-            "energy": 0.15,
-            "shape": "shimmer"
+            "energy": 0.15
         },
         {
             "band": "hello_happy_world",
@@ -1772,8 +1604,7 @@
             "x": -15.94,
             "y": 15.54,
             "bpm": 136.0,
-            "energy": 0.275,
-            "shape": "neutral"
+            "energy": 0.275
         },
         {
             "band": "hello_happy_world",
@@ -1782,8 +1613,7 @@
             "x": 9.07,
             "y": -11.42,
             "bpm": 123.0,
-            "energy": 0.498,
-            "shape": "neutral"
+            "energy": 0.498
         },
         {
             "band": "hello_happy_world",
@@ -1792,8 +1622,7 @@
             "x": -10.41,
             "y": 12.77,
             "bpm": 123.0,
-            "energy": 0.014,
-            "shape": "shimmer"
+            "energy": 0.014
         },
         {
             "band": "hello_happy_world",
@@ -1802,8 +1631,7 @@
             "x": 2.48,
             "y": 20.14,
             "bpm": 112.3,
-            "energy": 0.63,
-            "shape": "shimmer"
+            "energy": 0.63
         },
         {
             "band": "hello_happy_world",
@@ -1812,8 +1640,7 @@
             "x": -10.38,
             "y": 41.63,
             "bpm": 112.3,
-            "energy": 0.398,
-            "shape": "acoustic"
+            "energy": 0.398
         },
         {
             "band": "hello_happy_world",
@@ -1822,8 +1649,7 @@
             "x": -22.75,
             "y": 5.86,
             "bpm": 152.0,
-            "energy": 0.114,
-            "shape": "shimmer"
+            "energy": 0.114
         },
         {
             "band": "hello_happy_world",
@@ -1832,8 +1658,7 @@
             "x": 16.54,
             "y": -7.72,
             "bpm": 152.0,
-            "energy": 0.513,
-            "shape": "shimmer"
+            "energy": 0.513
         },
         {
             "band": "hello_happy_world",
@@ -1842,8 +1667,7 @@
             "x": -16.21,
             "y": 22.34,
             "bpm": 161.5,
-            "energy": 0.569,
-            "shape": "shimmer"
+            "energy": 0.569
         },
         {
             "band": "hello_happy_world",
@@ -1852,8 +1676,7 @@
             "x": -33.57,
             "y": 51.52,
             "bpm": 112.3,
-            "energy": 0.143,
-            "shape": "shimmer"
+            "energy": 0.143
         },
         {
             "band": "hello_happy_world",
@@ -1862,8 +1685,7 @@
             "x": 3.2,
             "y": 11.39,
             "bpm": 92.3,
-            "energy": 0.645,
-            "shape": "bright"
+            "energy": 0.645
         },
         {
             "band": "ikka_dumb_rock",
@@ -1872,8 +1694,7 @@
             "x": 21.1,
             "y": 8.72,
             "bpm": 129.2,
-            "energy": 0.921,
-            "shape": "bright"
+            "energy": 0.921
         },
         {
             "band": "millsage",
@@ -1882,8 +1703,7 @@
             "x": -4.07,
             "y": -10.07,
             "bpm": 112.3,
-            "energy": 0.859,
-            "shape": "neutral"
+            "energy": 0.859
         },
         {
             "band": "morfonica",
@@ -1892,8 +1712,7 @@
             "x": 1.1,
             "y": -12.27,
             "bpm": 123.0,
-            "energy": 0.607,
-            "shape": "bright"
+            "energy": 0.607
         },
         {
             "band": "morfonica",
@@ -1902,8 +1721,7 @@
             "x": 8.23,
             "y": 14.26,
             "bpm": 123.0,
-            "energy": 0.741,
-            "shape": "acoustic"
+            "energy": 0.741
         },
         {
             "band": "morfonica",
@@ -1912,8 +1730,7 @@
             "x": -1.68,
             "y": 7.4,
             "bpm": 129.2,
-            "energy": 0.634,
-            "shape": "acoustic"
+            "energy": 0.634
         },
         {
             "band": "morfonica",
@@ -1922,8 +1739,7 @@
             "x": -0.26,
             "y": 2.35,
             "bpm": 123.0,
-            "energy": 0.598,
-            "shape": "neutral"
+            "energy": 0.598
         },
         {
             "band": "morfonica",
@@ -1932,8 +1748,7 @@
             "x": -14.8,
             "y": 18.27,
             "bpm": 92.3,
-            "energy": 0.511,
-            "shape": "acoustic"
+            "energy": 0.511
         },
         {
             "band": "morfonica",
@@ -1942,8 +1757,7 @@
             "x": -50.71,
             "y": 38.74,
             "bpm": 112.3,
-            "energy": 0.279,
-            "shape": "acoustic"
+            "energy": 0.279
         },
         {
             "band": "morfonica",
@@ -1952,8 +1766,7 @@
             "x": -23.96,
             "y": 5.91,
             "bpm": 117.5,
-            "energy": 0.53,
-            "shape": "acoustic"
+            "energy": 0.53
         },
         {
             "band": "morfonica",
@@ -1962,8 +1775,7 @@
             "x": -14.29,
             "y": 65.39,
             "bpm": 117.5,
-            "energy": 0.414,
-            "shape": "neutral"
+            "energy": 0.414
         },
         {
             "band": "morfonica",
@@ -1972,8 +1784,7 @@
             "x": -25.2,
             "y": 32.05,
             "bpm": 123.0,
-            "energy": 0.267,
-            "shape": "acoustic"
+            "energy": 0.267
         },
         {
             "band": "morfonica",
@@ -1982,8 +1793,7 @@
             "x": -60.54,
             "y": 35.67,
             "bpm": 112.3,
-            "energy": 0.571,
-            "shape": "acoustic"
+            "energy": 0.571
         },
         {
             "band": "morfonica",
@@ -1992,8 +1802,7 @@
             "x": -23.53,
             "y": 19.26,
             "bpm": 92.3,
-            "energy": 0.604,
-            "shape": "acoustic"
+            "energy": 0.604
         },
         {
             "band": "morfonica",
@@ -2002,8 +1811,7 @@
             "x": -23.89,
             "y": -4.26,
             "bpm": 103.4,
-            "energy": 0.75,
-            "shape": "acoustic"
+            "energy": 0.75
         },
         {
             "band": "morfonica",
@@ -2012,8 +1820,7 @@
             "x": -28.19,
             "y": -6.22,
             "bpm": 129.2,
-            "energy": 0.287,
-            "shape": "acoustic"
+            "energy": 0.287
         },
         {
             "band": "morfonica",
@@ -2022,8 +1829,7 @@
             "x": -24.47,
             "y": 43.68,
             "bpm": 152.0,
-            "energy": 0.42,
-            "shape": "bright"
+            "energy": 0.42
         },
         {
             "band": "morfonica",
@@ -2032,8 +1838,7 @@
             "x": -24.59,
             "y": 30.61,
             "bpm": 136.0,
-            "energy": 0.587,
-            "shape": "acoustic"
+            "energy": 0.587
         },
         {
             "band": "morfonica",
@@ -2042,8 +1847,7 @@
             "x": -16.66,
             "y": 37.94,
             "bpm": 143.6,
-            "energy": 0.536,
-            "shape": "bright"
+            "energy": 0.536
         },
         {
             "band": "morfonica",
@@ -2052,8 +1856,7 @@
             "x": -34.33,
             "y": 46.39,
             "bpm": 129.2,
-            "energy": 0.217,
-            "shape": "acoustic"
+            "energy": 0.217
         },
         {
             "band": "morfonica",
@@ -2062,8 +1865,7 @@
             "x": -8.75,
             "y": -9.79,
             "bpm": 117.5,
-            "energy": 0.895,
-            "shape": "acoustic"
+            "energy": 0.895
         },
         {
             "band": "morfonica",
@@ -2072,8 +1874,7 @@
             "x": -8.5,
             "y": 16.33,
             "bpm": 129.2,
-            "energy": 0.929,
-            "shape": "acoustic"
+            "energy": 0.929
         },
         {
             "band": "morfonica",
@@ -2082,8 +1883,7 @@
             "x": -39.94,
             "y": 21.66,
             "bpm": 129.2,
-            "energy": 0.519,
-            "shape": "acoustic"
+            "energy": 0.519
         },
         {
             "band": "morfonica",
@@ -2092,8 +1892,7 @@
             "x": -31.81,
             "y": 4.9,
             "bpm": 136.0,
-            "energy": 0.616,
-            "shape": "acoustic"
+            "energy": 0.616
         },
         {
             "band": "morfonica",
@@ -2102,8 +1901,7 @@
             "x": -55.48,
             "y": 34.98,
             "bpm": 129.2,
-            "energy": 0.261,
-            "shape": "acoustic"
+            "energy": 0.261
         },
         {
             "band": "morfonica",
@@ -2112,8 +1910,7 @@
             "x": -10.98,
             "y": 28.28,
             "bpm": 99.4,
-            "energy": 0.869,
-            "shape": "acoustic"
+            "energy": 0.869
         },
         {
             "band": "morfonica",
@@ -2122,8 +1919,7 @@
             "x": -33.19,
             "y": 63.44,
             "bpm": 89.1,
-            "energy": 0.663,
-            "shape": "acoustic"
+            "energy": 0.663
         },
         {
             "band": "morfonica",
@@ -2132,8 +1928,7 @@
             "x": -13.64,
             "y": 16.77,
             "bpm": 136.0,
-            "energy": 0.543,
-            "shape": "acoustic"
+            "energy": 0.543
         },
         {
             "band": "morfonica",
@@ -2142,8 +1937,7 @@
             "x": -9.56,
             "y": 5.49,
             "bpm": 129.2,
-            "energy": 0.821,
-            "shape": "acoustic"
+            "energy": 0.821
         },
         {
             "band": "morfonica",
@@ -2152,8 +1946,7 @@
             "x": -10.12,
             "y": -5.4,
             "bpm": 123.0,
-            "energy": 0.193,
-            "shape": "acoustic"
+            "energy": 0.193
         },
         {
             "band": "morfonica",
@@ -2162,8 +1955,7 @@
             "x": -10.96,
             "y": 18.21,
             "bpm": 117.5,
-            "energy": 0.059,
-            "shape": "bright"
+            "energy": 0.059
         },
         {
             "band": "morfonica",
@@ -2172,8 +1964,7 @@
             "x": -23.56,
             "y": 6.54,
             "bpm": 107.7,
-            "energy": 0.37,
-            "shape": "acoustic"
+            "energy": 0.37
         },
         {
             "band": "morfonica",
@@ -2182,8 +1973,7 @@
             "x": -4.83,
             "y": 17.57,
             "bpm": 136.0,
-            "energy": 0.842,
-            "shape": "neutral"
+            "energy": 0.842
         },
         {
             "band": "morfonica",
@@ -2192,8 +1982,7 @@
             "x": -10.29,
             "y": 3.53,
             "bpm": 117.5,
-            "energy": 0.936,
-            "shape": "acoustic"
+            "energy": 0.936
         },
         {
             "band": "morfonica",
@@ -2202,8 +1991,7 @@
             "x": -23.88,
             "y": 21.34,
             "bpm": 172.3,
-            "energy": 0.9,
-            "shape": "acoustic"
+            "energy": 0.9
         },
         {
             "band": "morfonica",
@@ -2212,8 +2000,7 @@
             "x": -0.14,
             "y": -5.9,
             "bpm": 99.4,
-            "energy": 0.827,
-            "shape": "neutral"
+            "energy": 0.827
         },
         {
             "band": "morfonica",
@@ -2222,8 +2009,7 @@
             "x": -6.88,
             "y": 51.64,
             "bpm": 136.0,
-            "energy": 0.672,
-            "shape": "acoustic"
+            "energy": 0.672
         },
         {
             "band": "morfonica",
@@ -2232,8 +2018,7 @@
             "x": -36.26,
             "y": 40.96,
             "bpm": 129.2,
-            "energy": 0.66,
-            "shape": "acoustic"
+            "energy": 0.66
         },
         {
             "band": "morfonica",
@@ -2242,8 +2027,7 @@
             "x": 22.21,
             "y": -8.14,
             "bpm": 129.2,
-            "energy": 0.754,
-            "shape": "bright"
+            "energy": 0.754
         },
         {
             "band": "morfonica",
@@ -2252,8 +2036,7 @@
             "x": -24.76,
             "y": 41.03,
             "bpm": 123.0,
-            "energy": 0.892,
-            "shape": "acoustic"
+            "energy": 0.892
         },
         {
             "band": "morfonica",
@@ -2262,8 +2045,7 @@
             "x": -37.21,
             "y": 27.7,
             "bpm": 123.0,
-            "energy": 0.654,
-            "shape": "acoustic"
+            "energy": 0.654
         },
         {
             "band": "morfonica",
@@ -2272,8 +2054,7 @@
             "x": -7.37,
             "y": 9.83,
             "bpm": 129.2,
-            "energy": 0.804,
-            "shape": "acoustic"
+            "energy": 0.804
         },
         {
             "band": "morfonica",
@@ -2282,8 +2063,7 @@
             "x": -8.83,
             "y": -15.67,
             "bpm": 112.3,
-            "energy": 0.856,
-            "shape": "acoustic"
+            "energy": 0.856
         },
         {
             "band": "morfonica",
@@ -2292,8 +2072,7 @@
             "x": -26.82,
             "y": 10.68,
             "bpm": 143.6,
-            "energy": 0.722,
-            "shape": "acoustic"
+            "energy": 0.722
         },
         {
             "band": "morfonica",
@@ -2302,8 +2081,7 @@
             "x": -20.59,
             "y": 2.43,
             "bpm": 129.2,
-            "energy": 0.753,
-            "shape": "acoustic"
+            "energy": 0.753
         },
         {
             "band": "morfonica",
@@ -2312,8 +2090,7 @@
             "x": -39.4,
             "y": 20.99,
             "bpm": 143.6,
-            "energy": 0.351,
-            "shape": "acoustic"
+            "energy": 0.351
         },
         {
             "band": "morfonica",
@@ -2322,8 +2099,7 @@
             "x": -35.9,
             "y": 0.86,
             "bpm": 112.3,
-            "energy": 0.56,
-            "shape": "acoustic"
+            "energy": 0.56
         },
         {
             "band": "morfonica",
@@ -2332,8 +2108,7 @@
             "x": -20.37,
             "y": 3.86,
             "bpm": 117.5,
-            "energy": 0.467,
-            "shape": "acoustic"
+            "energy": 0.467
         },
         {
             "band": "morfonica",
@@ -2342,8 +2117,7 @@
             "x": -8.87,
             "y": 31.1,
             "bpm": 89.1,
-            "energy": 0.889,
-            "shape": "acoustic"
+            "energy": 0.889
         },
         {
             "band": "morfonica",
@@ -2352,8 +2126,7 @@
             "x": -20.07,
             "y": 17.11,
             "bpm": 112.3,
-            "energy": 0.272,
-            "shape": "acoustic"
+            "energy": 0.272
         },
         {
             "band": "morfonica",
@@ -2362,8 +2135,7 @@
             "x": -30.33,
             "y": 4.44,
             "bpm": 117.5,
-            "energy": 0.815,
-            "shape": "acoustic"
+            "energy": 0.815
         },
         {
             "band": "morfonica",
@@ -2372,8 +2144,7 @@
             "x": -25.03,
             "y": -11.88,
             "bpm": 129.2,
-            "energy": 0.725,
-            "shape": "acoustic"
+            "energy": 0.725
         },
         {
             "band": "morfonica",
@@ -2382,8 +2153,7 @@
             "x": -23.46,
             "y": -12.09,
             "bpm": 136.0,
-            "energy": 0.857,
-            "shape": "acoustic"
+            "energy": 0.857
         },
         {
             "band": "morfonica",
@@ -2392,8 +2162,7 @@
             "x": -9.25,
             "y": -9.38,
             "bpm": 103.4,
-            "energy": 0.171,
-            "shape": "acoustic"
+            "energy": 0.171
         },
         {
             "band": "morfonica",
@@ -2402,8 +2171,7 @@
             "x": -31.31,
             "y": 13.07,
             "bpm": 112.3,
-            "energy": 0.446,
-            "shape": "acoustic"
+            "energy": 0.446
         },
         {
             "band": "morfonica",
@@ -2412,8 +2180,7 @@
             "x": -33.76,
             "y": 25.34,
             "bpm": 161.5,
-            "energy": 0.546,
-            "shape": "acoustic"
+            "energy": 0.546
         },
         {
             "band": "morfonica",
@@ -2422,8 +2189,7 @@
             "x": -25.71,
             "y": 38.27,
             "bpm": 136.0,
-            "energy": 0.102,
-            "shape": "acoustic"
+            "energy": 0.102
         },
         {
             "band": "morfonica",
@@ -2432,8 +2198,7 @@
             "x": -28.53,
             "y": 6.9,
             "bpm": 117.5,
-            "energy": 0.481,
-            "shape": "acoustic"
+            "energy": 0.481
         },
         {
             "band": "morfonica",
@@ -2442,8 +2207,7 @@
             "x": -18.76,
             "y": 23.63,
             "bpm": 123.0,
-            "energy": 0.769,
-            "shape": "acoustic"
+            "energy": 0.769
         },
         {
             "band": "morfonica",
@@ -2452,8 +2216,7 @@
             "x": 4.85,
             "y": -1.12,
             "bpm": 143.6,
-            "energy": 0.442,
-            "shape": "acoustic"
+            "energy": 0.442
         },
         {
             "band": "mugendai_mutype",
@@ -2462,8 +2225,7 @@
             "x": 17.61,
             "y": 21.55,
             "bpm": 117.5,
-            "energy": 0.346,
-            "shape": "shimmer"
+            "energy": 0.346
         },
         {
             "band": "mugendai_mutype",
@@ -2472,8 +2234,7 @@
             "x": 19.29,
             "y": -8.97,
             "bpm": 129.2,
-            "energy": 0.862,
-            "shape": "shimmer"
+            "energy": 0.862
         },
         {
             "band": "mugendai_mutype",
@@ -2482,8 +2243,7 @@
             "x": -3.85,
             "y": 21.86,
             "bpm": 152.0,
-            "energy": 0.299,
-            "shape": "shimmer"
+            "energy": 0.299
         },
         {
             "band": "mugendai_mutype",
@@ -2492,8 +2252,7 @@
             "x": -8.86,
             "y": 32.96,
             "bpm": 99.4,
-            "energy": 0.109,
-            "shape": "acoustic"
+            "energy": 0.109
         },
         {
             "band": "mugendai_mutype",
@@ -2502,8 +2261,7 @@
             "x": -17.75,
             "y": -20.6,
             "bpm": 103.4,
-            "energy": 0.774,
-            "shape": "neutral"
+            "energy": 0.774
         },
         {
             "band": "mugendai_mutype",
@@ -2512,8 +2270,7 @@
             "x": -36.48,
             "y": 35.52,
             "bpm": 117.5,
-            "energy": 0.033,
-            "shape": "shimmer"
+            "energy": 0.033
         },
         {
             "band": "mugendai_mutype",
@@ -2522,8 +2279,7 @@
             "x": 24.64,
             "y": 13.56,
             "bpm": 117.5,
-            "energy": 0.137,
-            "shape": "shimmer"
+            "energy": 0.137
         },
         {
             "band": "mugendai_mutype",
@@ -2532,8 +2288,7 @@
             "x": 44.85,
             "y": -18.37,
             "bpm": 129.2,
-            "energy": 0.392,
-            "shape": "bright"
+            "energy": 0.392
         },
         {
             "band": "mugendai_mutype",
@@ -2542,8 +2297,7 @@
             "x": -41.47,
             "y": 5.19,
             "bpm": 89.1,
-            "energy": 0.018,
-            "shape": "shimmer"
+            "energy": 0.018
         },
         {
             "band": "mugendai_mutype",
@@ -2552,8 +2306,7 @@
             "x": -3.48,
             "y": 45.74,
             "bpm": 117.5,
-            "energy": 0.009,
-            "shape": "shimmer"
+            "energy": 0.009
         },
         {
             "band": "mugendai_mutype",
@@ -2562,8 +2315,7 @@
             "x": 38.1,
             "y": -33.69,
             "bpm": 117.5,
-            "energy": 0.335,
-            "shape": "bright"
+            "energy": 0.335
         },
         {
             "band": "mugendai_mutype",
@@ -2572,8 +2324,7 @@
             "x": 37.65,
             "y": 0.48,
             "bpm": 99.4,
-            "energy": 0.288,
-            "shape": "bright"
+            "energy": 0.288
         },
         {
             "band": "mugendai_mutype",
@@ -2582,8 +2333,7 @@
             "x": 51.97,
             "y": -21.15,
             "bpm": 117.5,
-            "energy": 0.865,
-            "shape": "neutral"
+            "energy": 0.865
         },
         {
             "band": "mugendai_mutype",
@@ -2592,8 +2342,7 @@
             "x": 32.07,
             "y": 3.18,
             "bpm": 103.4,
-            "energy": 0.093,
-            "shape": "shimmer"
+            "energy": 0.093
         },
         {
             "band": "mugendai_mutype",
@@ -2602,8 +2351,7 @@
             "x": 15.97,
             "y": 58.71,
             "bpm": 99.4,
-            "energy": 0.039,
-            "shape": "acoustic"
+            "energy": 0.039
         },
         {
             "band": "mugendai_mutype",
@@ -2612,8 +2360,7 @@
             "x": 25.79,
             "y": 3.01,
             "bpm": 99.4,
-            "energy": 0.385,
-            "shape": "neutral"
+            "energy": 0.385
         },
         {
             "band": "mugendai_mutype",
@@ -2622,8 +2369,7 @@
             "x": 26.93,
             "y": -26.25,
             "bpm": 123.0,
-            "energy": 0.047,
-            "shape": "shimmer"
+            "energy": 0.047
         },
         {
             "band": "mugendai_mutype",
@@ -2632,8 +2378,7 @@
             "x": 22.75,
             "y": 42.95,
             "bpm": 95.7,
-            "energy": 0.256,
-            "shape": "bright"
+            "energy": 0.256
         },
         {
             "band": "mugendai_mutype",
@@ -2642,8 +2387,7 @@
             "x": 56.74,
             "y": 13.1,
             "bpm": 143.6,
-            "energy": 0.578,
-            "shape": "shimmer"
+            "energy": 0.578
         },
         {
             "band": "mugendai_mutype",
@@ -2652,8 +2396,7 @@
             "x": 39.03,
             "y": -10.97,
             "bpm": 129.2,
-            "energy": 0.941,
-            "shape": "neutral"
+            "energy": 0.941
         },
         {
             "band": "mugendai_mutype",
@@ -2662,8 +2405,7 @@
             "x": 53.21,
             "y": -1.75,
             "bpm": 143.6,
-            "energy": 0.527,
-            "shape": "bright"
+            "energy": 0.527
         },
         {
             "band": "mugendai_mutype",
@@ -2672,8 +2414,7 @@
             "x": 39.38,
             "y": -28.37,
             "bpm": 136.0,
-            "energy": 0.458,
-            "shape": "bright"
+            "energy": 0.458
         },
         {
             "band": "mugendai_mutype",
@@ -2682,8 +2423,7 @@
             "x": 41.71,
             "y": 19.36,
             "bpm": 129.2,
-            "energy": 0.78,
-            "shape": "shimmer"
+            "energy": 0.78
         },
         {
             "band": "mygo",
@@ -2692,8 +2432,7 @@
             "x": 5.21,
             "y": 34.94,
             "bpm": 129.2,
-            "energy": 0.944,
-            "shape": "neutral"
+            "energy": 0.944
         },
         {
             "band": "mygo",
@@ -2702,8 +2441,7 @@
             "x": 32.23,
             "y": 13.47,
             "bpm": 103.4,
-            "energy": 0.974,
-            "shape": "neutral"
+            "energy": 0.974
         },
         {
             "band": "mygo",
@@ -2712,8 +2450,7 @@
             "x": 23.56,
             "y": 16.21,
             "bpm": 129.2,
-            "energy": 0.973,
-            "shape": "acoustic"
+            "energy": 0.973
         },
         {
             "band": "mygo",
@@ -2722,8 +2459,7 @@
             "x": 13.59,
             "y": -13.25,
             "bpm": 112.3,
-            "energy": 0.879,
-            "shape": "shimmer"
+            "energy": 0.879
         },
         {
             "band": "mygo",
@@ -2732,8 +2468,7 @@
             "x": 34.54,
             "y": -6.0,
             "bpm": 112.3,
-            "energy": 0.942,
-            "shape": "bright"
+            "energy": 0.942
         },
         {
             "band": "mygo",
@@ -2742,8 +2477,7 @@
             "x": 3.35,
             "y": -10.63,
             "bpm": 136.0,
-            "energy": 0.584,
-            "shape": "neutral"
+            "energy": 0.584
         },
         {
             "band": "mygo",
@@ -2752,8 +2486,7 @@
             "x": 20.0,
             "y": 9.22,
             "bpm": 136.0,
-            "energy": 0.968,
-            "shape": "bright"
+            "energy": 0.968
         },
         {
             "band": "mygo",
@@ -2762,8 +2495,7 @@
             "x": -30.87,
             "y": 63.78,
             "bpm": 99.4,
-            "energy": 0.923,
-            "shape": "acoustic"
+            "energy": 0.923
         },
         {
             "band": "mygo",
@@ -2772,8 +2504,7 @@
             "x": -6.63,
             "y": 59.26,
             "bpm": 112.3,
-            "energy": 0.76,
-            "shape": "acoustic"
+            "energy": 0.76
         },
         {
             "band": "mygo",
@@ -2782,8 +2513,7 @@
             "x": 14.16,
             "y": 8.89,
             "bpm": 129.2,
-            "energy": 0.976,
-            "shape": "acoustic"
+            "energy": 0.976
         },
         {
             "band": "mygo",
@@ -2792,8 +2522,7 @@
             "x": -10.69,
             "y": -13.52,
             "bpm": 117.5,
-            "energy": 0.995,
-            "shape": "acoustic"
+            "energy": 0.995
         },
         {
             "band": "mygo",
@@ -2802,8 +2531,7 @@
             "x": 14.38,
             "y": 16.29,
             "bpm": 129.2,
-            "energy": 0.954,
-            "shape": "acoustic"
+            "energy": 0.954
         },
         {
             "band": "mygo",
@@ -2812,8 +2540,7 @@
             "x": -50.41,
             "y": 58.06,
             "bpm": 89.1,
-            "energy": 0.907,
-            "shape": "acoustic"
+            "energy": 0.907
         },
         {
             "band": "mygo",
@@ -2822,8 +2549,7 @@
             "x": 4.63,
             "y": -20.23,
             "bpm": 129.2,
-            "energy": 0.967,
-            "shape": "acoustic"
+            "energy": 0.967
         },
         {
             "band": "mygo",
@@ -2832,8 +2558,7 @@
             "x": 15.12,
             "y": 13.22,
             "bpm": 123.0,
-            "energy": 0.997,
-            "shape": "acoustic"
+            "energy": 0.997
         },
         {
             "band": "mygo",
@@ -2842,8 +2567,7 @@
             "x": 34.66,
             "y": -25.2,
             "bpm": 123.0,
-            "energy": 0.985,
-            "shape": "acoustic"
+            "energy": 0.985
         },
         {
             "band": "mygo",
@@ -2852,8 +2576,7 @@
             "x": 26.02,
             "y": -8.38,
             "bpm": 112.3,
-            "energy": 0.991,
-            "shape": "neutral"
+            "energy": 0.991
         },
         {
             "band": "mygo",
@@ -2862,8 +2585,7 @@
             "x": 20.28,
             "y": 0.87,
             "bpm": 123.0,
-            "energy": 0.986,
-            "shape": "acoustic"
+            "energy": 0.986
         },
         {
             "band": "mygo",
@@ -2872,8 +2594,7 @@
             "x": 14.57,
             "y": 1.28,
             "bpm": 129.2,
-            "energy": 1.0,
-            "shape": "acoustic"
+            "energy": 1.0
         },
         {
             "band": "mygo",
@@ -2882,8 +2603,7 @@
             "x": 2.79,
             "y": 3.15,
             "bpm": 103.4,
-            "energy": 0.998,
-            "shape": "acoustic"
+            "energy": 0.998
         },
         {
             "band": "mygo",
@@ -2892,8 +2612,7 @@
             "x": 5.67,
             "y": 36.12,
             "bpm": 112.3,
-            "energy": 0.961,
-            "shape": "acoustic"
+            "energy": 0.961
         },
         {
             "band": "mygo",
@@ -2902,8 +2621,7 @@
             "x": -70.0,
             "y": 53.23,
             "bpm": 112.3,
-            "energy": 0.419,
-            "shape": "acoustic"
+            "energy": 0.419
         },
         {
             "band": "mygo",
@@ -2912,8 +2630,7 @@
             "x": 17.57,
             "y": 11.28,
             "bpm": 129.2,
-            "energy": 0.951,
-            "shape": "acoustic"
+            "energy": 0.951
         },
         {
             "band": "mygo",
@@ -2922,8 +2639,7 @@
             "x": 35.79,
             "y": -16.71,
             "bpm": 123.0,
-            "energy": 0.962,
-            "shape": "neutral"
+            "energy": 0.962
         },
         {
             "band": "mygo",
@@ -2932,8 +2648,7 @@
             "x": 32.88,
             "y": 11.03,
             "bpm": 129.2,
-            "energy": 0.988,
-            "shape": "neutral"
+            "energy": 0.988
         },
         {
             "band": "mygo",
@@ -2942,8 +2657,7 @@
             "x": 16.64,
             "y": 26.96,
             "bpm": 117.5,
-            "energy": 0.971,
-            "shape": "acoustic"
+            "energy": 0.971
         },
         {
             "band": "mygo",
@@ -2952,8 +2666,7 @@
             "x": 20.31,
             "y": 35.53,
             "bpm": 123.0,
-            "energy": 0.958,
-            "shape": "acoustic"
+            "energy": 0.958
         },
         {
             "band": "mygo",
@@ -2962,8 +2675,7 @@
             "x": 30.24,
             "y": -2.29,
             "bpm": 103.4,
-            "energy": 0.965,
-            "shape": "neutral"
+            "energy": 0.965
         },
         {
             "band": "mygo",
@@ -2972,8 +2684,7 @@
             "x": -57.21,
             "y": 38.67,
             "bpm": 89.1,
-            "energy": 0.81,
-            "shape": "acoustic"
+            "energy": 0.81
         },
         {
             "band": "mygo",
@@ -2982,8 +2693,7 @@
             "x": -2.66,
             "y": 35.86,
             "bpm": 95.7,
-            "energy": 0.918,
-            "shape": "acoustic"
+            "energy": 0.918
         },
         {
             "band": "mygo",
@@ -2992,8 +2702,7 @@
             "x": 9.63,
             "y": 41.69,
             "bpm": 123.0,
-            "energy": 0.979,
-            "shape": "acoustic"
+            "energy": 0.979
         },
         {
             "band": "mygo",
@@ -3002,8 +2711,7 @@
             "x": 27.98,
             "y": 21.81,
             "bpm": 117.5,
-            "energy": 0.994,
-            "shape": "neutral"
+            "energy": 0.994
         },
         {
             "band": "mygo",
@@ -3012,8 +2720,7 @@
             "x": 4.86,
             "y": 10.19,
             "bpm": 143.6,
-            "energy": 0.463,
-            "shape": "neutral"
+            "energy": 0.463
         },
         {
             "band": "mygo",
@@ -3022,8 +2729,7 @@
             "x": -0.65,
             "y": 29.99,
             "bpm": 117.5,
-            "energy": 0.719,
-            "shape": "acoustic"
+            "energy": 0.719
         },
         {
             "band": "mygo",
@@ -3032,8 +2738,7 @@
             "x": 16.15,
             "y": -35.89,
             "bpm": 112.3,
-            "energy": 0.666,
-            "shape": "shimmer"
+            "energy": 0.666
         },
         {
             "band": "mygo",
@@ -3042,8 +2747,7 @@
             "x": 16.02,
             "y": 39.23,
             "bpm": 123.0,
-            "energy": 0.947,
-            "shape": "neutral"
+            "energy": 0.947
         },
         {
             "band": "mygo",
@@ -3052,8 +2756,7 @@
             "x": 30.89,
             "y": 4.18,
             "bpm": 99.4,
-            "energy": 0.97,
-            "shape": "acoustic"
+            "energy": 0.97
         },
         {
             "band": "mygo",
@@ -3062,8 +2765,7 @@
             "x": -1.97,
             "y": 18.71,
             "bpm": 143.6,
-            "energy": 0.765,
-            "shape": "shimmer"
+            "energy": 0.765
         },
         {
             "band": "mygo",
@@ -3072,8 +2774,7 @@
             "x": 22.1,
             "y": 19.82,
             "bpm": 129.2,
-            "energy": 0.992,
-            "shape": "acoustic"
+            "energy": 0.992
         },
         {
             "band": "mygo",
@@ -3082,8 +2783,7 @@
             "x": 12.6,
             "y": 13.74,
             "bpm": 152.0,
-            "energy": 0.989,
-            "shape": "acoustic"
+            "energy": 0.989
         },
         {
             "band": "mygo",
@@ -3092,8 +2792,7 @@
             "x": -43.78,
             "y": 63.03,
             "bpm": 95.7,
-            "energy": 0.0,
-            "shape": "acoustic"
+            "energy": 0.0
         },
         {
             "band": "pastel_palettes",
@@ -3102,8 +2801,7 @@
             "x": -24.32,
             "y": 13.72,
             "bpm": 143.6,
-            "energy": 0.369,
-            "shape": "neutral"
+            "energy": 0.369
         },
         {
             "band": "pastel_palettes",
@@ -3112,8 +2810,7 @@
             "x": 10.04,
             "y": 12.79,
             "bpm": 136.0,
-            "energy": 0.211,
-            "shape": "neutral"
+            "energy": 0.211
         },
         {
             "band": "pastel_palettes",
@@ -3122,8 +2819,7 @@
             "x": -3.99,
             "y": 13.87,
             "bpm": 112.3,
-            "energy": 0.061,
-            "shape": "bright"
+            "energy": 0.061
         },
         {
             "band": "pastel_palettes",
@@ -3132,8 +2828,7 @@
             "x": -3.73,
             "y": 28.48,
             "bpm": 112.3,
-            "energy": 0.326,
-            "shape": "acoustic"
+            "energy": 0.326
         },
         {
             "band": "pastel_palettes",
@@ -3142,8 +2837,7 @@
             "x": -3.62,
             "y": 28.7,
             "bpm": 112.3,
-            "energy": 0.564,
-            "shape": "neutral"
+            "energy": 0.564
         },
         {
             "band": "pastel_palettes",
@@ -3152,8 +2846,7 @@
             "x": 11.95,
             "y": 14.96,
             "bpm": 152.0,
-            "energy": 0.311,
-            "shape": "bright"
+            "energy": 0.311
         },
         {
             "band": "pastel_palettes",
@@ -3162,8 +2855,7 @@
             "x": -4.74,
             "y": 19.43,
             "bpm": 117.5,
-            "energy": 0.065,
-            "shape": "bright"
+            "energy": 0.065
         },
         {
             "band": "pastel_palettes",
@@ -3172,8 +2864,7 @@
             "x": -21.68,
             "y": -7.28,
             "bpm": 117.5,
-            "energy": 0.405,
-            "shape": "bright"
+            "energy": 0.405
         },
         {
             "band": "pastel_palettes",
@@ -3182,8 +2873,7 @@
             "x": -3.4,
             "y": 4.83,
             "bpm": 123.0,
-            "energy": 0.404,
-            "shape": "bright"
+            "energy": 0.404
         },
         {
             "band": "pastel_palettes",
@@ -3192,8 +2882,7 @@
             "x": -30.25,
             "y": 51.69,
             "bpm": 99.4,
-            "energy": 0.09,
-            "shape": "acoustic"
+            "energy": 0.09
         },
         {
             "band": "pastel_palettes",
@@ -3202,8 +2891,7 @@
             "x": -10.2,
             "y": 33.66,
             "bpm": 136.0,
-            "energy": 0.238,
-            "shape": "neutral"
+            "energy": 0.238
         },
         {
             "band": "pastel_palettes",
@@ -3212,8 +2900,7 @@
             "x": -29.38,
             "y": -28.16,
             "bpm": 112.3,
-            "energy": 0.241,
-            "shape": "neutral"
+            "energy": 0.241
         },
         {
             "band": "pastel_palettes",
@@ -3222,8 +2909,7 @@
             "x": -6.73,
             "y": -4.76,
             "bpm": 117.5,
-            "energy": 0.555,
-            "shape": "acoustic"
+            "energy": 0.555
         },
         {
             "band": "pastel_palettes",
@@ -3232,8 +2918,7 @@
             "x": 13.56,
             "y": -3.62,
             "bpm": 99.4,
-            "energy": 0.608,
-            "shape": "bright"
+            "energy": 0.608
         },
         {
             "band": "pastel_palettes",
@@ -3242,8 +2927,7 @@
             "x": 8.55,
             "y": -11.38,
             "bpm": 136.0,
-            "energy": 0.36,
-            "shape": "bright"
+            "energy": 0.36
         },
         {
             "band": "pastel_palettes",
@@ -3252,8 +2936,7 @@
             "x": 1.32,
             "y": 21.36,
             "bpm": 117.5,
-            "energy": 0.208,
-            "shape": "shimmer"
+            "energy": 0.208
         },
         {
             "band": "pastel_palettes",
@@ -3262,8 +2945,7 @@
             "x": 12.89,
             "y": 52.6,
             "bpm": 112.3,
-            "energy": 0.29,
-            "shape": "bright"
+            "energy": 0.29
         },
         {
             "band": "pastel_palettes",
@@ -3272,8 +2954,7 @@
             "x": 16.18,
             "y": 5.38,
             "bpm": 112.3,
-            "energy": 0.633,
-            "shape": "bright"
+            "energy": 0.633
         },
         {
             "band": "pastel_palettes",
@@ -3282,8 +2963,7 @@
             "x": 15.98,
             "y": 11.88,
             "bpm": 161.5,
-            "energy": 0.781,
-            "shape": "bright"
+            "energy": 0.781
         },
         {
             "band": "pastel_palettes",
@@ -3292,8 +2972,7 @@
             "x": 33.32,
             "y": -23.96,
             "bpm": 112.3,
-            "energy": 0.411,
-            "shape": "shimmer"
+            "energy": 0.411
         },
         {
             "band": "pastel_palettes",
@@ -3302,8 +2981,7 @@
             "x": 11.26,
             "y": 45.26,
             "bpm": 112.3,
-            "energy": 0.281,
-            "shape": "bright"
+            "energy": 0.281
         },
         {
             "band": "pastel_palettes",
@@ -3312,8 +2990,7 @@
             "x": -9.85,
             "y": 29.69,
             "bpm": 95.7,
-            "energy": 0.554,
-            "shape": "neutral"
+            "energy": 0.554
         },
         {
             "band": "pastel_palettes",
@@ -3322,8 +2999,7 @@
             "x": -16.8,
             "y": 0.2,
             "bpm": 143.6,
-            "energy": 0.205,
-            "shape": "bright"
+            "energy": 0.205
         },
         {
             "band": "pastel_palettes",
@@ -3332,8 +3008,7 @@
             "x": -38.9,
             "y": 45.91,
             "bpm": 95.7,
-            "energy": 0.12,
-            "shape": "acoustic"
+            "energy": 0.12
         },
         {
             "band": "pastel_palettes",
@@ -3342,8 +3017,7 @@
             "x": -11.93,
             "y": 26.09,
             "bpm": 172.3,
-            "energy": 0.52,
-            "shape": "bright"
+            "energy": 0.52
         },
         {
             "band": "pastel_palettes",
@@ -3352,8 +3026,7 @@
             "x": -12.88,
             "y": 36.55,
             "bpm": 112.3,
-            "energy": 0.439,
-            "shape": "acoustic"
+            "energy": 0.439
         },
         {
             "band": "pastel_palettes",
@@ -3362,8 +3035,7 @@
             "x": 13.86,
             "y": 22.23,
             "bpm": 112.3,
-            "energy": 0.621,
-            "shape": "bright"
+            "energy": 0.621
         },
         {
             "band": "pastel_palettes",
@@ -3372,8 +3044,7 @@
             "x": -24.96,
             "y": 14.72,
             "bpm": 117.5,
-            "energy": 0.08,
-            "shape": "shimmer"
+            "energy": 0.08
         },
         {
             "band": "pastel_palettes",
@@ -3382,8 +3053,7 @@
             "x": 17.78,
             "y": -2.83,
             "bpm": 152.0,
-            "energy": 0.531,
-            "shape": "shimmer"
+            "energy": 0.531
         },
         {
             "band": "pastel_palettes",
@@ -3392,8 +3062,7 @@
             "x": -7.77,
             "y": 3.63,
             "bpm": 143.6,
-            "energy": 0.188,
-            "shape": "neutral"
+            "energy": 0.188
         },
         {
             "band": "pastel_palettes",
@@ -3402,8 +3071,7 @@
             "x": -24.3,
             "y": 13.7,
             "bpm": 117.5,
-            "energy": 0.627,
-            "shape": "bright"
+            "energy": 0.627
         },
         {
             "band": "pastel_palettes",
@@ -3412,8 +3080,7 @@
             "x": 19.71,
             "y": 50.11,
             "bpm": 112.3,
-            "energy": 0.437,
-            "shape": "bright"
+            "energy": 0.437
         },
         {
             "band": "pastel_palettes",
@@ -3422,8 +3089,7 @@
             "x": -54.79,
             "y": 46.14,
             "bpm": 143.6,
-            "energy": 0.194,
-            "shape": "acoustic"
+            "energy": 0.194
         },
         {
             "band": "pastel_palettes",
@@ -3432,8 +3098,7 @@
             "x": 15.05,
             "y": 31.35,
             "bpm": 123.0,
-            "energy": 0.534,
-            "shape": "bright"
+            "energy": 0.534
         },
         {
             "band": "pastel_palettes",
@@ -3442,8 +3107,7 @@
             "x": 10.99,
             "y": 3.89,
             "bpm": 117.5,
-            "energy": 0.863,
-            "shape": "acoustic"
+            "energy": 0.863
         },
         {
             "band": "pastel_palettes",
@@ -3452,8 +3116,7 @@
             "x": 12.38,
             "y": -36.66,
             "bpm": 123.0,
-            "energy": 0.619,
-            "shape": "shimmer"
+            "energy": 0.619
         },
         {
             "band": "pastel_palettes",
@@ -3462,8 +3125,7 @@
             "x": 27.09,
             "y": -12.8,
             "bpm": 129.2,
-            "energy": 0.269,
-            "shape": "neutral"
+            "energy": 0.269
         },
         {
             "band": "pastel_palettes",
@@ -3472,8 +3134,7 @@
             "x": -21.43,
             "y": 24.59,
             "bpm": 123.0,
-            "energy": 0.748,
-            "shape": "acoustic"
+            "energy": 0.748
         },
         {
             "band": "pastel_palettes",
@@ -3482,8 +3143,7 @@
             "x": -43.34,
             "y": 42.71,
             "bpm": 136.0,
-            "energy": 0.727,
-            "shape": "acoustic"
+            "energy": 0.727
         },
         {
             "band": "pastel_palettes",
@@ -3492,8 +3152,7 @@
             "x": -14.39,
             "y": 22.18,
             "bpm": 92.3,
-            "energy": 0.516,
-            "shape": "neutral"
+            "energy": 0.516
         },
         {
             "band": "pastel_palettes",
@@ -3502,8 +3161,7 @@
             "x": -9.9,
             "y": 17.09,
             "bpm": 143.6,
-            "energy": 0.819,
-            "shape": "acoustic"
+            "energy": 0.819
         },
         {
             "band": "pastel_palettes",
@@ -3512,8 +3170,7 @@
             "x": -18.59,
             "y": 12.51,
             "bpm": 136.0,
-            "energy": 0.533,
-            "shape": "neutral"
+            "energy": 0.533
         },
         {
             "band": "pastel_palettes",
@@ -3522,8 +3179,7 @@
             "x": -25.15,
             "y": -20.17,
             "bpm": 136.0,
-            "energy": 0.303,
-            "shape": "acoustic"
+            "energy": 0.303
         },
         {
             "band": "pastel_palettes",
@@ -3532,8 +3188,7 @@
             "x": -8.67,
             "y": -14.18,
             "bpm": 103.4,
-            "energy": 0.689,
-            "shape": "neutral"
+            "energy": 0.689
         },
         {
             "band": "pastel_palettes",
@@ -3542,8 +3197,7 @@
             "x": -70.0,
             "y": 45.3,
             "bpm": 152.0,
-            "energy": 0.017,
-            "shape": "acoustic"
+            "energy": 0.017
         },
         {
             "band": "pastel_palettes",
@@ -3552,8 +3206,7 @@
             "x": -0.5,
             "y": 0.34,
             "bpm": 117.5,
-            "energy": 0.492,
-            "shape": "bright"
+            "energy": 0.492
         },
         {
             "band": "pastel_palettes",
@@ -3562,8 +3215,7 @@
             "x": -24.5,
             "y": 8.92,
             "bpm": 117.5,
-            "energy": 0.023,
-            "shape": "shimmer"
+            "energy": 0.023
         },
         {
             "band": "pastel_palettes",
@@ -3572,8 +3224,7 @@
             "x": -27.79,
             "y": 56.74,
             "bpm": 89.1,
-            "energy": 0.472,
-            "shape": "shimmer"
+            "energy": 0.472
         },
         {
             "band": "pastel_palettes",
@@ -3582,8 +3233,7 @@
             "x": 10.88,
             "y": 12.38,
             "bpm": 117.5,
-            "energy": 0.545,
-            "shape": "bright"
+            "energy": 0.545
         },
         {
             "band": "pastel_palettes",
@@ -3592,8 +3242,7 @@
             "x": 23.21,
             "y": -4.97,
             "bpm": 143.6,
-            "energy": 0.416,
-            "shape": "bright"
+            "energy": 0.416
         },
         {
             "band": "pastel_palettes",
@@ -3602,8 +3251,7 @@
             "x": 3.45,
             "y": 18.68,
             "bpm": 112.3,
-            "energy": 0.868,
-            "shape": "neutral"
+            "energy": 0.868
         },
         {
             "band": "pastel_palettes",
@@ -3612,8 +3260,7 @@
             "x": -4.2,
             "y": 27.84,
             "bpm": 152.0,
-            "energy": 0.684,
-            "shape": "bright"
+            "energy": 0.684
         },
         {
             "band": "pastel_palettes",
@@ -3622,8 +3269,7 @@
             "x": -14.17,
             "y": 29.35,
             "bpm": 152.0,
-            "energy": 0.332,
-            "shape": "neutral"
+            "energy": 0.332
         },
         {
             "band": "pastel_palettes",
@@ -3632,8 +3278,7 @@
             "x": -8.45,
             "y": 6.67,
             "bpm": 152.0,
-            "energy": 0.64,
-            "shape": "shimmer"
+            "energy": 0.64
         },
         {
             "band": "pastel_palettes",
@@ -3642,8 +3287,7 @@
             "x": -18.11,
             "y": 43.93,
             "bpm": 161.5,
-            "energy": 0.285,
-            "shape": "neutral"
+            "energy": 0.285
         },
         {
             "band": "pastel_palettes",
@@ -3652,8 +3296,7 @@
             "x": -17.14,
             "y": 0.9,
             "bpm": 103.4,
-            "energy": 0.027,
-            "shape": "shimmer"
+            "energy": 0.027
         },
         {
             "band": "pastel_palettes",
@@ -3662,8 +3305,7 @@
             "x": 15.9,
             "y": 26.55,
             "bpm": 107.7,
-            "energy": 0.153,
-            "shape": "bright"
+            "energy": 0.153
         },
         {
             "band": "pastel_palettes",
@@ -3672,8 +3314,7 @@
             "x": 11.26,
             "y": -29.98,
             "bpm": 161.5,
-            "energy": 0.253,
-            "shape": "bright"
+            "energy": 0.253
         },
         {
             "band": "pastel_palettes",
@@ -3682,8 +3323,7 @@
             "x": 15.81,
             "y": -9.87,
             "bpm": 161.5,
-            "energy": 0.807,
-            "shape": "shimmer"
+            "energy": 0.807
         },
         {
             "band": "pastel_palettes",
@@ -3692,8 +3332,7 @@
             "x": -70.0,
             "y": 28.05,
             "bpm": 143.6,
-            "energy": 0.026,
-            "shape": "acoustic"
+            "energy": 0.026
         },
         {
             "band": "pastel_palettes",
@@ -3702,8 +3341,7 @@
             "x": 12.62,
             "y": 40.54,
             "bpm": 89.1,
-            "energy": 0.115,
-            "shape": "bright"
+            "energy": 0.115
         },
         {
             "band": "pastel_palettes",
@@ -3712,8 +3350,7 @@
             "x": -3.21,
             "y": 10.44,
             "bpm": 112.3,
-            "energy": 0.044,
-            "shape": "bright"
+            "energy": 0.044
         },
         {
             "band": "pastel_palettes",
@@ -3722,8 +3359,7 @@
             "x": -25.16,
             "y": 23.66,
             "bpm": 112.3,
-            "energy": 0.235,
-            "shape": "shimmer"
+            "energy": 0.235
         },
         {
             "band": "pastel_palettes",
@@ -3732,8 +3368,7 @@
             "x": 2.57,
             "y": 43.74,
             "bpm": 123.0,
-            "energy": 0.129,
-            "shape": "bright"
+            "energy": 0.129
         },
         {
             "band": "pastel_palettes",
@@ -3742,8 +3377,7 @@
             "x": -9.3,
             "y": -7.27,
             "bpm": 161.5,
-            "energy": 0.322,
-            "shape": "shimmer"
+            "energy": 0.322
         },
         {
             "band": "pastel_palettes",
@@ -3752,8 +3386,7 @@
             "x": 6.02,
             "y": -15.23,
             "bpm": 172.3,
-            "energy": 0.305,
-            "shape": "shimmer"
+            "energy": 0.305
         },
         {
             "band": "pastel_palettes",
@@ -3762,8 +3395,7 @@
             "x": -23.37,
             "y": 47.71,
             "bpm": 129.2,
-            "energy": 0.055,
-            "shape": "bright"
+            "energy": 0.055
         },
         {
             "band": "pastel_palettes",
@@ -3772,8 +3404,7 @@
             "x": 9.15,
             "y": 12.22,
             "bpm": 129.2,
-            "energy": 0.068,
-            "shape": "neutral"
+            "energy": 0.068
         },
         {
             "band": "pastel_palettes",
@@ -3782,8 +3413,7 @@
             "x": -18.91,
             "y": 20.93,
             "bpm": 117.5,
-            "energy": 0.563,
-            "shape": "neutral"
+            "energy": 0.563
         },
         {
             "band": "pastel_palettes",
@@ -3792,8 +3422,7 @@
             "x": -1.43,
             "y": 16.33,
             "bpm": 112.3,
-            "energy": 0.786,
-            "shape": "bright"
+            "energy": 0.786
         },
         {
             "band": "pastel_palettes",
@@ -3802,8 +3431,7 @@
             "x": -5.01,
             "y": 3.44,
             "bpm": 161.5,
-            "energy": 0.455,
-            "shape": "bright"
+            "energy": 0.455
         },
         {
             "band": "pastel_palettes",
@@ -3812,8 +3440,7 @@
             "x": -47.31,
             "y": -3.41,
             "bpm": 129.2,
-            "energy": 0.568,
-            "shape": "shimmer"
+            "energy": 0.568
         },
         {
             "band": "pastel_palettes",
@@ -3822,8 +3449,7 @@
             "x": -0.82,
             "y": 38.64,
             "bpm": 112.3,
-            "energy": 0.423,
-            "shape": "bright"
+            "energy": 0.423
         },
         {
             "band": "pastel_palettes",
@@ -3832,8 +3458,7 @@
             "x": -37.81,
             "y": 56.07,
             "bpm": 112.3,
-            "energy": 0.127,
-            "shape": "acoustic"
+            "energy": 0.127
         },
         {
             "band": "poppin_party",
@@ -3842,8 +3467,7 @@
             "x": 10.53,
             "y": 10.85,
             "bpm": 123.0,
-            "energy": 0.079,
-            "shape": "neutral"
+            "energy": 0.079
         },
         {
             "band": "poppin_party",
@@ -3852,8 +3476,7 @@
             "x": -1.89,
             "y": 57.88,
             "bpm": 129.2,
-            "energy": 0.605,
-            "shape": "bright"
+            "energy": 0.605
         },
         {
             "band": "poppin_party",
@@ -3862,8 +3485,7 @@
             "x": -2.89,
             "y": -10.79,
             "bpm": 123.0,
-            "energy": 0.168,
-            "shape": "acoustic"
+            "energy": 0.168
         },
         {
             "band": "poppin_party",
@@ -3872,8 +3494,7 @@
             "x": 28.98,
             "y": -19.21,
             "bpm": 129.2,
-            "energy": 0.316,
-            "shape": "neutral"
+            "energy": 0.316
         },
         {
             "band": "poppin_party",
@@ -3882,8 +3503,7 @@
             "x": 14.12,
             "y": 1.2,
             "bpm": 117.5,
-            "energy": 0.373,
-            "shape": "bright"
+            "energy": 0.373
         },
         {
             "band": "poppin_party",
@@ -3892,8 +3512,7 @@
             "x": 5.35,
             "y": 27.03,
             "bpm": 117.5,
-            "energy": 0.428,
-            "shape": "bright"
+            "energy": 0.428
         },
         {
             "band": "poppin_party",
@@ -3902,8 +3521,7 @@
             "x": -16.18,
             "y": 13.16,
             "bpm": 136.0,
-            "energy": 0.149,
-            "shape": "acoustic"
+            "energy": 0.149
         },
         {
             "band": "poppin_party",
@@ -3912,8 +3530,7 @@
             "x": -8.89,
             "y": 19.54,
             "bpm": 123.0,
-            "energy": 0.399,
-            "shape": "neutral"
+            "energy": 0.399
         },
         {
             "band": "poppin_party",
@@ -3922,8 +3539,7 @@
             "x": 3.73,
             "y": 27.87,
             "bpm": 107.7,
-            "energy": 0.214,
-            "shape": "shimmer"
+            "energy": 0.214
         },
         {
             "band": "poppin_party",
@@ -3932,8 +3548,7 @@
             "x": -46.29,
             "y": -19.53,
             "bpm": 123.0,
-            "energy": 0.041,
-            "shape": "shimmer"
+            "energy": 0.041
         },
         {
             "band": "poppin_party",
@@ -3942,8 +3557,7 @@
             "x": -70.0,
             "y": -6.22,
             "bpm": 107.7,
-            "energy": 0.008,
-            "shape": "neutral"
+            "energy": 0.008
         },
         {
             "band": "poppin_party",
@@ -3952,8 +3566,7 @@
             "x": 14.62,
             "y": -13.93,
             "bpm": 95.7,
-            "energy": 0.146,
-            "shape": "bright"
+            "energy": 0.146
         },
         {
             "band": "poppin_party",
@@ -3962,8 +3575,7 @@
             "x": -40.02,
             "y": 61.32,
             "bpm": 117.5,
-            "energy": 0.196,
-            "shape": "acoustic"
+            "energy": 0.196
         },
         {
             "band": "poppin_party",
@@ -3972,8 +3584,7 @@
             "x": -3.77,
             "y": 54.95,
             "bpm": 136.0,
-            "energy": 0.197,
-            "shape": "bright"
+            "energy": 0.197
         },
         {
             "band": "poppin_party",
@@ -3982,8 +3593,7 @@
             "x": 5.93,
             "y": 49.01,
             "bpm": 117.5,
-            "energy": 0.487,
-            "shape": "acoustic"
+            "energy": 0.487
         },
         {
             "band": "poppin_party",
@@ -3992,8 +3602,7 @@
             "x": 5.39,
             "y": 43.29,
             "bpm": 107.7,
-            "energy": 0.364,
-            "shape": "bright"
+            "energy": 0.364
         },
         {
             "band": "poppin_party",
@@ -4002,8 +3611,7 @@
             "x": 0.32,
             "y": 32.91,
             "bpm": 95.7,
-            "energy": 0.252,
-            "shape": "acoustic"
+            "energy": 0.252
         },
         {
             "band": "poppin_party",
@@ -4012,8 +3620,7 @@
             "x": 14.88,
             "y": -10.7,
             "bpm": 123.0,
-            "energy": 0.378,
-            "shape": "bright"
+            "energy": 0.378
         },
         {
             "band": "poppin_party",
@@ -4022,8 +3629,7 @@
             "x": -7.91,
             "y": 27.88,
             "bpm": 123.0,
-            "energy": 0.795,
-            "shape": "acoustic"
+            "energy": 0.795
         },
         {
             "band": "poppin_party",
@@ -4032,8 +3638,7 @@
             "x": -47.03,
             "y": 25.25,
             "bpm": 112.3,
-            "energy": 0.056,
-            "shape": "shimmer"
+            "energy": 0.056
         },
         {
             "band": "poppin_party",
@@ -4042,8 +3647,7 @@
             "x": -43.69,
             "y": -21.77,
             "bpm": 161.5,
-            "energy": 0.02,
-            "shape": "shimmer"
+            "energy": 0.02
         },
         {
             "band": "poppin_party",
@@ -4052,8 +3656,7 @@
             "x": -70.0,
             "y": 18.57,
             "bpm": 89.1,
-            "energy": 0.006,
-            "shape": "acoustic"
+            "energy": 0.006
         },
         {
             "band": "poppin_party",
@@ -4062,8 +3665,7 @@
             "x": -11.36,
             "y": 24.95,
             "bpm": 123.0,
-            "energy": 0.507,
-            "shape": "neutral"
+            "energy": 0.507
         },
         {
             "band": "poppin_party",
@@ -4072,8 +3674,7 @@
             "x": 15.05,
             "y": 40.87,
             "bpm": 129.2,
-            "energy": 0.734,
-            "shape": "bright"
+            "energy": 0.734
         },
         {
             "band": "poppin_party",
@@ -4082,8 +3683,7 @@
             "x": 16.31,
             "y": 5.22,
             "bpm": 129.2,
-            "energy": 0.387,
-            "shape": "neutral"
+            "energy": 0.387
         },
         {
             "band": "poppin_party",
@@ -4092,8 +3692,7 @@
             "x": 42.4,
             "y": -20.18,
             "bpm": 152.0,
-            "energy": 0.294,
-            "shape": "neutral"
+            "energy": 0.294
         },
         {
             "band": "poppin_party",
@@ -4102,8 +3701,7 @@
             "x": -18.79,
             "y": 46.23,
             "bpm": 143.6,
-            "energy": 0.181,
-            "shape": "acoustic"
+            "energy": 0.181
         },
         {
             "band": "poppin_party",
@@ -4112,8 +3710,7 @@
             "x": -18.33,
             "y": 36.38,
             "bpm": 99.4,
-            "energy": 0.524,
-            "shape": "neutral"
+            "energy": 0.524
         },
         {
             "band": "poppin_party",
@@ -4122,8 +3719,7 @@
             "x": -23.31,
             "y": 54.46,
             "bpm": 143.6,
-            "energy": 0.247,
-            "shape": "acoustic"
+            "energy": 0.247
         },
         {
             "band": "poppin_party",
@@ -4132,8 +3728,7 @@
             "x": -4.16,
             "y": -11.1,
             "bpm": 152.0,
-            "energy": 0.501,
-            "shape": "acoustic"
+            "energy": 0.501
         },
         {
             "band": "poppin_party",
@@ -4142,8 +3737,7 @@
             "x": -33.58,
             "y": 19.89,
             "bpm": 92.3,
-            "energy": 0.237,
-            "shape": "acoustic"
+            "energy": 0.237
         },
         {
             "band": "poppin_party",
@@ -4152,8 +3746,7 @@
             "x": -4.01,
             "y": -0.6,
             "bpm": 123.0,
-            "energy": 0.408,
-            "shape": "neutral"
+            "energy": 0.408
         },
         {
             "band": "poppin_party",
@@ -4162,8 +3755,7 @@
             "x": -3.57,
             "y": 16.93,
             "bpm": 95.7,
-            "energy": 0.561,
-            "shape": "acoustic"
+            "energy": 0.561
         },
         {
             "band": "poppin_party",
@@ -4172,8 +3764,7 @@
             "x": -3.89,
             "y": 53.37,
             "bpm": 117.5,
-            "energy": 0.379,
-            "shape": "acoustic"
+            "energy": 0.379
         },
         {
             "band": "poppin_party",
@@ -4182,8 +3773,7 @@
             "x": -6.75,
             "y": 46.27,
             "bpm": 103.4,
-            "energy": 0.713,
-            "shape": "acoustic"
+            "energy": 0.713
         },
         {
             "band": "poppin_party",
@@ -4192,8 +3782,7 @@
             "x": 15.09,
             "y": 21.81,
             "bpm": 112.3,
-            "energy": 0.643,
-            "shape": "neutral"
+            "energy": 0.643
         },
         {
             "band": "poppin_party",
@@ -4202,8 +3791,7 @@
             "x": 34.25,
             "y": 11.98,
             "bpm": 89.1,
-            "energy": 0.825,
-            "shape": "neutral"
+            "energy": 0.825
         },
         {
             "band": "poppin_party",
@@ -4212,8 +3800,7 @@
             "x": -50.23,
             "y": 20.55,
             "bpm": 123.0,
-            "energy": 0.088,
-            "shape": "acoustic"
+            "energy": 0.088
         },
         {
             "band": "poppin_party",
@@ -4222,8 +3809,7 @@
             "x": 5.42,
             "y": 1.79,
             "bpm": 136.0,
-            "energy": 0.551,
-            "shape": "shimmer"
+            "energy": 0.551
         },
         {
             "band": "poppin_party",
@@ -4232,8 +3818,7 @@
             "x": 17.9,
             "y": -1.32,
             "bpm": 107.7,
-            "energy": 0.212,
-            "shape": "bright"
+            "energy": 0.212
         },
         {
             "band": "poppin_party",
@@ -4242,8 +3827,7 @@
             "x": -70.0,
             "y": 55.2,
             "bpm": 143.6,
-            "energy": 0.012,
-            "shape": "acoustic"
+            "energy": 0.012
         },
         {
             "band": "poppin_party",
@@ -4252,8 +3836,7 @@
             "x": -37.17,
             "y": 44.48,
             "bpm": 117.5,
-            "energy": 0.372,
-            "shape": "acoustic"
+            "energy": 0.372
         },
         {
             "band": "poppin_party",
@@ -4262,8 +3845,7 @@
             "x": -16.36,
             "y": 31.95,
             "bpm": 92.3,
-            "energy": 0.505,
-            "shape": "neutral"
+            "energy": 0.505
         },
         {
             "band": "poppin_party",
@@ -4272,8 +3854,7 @@
             "x": -10.18,
             "y": 38.81,
             "bpm": 103.4,
-            "energy": 0.384,
-            "shape": "neutral"
+            "energy": 0.384
         },
         {
             "band": "poppin_party",
@@ -4282,8 +3863,7 @@
             "x": 34.02,
             "y": 18.32,
             "bpm": 123.0,
-            "energy": 0.61,
-            "shape": "bright"
+            "energy": 0.61
         },
         {
             "band": "poppin_party",
@@ -4292,8 +3872,7 @@
             "x": -31.28,
             "y": 35.29,
             "bpm": 117.5,
-            "energy": 0.1,
-            "shape": "acoustic"
+            "energy": 0.1
         },
         {
             "band": "poppin_party",
@@ -4302,8 +3881,7 @@
             "x": -0.09,
             "y": 37.32,
             "bpm": 112.3,
-            "energy": 0.681,
-            "shape": "neutral"
+            "energy": 0.681
         },
         {
             "band": "poppin_party",
@@ -4312,8 +3890,7 @@
             "x": 12.26,
             "y": 42.88,
             "bpm": 117.5,
-            "energy": 0.877,
-            "shape": "acoustic"
+            "energy": 0.877
         },
         {
             "band": "poppin_party",
@@ -4322,8 +3899,7 @@
             "x": 7.48,
             "y": -0.87,
             "bpm": 112.3,
-            "energy": 0.338,
-            "shape": "neutral"
+            "energy": 0.338
         },
         {
             "band": "poppin_party",
@@ -4332,8 +3908,7 @@
             "x": 24.53,
             "y": -12.77,
             "bpm": 129.2,
-            "energy": 0.715,
-            "shape": "neutral"
+            "energy": 0.715
         },
         {
             "band": "poppin_party",
@@ -4342,8 +3917,7 @@
             "x": 13.07,
             "y": -28.06,
             "bpm": 143.6,
-            "energy": 0.912,
-            "shape": "neutral"
+            "energy": 0.912
         },
         {
             "band": "poppin_party",
@@ -4352,8 +3926,7 @@
             "x": -15.16,
             "y": 39.96,
             "bpm": 152.0,
-            "energy": 0.517,
-            "shape": "neutral"
+            "energy": 0.517
         },
         {
             "band": "poppin_party",
@@ -4362,8 +3935,7 @@
             "x": -6.18,
             "y": 55.13,
             "bpm": 95.7,
-            "energy": 0.357,
-            "shape": "acoustic"
+            "energy": 0.357
         },
         {
             "band": "poppin_party",
@@ -4372,8 +3944,7 @@
             "x": 11.5,
             "y": 14.48,
             "bpm": 99.4,
-            "energy": 0.762,
-            "shape": "neutral"
+            "energy": 0.762
         },
         {
             "band": "poppin_party",
@@ -4382,8 +3953,7 @@
             "x": -2.54,
             "y": 9.79,
             "bpm": 117.5,
-            "energy": 0.772,
-            "shape": "neutral"
+            "energy": 0.772
         },
         {
             "band": "poppin_party",
@@ -4392,8 +3962,7 @@
             "x": -14.48,
             "y": 53.86,
             "bpm": 123.0,
-            "energy": 0.651,
-            "shape": "acoustic"
+            "energy": 0.651
         },
         {
             "band": "poppin_party",
@@ -4402,8 +3971,7 @@
             "x": 4.18,
             "y": 46.48,
             "bpm": 112.3,
-            "energy": 0.803,
-            "shape": "neutral"
+            "energy": 0.803
         },
         {
             "band": "poppin_party",
@@ -4412,8 +3980,7 @@
             "x": 3.32,
             "y": 46.93,
             "bpm": 123.0,
-            "energy": 0.959,
-            "shape": "neutral"
+            "energy": 0.959
         },
         {
             "band": "poppin_party",
@@ -4422,8 +3989,7 @@
             "x": 3.27,
             "y": -7.21,
             "bpm": 136.0,
-            "energy": 0.932,
-            "shape": "bright"
+            "energy": 0.932
         },
         {
             "band": "poppin_party",
@@ -4432,8 +3998,7 @@
             "x": 1.16,
             "y": 29.49,
             "bpm": 95.7,
-            "energy": 0.483,
-            "shape": "acoustic"
+            "energy": 0.483
         },
         {
             "band": "poppin_party",
@@ -4442,8 +4007,7 @@
             "x": 19.9,
             "y": -15.42,
             "bpm": 152.0,
-            "energy": 0.319,
-            "shape": "neutral"
+            "energy": 0.319
         },
         {
             "band": "poppin_party",
@@ -4452,8 +4016,7 @@
             "x": 4.09,
             "y": -12.03,
             "bpm": 117.5,
-            "energy": 0.32,
-            "shape": "acoustic"
+            "energy": 0.32
         },
         {
             "band": "poppin_party",
@@ -4462,8 +4025,7 @@
             "x": 22.57,
             "y": -14.89,
             "bpm": 95.7,
-            "energy": 0.273,
-            "shape": "neutral"
+            "energy": 0.273
         },
         {
             "band": "poppin_party",
@@ -4472,8 +4034,7 @@
             "x": 14.72,
             "y": 39.85,
             "bpm": 95.7,
-            "energy": 0.131,
-            "shape": "bright"
+            "energy": 0.131
         },
         {
             "band": "poppin_party",
@@ -4482,8 +4043,7 @@
             "x": 18.66,
             "y": 21.22,
             "bpm": 136.0,
-            "energy": 0.866,
-            "shape": "shimmer"
+            "energy": 0.866
         },
         {
             "band": "poppin_party",
@@ -4492,8 +4052,7 @@
             "x": 3.92,
             "y": 51.94,
             "bpm": 123.0,
-            "energy": 0.886,
-            "shape": "bright"
+            "energy": 0.886
         },
         {
             "band": "poppin_party",
@@ -4502,8 +4061,7 @@
             "x": -9.56,
             "y": 30.06,
             "bpm": 161.5,
-            "energy": 0.854,
-            "shape": "neutral"
+            "energy": 0.854
         },
         {
             "band": "poppin_party",
@@ -4512,8 +4070,7 @@
             "x": -25.15,
             "y": 48.47,
             "bpm": 129.2,
-            "energy": 0.493,
-            "shape": "acoustic"
+            "energy": 0.493
         },
         {
             "band": "poppin_party",
@@ -4522,8 +4079,7 @@
             "x": 18.11,
             "y": 37.36,
             "bpm": 123.0,
-            "energy": 0.848,
-            "shape": "bright"
+            "energy": 0.848
         },
         {
             "band": "poppin_party",
@@ -4532,8 +4088,7 @@
             "x": 10.69,
             "y": -33.53,
             "bpm": 123.0,
-            "energy": 0.873,
-            "shape": "bright"
+            "energy": 0.873
         },
         {
             "band": "poppin_party",
@@ -4542,8 +4097,7 @@
             "x": 14.72,
             "y": 54.82,
             "bpm": 152.0,
-            "energy": 0.927,
-            "shape": "neutral"
+            "energy": 0.927
         },
         {
             "band": "poppin_party",
@@ -4552,8 +4106,7 @@
             "x": 8.2,
             "y": 64.09,
             "bpm": 129.2,
-            "energy": 0.891,
-            "shape": "acoustic"
+            "energy": 0.891
         },
         {
             "band": "poppin_party",
@@ -4562,8 +4115,7 @@
             "x": 16.21,
             "y": 41.19,
             "bpm": 89.1,
-            "energy": 0.924,
-            "shape": "neutral"
+            "energy": 0.924
         },
         {
             "band": "poppin_party",
@@ -4572,8 +4124,7 @@
             "x": 22.27,
             "y": 44.72,
             "bpm": 123.0,
-            "energy": 0.83,
-            "shape": "neutral"
+            "energy": 0.83
         },
         {
             "band": "poppin_party",
@@ -4582,8 +4133,7 @@
             "x": -2.92,
             "y": 32.94,
             "bpm": 129.2,
-            "energy": 0.123,
-            "shape": "shimmer"
+            "energy": 0.123
         },
         {
             "band": "poppin_party",
@@ -4592,8 +4142,7 @@
             "x": 30.37,
             "y": -33.59,
             "bpm": 107.7,
-            "energy": 0.851,
-            "shape": "neutral"
+            "energy": 0.851
         },
         {
             "band": "poppin_party",
@@ -4602,8 +4151,7 @@
             "x": 0.9,
             "y": 47.07,
             "bpm": 129.2,
-            "energy": 0.395,
-            "shape": "acoustic"
+            "energy": 0.395
         },
         {
             "band": "poppin_party",
@@ -4612,8 +4160,7 @@
             "x": -21.93,
             "y": 16.7,
             "bpm": 107.7,
-            "energy": 0.612,
-            "shape": "acoustic"
+            "energy": 0.612
         },
         {
             "band": "poppin_party",
@@ -4622,8 +4169,7 @@
             "x": 43.68,
             "y": -9.12,
             "bpm": 99.4,
-            "energy": 0.583,
-            "shape": "bright"
+            "energy": 0.583
         },
         {
             "band": "poppin_party",
@@ -4632,8 +4178,7 @@
             "x": 10.5,
             "y": -23.19,
             "bpm": 95.7,
-            "energy": 0.586,
-            "shape": "bright"
+            "energy": 0.586
         },
         {
             "band": "poppin_party",
@@ -4642,8 +4187,7 @@
             "x": -18.32,
             "y": -6.54,
             "bpm": 112.3,
-            "energy": 0.27,
-            "shape": "acoustic"
+            "energy": 0.27
         },
         {
             "band": "poppin_party",
@@ -4652,8 +4196,7 @@
             "x": 1.72,
             "y": 40.14,
             "bpm": 112.3,
-            "energy": 0.126,
-            "shape": "neutral"
+            "energy": 0.126
         },
         {
             "band": "poppin_party",
@@ -4662,8 +4205,7 @@
             "x": 9.6,
             "y": 26.04,
             "bpm": 123.0,
-            "energy": 0.833,
-            "shape": "shimmer"
+            "energy": 0.833
         },
         {
             "band": "poppin_party",
@@ -4672,8 +4214,7 @@
             "x": 15.42,
             "y": 32.69,
             "bpm": 129.2,
-            "energy": 0.915,
-            "shape": "bright"
+            "energy": 0.915
         },
         {
             "band": "poppin_party",
@@ -4682,8 +4223,7 @@
             "x": 19.49,
             "y": 37.75,
             "bpm": 112.3,
-            "energy": 0.646,
-            "shape": "neutral"
+            "energy": 0.646
         },
         {
             "band": "poppin_party",
@@ -4692,8 +4232,7 @@
             "x": 4.97,
             "y": 6.93,
             "bpm": 136.0,
-            "energy": 0.445,
-            "shape": "neutral"
+            "energy": 0.445
         },
         {
             "band": "poppin_party",
@@ -4702,8 +4241,7 @@
             "x": -3.93,
             "y": 21.81,
             "bpm": 123.0,
-            "energy": 0.182,
-            "shape": "bright"
+            "energy": 0.182
         },
         {
             "band": "poppin_party",
@@ -4712,8 +4250,7 @@
             "x": 15.05,
             "y": 40.87,
             "bpm": 129.2,
-            "energy": 0.736,
-            "shape": "bright"
+            "energy": 0.736
         },
         {
             "band": "poppin_party",
@@ -4722,8 +4259,7 @@
             "x": 9.54,
             "y": 8.26,
             "bpm": 152.0,
-            "energy": 0.853,
-            "shape": "shimmer"
+            "energy": 0.853
         },
         {
             "band": "poppin_party",
@@ -4732,8 +4268,7 @@
             "x": 5.85,
             "y": 26.87,
             "bpm": 123.0,
-            "energy": 0.794,
-            "shape": "neutral"
+            "energy": 0.794
         },
         {
             "band": "poppin_party",
@@ -4742,8 +4277,7 @@
             "x": -16.57,
             "y": 20.71,
             "bpm": 95.7,
-            "energy": 0.91,
-            "shape": "acoustic"
+            "energy": 0.91
         },
         {
             "band": "poppin_party",
@@ -4752,8 +4286,7 @@
             "x": -32.87,
             "y": 26.63,
             "bpm": 95.7,
-            "energy": 0.68,
-            "shape": "shimmer"
+            "energy": 0.68
         },
         {
             "band": "poppin_party",
@@ -4762,8 +4295,7 @@
             "x": 29.41,
             "y": -30.49,
             "bpm": 161.5,
-            "energy": 0.874,
-            "shape": "neutral"
+            "energy": 0.874
         },
         {
             "band": "poppin_party",
@@ -4772,8 +4304,7 @@
             "x": 15.08,
             "y": -21.35,
             "bpm": 152.0,
-            "energy": 0.818,
-            "shape": "neutral"
+            "energy": 0.818
         },
         {
             "band": "poppin_party",
@@ -4782,8 +4313,7 @@
             "x": -8.57,
             "y": 13.43,
             "bpm": 95.7,
-            "energy": 0.775,
-            "shape": "shimmer"
+            "energy": 0.775
         },
         {
             "band": "poppin_party",
@@ -4792,8 +4322,7 @@
             "x": -2.3,
             "y": -5.24,
             "bpm": 136.0,
-            "energy": 0.466,
-            "shape": "shimmer"
+            "energy": 0.466
         },
         {
             "band": "poppin_party",
@@ -4802,8 +4331,7 @@
             "x": 10.38,
             "y": 5.48,
             "bpm": 129.2,
-            "energy": 0.167,
-            "shape": "shimmer"
+            "energy": 0.167
         },
         {
             "band": "poppin_party",
@@ -4812,8 +4340,7 @@
             "x": -9.33,
             "y": -4.98,
             "bpm": 136.0,
-            "energy": 0.258,
-            "shape": "bright"
+            "energy": 0.258
         },
         {
             "band": "poppin_party",
@@ -4822,8 +4349,7 @@
             "x": 3.95,
             "y": 28.43,
             "bpm": 152.0,
-            "energy": 0.731,
-            "shape": "neutral"
+            "energy": 0.731
         },
         {
             "band": "poppin_party",
@@ -4832,8 +4358,7 @@
             "x": -6.87,
             "y": 5.34,
             "bpm": 107.7,
-            "energy": 0.407,
-            "shape": "neutral"
+            "energy": 0.407
         },
         {
             "band": "poppin_party",
@@ -4842,8 +4367,7 @@
             "x": 11.61,
             "y": 22.42,
             "bpm": 136.0,
-            "energy": 0.48,
-            "shape": "neutral"
+            "energy": 0.48
         },
         {
             "band": "poppin_party",
@@ -4852,8 +4376,7 @@
             "x": 15.23,
             "y": 5.06,
             "bpm": 143.6,
-            "energy": 0.199,
-            "shape": "bright"
+            "energy": 0.199
         },
         {
             "band": "poppin_party",
@@ -4862,8 +4385,7 @@
             "x": -7.47,
             "y": 26.72,
             "bpm": 112.3,
-            "energy": 0.434,
-            "shape": "neutral"
+            "energy": 0.434
         },
         {
             "band": "poppin_party",
@@ -4872,8 +4394,7 @@
             "x": 14.37,
             "y": -10.52,
             "bpm": 152.0,
-            "energy": 0.132,
-            "shape": "neutral"
+            "energy": 0.132
         },
         {
             "band": "poppin_party",
@@ -4882,8 +4403,7 @@
             "x": 16.98,
             "y": 1.37,
             "bpm": 129.2,
-            "energy": 0.323,
-            "shape": "bright"
+            "energy": 0.323
         },
         {
             "band": "poppin_party",
@@ -4892,8 +4412,7 @@
             "x": 5.69,
             "y": 24.32,
             "bpm": 129.2,
-            "energy": 0.798,
-            "shape": "shimmer"
+            "energy": 0.798
         },
         {
             "band": "poppin_party",
@@ -4902,8 +4421,7 @@
             "x": -15.01,
             "y": -9.27,
             "bpm": 107.7,
-            "energy": 0.284,
-            "shape": "neutral"
+            "energy": 0.284
         },
         {
             "band": "poppin_party",
@@ -4912,8 +4430,7 @@
             "x": 11.88,
             "y": -1.35,
             "bpm": 143.6,
-            "energy": 0.317,
-            "shape": "bright"
+            "energy": 0.317
         },
         {
             "band": "poppin_party",
@@ -4922,8 +4439,7 @@
             "x": -7.3,
             "y": 2.34,
             "bpm": 136.0,
-            "energy": 0.191,
-            "shape": "shimmer"
+            "energy": 0.191
         },
         {
             "band": "poppin_party",
@@ -4932,8 +4448,7 @@
             "x": 1.97,
             "y": 35.22,
             "bpm": 172.3,
-            "energy": 0.742,
-            "shape": "shimmer"
+            "energy": 0.742
         },
         {
             "band": "poppin_party",
@@ -4942,8 +4457,7 @@
             "x": 34.02,
             "y": 6.97,
             "bpm": 95.7,
-            "energy": 0.85,
-            "shape": "neutral"
+            "energy": 0.85
         },
         {
             "band": "poppin_party",
@@ -4952,8 +4466,7 @@
             "x": -0.43,
             "y": 2.11,
             "bpm": 161.5,
-            "energy": 0.47,
-            "shape": "shimmer"
+            "energy": 0.47
         },
         {
             "band": "poppin_party",
@@ -4962,8 +4475,7 @@
             "x": 6.08,
             "y": -20.99,
             "bpm": 112.3,
-            "energy": 0.425,
-            "shape": "shimmer"
+            "energy": 0.425
         },
         {
             "band": "poppin_party",
@@ -4972,8 +4484,7 @@
             "x": 0.48,
             "y": 0.06,
             "bpm": 117.5,
-            "energy": 0.314,
-            "shape": "neutral"
+            "energy": 0.314
         },
         {
             "band": "poppin_party",
@@ -4982,8 +4493,7 @@
             "x": 22.24,
             "y": -6.69,
             "bpm": 117.5,
-            "energy": 0.557,
-            "shape": "bright"
+            "energy": 0.557
         },
         {
             "band": "raise_a_suilen",
@@ -4992,8 +4502,7 @@
             "x": 14.14,
             "y": 10.93,
             "bpm": 129.2,
-            "energy": 0.165,
-            "shape": "bright"
+            "energy": 0.165
         },
         {
             "band": "raise_a_suilen",
@@ -5002,8 +4511,7 @@
             "x": 25.42,
             "y": 3.74,
             "bpm": 152.0,
-            "energy": 0.259,
-            "shape": "bright"
+            "energy": 0.259
         },
         {
             "band": "raise_a_suilen",
@@ -5012,8 +4520,7 @@
             "x": 32.57,
             "y": -9.59,
             "bpm": 129.2,
-            "energy": 0.809,
-            "shape": "acoustic"
+            "energy": 0.809
         },
         {
             "band": "raise_a_suilen",
@@ -5022,8 +4529,7 @@
             "x": 24.0,
             "y": 6.1,
             "bpm": 112.3,
-            "energy": 0.495,
-            "shape": "bright"
+            "energy": 0.495
         },
         {
             "band": "raise_a_suilen",
@@ -5032,8 +4538,7 @@
             "x": 22.99,
             "y": -19.8,
             "bpm": 129.2,
-            "energy": 0.347,
-            "shape": "bright"
+            "energy": 0.347
         },
         {
             "band": "raise_a_suilen",
@@ -5042,8 +4547,7 @@
             "x": 14.33,
             "y": -12.99,
             "bpm": 117.5,
-            "energy": 0.451,
-            "shape": "bright"
+            "energy": 0.451
         },
         {
             "band": "raise_a_suilen",
@@ -5052,8 +4556,7 @@
             "x": 11.18,
             "y": -28.82,
             "bpm": 123.0,
-            "energy": 0.049,
-            "shape": "bright"
+            "energy": 0.049
         },
         {
             "band": "raise_a_suilen",
@@ -5062,8 +4565,7 @@
             "x": 19.24,
             "y": -6.68,
             "bpm": 136.0,
-            "energy": 0.577,
-            "shape": "neutral"
+            "energy": 0.577
         },
         {
             "band": "raise_a_suilen",
@@ -5072,8 +4574,7 @@
             "x": 24.4,
             "y": 15.07,
             "bpm": 112.3,
-            "energy": 0.766,
-            "shape": "bright"
+            "energy": 0.766
         },
         {
             "band": "raise_a_suilen",
@@ -5082,8 +4583,7 @@
             "x": -3.95,
             "y": 41.23,
             "bpm": 123.0,
-            "energy": 0.649,
-            "shape": "bright"
+            "energy": 0.649
         },
         {
             "band": "raise_a_suilen",
@@ -5092,8 +4592,7 @@
             "x": 23.92,
             "y": -31.74,
             "bpm": 129.2,
-            "energy": 0.537,
-            "shape": "bright"
+            "energy": 0.537
         },
         {
             "band": "raise_a_suilen",
@@ -5102,8 +4601,7 @@
             "x": 28.93,
             "y": -9.27,
             "bpm": 136.0,
-            "energy": 0.036,
-            "shape": "bright"
+            "energy": 0.036
         },
         {
             "band": "raise_a_suilen",
@@ -5112,8 +4610,7 @@
             "x": 27.75,
             "y": -7.95,
             "bpm": 112.3,
-            "energy": 0.525,
-            "shape": "bright"
+            "energy": 0.525
         },
         {
             "band": "raise_a_suilen",
@@ -5122,8 +4619,7 @@
             "x": 24.55,
             "y": -16.15,
             "bpm": 123.0,
-            "energy": 0.745,
-            "shape": "bright"
+            "energy": 0.745
         },
         {
             "band": "raise_a_suilen",
@@ -5132,8 +4628,7 @@
             "x": 7.05,
             "y": -23.29,
             "bpm": 129.2,
-            "energy": 0.219,
-            "shape": "neutral"
+            "energy": 0.219
         },
         {
             "band": "raise_a_suilen",
@@ -5142,8 +4637,7 @@
             "x": -7.94,
             "y": 9.17,
             "bpm": 136.0,
-            "energy": 0.461,
-            "shape": "neutral"
+            "energy": 0.461
         },
         {
             "band": "raise_a_suilen",
@@ -5152,8 +4646,7 @@
             "x": 13.73,
             "y": -10.68,
             "bpm": 143.6,
-            "energy": 0.832,
-            "shape": "bright"
+            "energy": 0.832
         },
         {
             "band": "raise_a_suilen",
@@ -5162,8 +4655,7 @@
             "x": 26.25,
             "y": 8.96,
             "bpm": 143.6,
-            "energy": 0.659,
-            "shape": "neutral"
+            "energy": 0.659
         },
         {
             "band": "raise_a_suilen",
@@ -5172,8 +4664,7 @@
             "x": 5.51,
             "y": -8.94,
             "bpm": 123.0,
-            "energy": 0.914,
-            "shape": "acoustic"
+            "energy": 0.914
         },
         {
             "band": "raise_a_suilen",
@@ -5182,8 +4673,7 @@
             "x": 21.93,
             "y": -14.69,
             "bpm": 123.0,
-            "energy": 0.839,
-            "shape": "neutral"
+            "energy": 0.839
         },
         {
             "band": "raise_a_suilen",
@@ -5192,8 +4682,7 @@
             "x": 26.72,
             "y": -17.9,
             "bpm": 136.0,
-            "energy": 0.906,
-            "shape": "neutral"
+            "energy": 0.906
         },
         {
             "band": "raise_a_suilen",
@@ -5202,8 +4691,7 @@
             "x": 31.7,
             "y": -35.33,
             "bpm": 112.3,
-            "energy": 0.788,
-            "shape": "bright"
+            "energy": 0.788
         },
         {
             "band": "raise_a_suilen",
@@ -5212,8 +4700,7 @@
             "x": 15.68,
             "y": -16.07,
             "bpm": 103.4,
-            "energy": 0.885,
-            "shape": "neutral"
+            "energy": 0.885
         },
         {
             "band": "raise_a_suilen",
@@ -5222,8 +4709,7 @@
             "x": 33.06,
             "y": 3.61,
             "bpm": 103.4,
-            "energy": 0.334,
-            "shape": "bright"
+            "energy": 0.334
         },
         {
             "band": "raise_a_suilen",
@@ -5232,8 +4718,7 @@
             "x": 22.09,
             "y": -19.81,
             "bpm": 136.0,
-            "energy": 0.223,
-            "shape": "bright"
+            "energy": 0.223
         },
         {
             "band": "raise_a_suilen",
@@ -5242,8 +4727,7 @@
             "x": 24.64,
             "y": -4.2,
             "bpm": 143.6,
-            "energy": 0.721,
-            "shape": "neutral"
+            "energy": 0.721
         },
         {
             "band": "raise_a_suilen",
@@ -5252,8 +4736,7 @@
             "x": 12.16,
             "y": -22.95,
             "bpm": 123.0,
-            "energy": 0.789,
-            "shape": "bright"
+            "energy": 0.789
         },
         {
             "band": "raise_a_suilen",
@@ -5262,8 +4745,7 @@
             "x": 11.21,
             "y": 16.75,
             "bpm": 117.5,
-            "energy": 0.052,
-            "shape": "bright"
+            "energy": 0.052
         },
         {
             "band": "raise_a_suilen",
@@ -5272,8 +4754,7 @@
             "x": 6.26,
             "y": -13.04,
             "bpm": 117.5,
-            "energy": 0.206,
-            "shape": "bright"
+            "energy": 0.206
         },
         {
             "band": "raise_a_suilen",
@@ -5282,8 +4763,7 @@
             "x": -9.95,
             "y": 40.49,
             "bpm": 136.0,
-            "energy": 0.021,
-            "shape": "shimmer"
+            "energy": 0.021
         },
         {
             "band": "raise_a_suilen",
@@ -5292,8 +4772,7 @@
             "x": 11.62,
             "y": 1.35,
             "bpm": 117.5,
-            "energy": 0.024,
-            "shape": "bright"
+            "energy": 0.024
         },
         {
             "band": "raise_a_suilen",
@@ -5302,8 +4781,7 @@
             "x": 11.25,
             "y": 21.28,
             "bpm": 117.5,
-            "energy": 0.25,
-            "shape": "bright"
+            "energy": 0.25
         },
         {
             "band": "raise_a_suilen",
@@ -5312,8 +4790,7 @@
             "x": 24.51,
             "y": 34.02,
             "bpm": 107.7,
-            "energy": 0.426,
-            "shape": "bright"
+            "energy": 0.426
         },
         {
             "band": "raise_a_suilen",
@@ -5322,8 +4799,7 @@
             "x": 11.15,
             "y": 25.61,
             "bpm": 123.0,
-            "energy": 0.489,
-            "shape": "bright"
+            "energy": 0.489
         },
         {
             "band": "raise_a_suilen",
@@ -5332,8 +4808,7 @@
             "x": 10.58,
             "y": -25.54,
             "bpm": 107.7,
-            "energy": 0.147,
-            "shape": "bright"
+            "energy": 0.147
         },
         {
             "band": "raise_a_suilen",
@@ -5342,8 +4817,7 @@
             "x": 34.53,
             "y": -20.68,
             "bpm": 136.0,
-            "energy": 0.038,
-            "shape": "bright"
+            "energy": 0.038
         },
         {
             "band": "raise_a_suilen",
@@ -5352,8 +4826,7 @@
             "x": 23.2,
             "y": -7.16,
             "bpm": 117.5,
-            "energy": 0.22,
-            "shape": "bright"
+            "energy": 0.22
         },
         {
             "band": "raise_a_suilen",
@@ -5362,8 +4835,7 @@
             "x": 39.27,
             "y": -18.77,
             "bpm": 136.0,
-            "energy": 0.099,
-            "shape": "bright"
+            "energy": 0.099
         },
         {
             "band": "raise_a_suilen",
@@ -5372,8 +4844,7 @@
             "x": 28.22,
             "y": 0.05,
             "bpm": 152.0,
-            "energy": 0.58,
-            "shape": "neutral"
+            "energy": 0.58
         },
         {
             "band": "raise_a_suilen",
@@ -5382,8 +4853,7 @@
             "x": 29.0,
             "y": 13.13,
             "bpm": 99.4,
-            "energy": 0.883,
-            "shape": "neutral"
+            "energy": 0.883
         },
         {
             "band": "raise_a_suilen",
@@ -5392,8 +4862,7 @@
             "x": 15.74,
             "y": -24.98,
             "bpm": 117.5,
-            "energy": 0.276,
-            "shape": "bright"
+            "energy": 0.276
         },
         {
             "band": "raise_a_suilen",
@@ -5402,8 +4871,7 @@
             "x": 21.93,
             "y": -36.4,
             "bpm": 117.5,
-            "energy": 0.19,
-            "shape": "acoustic"
+            "energy": 0.19
         },
         {
             "band": "raise_a_suilen",
@@ -5412,8 +4880,7 @@
             "x": 7.05,
             "y": 3.94,
             "bpm": 123.0,
-            "energy": 0.429,
-            "shape": "neutral"
+            "energy": 0.429
         },
         {
             "band": "raise_a_suilen",
@@ -5422,8 +4889,7 @@
             "x": 47.94,
             "y": -26.58,
             "bpm": 136.0,
-            "energy": 0.935,
-            "shape": "bright"
+            "energy": 0.935
         },
         {
             "band": "raise_a_suilen",
@@ -5432,8 +4898,7 @@
             "x": 25.53,
             "y": 40.6,
             "bpm": 136.0,
-            "energy": 0.898,
-            "shape": "bright"
+            "energy": 0.898
         },
         {
             "band": "raise_a_suilen",
@@ -5442,8 +4907,7 @@
             "x": 29.15,
             "y": 50.49,
             "bpm": 129.2,
-            "energy": 0.956,
-            "shape": "bright"
+            "energy": 0.956
         },
         {
             "band": "raise_a_suilen",
@@ -5452,8 +4916,7 @@
             "x": 43.51,
             "y": -0.07,
             "bpm": 95.7,
-            "energy": 0.939,
-            "shape": "shimmer"
+            "energy": 0.939
         },
         {
             "band": "raise_a_suilen",
@@ -5462,8 +4925,7 @@
             "x": 14.5,
             "y": 26.91,
             "bpm": 95.7,
-            "energy": 0.964,
-            "shape": "acoustic"
+            "energy": 0.964
         },
         {
             "band": "raise_a_suilen",
@@ -5472,8 +4934,7 @@
             "x": 25.66,
             "y": -28.95,
             "bpm": 129.2,
-            "energy": 0.46,
-            "shape": "bright"
+            "energy": 0.46
         },
         {
             "band": "raise_a_suilen",
@@ -5482,8 +4943,7 @@
             "x": 12.62,
             "y": -17.66,
             "bpm": 123.0,
-            "energy": 0.222,
-            "shape": "bright"
+            "energy": 0.222
         },
         {
             "band": "raise_a_suilen",
@@ -5492,8 +4952,7 @@
             "x": 16.81,
             "y": -26.34,
             "bpm": 103.4,
-            "energy": 0.953,
-            "shape": "bright"
+            "energy": 0.953
         },
         {
             "band": "raise_a_suilen",
@@ -5502,8 +4961,7 @@
             "x": 50.22,
             "y": -24.12,
             "bpm": 123.0,
-            "energy": 0.706,
-            "shape": "bright"
+            "energy": 0.706
         },
         {
             "band": "raise_a_suilen",
@@ -5512,8 +4970,7 @@
             "x": 19.86,
             "y": -13.89,
             "bpm": 99.4,
-            "energy": 0.718,
-            "shape": "bright"
+            "energy": 0.718
         },
         {
             "band": "raise_a_suilen",
@@ -5522,8 +4979,7 @@
             "x": 33.07,
             "y": -1.42,
             "bpm": 112.3,
-            "energy": 0.938,
-            "shape": "bright"
+            "energy": 0.938
         },
         {
             "band": "raise_a_suilen",
@@ -5532,8 +4988,7 @@
             "x": -33.37,
             "y": 50.55,
             "bpm": 136.0,
-            "energy": 0.121,
-            "shape": "acoustic"
+            "energy": 0.121
         },
         {
             "band": "raise_a_suilen",
@@ -5542,8 +4997,7 @@
             "x": -36.87,
             "y": 11.06,
             "bpm": 152.0,
-            "energy": 0.073,
-            "shape": "acoustic"
+            "energy": 0.073
         },
         {
             "band": "raise_a_suilen",
@@ -5552,8 +5006,7 @@
             "x": 30.29,
             "y": -13.67,
             "bpm": 143.6,
-            "energy": 0.454,
-            "shape": "bright"
+            "energy": 0.454
         },
         {
             "band": "raise_a_suilen",
@@ -5562,8 +5015,7 @@
             "x": 37.02,
             "y": -5.41,
             "bpm": 117.5,
-            "energy": 0.763,
-            "shape": "neutral"
+            "energy": 0.763
         },
         {
             "band": "raise_a_suilen",
@@ -5572,8 +5024,7 @@
             "x": 25.21,
             "y": 43.08,
             "bpm": 129.2,
-            "energy": 0.393,
-            "shape": "bright"
+            "energy": 0.393
         },
         {
             "band": "raise_a_suilen",
@@ -5582,8 +5033,7 @@
             "x": 1.01,
             "y": 6.61,
             "bpm": 152.0,
-            "energy": 0.244,
-            "shape": "bright"
+            "energy": 0.244
         },
         {
             "band": "raise_a_suilen",
@@ -5592,8 +5042,7 @@
             "x": 29.3,
             "y": 7.47,
             "bpm": 117.5,
-            "energy": 0.363,
-            "shape": "bright"
+            "energy": 0.363
         },
         {
             "band": "raise_a_suilen",
@@ -5602,8 +5051,7 @@
             "x": 11.99,
             "y": -26.96,
             "bpm": 112.3,
-            "energy": 0.076,
-            "shape": "bright"
+            "energy": 0.076
         },
         {
             "band": "raise_a_suilen",
@@ -5612,8 +5060,7 @@
             "x": 43.87,
             "y": -23.09,
             "bpm": 143.6,
-            "energy": 0.59,
-            "shape": "acoustic"
+            "energy": 0.59
         },
         {
             "band": "raise_a_suilen",
@@ -5622,8 +5069,7 @@
             "x": 19.43,
             "y": -3.1,
             "bpm": 161.5,
-            "energy": 0.443,
-            "shape": "shimmer"
+            "energy": 0.443
         },
         {
             "band": "raise_a_suilen",
@@ -5632,8 +5078,7 @@
             "x": 12.1,
             "y": -30.22,
             "bpm": 136.0,
-            "energy": 0.508,
-            "shape": "bright"
+            "energy": 0.508
         },
         {
             "band": "raise_a_suilen",
@@ -5642,8 +5087,7 @@
             "x": 20.92,
             "y": -18.8,
             "bpm": 123.0,
-            "energy": 0.431,
-            "shape": "shimmer"
+            "energy": 0.431
         },
         {
             "band": "raise_a_suilen",
@@ -5652,8 +5096,7 @@
             "x": 12.68,
             "y": 9.74,
             "bpm": 136.0,
-            "energy": 0.692,
-            "shape": "acoustic"
+            "energy": 0.692
         },
         {
             "band": "raise_a_suilen",
@@ -5662,8 +5105,7 @@
             "x": 5.55,
             "y": 7.63,
             "bpm": 172.3,
-            "energy": 0.759,
-            "shape": "neutral"
+            "energy": 0.759
         },
         {
             "band": "raise_a_suilen",
@@ -5672,8 +5114,7 @@
             "x": 25.79,
             "y": -39.45,
             "bpm": 152.0,
-            "energy": 0.703,
-            "shape": "bright"
+            "energy": 0.703
         },
         {
             "band": "raise_a_suilen",
@@ -5682,8 +5123,7 @@
             "x": 34.0,
             "y": 8.14,
             "bpm": 107.7,
-            "energy": 0.656,
-            "shape": "bright"
+            "energy": 0.656
         },
         {
             "band": "raise_a_suilen",
@@ -5692,8 +5132,7 @@
             "x": 29.85,
             "y": 34.74,
             "bpm": 129.2,
-            "energy": 0.54,
-            "shape": "neutral"
+            "energy": 0.54
         },
         {
             "band": "raise_a_suilen",
@@ -5702,8 +5141,7 @@
             "x": 32.81,
             "y": -12.62,
             "bpm": 152.0,
-            "energy": 0.69,
-            "shape": "neutral"
+            "energy": 0.69
         },
         {
             "band": "raise_a_suilen",
@@ -5712,8 +5150,7 @@
             "x": 5.2,
             "y": 10.1,
             "bpm": 172.3,
-            "energy": 0.844,
-            "shape": "neutral"
+            "energy": 0.844
         },
         {
             "band": "raise_a_suilen",
@@ -5722,8 +5159,7 @@
             "x": 15.81,
             "y": -8.31,
             "bpm": 99.4,
-            "energy": 0.473,
-            "shape": "neutral"
+            "energy": 0.473
         },
         {
             "band": "raise_a_suilen",
@@ -5732,8 +5168,7 @@
             "x": -3.21,
             "y": 21.09,
             "bpm": 143.6,
-            "energy": 0.625,
-            "shape": "neutral"
+            "energy": 0.625
         },
         {
             "band": "raise_a_suilen",
@@ -5742,8 +5177,7 @@
             "x": 16.77,
             "y": -13.76,
             "bpm": 143.6,
-            "energy": 0.835,
-            "shape": "neutral"
+            "energy": 0.835
         },
         {
             "band": "raise_a_suilen",
@@ -5752,8 +5186,7 @@
             "x": 17.45,
             "y": -30.18,
             "bpm": 129.2,
-            "energy": 0.381,
-            "shape": "bright"
+            "energy": 0.381
         },
         {
             "band": "raise_a_suilen",
@@ -5762,8 +5195,7 @@
             "x": 35.26,
             "y": -10.06,
             "bpm": 129.2,
-            "energy": 0.325,
-            "shape": "neutral"
+            "energy": 0.325
         },
         {
             "band": "raise_a_suilen",
@@ -5772,8 +5204,7 @@
             "x": -10.47,
             "y": 11.94,
             "bpm": 99.4,
-            "energy": 0.082,
-            "shape": "neutral"
+            "energy": 0.082
         },
         {
             "band": "raise_a_suilen",
@@ -5782,8 +5213,7 @@
             "x": 26.03,
             "y": -19.85,
             "bpm": 123.0,
-            "energy": 0.876,
-            "shape": "neutral"
+            "energy": 0.876
         },
         {
             "band": "roselia",
@@ -5792,8 +5222,7 @@
             "x": 5.86,
             "y": 50.34,
             "bpm": 117.5,
-            "energy": 0.737,
-            "shape": "neutral"
+            "energy": 0.737
         },
         {
             "band": "roselia",
@@ -5802,8 +5231,7 @@
             "x": 1.87,
             "y": -39.58,
             "bpm": 123.0,
-            "energy": 0.152,
-            "shape": "acoustic"
+            "energy": 0.152
         },
         {
             "band": "roselia",
@@ -5812,8 +5240,7 @@
             "x": 0.83,
             "y": -3.34,
             "bpm": 136.0,
-            "energy": 0.777,
-            "shape": "acoustic"
+            "energy": 0.777
         },
         {
             "band": "roselia",
@@ -5822,8 +5249,7 @@
             "x": -11.13,
             "y": 50.16,
             "bpm": 143.6,
-            "energy": 0.042,
-            "shape": "acoustic"
+            "energy": 0.042
         },
         {
             "band": "roselia",
@@ -5832,8 +5258,7 @@
             "x": 17.44,
             "y": -26.24,
             "bpm": 129.2,
-            "energy": 0.176,
-            "shape": "shimmer"
+            "energy": 0.176
         },
         {
             "band": "roselia",
@@ -5842,8 +5267,7 @@
             "x": -17.31,
             "y": 18.39,
             "bpm": 112.3,
-            "energy": 0.144,
-            "shape": "acoustic"
+            "energy": 0.144
         },
         {
             "band": "roselia",
@@ -5852,8 +5276,7 @@
             "x": -2.5,
             "y": -19.4,
             "bpm": 143.6,
-            "energy": 0.701,
-            "shape": "neutral"
+            "energy": 0.701
         },
         {
             "band": "roselia",
@@ -5862,8 +5285,7 @@
             "x": 0.2,
             "y": 32.66,
             "bpm": 123.0,
-            "energy": 0.388,
-            "shape": "neutral"
+            "energy": 0.388
         },
         {
             "band": "roselia",
@@ -5872,8 +5294,7 @@
             "x": 18.15,
             "y": -9.04,
             "bpm": 129.2,
-            "energy": 0.308,
-            "shape": "bright"
+            "energy": 0.308
         },
         {
             "band": "roselia",
@@ -5882,8 +5303,7 @@
             "x": 0.83,
             "y": -10.18,
             "bpm": 123.0,
-            "energy": 0.293,
-            "shape": "neutral"
+            "energy": 0.293
         },
         {
             "band": "roselia",
@@ -5892,8 +5312,7 @@
             "x": -70.0,
             "y": 63.28,
             "bpm": 172.3,
-            "energy": 0.029,
-            "shape": "acoustic"
+            "energy": 0.029
         },
         {
             "band": "roselia",
@@ -5902,8 +5321,7 @@
             "x": 3.14,
             "y": 36.71,
             "bpm": 129.2,
-            "energy": 0.229,
-            "shape": "shimmer"
+            "energy": 0.229
         },
         {
             "band": "roselia",
@@ -5912,8 +5330,7 @@
             "x": 11.24,
             "y": -21.68,
             "bpm": 123.0,
-            "energy": 0.668,
-            "shape": "bright"
+            "energy": 0.668
         },
         {
             "band": "roselia",
@@ -5922,8 +5339,7 @@
             "x": 3.3,
             "y": -17.56,
             "bpm": 129.2,
-            "energy": 0.341,
-            "shape": "shimmer"
+            "energy": 0.341
         },
         {
             "band": "roselia",
@@ -5932,8 +5348,7 @@
             "x": -16.48,
             "y": -33.25,
             "bpm": 152.0,
-            "energy": 0.005,
-            "shape": "acoustic"
+            "energy": 0.005
         },
         {
             "band": "roselia",
@@ -5942,8 +5357,7 @@
             "x": -25.54,
             "y": 34.99,
             "bpm": 123.0,
-            "energy": 0.631,
-            "shape": "acoustic"
+            "energy": 0.631
         },
         {
             "band": "roselia",
@@ -5952,8 +5366,7 @@
             "x": -3.13,
             "y": -29.73,
             "bpm": 112.3,
-            "energy": 0.653,
-            "shape": "acoustic"
+            "energy": 0.653
         },
         {
             "band": "roselia",
@@ -5962,8 +5375,7 @@
             "x": 3.46,
             "y": 12.76,
             "bpm": 136.0,
-            "energy": 0.683,
-            "shape": "neutral"
+            "energy": 0.683
         },
         {
             "band": "roselia",
@@ -5972,8 +5384,7 @@
             "x": 9.94,
             "y": 49.31,
             "bpm": 117.5,
-            "energy": 0.739,
-            "shape": "neutral"
+            "energy": 0.739
         },
         {
             "band": "roselia",
@@ -5982,8 +5393,7 @@
             "x": 2.39,
             "y": -26.15,
             "bpm": 123.0,
-            "energy": 0.575,
-            "shape": "acoustic"
+            "energy": 0.575
         },
         {
             "band": "roselia",
@@ -5992,8 +5402,7 @@
             "x": -14.85,
             "y": 25.95,
             "bpm": 136.0,
-            "energy": 0.593,
-            "shape": "acoustic"
+            "energy": 0.593
         },
         {
             "band": "roselia",
@@ -6002,8 +5411,7 @@
             "x": 33.96,
             "y": 4.98,
             "bpm": 129.2,
-            "energy": 0.484,
-            "shape": "bright"
+            "energy": 0.484
         },
         {
             "band": "roselia",
@@ -6012,8 +5420,7 @@
             "x": 9.52,
             "y": -22.48,
             "bpm": 161.5,
-            "energy": 0.574,
-            "shape": "acoustic"
+            "energy": 0.574
         },
         {
             "band": "roselia",
@@ -6022,8 +5429,7 @@
             "x": 7.3,
             "y": 0.75,
             "bpm": 123.0,
-            "energy": 0.662,
-            "shape": "neutral"
+            "energy": 0.662
         },
         {
             "band": "roselia",
@@ -6032,8 +5438,7 @@
             "x": 4.2,
             "y": -2.86,
             "bpm": 99.4,
-            "energy": 0.695,
-            "shape": "shimmer"
+            "energy": 0.695
         },
         {
             "band": "roselia",
@@ -6042,8 +5447,7 @@
             "x": -24.74,
             "y": 30.36,
             "bpm": 117.5,
-            "energy": 0.307,
-            "shape": "acoustic"
+            "energy": 0.307
         },
         {
             "band": "roselia",
@@ -6052,8 +5456,7 @@
             "x": 6.16,
             "y": 1.8,
             "bpm": 123.0,
-            "energy": 0.624,
-            "shape": "neutral"
+            "energy": 0.624
         },
         {
             "band": "roselia",
@@ -6062,8 +5465,7 @@
             "x": -18.96,
             "y": 30.39,
             "bpm": 129.2,
-            "energy": 0.539,
-            "shape": "neutral"
+            "energy": 0.539
         },
         {
             "band": "roselia",
@@ -6072,8 +5474,7 @@
             "x": -12.91,
             "y": 9.65,
             "bpm": 152.0,
-            "energy": 0.358,
-            "shape": "acoustic"
+            "energy": 0.358
         },
         {
             "band": "roselia",
@@ -6082,8 +5483,7 @@
             "x": -4.18,
             "y": -27.72,
             "bpm": 117.5,
-            "energy": 0.226,
-            "shape": "shimmer"
+            "energy": 0.226
         },
         {
             "band": "roselia",
@@ -6092,8 +5492,7 @@
             "x": 16.2,
             "y": -34.01,
             "bpm": 117.5,
-            "energy": 0.263,
-            "shape": "neutral"
+            "energy": 0.263
         },
         {
             "band": "roselia",
@@ -6102,8 +5501,7 @@
             "x": -8.98,
             "y": -42.65,
             "bpm": 107.7,
-            "energy": 0.581,
-            "shape": "acoustic"
+            "energy": 0.581
         },
         {
             "band": "roselia",
@@ -6112,8 +5510,7 @@
             "x": 16.47,
             "y": -16.12,
             "bpm": 123.0,
-            "energy": 0.615,
-            "shape": "shimmer"
+            "energy": 0.615
         },
         {
             "band": "roselia",
@@ -6122,8 +5519,7 @@
             "x": -22.95,
             "y": -2.93,
             "bpm": 123.0,
-            "energy": 0.117,
-            "shape": "acoustic"
+            "energy": 0.117
         },
         {
             "band": "roselia",
@@ -6132,8 +5528,7 @@
             "x": 3.64,
             "y": -13.91,
             "bpm": 107.7,
-            "energy": 0.164,
-            "shape": "bright"
+            "energy": 0.164
         },
         {
             "band": "roselia",
@@ -6142,8 +5537,7 @@
             "x": -7.87,
             "y": 16.27,
             "bpm": 117.5,
-            "energy": 0.032,
-            "shape": "bright"
+            "energy": 0.032
         },
         {
             "band": "roselia",
@@ -6152,8 +5546,7 @@
             "x": -1.05,
             "y": -16.42,
             "bpm": 129.2,
-            "energy": 0.882,
-            "shape": "acoustic"
+            "energy": 0.882
         },
         {
             "band": "roselia",
@@ -6162,8 +5555,7 @@
             "x": -22.37,
             "y": 24.77,
             "bpm": 123.0,
-            "energy": 0.31,
-            "shape": "acoustic"
+            "energy": 0.31
         },
         {
             "band": "roselia",
@@ -6172,8 +5564,7 @@
             "x": 25.47,
             "y": -0.9,
             "bpm": 123.0,
-            "energy": 0.917,
-            "shape": "bright"
+            "energy": 0.917
         },
         {
             "band": "roselia",
@@ -6182,8 +5573,7 @@
             "x": 11.67,
             "y": -26.76,
             "bpm": 129.2,
-            "energy": 0.901,
-            "shape": "neutral"
+            "energy": 0.901
         },
         {
             "band": "roselia",
@@ -6192,8 +5582,7 @@
             "x": 12.84,
             "y": 5.74,
             "bpm": 129.2,
-            "energy": 0.841,
-            "shape": "neutral"
+            "energy": 0.841
         },
         {
             "band": "roselia",
@@ -6202,8 +5591,7 @@
             "x": 9.83,
             "y": -3.69,
             "bpm": 129.2,
-            "energy": 0.829,
-            "shape": "bright"
+            "energy": 0.829
         },
         {
             "band": "roselia",
@@ -6212,8 +5600,7 @@
             "x": -11.51,
             "y": 6.72,
             "bpm": 152.0,
-            "energy": 0.266,
-            "shape": "acoustic"
+            "energy": 0.266
         },
         {
             "band": "roselia",
@@ -6222,8 +5609,7 @@
             "x": 12.28,
             "y": 15.32,
             "bpm": 117.5,
-            "energy": 0.751,
-            "shape": "bright"
+            "energy": 0.751
         },
         {
             "band": "roselia",
@@ -6232,8 +5618,7 @@
             "x": 14.22,
             "y": -4.89,
             "bpm": 129.2,
-            "energy": 0.712,
-            "shape": "bright"
+            "energy": 0.712
         },
         {
             "band": "roselia",
@@ -6242,8 +5627,7 @@
             "x": 26.25,
             "y": 15.36,
             "bpm": 103.4,
-            "energy": 0.926,
-            "shape": "neutral"
+            "energy": 0.926
         },
         {
             "band": "roselia",
@@ -6252,8 +5636,7 @@
             "x": -25.13,
             "y": 41.6,
             "bpm": 123.0,
-            "energy": 0.637,
-            "shape": "acoustic"
+            "energy": 0.637
         },
         {
             "band": "roselia",
@@ -6262,8 +5645,7 @@
             "x": 17.7,
             "y": -2.37,
             "bpm": 123.0,
-            "energy": 0.589,
-            "shape": "bright"
+            "energy": 0.589
         },
         {
             "band": "roselia",
@@ -6272,8 +5654,7 @@
             "x": -22.4,
             "y": 32.19,
             "bpm": 103.4,
-            "energy": 0.469,
-            "shape": "neutral"
+            "energy": 0.469
         },
         {
             "band": "roselia",
@@ -6282,8 +5663,7 @@
             "x": -31.53,
             "y": 49.33,
             "bpm": 99.4,
-            "energy": 0.202,
-            "shape": "neutral"
+            "energy": 0.202
         },
         {
             "band": "roselia",
@@ -6292,8 +5672,7 @@
             "x": 6.5,
             "y": 1.87,
             "bpm": 117.5,
-            "energy": 0.894,
-            "shape": "neutral"
+            "energy": 0.894
         },
         {
             "band": "roselia",
@@ -6302,8 +5681,7 @@
             "x": -3.4,
             "y": -14.24,
             "bpm": 117.5,
-            "energy": 0.806,
-            "shape": "acoustic"
+            "energy": 0.806
         },
         {
             "band": "roselia",
@@ -6312,8 +5690,7 @@
             "x": -6.79,
             "y": 9.11,
             "bpm": 99.4,
-            "energy": 0.671,
-            "shape": "acoustic"
+            "energy": 0.671
         },
         {
             "band": "roselia",
@@ -6322,8 +5699,7 @@
             "x": 0.79,
             "y": -30.12,
             "bpm": 123.0,
-            "energy": 0.328,
-            "shape": "neutral"
+            "energy": 0.328
         },
         {
             "band": "roselia",
@@ -6332,8 +5708,7 @@
             "x": -0.08,
             "y": -33.95,
             "bpm": 107.7,
-            "energy": 0.86,
-            "shape": "neutral"
+            "energy": 0.86
         },
         {
             "band": "roselia",
@@ -6342,8 +5717,7 @@
             "x": 2.54,
             "y": 30.21,
             "bpm": 99.4,
-            "energy": 0.432,
-            "shape": "neutral"
+            "energy": 0.432
         },
         {
             "band": "roselia",
@@ -6352,8 +5726,7 @@
             "x": 21.79,
             "y": 9.45,
             "bpm": 129.2,
-            "energy": 0.528,
-            "shape": "bright"
+            "energy": 0.528
         },
         {
             "band": "roselia",
@@ -6362,8 +5735,7 @@
             "x": 20.47,
             "y": -17.39,
             "bpm": 129.2,
-            "energy": 0.665,
-            "shape": "bright"
+            "energy": 0.665
         },
         {
             "band": "roselia",
@@ -6372,8 +5744,7 @@
             "x": -70.0,
             "y": -9.08,
             "bpm": 123.0,
-            "energy": 0.015,
-            "shape": "acoustic"
+            "energy": 0.015
         },
         {
             "band": "roselia",
@@ -6382,8 +5753,7 @@
             "x": 8.29,
             "y": -8.41,
             "bpm": 99.4,
-            "energy": 0.141,
-            "shape": "neutral"
+            "energy": 0.141
         },
         {
             "band": "roselia",
@@ -6392,8 +5762,7 @@
             "x": 8.0,
             "y": -16.0,
             "bpm": 129.2,
-            "energy": 0.648,
-            "shape": "neutral"
+            "energy": 0.648
         },
         {
             "band": "roselia",
@@ -6402,8 +5771,7 @@
             "x": -9.71,
             "y": 1.9,
             "bpm": 129.2,
-            "energy": 0.402,
-            "shape": "acoustic"
+            "energy": 0.402
         },
         {
             "band": "roselia",
@@ -6412,8 +5780,7 @@
             "x": -5.67,
             "y": -6.92,
             "bpm": 129.2,
-            "energy": 0.264,
-            "shape": "acoustic"
+            "energy": 0.264
         },
         {
             "band": "roselia",
@@ -6422,8 +5789,7 @@
             "x": -56.68,
             "y": -6.55,
             "bpm": 112.3,
-            "energy": 0.002,
-            "shape": "acoustic"
+            "energy": 0.002
         },
         {
             "band": "roselia",
@@ -6432,8 +5798,7 @@
             "x": 16.39,
             "y": -11.81,
             "bpm": 123.0,
-            "energy": 0.785,
-            "shape": "neutral"
+            "energy": 0.785
         },
         {
             "band": "roselia",
@@ -6442,8 +5807,7 @@
             "x": 36.12,
             "y": -6.68,
             "bpm": 99.4,
-            "energy": 0.813,
-            "shape": "bright"
+            "energy": 0.813
         },
         {
             "band": "roselia",
@@ -6452,8 +5816,7 @@
             "x": 13.59,
             "y": 39.19,
             "bpm": 103.4,
-            "energy": 0.771,
-            "shape": "shimmer"
+            "energy": 0.771
         },
         {
             "band": "roselia",
@@ -6462,8 +5825,7 @@
             "x": -5.81,
             "y": 5.45,
             "bpm": 123.0,
-            "energy": 0.677,
-            "shape": "acoustic"
+            "energy": 0.677
         },
         {
             "band": "roselia",
@@ -6472,8 +5834,7 @@
             "x": -45.09,
             "y": 12.55,
             "bpm": 117.5,
-            "energy": 0.112,
-            "shape": "acoustic"
+            "energy": 0.112
         },
         {
             "band": "roselia",
@@ -6482,8 +5843,7 @@
             "x": -12.29,
             "y": -22.87,
             "bpm": 107.7,
-            "energy": 0.2,
-            "shape": "neutral"
+            "energy": 0.2
         },
         {
             "band": "roselia",
@@ -6492,8 +5852,7 @@
             "x": -2.0,
             "y": -5.81,
             "bpm": 143.6,
-            "energy": 0.601,
-            "shape": "neutral"
+            "energy": 0.601
         },
         {
             "band": "roselia",
@@ -6502,8 +5861,7 @@
             "x": 1.06,
             "y": 1.25,
             "bpm": 136.0,
-            "energy": 0.8,
-            "shape": "neutral"
+            "energy": 0.8
         },
         {
             "band": "roselia",
@@ -6512,8 +5870,7 @@
             "x": 16.23,
             "y": -28.04,
             "bpm": 123.0,
-            "energy": 0.135,
-            "shape": "shimmer"
+            "energy": 0.135
         },
         {
             "band": "roselia",
@@ -6522,8 +5879,7 @@
             "x": -5.59,
             "y": 6.26,
             "bpm": 143.6,
-            "energy": 0.096,
-            "shape": "neutral"
+            "energy": 0.096
         },
         {
             "band": "roselia",
@@ -6532,8 +5888,7 @@
             "x": -11.23,
             "y": -2.16,
             "bpm": 129.2,
-            "energy": 0.366,
-            "shape": "bright"
+            "energy": 0.366
         },
         {
             "band": "roselia",
@@ -6542,8 +5897,7 @@
             "x": -0.8,
             "y": 20.45,
             "bpm": 103.4,
-            "energy": 0.234,
-            "shape": "bright"
+            "energy": 0.234
         },
         {
             "band": "roselia",
@@ -6552,8 +5906,7 @@
             "x": -23.04,
             "y": 1.08,
             "bpm": 129.2,
-            "energy": 0.062,
-            "shape": "acoustic"
+            "energy": 0.062
         },
         {
             "band": "roselia",
@@ -6562,8 +5915,7 @@
             "x": -9.59,
             "y": -3.62,
             "bpm": 143.6,
-            "energy": 0.14,
-            "shape": "neutral"
+            "energy": 0.14
         },
         {
             "band": "roselia",
@@ -6572,8 +5924,7 @@
             "x": -13.9,
             "y": -31.2,
             "bpm": 112.3,
-            "energy": 0.105,
-            "shape": "neutral"
+            "energy": 0.105
         },
         {
             "band": "roselia",
@@ -6582,8 +5933,7 @@
             "x": 1.77,
             "y": 24.78,
             "bpm": 143.6,
-            "energy": 0.376,
-            "shape": "bright"
+            "energy": 0.376
         },
         {
             "band": "roselia",
@@ -6592,8 +5942,7 @@
             "x": -5.39,
             "y": -15.3,
             "bpm": 117.5,
-            "energy": 0.225,
-            "shape": "bright"
+            "energy": 0.225
         },
         {
             "band": "roselia",
@@ -6602,8 +5951,7 @@
             "x": 1.11,
             "y": -27.56,
             "bpm": 136.0,
-            "energy": 0.698,
-            "shape": "neutral"
+            "energy": 0.698
         },
         {
             "band": "roselia",
@@ -6612,8 +5960,7 @@
             "x": 35.64,
             "y": -17.5,
             "bpm": 143.6,
-            "energy": 0.566,
-            "shape": "bright"
+            "energy": 0.566
         },
         {
             "band": "roselia",
@@ -6622,8 +5969,7 @@
             "x": -19.41,
             "y": 7.89,
             "bpm": 136.0,
-            "energy": 0.3,
-            "shape": "neutral"
+            "energy": 0.3
         },
         {
             "band": "roselia",
@@ -6632,8 +5978,7 @@
             "x": 1.87,
             "y": 4.98,
             "bpm": 136.0,
-            "energy": 0.291,
-            "shape": "acoustic"
+            "energy": 0.291
         },
         {
             "band": "roselia",
@@ -6642,8 +5987,7 @@
             "x": 3.84,
             "y": 16.37,
             "bpm": 103.4,
-            "energy": 0.175,
-            "shape": "bright"
+            "energy": 0.175
         },
         {
             "band": "roselia",
@@ -6652,8 +5996,7 @@
             "x": 19.3,
             "y": 36.0,
             "bpm": 112.3,
-            "energy": 0.179,
-            "shape": "bright"
+            "energy": 0.179
         },
         {
             "band": "roselia",
@@ -6662,8 +6005,7 @@
             "x": -42.45,
             "y": 50.14,
             "bpm": 112.3,
-            "energy": 0.064,
-            "shape": "neutral"
+            "energy": 0.064
         },
         {
             "band": "roselia",
@@ -6672,8 +6014,7 @@
             "x": -7.98,
             "y": 0.6,
             "bpm": 152.0,
-            "energy": 0.642,
-            "shape": "neutral"
+            "energy": 0.642
         },
         {
             "band": "roselia",
@@ -6682,8 +6023,31 @@
             "x": 29.3,
             "y": 15.66,
             "bpm": 112.3,
-            "energy": 0.49,
-            "shape": "bright"
+            "energy": 0.49
+        },
+        {
+            "band": "mygo",
+            "song": "素寄曲",
+            "url": "https://youtu.be/uZSAArx6jKM",
+            "x": 9.03,
+            "y": 29.99,
+            "bpm": 117.5
+        },
+        {
+            "band": "mygo",
+            "song": "羅永線",
+            "url": "https://youtu.be/fwTsHwFzOlg",
+            "x": 9.04,
+            "y": 39.19,
+            "bpm": 129.2
+        },
+        {
+            "band": "mygo",
+            "song": "騒混出",
+            "url": "https://youtu.be/GzbCOAHhwzM",
+            "x": 22.28,
+            "y": 34.88,
+            "bpm": 117.5
         }
     ],
     "centroids": [
@@ -6731,9 +6095,9 @@
         },
         {
             "band": "mygo",
-            "n": 41,
-            "x": 7.4,
-            "y": 16.04
+            "n": 44,
+            "x": 7.82,
+            "y": 17.31
         },
         {
             "band": "pastel_palettes",
@@ -6771,7 +6135,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 660,
+        "n": 663,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,

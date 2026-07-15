@@ -1,0 +1,33 @@
+{
+  "purpose": "proxy z-score 동결 정규화 상수(신곡 증분용)",
+  "source": "genre_features_analyze.build_proxies 재현 — song_features_with_proxies.csv 원시 컬럼 mean/std(ddof=1)",
+  "built_at": "2026-07-15",
+  "n_rows": 660,
+  "verify_max_abs_diff": 0.0,
+  "norms": {
+    "harmonic_ratio": {
+      "mean": 0.7264974545454546,
+      "std": 0.06903763379714725
+    },
+    "flatness": {
+      "mean": 0.033981727272727275,
+      "std": 0.01152043402163751
+    },
+    "voiced_frac_mix": {
+      "mean": 0.3838141363636363,
+      "std": 0.15838968607022993
+    },
+    "rms": {
+      "mean": 0.296036893939394,
+      "std": 0.04825772841047603
+    },
+    "contrast": {
+      "mean": 22.008802863636365,
+      "std": 0.691808770197251
+    },
+    "flux": {
+      "mean": 1.2641376818181818,
+      "std": 0.11575878929816609
+    }
+  }
+}
