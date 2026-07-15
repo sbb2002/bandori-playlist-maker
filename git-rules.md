@@ -103,21 +103,24 @@
 
 ---
 
-### `tool/*` (예: `song-autoloader`)
+### `tools`
 
-* **반자동 운영 툴 전용 브랜치.** 배포 앱(`main`)이 아니라, 사람이 로컬에서 트리거해 데이터를
+* **반자동 운영 툴 전용 단일 브랜치.** 배포 앱(`main`)이 아니라, 사람이 로컬에서 트리거해 데이터를
   주입하는 반자동 파이프라인(예: 신곡 오토로더)을 담는다. `main`은 **배포 앱 소스만** 담는다.
-* **`main`에 머지하지 않는다.** `data`·`document-archive`처럼 **상시 재사용·`main` 미머지** 브랜치다.
-  툴 코드는 이 브랜치에 상주하고, 산출 데이터만 `data` 브랜치로 흘려보낸다(→ `data` 절 규칙).
+* **`main`에 머지하지 않는다.** `data`·`document-archive`와 같은 원칙의 **상시 재사용·`main` 미머지**
+  단일 브랜치다. 여러 툴이 생기면 `src/scripts/<tool-name>/`처럼 이 브랜치 안에서 디렉터리로
+  나눈다(브랜치를 툴마다 새로 파지 않는다 — `data`/`document-archive`와 동일 원칙).
+  이 브랜치는 **자기 목적에 필요한 파일만** 담는다 — 앱 소스(`src/backend`, `src/frontend`,
+  `src/tests`)·`main` 전용 문서(`CLAUDE.md`, `git-rules.md`, `docs/`, `versionlog.md`)·배포 설정은
+  두지 않는다. 툴 산출 데이터만 `data` 브랜치로 흘려보낸다(→ `data` 절 규칙).
 * **왜 반자동·로컬인가:** 신곡 감지는 형제 프로젝트 Actions가 전담하지만, 오디오 다운로드(yt-dlp)는
   데이터센터/DB서버 IP가 YouTube 봇월에 막혀 **집(레지덴셜) IP 로컬 실행**이 필요하다. 그래서 cron
   완전자동이 아니라 사람이 트리거하는 반자동 툴로 둔다.
 * **Rebase 규칙:** 공유 모듈(`src/scripts/data/*` 등)이 `main`에서 바뀌면 최신화를 위해 **필요 시
   `main`에서 Rebase를 허용**한다. (자동화 봇이 소유해 Rebase를 금지하는 `data` 브랜치와 다르다 —
-  tool 브랜치는 사람이 실행하므로 최신 공유 코드 동기화가 이롭다.)
-* **현재 인스턴스는 `feature/song-autoloader`**(신곡 오토로더)다. 접두사 `feature/`는 과거 잔재이며,
-  다른 로컬의 워크트리가 이 브랜치명을 추적 중이라 즉시 rename하지 않는다(멀티로컬 인수인계 리스크).
-  **신규 툴은 `tool/*`로 생성**하고, 위 브랜치는 정리 여력이 될 때 `tool/*`로 이관한다.
+  `tools` 브랜치는 사람이 실행하므로 최신 공유 코드 동기화가 이롭다.)
+* **현재 상주 툴은 신곡 오토로더**(`src/scripts/autoloader/`)다. 옛 `feature/song-autoloader`
+  브랜치에서 2026-07-16 `tools`로 정식 승격·이관됐다(옛 브랜치는 삭제됨).
 * **[배포 및 태깅]** `main` 머지가 없으므로 **태깅 대상이 아니다.**
 
 ---
@@ -181,6 +184,6 @@ PR을 열지 않으므로 이 목록에 포함되지 않는다.
 
 ## General Rules
 
-* 하나의 브랜치는 하나의 작업(Task)/주제만 담당한다. (단일 브랜치인 `data`·`document-archive`와 `tool/*`(예: `feature/song-autoloader`)은 예외적으로 상시 재사용한다.)
+* 하나의 브랜치는 하나의 작업(Task)/주제만 담당한다. (단일 브랜치인 `data`·`document-archive`·`tools`는 예외적으로 상시 재사용한다.)
 * Merge 정책은 `CLAUDE.md`의 Working agreement를 따른다.
 * 다음(새로운) 작업은 항상 최신 `main`에서 새로운 브랜치를 생성하여 시작한다.

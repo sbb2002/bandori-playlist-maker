@@ -58,9 +58,9 @@ bandori-playlist-maker/
 ### 경계 (의존 방향 = 안쪽으로만)
 
 `frontend` → HTTP/JSON → `api`(DTO·에러 매핑) → `domain`(순수) ← `ports`(도메인 정의 인터페이스)
-← `adapters`(OpenRouter 구현) / `repo`(CSV 로더). `main.py`가 composition root로 어댑터를 포트
-자리에 주입. `domain/`은 `adapters/`·`api/`·OpenRouter를 모른다. 벤더 교체 = 어댑터 1파일 +
-주입 1줄. (investbot의 adapter→api 분리와 동형.)
+← `adapters`(Groq 구현, `groq_adapter.py`) / `repo`(원격 fetch + CSV 로더). `main.py`가
+composition root로 어댑터를 포트 자리에 주입. `domain/`은 `adapters/`·`api/`·LLM 벤더를 모른다.
+벤더 교체 = 어댑터 1파일 + 주입 1줄. (investbot의 adapter→api 분리와 동형.)
 
 **cross-team import**: `harmonic.py`는 `src/scripts/data/camelot.py`의 `is_adjacent()`를,
 `song_repo.py`는 `video_id.py`를 읽기 전용 import (둘 다 표준 라이브러리 순수 함수 — 도메인
@@ -150,7 +150,7 @@ GET /api/health     → 200 { "status": "ok", "version", "interpreter": "stub"|"
 |---|---|---|
 | 잘못된 요청 | 400 | INVALID_REQUEST |
 | LLM 파싱 불가 | 422 | MOOD_UNINTERPRETABLE |
-| OpenRouter 실패/레이트리밋 | 502 | LLM_UPSTREAM_FAILED |
+| Groq 실패/레이트리밋 | 502 | LLM_UPSTREAM_FAILED |
 | 세트리스트 구성 불가 | 409 | NO_SETLIST |
 | 기타 | 500 | INTERNAL |
 
@@ -166,9 +166,9 @@ GET /api/health     → 200 { "status": "ok", "version", "interpreter": "stub"|"
    - 대체: `avg_song_seconds=213` 플레이스홀더(오차가 재생시간에 그대로 반영).
    - 공통: 프론트 `getDuration()`으로 실제 경과 추적 → `playlist_half_played` 판정.
      엔진 사이징은 iframe에 의존 불가(재생 전 미확보).
-3. **OpenRouter 모델**: 경량 구조화 추출(입 ~300/출 ~150토큰)이라 저가 소형 모델 1차
-   (Haiku/Gemini Flash/mini 계열), 요청당 ~$0.001 수준. 정확한 모델 ID·단가는 구현 직전 검증
-   (어댑터 격리로 지연 무비용).
+3. **LLM 벤더/모델 — 확정(Resolved)**: OpenRouter가 아니라 **Groq**로 확정·구현됨
+   (`adapters/groq_adapter.py`). 기본 모델은 `render.yaml`의 `GROQ_MODEL`(현재
+   `openai/gpt-oss-20b`)로 오버라이드 가능 — 어댑터 격리 덕에 모델·벤더 교체는 여전히 무비용.
 4. **선곡 이유 노출: YES.** reason 메타는 엔진이 LLM 비용 0으로 생성. API 항상 포함, 프론트가
    표시 강도 조절(접이식/보조 텍스트).
 
@@ -178,7 +178,7 @@ GET /api/health     → 200 { "status": "ok", "version", "interpreter": "stub"|"
 |---|---|---|---|---|
 | T1 | 도메인 모델 + CSV 로더 | domain/models.py, repo/song_repo.py, tests | **haiku** | 선행 단독 |
 | T2 | 선곡 엔진 순수 함수 | domain/selection.py·energy.py·harmonic.py, tests 3종 | **sonnet** (②③) | T1 후. T3·T5와 병렬 |
-| T3 | LLM 포트 + OpenRouter 어댑터 | ports/mood_port.py, adapters/, test(목킹) | **sonnet** (①③) | T1 후. T2·T5와 병렬 |
+| T3 | LLM 포트 + Groq 어댑터 | ports/mood_port.py, adapters/, test(목킹) | **sonnet** (①③) | T1 후. T2·T5와 병렬 |
 | T4 | FastAPI 조립·CORS·에러 | main.py, api/, requirements.txt, test_api.py | **sonnet** (②) | T2·T3 후 |
 | T5 | 정적 프론트 + iframe + umami | frontend/ 3파일 | **haiku** (반려 2회 시 상향) | 스키마3 동결로 즉시. 통합 검증만 T4 후 |
 
@@ -188,6 +188,7 @@ GET /api/health     → 200 { "status": "ok", "version", "interpreter": "stub"|"
 
 1. `duration_sec` 백필 승인 + YouTube Data API 키 발급 (사용자) — T2를 차단하지는 않음(양쪽 수용 설계).
 2. ④ 제안값(N=3, 이유 노출 등) 사용자 최종 결재.
-3. `FRONTEND_ORIGIN` 확정 — GitHub Pages 프로젝트 페이지 기준 `https://sbb2002.github.io` 예상.
+3. ~~`FRONTEND_ORIGIN` 확정~~ — **Resolved**: `https://sbb2002.github.io`로 확정·배포됨(`render.yaml`).
 4. key 신뢰도 미검증 — non_harmonic 표기로 완화, 실사용 피드백으로 재평가.
-5. 백엔드 호스팅 플랫폼(§9) — 아키텍처는 플랫폼 무관, 배포 시점 결정.
+5. ~~백엔드 호스팅 플랫폼(§9)~~ — **Resolved**: 프론트 GitHub Pages(`.github/workflows/pages.yml`)
+   + 백엔드 Render 무료 플랜(`render.yaml`)으로 확정·배포됨.

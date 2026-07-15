@@ -40,14 +40,21 @@ project `bandori-song-sorter` (a static "browse" site), reusing that project's a
 - **Clean/hexagonal split is required, not optional**: domain logic (mood-interpretation schema,
   energy-progression + harmonic-mixing selection rules) must not depend directly on any external
   service. LLM calls go through a port/interface with the LLM provider as a swappable adapter —
-  switching OpenRouter models, or vendors entirely (e.g. to direct Anthropic/OpenAI calls), must be a
+  switching models, or vendors entirely (e.g. to direct Anthropic/OpenAI calls), must be a
   single-adapter change.
 - Selection logic must be a **pure function** over structured LLM output (mood/energy params) so it is
   unit-testable without calling any LLM.
 - Workspace precedent to follow: `investbot`'s `src/core/adapter/` (protocol layer) →
   `src/core/api/` (business logic) separation.
-- Needs a backend (not a static site) solely to hold the OpenRouter API key and (later) do request
-  queuing — prefer a free tier with cold-start/sleep acceptable (Render et al., undecided).
+- Needs a backend (not a static site) to hold the Groq API key and rate-limit outbound calls
+  (`src/backend/app/adapters/rate_limiter.py`); request queuing is still TBD (see "Open questions").
+
+**Resolved (confirmed, live):** LLM vendor is **Groq** (`src/backend/app/adapters/groq_adapter.py`,
+wired in `main.py` — falls back to a stub/offline adapter when `GROQ_API_KEY` is unset). Hosting is
+**frontend → GitHub Pages** (`.github/workflows/pages.yml`) and **backend → Render free tier**
+(`render.yaml`, cold-start/sleep accepted). External APIs in use: **Groq** (mood/energy extraction)
+and the **YouTube iframe Player API** (autoplay); YouTube Data API access is used ad hoc for
+duration backfill, not yet a standing integration.
 
 ## Data sources (reused from `bandori-song-sorter`, not this repo)
 
@@ -79,7 +86,7 @@ suite already uses via `conftest.py` — not live-updated by the autoloader).
 ## Pilot scope (PRD §4) — must-have only
 
 1. Natural-language request input.
-2. OpenRouter LLM call → extract mood/energy direction (brightness, starting energy level).
+2. Groq LLM call → extract mood/energy direction (brightness, starting energy level).
 3. Candidate filtering across the full song set (band checkbox filter is post-pilot).
 4. Energy-progression logic: split the setlist into N stages (N default TBD — open question), pick
    per-stage by energy level, and prefer the next song whose key is Camelot-adjacent to the previous
@@ -92,9 +99,13 @@ Explicitly out of pilot scope: saving/sharing as a real YouTube playlist (would 
 ## Known open questions (PRD §9)
 
 Treat these as unresolved — don't silently pick an answer when implementing related code without
-flagging it: default/min/max energy stage count N; which OpenRouter model; hosting platform; when to
-introduce request queuing; whether to surface "why this song was picked" explanations to
-users; whether the reused audio features need re-extraction for mood-matching accuracy.
+flagging it: default/min/max energy stage count N; when to introduce request queuing; whether to
+surface "why this song was picked" explanations to users; whether the reused audio features need
+re-extraction for mood-matching accuracy.
+
+(LLM vendor and hosting platform used to be listed here — both are resolved now, see the "Resolved"
+note under "Architecture mandated by the PRD" above. The minimum-sample-size band-exclusion question
+used to be listed here too — also resolved, see the note directly below.)
 
 **Resolved (2026-07-15):** the minimum-sample-size band-exclusion question is closed — no band is
 excluded from candidates for having few songs (`_MIN_BAND_SAMPLE` in
