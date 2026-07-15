@@ -177,5 +177,66 @@ class MergeTest(unittest.TestCase):
         self.assertEqual(rows[0]["i_mean"], "0.10000")
 
 
+class PatchIntensityRowsTest(unittest.TestCase):
+    """soft-run이 밴드 평균으로 임시 대체했던 i_*를 되짚어 갱신(백필)하는 경로."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        data = self.root / "data"
+        data.mkdir()
+        master_rows = [
+            "0,mygo,old0,https://youtu.be/OLDVID00000,OLDVID00000,Amaj,11B,120.0,"
+            "0.1,0.2,-1.0,-0.5,120.0,0.5,neutral,True,0.500000,"
+            "0.10000,0.50000,1.00000,-0.50000,0.00000,0.20000",
+            "660,mygo,신곡660,https://youtu.be/NEWVID00000,NEWVID00000,Amaj,11B,120.0,"
+            "0.1,0.2,-1.0,-0.5,120.0,,neutral,True,0.750000,"
+            "0.10000,0.50000,1.00000,-0.50000,0.00000,0.20000",   # provisional(밴드 평균)
+        ]
+        (data / "songs_master.csv").write_bytes(
+            (MASTER_HEADER + "\r\n" + "\r\n".join(master_rows) + "\r\n").encode())
+        (data / "temporal_intensity.csv").write_bytes(
+            b"idx,band,song,i_mean,i_std,i_max,i_min,i_start,i_end\r\n"
+            b"0,mygo,old0,0.10000,0.50000,1.00000,-0.50000,0.00000,0.20000\r\n"
+            b"660,mygo,\xec\x8b\xa0\xea\xb3\xa1660,0.10000,0.50000,1.00000,"
+            b"-0.50000,0.00000,0.20000\r\n")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_patches_only_target_idx_i_fields(self):
+        before_master = (self.root / "data/songs_master.csv").read_bytes()
+        real = {"i_mean": "0.42000", "i_std": "0.11000", "i_max": "0.90000",
+               "i_min": "0.05000", "i_start": "0.30000", "i_end": "0.55000"}
+        merge_data.patch_intensity_rows(self.root, {660: real})
+
+        rows = list(csv.DictReader(
+            (self.root / "data/songs_master.csv").open(encoding="utf-8", newline="")))
+        self.assertEqual(rows[0]["i_mean"], "0.10000")      # idx=0 불변
+        self.assertEqual(rows[1]["i_mean"], "0.42000")      # idx=660 갱신
+        self.assertEqual(rows[1]["idx"], "660")
+        self.assertEqual(rows[1]["key"], "Amaj")            # i_* 외 컬럼 불변
+        self.assertNotEqual((self.root / "data/songs_master.csv").read_bytes(),
+                            before_master)
+
+        trows = list(csv.DictReader(
+            (self.root / "data/temporal_intensity.csv").open(encoding="utf-8", newline="")))
+        self.assertEqual(trows[1]["i_mean"], "0.42000")
+
+    def test_no_updates_is_noop(self):
+        before = (self.root / "data/songs_master.csv").read_bytes()
+        merge_data.patch_intensity_rows(self.root, {})
+        self.assertEqual((self.root / "data/songs_master.csv").read_bytes(), before)
+
+    def test_unknown_idx_rolls_back(self):
+        before_master = (self.root / "data/songs_master.csv").read_bytes()
+        before_temporal = (self.root / "data/temporal_intensity.csv").read_bytes()
+        with self.assertRaises(AssertionError):
+            merge_data.patch_intensity_rows(self.root, {999: {"i_mean": "0.0"}})
+        self.assertEqual((self.root / "data/songs_master.csv").read_bytes(), before_master)
+        self.assertEqual((self.root / "data/temporal_intensity.csv").read_bytes(),
+                         before_temporal)
+
+
 if __name__ == "__main__":
     unittest.main()

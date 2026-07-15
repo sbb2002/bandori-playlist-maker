@@ -191,5 +191,37 @@ class AggregateIntensityTest(unittest.TestCase):
         self.assertEqual(got["i_start"], got["i_end"])
 
 
+class BandAverageIntensityTest(unittest.TestCase):
+    """soft-run이 intensity_norm 미준비 시 대체하는 밴드 평균 산식."""
+
+    def _row(self, idx, band, i_mean):
+        r = {"idx": str(idx), "band": band}
+        for i, f in enumerate(norms.I_FIELDS):
+            r[f] = f"{i_mean + i * 0.1:.5f}"
+        return r
+
+    def test_averages_only_same_band(self):
+        rows = [self._row(1, "afterglow", 1.0), self._row(2, "afterglow", 3.0),
+                self._row(3, "roselia", 9.0)]
+        got = norms.band_average_intensity(rows, "afterglow")
+        self.assertAlmostEqual(float(got["i_mean"]), 2.0, places=4)
+
+    def test_excludes_given_idx(self):
+        rows = [self._row(1, "afterglow", 1.0), self._row(2, "afterglow", 3.0)]
+        got = norms.band_average_intensity(rows, "afterglow", exclude_idx=frozenset({2}))
+        self.assertAlmostEqual(float(got["i_mean"]), 1.0, places=4)
+
+    def test_no_reference_rows_returns_none(self):
+        rows = [self._row(1, "roselia", 9.0)]
+        self.assertIsNone(norms.band_average_intensity(rows, "afterglow"))
+
+    def test_rows_with_blank_i_fields_are_skipped(self):
+        blank = {"idx": "5", "band": "afterglow",
+                 **{f: "" for f in norms.I_FIELDS}}
+        rows = [blank, self._row(1, "afterglow", 2.0)]
+        got = norms.band_average_intensity(rows, "afterglow")
+        self.assertAlmostEqual(float(got["i_mean"]), 2.0, places=4)
+
+
 if __name__ == "__main__":
     unittest.main()

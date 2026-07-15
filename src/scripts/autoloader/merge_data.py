@@ -177,6 +177,52 @@ def _read_rows(path: Path) -> list[dict]:
         return list(csv.DictReader(f))
 
 
+I_FIELDS = ["i_mean", "i_std", "i_max", "i_min", "i_start", "i_end"]
+
+
+def patch_intensity_rows(repo_root: Path, updates: dict[int, dict[str, str]]) -> None:
+    """soft-run이 밴드 평균으로 임시 대체했던 i_* 컬럼을, 정식 동결 norm이 준비된
+    이후의 일반 run에서 실측값으로 되짚어 갱신한다(백필).
+
+    이 함수는 `merge()`의 "기존 행 바이트 불변" 불변식에 대한 **의도된 예외**다 —
+    대상은 오직 이전에 provisional로 표시된 행의 i_* 6컬럼뿐이고, idx/band/song 등
+    나머지 모든 필드·모든 다른 행은 그대로 둔다. songs_master.csv와
+    temporal_intensity.csv 둘 다 갱신하며, 실패 시 두 파일 전체를 스냅샷 복원한다.
+
+    updates: {idx: {"i_mean": "...", ...}} — norms.aggregate_intensity() 산출 그대로.
+    """
+    if not updates:
+        return
+    paths = {REL_MASTER: repo_root / REL_MASTER, REL_TEMPORAL: repo_root / REL_TEMPORAL}
+    snapshot = {p: p.read_bytes() for p in paths.values()}
+    try:
+        for rel, p in paths.items():
+            rows = _read_rows(p)
+            with p.open(encoding="utf-8", newline="") as f:
+                fieldnames = csv.DictReader(f).fieldnames
+            term = _line_terminator(snapshot[p])
+            patched = 0
+            for r in rows:
+                u = updates.get(int(r["idx"]))
+                if u is None:
+                    continue
+                r.update({f: u[f] for f in I_FIELDS})
+                patched += 1
+            if patched != len(updates):
+                found = {int(r["idx"]) for r in rows} & set(updates)
+                missing = set(updates) - found
+                raise AssertionError(f"{rel}: idx 못 찾음(백필 대상 아님?): {sorted(missing)}")
+            buf = io.StringIO()
+            writer = csv.DictWriter(buf, fieldnames=fieldnames, lineterminator=term)
+            writer.writeheader()
+            writer.writerows(rows)
+            p.write_bytes(buf.getvalue().encode("utf-8"))
+    except Exception:
+        for p, b in snapshot.items():
+            p.write_bytes(b)
+        raise
+
+
 def _pre_checks(master_before: list[dict], landed: list[dict]) -> None:
     known_vid = {(m.get("video_id") or "").strip() for m in master_before}
     known_idx = {int(m["idx"]) for m in master_before}

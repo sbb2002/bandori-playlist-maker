@@ -18,10 +18,23 @@
   python src/scripts/autoloader/run_autoloader.py --dry     # 검증(파일 미변경)
   python src/scripts/autoloader/run_autoloader.py           # data/ 반영(git 없음)
   python src/scripts/autoloader/run_autoloader.py --repo-root <data브랜치 워크트리> --git
+  python src/scripts/autoloader/run_autoloader.py --soft    # 아래 참고
+
+soft-run(--soft): 원본 전곡 wav 캐시가 불완전해 intensity_norm 부트스트랩이 불가능한
+환경(예: 로컬 오디오 43%만 보유)에서도 신곡 다운로드·나머지 지표는 정상 반영하고 싶을
+때 쓴다. i_*(시간분절 강도) 동결 norm만 준비 불가하면 전체를 중단하는 대신, 해당
+신곡의 i_*를 같은 밴드 기존 곡 평균으로 임시 대체해 반영하고
+data/provisional_intensity.json에 idx를 기록한다(다른 컬럼은 정상 산출 — i_*만 원본
+전곡 wav 재추출이 필요한 유일한 계열이라 영향받는 건 이 6컬럼뿐).
+**--soft 없이(즉 intensity_norm 부트스트랩이 가능한 "제대로 준비된 환경"에서) 실행하면**,
+새 신곡 처리 전에 먼저 provisional_intensity.json에 남은 idx들을 실측 i_*로
+재산출해 songs_master.csv/temporal_intensity.csv를 되짚어 갱신(백필)하고 레지스트리에서
+제거한다 — merge_data.patch_intensity_rows() 참고.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 import time
@@ -54,16 +67,44 @@ DATA_PATHS = [
     "data/song_features_with_proxies.csv", "data/full_audio_features.csv",
     "data/temporal_intensity.csv", "data/songs_master.csv",
     "data/feature_norms.json", "data/energy_full_norm.json",
-    "data/intensity_norm.json",
+    "data/intensity_norm.json", "data/provisional_intensity.json",
 ]
+
+PROVISIONAL_JSON_REL = "data/provisional_intensity.json"
+
+
+def _load_provisional(repo_root: Path) -> dict[int, dict]:
+    p = repo_root / PROVISIONAL_JSON_REL
+    if not p.exists():
+        return {}
+    return {int(k): v for k, v in json.loads(p.read_text(encoding="utf-8")).items()}
+
+
+def _save_provisional(repo_root: Path, reg: dict[int, dict]) -> None:
+    p = repo_root / PROVISIONAL_JSON_REL
+    if not reg:
+        p.unlink(missing_ok=True)
+        return
+    p.write_text(json.dumps({str(k): v for k, v in reg.items()},
+                            ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def _prepare_norms(repo_root: Path, master_rows: list[dict], audio_dir: Path,
-                   workers: int) -> tuple[dict, norms.EnergyFullFrozen, tuple, dict]:
+                   workers: int, soft: bool
+                   ) -> tuple[dict, norms.EnergyFullFrozen, tuple, dict, bool]:
     """동결 norm 4계열 준비(최초 구축 시 기존 행 재현 검증 후 영속화).
 
-    구축 실패(재현 불일치)는 RuntimeError로 즉시 중단 — 자로 쓸 분포가 원본과
-    다르면 신곡 값 전체가 오염되기 때문."""
+    proxy/shape/energy_full은 이미 반영된 CSV 산출물(song_features_with_proxies.csv
+    등)에서 구축되므로 원본 wav 캐시가 불완전해도 항상 준비 가능하다. i_*만
+    전곡 wav 부트스트랩이 필요해 유일한 취약점이다 — 재현 실패는 보통 로컬의
+    wav 캐시 커버리지 부족 때문(예: 285/660곡만 보유).
+
+    soft=False(기본): 구축 실패는 RuntimeError로 즉시 중단(자로 쓸 분포가 원본과
+    다르면 신곡 값 전체가 오염되기 때문) — 이 경로에서 성공하면 intensity_ready=True.
+    soft=True: i_* 실패만 흡수하고 (None, None)·intensity_ready=False를 반환,
+    호출측이 밴드 평균 임시값으로 대체하도록 한다. proxy/shape/energy_full 실패는
+    soft에서도 그대로 중단(이 값들은 wav 없이도 항상 구축 가능해야 하므로, 실패
+    시 진짜 버그일 가능성이 높다)."""
     data = repo_root / "data"
     p_norms = norms.load_or_build_proxy_norms(
         data / "song_features_with_proxies.csv", data / "feature_norms.json")
@@ -81,27 +122,88 @@ def _prepare_norms(repo_root: Path, master_rows: list[dict], audio_dir: Path,
         data / "energy_full_norm.json")
 
     norm_json = data / "intensity_norm.json"
-    if not norm_json.exists():
-        print("intensity_norm.json 없음 → 기존 전곡 wav 부트스트랩(1회, 수 분~수십 분)…")
-        # ⚠️ 전역 med/MAD의 원본 기반은 master(658)가 아니라 원시 추출 세트
-        # temporal_intensity.csv(660행, 중복 업로드 포함)다 — energy_full과 동일 사정.
-        with (data / "temporal_intensity.csv").open(encoding="utf-8", newline="") as f:
-            import csv as _csv2
-            basis_rows = list(_csv2.DictReader(f))
-        payload = norms.bootstrap_intensity_norm(basis_rows, audio_dir,
-                                                 out_json=norm_json, workers=workers)
-        v = payload["verify"]
-        if v["total"] == 0 or v["max_abs_diff"] > 5e-4:
-            norm_json.unlink(missing_ok=True)
-            raise SystemExit("‼️ i_* 동결 상수 검증 실패 — extract_temporal_intensity 대조 필요")
-    med, mad = norms.load_intensity_norm(norm_json)
-    return p_norms, ef, (med, mad), shape_norms
+    try:
+        if not norm_json.exists():
+            print("intensity_norm.json 없음 → 기존 전곡 wav 부트스트랩(1회, 수 분~수십 분)…")
+            # ⚠️ 전역 med/MAD의 원본 기반은 master(658)가 아니라 원시 추출 세트
+            # temporal_intensity.csv(660행, 중복 업로드 포함)다 — energy_full과 동일 사정.
+            with (data / "temporal_intensity.csv").open(encoding="utf-8", newline="") as f:
+                import csv as _csv2
+                basis_rows = list(_csv2.DictReader(f))
+            payload = norms.bootstrap_intensity_norm(basis_rows, audio_dir,
+                                                     out_json=norm_json, workers=workers)
+            v = payload["verify"]
+            if v["total"] == 0 or v["max_abs_diff"] > 5e-4:
+                norm_json.unlink(missing_ok=True)
+                raise RuntimeError(
+                    f"i_* 동결 상수 검증 실패(exact {v['exact']}/{v['total']}, "
+                    f"max diff {v['max_abs_diff']:.2e}) — wav 캐시 커버리지 부족 의심")
+        med, mad = norms.load_intensity_norm(norm_json)
+    except Exception as exc:  # noqa: BLE001
+        if not soft:
+            raise SystemExit(f"‼️ {exc}") from exc
+        print(f"⚠️ --soft: intensity_norm 준비 실패({exc}) — "
+              "이번 실행의 신곡 i_*는 밴드 평균으로 임시 대체하고 provisional 기록")
+        return p_norms, ef, (None, None), shape_norms, False
+    return p_norms, ef, (med, mad), shape_norms, True
+
+
+def _backfill_provisional(repo_root: Path, audio_dir: Path, med, mad,
+                          master_rows: list[dict]) -> None:
+    """soft-run이 밴드 평균으로 임시 대체했던 i_*를, intensity_norm이 준비된
+    이번 run에서 실측값으로 되짚어 갱신.
+
+    provisional로 반영된 곡은 이미 master의 "기존 곡"이라 sources.detect_new가
+    더 이상 신곡으로 잡지 않는다 — 즉 그 wav를 처음 받았던 로컬(soft-run 실행처)이
+    아닌 다른 로컬(예: 원본 wav 전곡을 가진 메인 로컬)에서 이 run을 돌리면
+    audio_dir에 해당 wav가 없는 게 정상이다. 그래서 없으면 master의
+    url(band/idx로 조회)로 즉시 재다운로드를 시도한다. 다운로드까지 실패하면
+    (네트워크 문제 등) 해당 idx는 레지스트리에 남겨 다음 기회에 재시도한다
+    (fail-soft, 멱등)."""
+    reg = _load_provisional(repo_root)
+    if not reg:
+        return
+    by_idx = {int(r["idx"]): r for r in master_rows}
+    print(f"provisional i_* 백필 대상 {len(reg)}곡 시도…")
+    updates: dict[int, dict[str, str]] = {}
+    for idx, meta in reg.items():
+        wav = audio_dir / f"{meta['band']}__{int(idx):03d}.wav"
+        if not wav.exists():
+            m = by_idx.get(int(idx))
+            if m is None:
+                print(f"  ✗ idx={idx}: master에 없음(비정상) — 스킵, 레지스트리 유지")
+                continue
+            print(f"  [dl] idx={idx} wav 없음 — 재다운로드 시도")
+            got = fetch_new.download_one(
+                {"band": meta["band"], "idx": idx, "url": m["url"]}, audio_dir)
+            if got is None:
+                print(f"  ✗ idx={idx}: 재다운로드 실패 — 다음 실행에 재시도")
+                continue
+            wav = got
+        try:
+            frames = norms.compute_frames_for(wav)
+            updates[idx] = norms.aggregate_intensity(frames, med, mad)
+            print(f"  ✅ idx={idx} {meta['band']} 백필 완료")
+        except Exception as exc:  # noqa: BLE001
+            print(f"  ✗ idx={idx}: 백필 실패({exc!r}) — 다음 실행에 재시도")
+    if not updates:
+        return
+    merge_data.patch_intensity_rows(repo_root, updates)
+    for idx in updates:
+        reg.pop(idx, None)
+    _save_provisional(repo_root, reg)
+    print(f"provisional 백필 완료: {len(updates)}곡 반영, {len(reg)}곡 대기 중")
 
 
 def _process_song(cand: dict, wav: Path, p_norms: dict,
                   ef: norms.EnergyFullFrozen, med, mad,
-                  audio_entries: dict[int, dict], shape_norms: dict) -> dict | None:
-    """신곡 1곡 분석(fail-soft). 성공 시 merge_data.merge용 landed dict."""
+                  audio_entries: dict[int, dict], shape_norms: dict,
+                  master_rows: list[dict] | None = None) -> dict | None:
+    """신곡 1곡 분석(fail-soft). 성공 시 merge_data.merge용 landed dict.
+
+    med/mad가 None(soft-run에서 intensity_norm 준비 실패)이면 i_*는 같은 밴드
+    기존 곡 평균으로 대체하고 landed dict에 provisional=True를 표시한다. 참조할
+    같은 밴드 실측 행이 하나도 없으면(신설 밴드 등) 이 곡은 fail-soft로 스킵."""
     idx = cand["idx"]
     try:
         entry = audio_entries.get(idx)
@@ -114,15 +216,27 @@ def _process_song(cand: dict, wav: Path, p_norms: dict,
         shape = norms.compute_shape(excerpt, shape_norms)     # 동결 z(형제 audio_map 미의존)
         full = extract_features(wav)                          # 전곡 서브피처
         full["extract_sec"] = round(time.time() - t0, 2)
-        frames = norms.compute_frames_for(wav)                # 프레임 강도
-        intensity = norms.aggregate_intensity(frames, med, mad)
         energy_full = ef.energy_full_for(full)
 
-        print(f"  ✅ {cand['band']} · {cand['song']}  (idx={idx} key={excerpt['key']} "
+        provisional = False
+        if med is not None:
+            frames = norms.compute_frames_for(wav)            # 프레임 강도
+            intensity = norms.aggregate_intensity(frames, med, mad)
+        else:
+            intensity = norms.band_average_intensity(master_rows or [], cand["band"])
+            if intensity is None:
+                raise RuntimeError(
+                    "intensity_norm 미준비 + 같은 밴드 참조 행 없음 — "
+                    "soft-run으로도 i_* 대체 불가")
+            provisional = True
+
+        tag = "🟡 provisional" if provisional else "✅"
+        print(f"  {tag} {cand['band']} · {cand['song']}  (idx={idx} key={excerpt['key']} "
               f"energy_full={energy_full:.3f} i_mean={intensity['i_mean']})")
         return {"cand": cand, "excerpt": excerpt, "proxies": proxies,
                 "full_feats": full, "audio_entry": entry, "shape": shape,
-                "energy_full": energy_full, "intensity": intensity}
+                "energy_full": energy_full, "intensity": intensity,
+                "provisional": provisional}
     except Exception as exc:  # noqa: BLE001 — 곡별 격리(fail-soft)
         print(f"  ✗ 분석 실패(스킵·다음 실행 재시도): {cand['band']} · {cand['song']} — {exc!r}")
         return None
@@ -141,7 +255,10 @@ def _git_data_branch(repo_root: Path, landed: list[dict]) -> None:
     if branch != "data":
         raise SystemExit(f"‼️ --git은 `data` 브랜치에서만 실행(현재: {branch}). "
                          "git-rules.md의 data 브랜치 규칙 참조.")
-    g("add", "--", *DATA_PATHS)
+    # provisional_intensity.json은 조건부 산출물이라 존재할 때만 add 대상에 포함
+    # (git add는 없는 pathspec에 에러를 내므로).
+    existing_paths = [p for p in DATA_PATHS if (repo_root / p).exists()]
+    g("add", "--", *existing_paths)
     if subprocess.run(["git", "-C", str(repo_root), "diff", "--cached", "--quiet"]).returncode == 0:
         print("커밋할 데이터 변경 없음.")
         return
@@ -175,6 +292,9 @@ def main(argv=None) -> int:
     ap.add_argument("--workers", type=int, default=6, help="부트스트랩 병렬 worker")
     ap.add_argument("--git", action="store_true",
                     help="반영 후 data 브랜치 커밋·푸시 + PR 오픈(브랜치=data 필수)")
+    ap.add_argument("--soft", action="store_true",
+                    help="intensity_norm 준비 불가 시 중단 대신 i_*를 밴드 평균으로 "
+                         "임시 대체하고 provisional 기록(모듈 docstring 참고)")
     a = ap.parse_args(argv)
 
     repo_root = Path(a.repo_root).resolve()
@@ -192,19 +312,26 @@ def main(argv=None) -> int:
           f"→ 신곡 {len(cands)}곡")
     for c in cands:
         print(f"  · idx={c['idx']} {c['band']:12} {c['song']}  ({c['video_id']})")
-    if not cands:
-        print("신곡 없음 — 종료(멱등).")
-        return 0
     if a.limit > 0:
         cands = cands[:a.limit]
 
-    # ② 동결 norm
-    p_norms, ef, (med, mad), shape_norms = _prepare_norms(
-        repo_root, master_rows, audio_dir, a.workers)
-
-    # ③ 곡별 처리
+    # ② 다운로드 우선(신곡 확보는 norm 준비 성패와 무관하게 항상 시도)
     audio_entries = sources.audio_map_entries_by_idx(audio_map)
-    wavs = fetch_new.download_all(cands, audio_dir)
+    wavs = fetch_new.download_all(cands, audio_dir) if cands else {}
+
+    # ③ 동결 norm(soft-run이면 intensity_norm 실패를 흡수)
+    p_norms, ef, (med, mad), shape_norms, intensity_ready = _prepare_norms(
+        repo_root, master_rows, audio_dir, a.workers, soft=a.soft)
+
+    # ④ 정상(비-soft) run이면, 먼저 이전 soft-run이 남긴 provisional i_*를 백필
+    if not a.soft and intensity_ready and not a.dry:
+        _backfill_provisional(repo_root, audio_dir, med, mad, master_rows)
+
+    if not cands:
+        print("신곡 없음 — 종료(멱등).")
+        return 0
+
+    # ⑤ 곡별 처리
     landed, failed = [], []
     for c in cands:
         wav = wavs.get(c["idx"])
@@ -212,7 +339,8 @@ def main(argv=None) -> int:
             print(f"  ✗ 다운로드 실패(스킵): {c['band']} · {c['song']}")
             failed.append(c)
             continue
-        res = _process_song(c, wav, p_norms, ef, med, mad, audio_entries, shape_norms)
+        res = _process_song(c, wav, p_norms, ef, med, mad, audio_entries, shape_norms,
+                            master_rows=master_rows)
         (landed if res else failed).append(res or c)
 
     print(f"\n반영 {len(landed)}곡 · 실패 {len(failed)}곡")
@@ -220,7 +348,7 @@ def main(argv=None) -> int:
         print("반영할 신곡 없음 — 종료.")
         return 1 if failed else 0
 
-    # ④ 반영
+    # ⑥ 반영
     if a.dry:
         print("--dry: data/ 미변경. 산출 예정 행:")
         for s in landed:
@@ -228,7 +356,8 @@ def main(argv=None) -> int:
                 s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
                 s["energy_full"], s["intensity"],
                 True, s["shape"])  # dry에서는 eligible 근사 표기(실반영 시 재계산)
-            print(f"  {row}")
+            prov = " [provisional i_*]" if s.get("provisional") else ""
+            print(f"  {row}{prov}")
         return 0
 
     sf_bytes = sources.read_main_bytes(sources.SORTER_SONGS_FULL, sorter)
@@ -236,7 +365,18 @@ def main(argv=None) -> int:
     merge_data.merge(repo_root, landed, sf_bytes, am_bytes)
     print(f"data/ 반영 완료: master {len(master_rows)} → {len(master_rows) + len(landed)}행")
 
-    # ⑤ git(옵션)
+    provisional_landed = [s for s in landed if s.get("provisional")]
+    if provisional_landed:
+        reg = _load_provisional(repo_root)
+        for s in provisional_landed:
+            reg[int(s["cand"]["idx"])] = {"band": s["cand"]["band"],
+                                          "song": s["cand"]["song"],
+                                          "recorded_at": time.strftime("%Y-%m-%d")}
+        _save_provisional(repo_root, reg)
+        print(f"⚠️ provisional i_* {len(provisional_landed)}곡 기록 — "
+              f"{PROVISIONAL_JSON_REL}. intensity_norm 준비되는 run에서 자동 백필됨.")
+
+    # ⑦ git(옵션)
     if a.git:
         _git_data_branch(repo_root, landed)
     else:

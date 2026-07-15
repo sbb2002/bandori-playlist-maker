@@ -469,3 +469,22 @@ def load_intensity_norm(path: Path) -> tuple[np.ndarray, np.ndarray]:
     d = json.loads(path.read_text(encoding="utf-8"))
     return (np.array(d["med"], dtype=np.float32),
             np.array(d["mad"], dtype=np.float32))
+
+
+def band_average_intensity(master_rows: list[dict], band: str,
+                           exclude_idx: frozenset[int] = frozenset()) -> dict[str, str] | None:
+    """i_* 동결 상수가 없는 환경(soft-run)의 임시 대체값 — 같은 밴드 기존 곡의
+    i_* 평균('%.5f', aggregate_intensity와 동일 포맷). provisional 행 자체는
+    자기 자신을 평균에 오염시키지 않도록 exclude_idx로 제외한다.
+    같은 밴드에 참조할 실측 행이 하나도 없으면 None(호출측이 스킵 여부 판단)."""
+    vals: dict[str, list[float]] = {f: [] for f in I_FIELDS}
+    for r in master_rows:
+        if r["band"] != band or int(r["idx"]) in exclude_idx:
+            continue
+        if not all((r.get(f) or "").strip() for f in I_FIELDS):
+            continue
+        for f in I_FIELDS:
+            vals[f].append(float(r[f]))
+    if not vals["i_mean"]:
+        return None
+    return {f: f"{np.mean(vals[f]):.5f}" for f in I_FIELDS}
