@@ -9,7 +9,7 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SEL_CSV = os.path.join(HERE, "selected_songs.csv")
-LOCAL_AUDIO_DIR = r"C:\Users\user\Documents\myprojects\bandori-song-sorter\src\content\cluster\audio_full"
+LOCAL_AUDIO_DIR = r"C:\Users\User\Documents\pyworks\bandori-song-sorter\src\content\cluster\audio_full"
 DL_AUDIO_DIR = os.path.join(HERE, "audio_dl")
 STEMS_DIR = os.path.join(HERE, "stems")
 MODEL = "htdemucs"
@@ -25,6 +25,9 @@ def audio_path(row):
 
 def main():
     df = pd.read_csv(SEL_CSV)
+    bands = sys.argv[1:]
+    if bands:
+        df = df[df["band"].isin(bands)]
     targets = list(df.itertuples())
     print(f"[separate] {len(targets)} tracks")
 
@@ -41,7 +44,8 @@ def main():
             failed.append((r.tag, "no source audio"))
             continue
         print(f"[{n}/{len(targets)}] separating {r.tag} ...", flush=True)
-        cmd = [sys.executable, "-m", "demucs", "-n", MODEL,
+        runner = os.path.join(HERE, "_demucs_run.py")
+        cmd = [sys.executable, runner, "-n", MODEL,
                "--two-stems", "vocals", "-o", STEMS_DIR, src]
         proc = subprocess.run(cmd, capture_output=True, text=True)
         if proc.returncode != 0 or not os.path.isfile(voc_out):

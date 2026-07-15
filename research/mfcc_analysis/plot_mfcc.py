@@ -1,10 +1,19 @@
-"""Step 3 — plot raw-mix MFCC vs vocal-only MFCC, one PNG per band.
+"""Step 3 — plot raw-mix CQT vs vocal-only CQT, one PNG per band.
 
-Layout per band: 2 rows x 3 cols. Row 0 = raw mix MFCC, row 1 = vocal-only
-MFCC (demucs htdemucs). Columns = the band's 3 selected songs, so raw vs
+Layout per band: 2 rows x 3 cols. Row 0 = raw mix CQT, row 1 = vocal-only
+CQT (demucs htdemucs). Columns = the band's 3 selected songs, so raw vs
 vocal is compared vertically and songs are compared horizontally.
+
+y-axis is a musical-note (pitch) scale via Constant-Q Transform, not MFCC
+cepstral coefficients — MFCC's coefficient index has no frequency meaning,
+so it can't be relabeled onto a note scale. Color is a sequential dB scale
+(dark = quiet, bright = loud) instead of the old diverging coolwarm.
+
+Optional CLI args restrict to specific bands, e.g. `python plot_mfcc.py
+mygo ave_mujica` for a quick sample instead of the full 10-band run.
 """
 import os
+import sys
 import numpy as np
 import pandas as pd
 import librosa
@@ -23,13 +32,16 @@ import matplotlib.pyplot as plt
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SEL_CSV = os.path.join(HERE, "selected_songs.csv")
-LOCAL_AUDIO_DIR = r"C:\Users\user\Documents\myprojects\bandori-song-sorter\src\content\cluster\audio_full"
+LOCAL_AUDIO_DIR = r"C:\Users\User\Documents\pyworks\bandori-song-sorter\src\content\cluster\audio_full"
 DL_AUDIO_DIR = os.path.join(HERE, "audio_dl")
 STEMS_DIR = os.path.join(HERE, "stems", "htdemucs")
 OUT_DIR = os.path.join(HERE, "fig", "mfcc")
 
-N_MFCC = 20
 SR = 22050
+FMIN = librosa.note_to_hz("C2")
+N_BINS = 72          # 6 octaves
+BINS_PER_OCTAVE = 12
+DB_VMIN, DB_VMAX = -60, 0
 
 
 def mix_path(tag):
@@ -40,48 +52,50 @@ def mix_path(tag):
     return dl if os.path.isfile(dl) else None
 
 
-def compute_mfcc(path):
+def compute_cqt_db(path):
     y, sr = librosa.load(path, sr=SR, mono=True)
-    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=N_MFCC)
-    return mfcc, sr
+    C = librosa.cqt(y, sr=sr, fmin=FMIN, n_bins=N_BINS, bins_per_octave=BINS_PER_OCTAVE)
+    C_db = librosa.amplitude_to_db(np.abs(C), ref=np.max)
+    return C_db, sr
 
 
 def plot_band(band, rows, out_path):
     """rows: list of (song, mix_p, voc_p) for this band, up to 3."""
     n = len(rows)
-    pairs = []  # (mfcc_raw, mfcc_voc, sr, song)
+    pairs = []  # (cqt_raw_db, cqt_voc_db, sr, song)
     for song, mix_p, voc_p in rows:
-        mfcc_raw, sr = compute_mfcc(mix_p)
-        mfcc_voc, _ = compute_mfcc(voc_p)
-        pairs.append((mfcc_raw[1:], mfcc_voc[1:], sr, song))
-
-    _allvals = np.concatenate([np.abs(mr).ravel() for mr, mv, _, _ in pairs]
-                              + [np.abs(mv).ravel() for mr, mv, _, _ in pairs])
-    vmax = float(np.percentile(_allvals, 98))
-    vmin = -vmax
+        cqt_raw, sr = compute_cqt_db(mix_p)
+        cqt_voc, _ = compute_cqt_db(voc_p)
+        pairs.append((cqt_raw, cqt_voc, sr, song))
 
     fig, axes = plt.subplots(2, n, figsize=(4.2 * n, 6), squeeze=False, sharex="col")
     fig.subplots_adjust(hspace=0.0)
     last_img = None
-    for col, (mfcc_raw, mfcc_voc, sr, song) in enumerate(pairs):
+    for col, (cqt_raw, cqt_voc, sr, song) in enumerate(pairs):
         last_img = librosa.display.specshow(
-            mfcc_raw, x_axis="time", sr=sr, ax=axes[0, col],
-            cmap="coolwarm", vmin=vmin, vmax=vmax)
+            cqt_raw, x_axis="time", y_axis="cqt_note", sr=sr,
+            fmin=FMIN, bins_per_octave=BINS_PER_OCTAVE,
+            ax=axes[0, col], cmap="magma", vmin=DB_VMIN, vmax=DB_VMAX)
         axes[0, col].set_title(song, fontsize=9)
         axes[0, col].set_xlabel("")
         axes[0, col].tick_params(labelbottom=False)
         if col == 0:
-            axes[0, col].set_ylabel("raw mix\nMFCC 1–19")
+            axes[0, col].set_ylabel("raw mix\npitch (CQT)")
+        else:
+            axes[0, col].set_ylabel("")
 
         last_img = librosa.display.specshow(
-            mfcc_voc, x_axis="time", sr=sr, ax=axes[1, col],
-            cmap="coolwarm", vmin=vmin, vmax=vmax)
+            cqt_voc, x_axis="time", y_axis="cqt_note", sr=sr,
+            fmin=FMIN, bins_per_octave=BINS_PER_OCTAVE,
+            ax=axes[1, col], cmap="magma", vmin=DB_VMIN, vmax=DB_VMAX)
         axes[1, col].set_xlabel("time (s)")
         if col == 0:
-            axes[1, col].set_ylabel("vocal-only\nMFCC 1–19")
+            axes[1, col].set_ylabel("vocal-only\npitch (CQT)")
+        else:
+            axes[1, col].set_ylabel("")
 
-    fig.suptitle(f"{band}  —  raw (top) vs vocal-only (bottom) MFCC", fontsize=12)
-    fig.colorbar(last_img, ax=axes, format="%+2.0f", fraction=0.02)
+    fig.suptitle(f"{band}  —  raw (top) vs vocal-only (bottom) CQT", fontsize=12)
+    fig.colorbar(last_img, ax=axes, format="%+2.0f dB", fraction=0.02)
     fig.savefig(out_path, dpi=110, bbox_inches="tight")
     plt.close(fig)
 
@@ -89,13 +103,13 @@ def plot_band(band, rows, out_path):
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     df = pd.read_csv(SEL_CSV)
+    only_bands = sys.argv[1:]
     problems = []
     bands = sorted(df["band"].unique())
+    if only_bands:
+        bands = [b for b in bands if b in only_bands]
     for n, band in enumerate(bands, 1):
         out_path = os.path.join(OUT_DIR, f"{band}_mfcc.png")
-        if os.path.isfile(out_path):
-            print(f"[{n}/{len(bands)}] skip {band} (already plotted)")
-            continue
         sub = df[df["band"] == band].sort_values("idx")
         rows = []
         missing = []
