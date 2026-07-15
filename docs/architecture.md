@@ -41,7 +41,8 @@ bandori-playlist-maker/
 │  │  │  ├─ openrouter_adapter.py # MoodInterpreter 구현 ← 벤더 교체 시 이 파일만 교체
 │  │  │  └─ prompt.py             # 시스템 프롬프트 + LLM JSON 스키마 + 파싱/검증→MoodParameters
 │  │  └─ repo/
-│  │     └─ song_repo.py          # data/songs_master.csv 로더 → list[Song]
+│  │     ├─ song_repo.py          # songs_master.csv 로더 → list[Song]
+│  │     └─ remote_source.py      # `data` 브랜치 songs_master.csv 원격 fetch+캐시(main엔 data/ 없음)
 │  └─ requirements.txt
 ├─ frontend/                      # 정적 — GitHub Pages 배포 전제(빌드 스텝 없음)
 │  ├─ index.html                  # 자연어 입력창 + 결과·플레이어 영역
@@ -51,7 +52,7 @@ bandori-playlist-maker/
 │  ├─ test_harmonic.py / test_energy.py / test_selection.py
 │  ├─ test_openrouter_adapter.py  # HTTP 목킹
 │  └─ test_api.py                 # 엔드포인트 계약·CORS·에러
-└─ data/, scripts/data/           # ← 데이터팀 소유(현 src/scripts/data/). 코드팀은 읽기 전용 소비만.
+└─ scripts/data/                  # ← 데이터팀 소유. 코드팀은 읽기 전용 소비만(data/ 자체는 별도 `data` 브랜치 전용 — git-rules.md 참조, main엔 없음).
 ```
 
 ### 경계 (의존 방향 = 안쪽으로만)

@@ -157,5 +157,20 @@ YouTube API 서비스 이용 고지·YouTube 약관/Google 방침 링크·데이
 수정. 스텁(오프라인 휴리스틱) 어댑터의 요약 문구에 "(이 문구는 stub입니다.)"를 명시해 실제 LLM
 응답과 혼동되지 않도록 함.
 
+## v1.7.0 — 2026-07-15
+
+`main`에서 `data/` 디렉터리 제거 — 이제 `main`은 앱 소스만 배포한다. 배포된 backend가 런타임에
+`data` 브랜치의 `songs_master.csv`를 직접 원격 fetch(신규 `app.repo.remote_source`)해 기동 시 +
+주기 리프레시(`DATA_REFRESH_INTERVAL_SEC`, 기본 30분)로 반영한다. `render.yaml`이 `main` push마다
+자동 재배포하는데, 지금까지는 신곡이 추가될 때마다 `data` 브랜치를 `main`에 머지해 그 재배포를
+트리거해 왔다 — 이제 `data`는 `main`에 아예 병합되지 않으므로 데이터 갱신이 서비스 재기동을
+일으키지 않는다(`git-rules.md`의 `data` 브랜치 규칙 갱신). 회귀 가드 테스트(`test_integration.py`)는
+실시간 데이터 대신 코드/테스트팀 소유 고정 스냅샷(`src/tests/fixtures/songs_master.csv`)으로
+결정론적으로 돈다.
+
+- 기준 커밋: (PR 오픈 직전 커밋)
+- 관련 PR: [#33](https://github.com/sbb2002/bandori-playlist-maker/pull/33) (예정 — 실제 번호가
+  다르면 정정)
+
 - 기준 커밋: `488b8c5`
 - 관련 PR: [#27](https://github.com/sbb2002/bandori-playlist-maker/pull/27)

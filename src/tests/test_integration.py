@@ -1,14 +1,25 @@
-"""통합 회귀 가드 — 실제 songs_master.csv를 로드해 2단계 엔진의 핵심 속성을 고정한다.
+"""통합 회귀 가드 — songs_master.csv 스냅샷을 로드해 2단계 엔진의 핵심 속성을 고정한다.
 
 R&D 보고서(document-archive 브랜치 archive/research/2026-07-11-playlist-sequencing-strategy.md §4.2)의 가드 지표:
 조용 요청에서 무드 누출 없음 + 인접 전환 매끄러움.
+
+`main`엔 더 이상 `data/`가 없다(배포된 backend는 런타임에 `data` 브랜치를 원격 fetch —
+`app.repo.remote_source` 참조). 이 회귀 가드는 실시간 데이터가 아니라 `fixtures/songs_master.csv`
+(코드/테스트팀 소유 고정 스냅샷, 오토로더가 갱신하지 않음)로 결정론적으로 돈다.
 """
 
 import random
+from pathlib import Path
 
 from app.domain.models import MoodParameters
 from app.domain.selection import build_setlist
-from app.repo.song_repo import load_songs
+from app.repo.song_repo import load_songs as _load_songs_from
+
+_FIXTURE = Path(__file__).parent / "fixtures" / "songs_master.csv"
+
+
+def load_songs():
+    return _load_songs_from(_FIXTURE)
 
 
 def _quiet_params() -> MoodParameters:

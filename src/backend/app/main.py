@@ -11,7 +11,9 @@
     MOOD_INTERPRETER     "stub" | "groq" 로 강제 선택(기본: 키 유무로 자동).
     FRONTEND_ORIGIN      CORS 허용 오리진(쉼표 구분). 개발용 localhost는 항상 허용.
     TELEGRAM_BOT_TOKEN·TELEGRAM_CHAT_ID   운영 오류 Telegram 알림(선택, 둘 다 필요).
-    SONGS_CSV            songs_master.csv 경로 override.
+    SONGS_CSV            songs_master.csv 경로 override(설정 시 `data` 브랜치 원격 fetch를 건너뜀).
+    DATA_REFRESH_INTERVAL_SEC   `data` 브랜치 재fetch 주기(초, 기본 1800=30분). 0=주기 리프레시 비활성
+                                (기동 시 최초 1회만 로드).
 """
 
 from __future__ import annotations
@@ -20,6 +22,7 @@ import asyncio
 import json
 import logging
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -36,6 +39,7 @@ from .ports.mood_port import (
     MoodInterpreter,
 )
 from .ports.notify_port import Notifier, NoopNotifier
+from .repo import remote_source
 from .repo.song_repo import load_songs
 
 logger = logging.getLogger("setlist_maker")
@@ -246,9 +250,47 @@ class InflightLimitMiddleware:
         await send({"type": "http.response.body", "body": body})
 
 
+def _load_current_songs(*, force: bool = False) -> list:
+    """`data` 브랜치에서 songs_master.csv를 fetch(또는 캐시 재사용)해 적재한다."""
+    path = remote_source.ensure_songs_csv(force=force)
+    return load_songs(path)
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """기동 후 주기적으로 `data` 브랜치를 재fetch해 `app.state.songs`를 갱신한다.
+
+    `main` 재배포 없이 신곡이 반영되게 하는 것이 목적(data 브랜치는 main에 병합되지 않음 —
+    git-rules.md). DATA_REFRESH_INTERVAL_SEC=0이면 이 루프를 비활성화(기동 시 1회 로드만).
+    리프레시 실패는 기존 `app.state.songs`를 그대로 유지하고 다음 주기에 재시도한다.
+    """
+    interval = _env_int("DATA_REFRESH_INTERVAL_SEC", 1800)
+    task: asyncio.Task | None = None
+    if interval > 0:
+        async def _refresh_loop() -> None:
+            while True:
+                await asyncio.sleep(interval)
+                try:
+                    songs = await asyncio.to_thread(_load_current_songs, force=True)
+                except Exception:  # noqa: BLE001 — 리프레시 실패는 기존 데이터로 계속 서빙
+                    logger.warning("songs_master.csv 주기 리프레시 실패(기존 데이터 유지).", exc_info=True)
+                    continue
+                app.state.songs = songs
+                logger.info("곡 %d건 주기 리프레시 완료.", len(songs))
+
+        task = asyncio.create_task(_refresh_loop())
+        _bg_tasks.add(task)
+        task.add_done_callback(_bg_tasks.discard)
+    try:
+        yield
+    finally:
+        if task is not None:
+            task.cancel()
+
+
 def create_app() -> FastAPI:
     _load_dotenv()  # 어댑터·CORS가 env를 읽기 전에 .env 주입.
-    app = FastAPI(title="setlist-maker", version="0.1.0-pilot")
+    app = FastAPI(title="setlist-maker", version="0.1.0-pilot", lifespan=_lifespan)
 
     # 입장제어(in-flight 상한) — CORS보다 먼저 add해 CORS가 바깥에서 감싸도록(거절 응답에도 CORS 헤더).
     app.add_middleware(InflightLimitMiddleware, limit=_env_int("REQUEST_QUEUE_MAX", 200))
@@ -265,7 +307,7 @@ def create_app() -> FastAPI:
     app.state.interpreter = _build_interpreter()
     app.state.interpreter_name = type(app.state.interpreter).__name__  # /api/health 진단(stub|groq 확인)
     app.state.notifier = _build_notifier()
-    app.state.songs = load_songs()
+    app.state.songs = _load_current_songs()
     logger.info("곡 %d건 적재 완료.", len(app.state.songs))
 
     app.include_router(router)
