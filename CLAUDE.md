@@ -93,9 +93,15 @@ Explicitly out of pilot scope: saving/sharing as a real YouTube playlist (would 
 
 Treat these as unresolved — don't silently pick an answer when implementing related code without
 flagging it: default/min/max energy stage count N; which OpenRouter model; hosting platform; when to
-introduce request queuing; minimum sample-size threshold for excluding low-count bands (e.g. n<10,
-poppin_party=115 vs. some bands=1); whether to surface "why this song was picked" explanations to
+introduce request queuing; whether to surface "why this song was picked" explanations to
 users; whether the reused audio features need re-extraction for mood-matching accuracy.
+
+**Resolved (2026-07-15):** the minimum-sample-size band-exclusion question is closed — no band is
+excluded from candidates for having few songs (`_MIN_BAND_SAMPLE` in
+`src/scripts/data/build_master.py` is now 1, i.e. a no-op threshold). A very sparse band selected via
+the band filter (e.g. n=1) combined with a long target playtime is a separate, still-open UX question
+(the selection engine's behavior when the eligible pool is far smaller than what the target duration
+needs — repeats vs. a shorter-than-requested setlist vs. an error) — not solved by this decision.
 
 ## Git-Rules
 브랜치 관리를 위해 `git-rules.md`의 규칙을 따른다.

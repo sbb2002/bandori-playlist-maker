@@ -73,8 +73,11 @@ _DST_MASTER = _DATA_DIR / "songs_master.csv"
 
 _EXPECTED_ROW_COUNT = 660
 
-# B1 정책: 밴드 표본 n>=10이면 eligible_band=True. n<10인 3그룹, 합 7곡.
-_MIN_BAND_SAMPLE = 10
+# [2026-07-15 결정] B1 정책(밴드 표본 n>=10 미만 제외)은 폐기한다 — 표본이 적다는
+# 이유로 곡을 앱에서 아예 빼는 건 부적절하다는 판단(사용자 확정). eligible_band는
+# 이제 실질적으로 항상 True다(밴드 존재만으로 충족되는 문턱). 컬럼 자체는 향후 다른
+# 기준(예: 명시적 밴드 차단)을 위해 남겨둔다.
+_MIN_BAND_SAMPLE = 1
 
 _MASTER_COLUMNS = [
     "idx",
@@ -166,7 +169,8 @@ def _read_audio_map() -> list[dict]:
 
 def _band_eligibility(songs_full: dict[int, dict[str, str]]) -> dict[str, bool]:
     """밴드별 표본 수(various_artists 포함, 컴필레이션 버킷도 카운트)를 세어
-    n>=10 이면 True인 eligible_band 맵을 만든다 (B1 정책)."""
+    n>=_MIN_BAND_SAMPLE(=1)이면 True인 eligible_band 맵을 만든다 — 실질적으로 밴드가
+    존재하기만 하면 항상 True(B1 정책 폐기, 2026-07-15)."""
     counts = Counter(r["band"] for r in songs_full.values())
     return {band: (n >= _MIN_BAND_SAMPLE) for band, n in counts.items()}
 
@@ -265,15 +269,11 @@ def build() -> dict[str, object]:
             f"{kept['band']!r},{kept['song']!r} != {band!r},{song!r}"
         )
 
-    # --- eligible_band False 정확히 7행 ---
+    # --- eligible_band False 0행(B1 정책 폐기 — 표본 적다고 제외 안 함, 2026-07-15) ---
     false_rows = [r for r in master_rows if r["eligible_band"] is False]
-    assert len(false_rows) == 7, (
-        f"eligible_band False 행 수 불일치: {len(false_rows)} != 7"
-    )
-    false_bands = Counter(r["band"] for r in false_rows)
-    expected_false_bands = {"various_artists": 5, "ikka_dumb_rock": 1, "millsage": 1}
-    assert dict(false_bands) == expected_false_bands, (
-        f"eligible_band False 밴드 구성 불일치: {dict(false_bands)} != {expected_false_bands}"
+    assert len(false_rows) == 0, (
+        f"eligible_band False 행 존재(정책 폐기 후엔 있으면 안 됨): "
+        f"{dict(Counter(r['band'] for r in false_rows))}"
     )
 
     # --- video_id 전부 11자 (개별 검증은 위 루프에서 완료, 총량 재확인) ---
@@ -296,7 +296,7 @@ def build() -> dict[str, object]:
     return {
         "row_count": len(master_rows),
         "eligible_false_count": len(false_rows),
-        "eligible_false_bands": dict(false_bands),
+        "eligible_false_bands": {},
         "unique_video_id_count": len(video_ids),
         "dropped_duplicate_upload_idxs": sorted(_DROPPED_DUPLICATE_IDXS),
         "output_files": [

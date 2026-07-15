@@ -157,6 +157,9 @@ YouTube API 서비스 이용 고지·YouTube 약관/Google 방침 링크·데이
 수정. 스텁(오프라인 휴리스틱) 어댑터의 요약 문구에 "(이 문구는 stub입니다.)"를 명시해 실제 LLM
 응답과 혼동되지 않도록 함.
 
+- 기준 커밋: `488b8c5`
+- 관련 PR: [#27](https://github.com/sbb2002/bandori-playlist-maker/pull/27)
+
 ## v1.7.0 — 2026-07-15
 
 `main`에서 `data/` 디렉터리 제거 — 이제 `main`은 앱 소스만 배포한다. 배포된 backend가 런타임에
@@ -168,9 +171,18 @@ YouTube API 서비스 이용 고지·YouTube 약관/Google 방침 링크·데이
 실시간 데이터 대신 코드/테스트팀 소유 고정 스냅샷(`src/tests/fixtures/songs_master.csv`)으로
 결정론적으로 돈다.
 
-- 기준 커밋: (PR 오픈 직전 커밋)
-- 관련 PR: [#33](https://github.com/sbb2002/bandori-playlist-maker/pull/33) (예정 — 실제 번호가
-  다르면 정정)
+- 기준 커밋: `5e98c39`
+- 관련 PR: [#33](https://github.com/sbb2002/bandori-playlist-maker/pull/33)
 
-- 기준 커밋: `488b8c5`
-- 관련 PR: [#27](https://github.com/sbb2002/bandori-playlist-maker/pull/27)
+## v1.8.0 — 2026-07-15
+
+표본 부족 밴드(n<10) 자동 제외 정책(B1)을 폐기 — 표본이 적다는 이유로 곡을 앱에서 아예 빼는 건
+부적절하다는 판단(사용자 확정). `src/scripts/data/build_master.py`의 `_MIN_BAND_SAMPLE`을
+10→1로 낮춰 실질적으로 항상 eligible이 되게 하고, 신곡 오토로더가 처음으로 실제 반영을
+시도하면서 발견한 기존 데이터 불일치(`various_artists`·`ikka_dumb_rock`·`millsage` 3개 밴드,
+합 7곡이 정책상 False여야 하는데 실제로는 True로 저장돼 있던 것)를 정책 자체를 바꿔 해소했다.
+`CLAUDE.md`·`docs/PRD.md`의 관련 오픈퀘스천도 해결됨으로 갱신. sparse 밴드만 필터링해 긴
+재생시간을 요청하는 경우의 선곡 엔진 동작은 별개의 미해결 이슈로 남겨둠.
+
+- 기준 커밋: (PR 오픈 직전 커밋)
+- 관련 PR: (예정)
