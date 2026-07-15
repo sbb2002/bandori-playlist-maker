@@ -200,3 +200,14 @@ GitHub Pages, 백엔드 Render 무료 플랜 — 이미 `render.yaml`/`pages.yml
 
 - 기준 커밋: (PR 오픈 직전 커밋)
 - 관련 PR: [#35](https://github.com/sbb2002/bandori-playlist-maker/pull/35)
+
+## v1.8.2 — 2026-07-16
+
+`render.yaml`에 `buildFilter.paths`(allowlist: `src/backend/**`, `render.yaml`) 추가. `data/`를
+`main`에서 뺀 것과 같은 이유 — `CLAUDE.md`·`git-rules.md`·`docs/`·`versionlog.md`·
+`src/frontend/**` 같은 정책 문서·프론트 전용 변경까지 매번 backend를 재배포(콜드스타트 유발)
+시키던 것을 막는다. 코드 동작 변경 없음, Render 배포 설정만. (원래 v1.7.2로 태깅했으나, PR #34·
+#35가 먼저 v1.8.0·v1.8.1로 머지되어 v1.8.2로 재태깅.)
+
+- 기준 커밋: (PR 오픈 직전 커밋)
+- 관련 PR: [#36](https://github.com/sbb2002/bandori-playlist-maker/pull/36)
