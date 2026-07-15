@@ -160,19 +160,7 @@ YouTube API 서비스 이용 고지·YouTube 약관/Google 방침 링크·데이
 - 기준 커밋: `488b8c5`
 - 관련 PR: [#27](https://github.com/sbb2002/bandori-playlist-maker/pull/27)
 
-## v1.7.0 — 2026-07-15
+<!-- 신곡 오토로더(src/scripts/autoloader/)는 main에 머지하지 않는 영구 tool 브랜치
+     (feature/song-autoloader)에서 운영한다 — 배포 앱 릴리스가 아니므로 여기 기록하지 않는다.
+     툴 변경 이력·사용법은 src/scripts/README.md 참조. (2026-07-15 결정) -->
 
-신곡 오토로더(`src/scripts/autoloader/`) 신설 — 형제 프로젝트가 main에 반영한 신곡을 감별해
-다운로드(yt-dlp, 집 IP)하고 **이 앱의 파라미터**(45s excerpt 특징·proxy·energy_full·시간분절
-i_*·camelot·shape)로 분석한 뒤 `data/` 6파일에 원자 반영하는 로컬 원커맨드. 파생 컬럼은 **동결
-norm** 원칙(기존 658행 바이트 불변, 신곡만 원래 분포에 대입)으로 산출하며, 동결 상수는
-`data/*.json` 4종으로 영속화하고 최초 구축 시 기존 행 재계산 대조로 검증했다(proxy 최대오차 0,
-energy_full exact 658/658, shape exact 659/660 — 유일한 불일치는 형제 `add_pulse_shape.py`
-자체가 docstring에서 경고한 동명곡 조인 한계(roselia/Neo-Aspect, idx 570·588)로 우리 포팅
-문제가 아님). shape는 형제 `audio_map.json` 신곡 엔트리에 더 이상 이 필드가 없어(형식 변화,
-2026-07-15 확인) 형제 값을 그대로 옮기지 않고 형제 채널 산식(z-score, ddof=0)을 이식해 우리
-발췌 특징에서 직접 계산한다. 데이터 커밋은 `data` 브랜치 + main 대상 PR(소유자 머지 —
-`data` 브랜치의 "바로 머지" 규칙은 PR 자동머지 Actions 도입 후 적용).
-
-- 기준 커밋: `d369745`
-- 관련 PR: [#32](https://github.com/sbb2002/bandori-playlist-maker/pull/32)

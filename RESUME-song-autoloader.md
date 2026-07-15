@@ -1,6 +1,9 @@
 # RESUME — 신곡 오토로더 (2026-07-15 마감 시점 스냅샷)
 
-> **이 파일은 세션 재개용 임시 메모다. PR 오픈 직전에 삭제할 것(main에 남기지 않는다).**
+> **이 파일은 멀티로컬 세션 인수인계용 노트다.** `feature/song-autoloader`는 **main에
+> 머지하지 않는 영구 tool 브랜치**로 확정됐으므로(2026-07-15) 이 파일은 브랜치에 상주한다 —
+> 예전의 "PR 직전 삭제 / v1.7.0 태그" 전제는 폐기. 내구성 있는 사용법·운영 규칙은
+> `src/scripts/README.md`로 이관하고, 여기는 진행 중 상태·다음 재개 순서만 유지한다.
 
 ## 오늘까지 완료된 것
 
@@ -48,6 +51,45 @@
   실측으로 확인한 상세 내용은 `document-archive` 브랜치
   `archive/reports/2026-07-15-song-autoloader-shape-fix-and-norm-methodology.md` 참고
   (`git show document-archive:archive/reports/2026-07-15-...`).
+
+## soft-run 기능 추가 (같은 별도 로컬, 2026-07-15 세 번째 세션)
+
+사용자 요청: intensity_norm 부트스트랩이 불가능한 환경(이 로컬 — wav 43%만 보유)에서도
+신곡 다운로드·나머지 지표 반영을 막지 말고, i_*만 밴드 평균으로 임시 대체 후 나중에
+제대로 준비된 환경의 run에서 재산출(백필)되게 해달라는 요청. 구현 완료:
+
+- `norms.py`: `band_average_intensity(master_rows, band, exclude_idx=...)` 추가 — 같은
+  밴드 기존 곡 i_* 평균('%.5f', 참조 행 없으면 None).
+- `merge_data.py`: `patch_intensity_rows(repo_root, {idx: {i_*...}})` 추가 —
+  songs_master.csv/temporal_intensity.csv의 **해당 idx 행 i_* 6컬럼만** 되짚어 갱신.
+  "기존 행 바이트 불변" 불변식에 대한 의도된 예외(대상은 이전에 provisional로 표시된
+  행뿐), 실패 시 두 파일 전체 스냅샷 롤백.
+- `run_autoloader.py`: `--soft` 플래그 추가.
+  - 다운로드 순서를 norm 준비보다 앞으로 이동(신곡 확보를 norm 성패와 분리).
+  - `_prepare_norms(..., soft=)`: intensity_norm만 실패를 흡수(med=None 반환,
+    intensity_ready=False) — proxy/shape/energy_full은 wav 없이도 항상 구축 가능하므로
+    soft에서도 그대로 중단(진짜 버그 가능성이 높음).
+  - `_process_song`: med가 None이면 `band_average_intensity`로 대체하고
+    `provisional=True` 표시(참조 행조차 없으면 fail-soft 스킵).
+  - 반영 후 provisional 곡은 idx→{band,song,recorded_at}을
+    `data/provisional_intensity.json`에 기록.
+  - **`--soft` 없이(intensity_norm 준비 가능한 정상 run) 실행하면** 새 신곡 처리 전에
+    `_backfill_provisional()`이 먼저 실행 — registry의 idx들을 실측 i_*로 재산출해
+    `patch_intensity_rows`로 반영하고 registry에서 제거(wav 없으면 다음 실행에 재시도,
+    fail-soft).
+- 단위테스트 추가: `test_norms.py::BandAverageIntensityTest`(4개),
+  `test_merge_data.py::PatchIntensityRowsTest`(3개). `python -m pytest scripts/autoloader -q`
+  42 passed, 전체 `python -m pytest` 238 passed.
+- **후속 수정(사용자 확정)**: `_backfill_provisional`이 wav 없으면 스킵만 하던 걸,
+  master의 url로 **즉시 재다운로드 시도**하도록 변경 — soft-run을 돌린 로컬과 백필을
+  돌리는(메인) 로컬이 다르면 그 신곡 wav가 메인 로컬엔 원래 없는 게 정상이기 때문
+  (그 곡은 이미 master의 "기존 곡"이라 detect_new가 신곡으로 재감지하지 않음).
+- **미검증**: 이 로컬은 wav 커버리지가 부족해 `--soft` 경로와 백필 경로 둘 다 **합성
+  데이터 단위테스트로만** 검증했다. 원래 로컬(원본 wav 있음, 원래는 intensity_norm이
+  정상 구축되므로 `--soft` 자체가 필요 없는 환경)에서는 이 기능이 실사용될 일이 없을
+  가능성이 높음 — 오히려 **이 로컬처럼 wav가 부분적인 제3의 환경**(예: CI, 다른 개발자
+  머신)에서 유용한 경로다. 다음 재개 시 실제 `--soft` E2E는 wav 커버리지가 의도적으로
+  부족한 환경에서 별도 확인 필요.
 
 ## 다음 재개 순서 (원래 로컬 — 실오디오·캐시 wav 있는 환경)
 
