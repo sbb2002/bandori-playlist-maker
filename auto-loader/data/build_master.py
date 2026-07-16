@@ -3,9 +3,9 @@
 
 근거:
     - docs/PRD.md §6
-    - document-archive 브랜치 archive/reports/2026-07-10-data-team-lead-ticket-design.md §⑤ 티켓1,
+    - document-archive 브랜치 archive/last-papers/reports/2026-07-10-data-team-lead-ticket-design.md §⑤ 티켓1,
       §④ B1(표본 부족 밴드 n>=10 정책)·B2(data/ 복사 정책 / 컬럼 스펙)
-    - document-archive 브랜치 archive/reports/2026-07-10-data-team-tickets-2-3-review.md
+    - document-archive 브랜치 archive/last-papers/reports/2026-07-10-data-team-tickets-2-3-review.md
       (video_id/camelot 컬럼은 기존 모듈 import로 채울 것 — 재구현 금지)
 
 표준 라이브러리만 사용한다 (csv, json, pathlib, sys, collections).
