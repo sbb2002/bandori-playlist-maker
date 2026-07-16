@@ -13,7 +13,7 @@
    (`build_setlist`)에 태운다.
 2. 시드 고정 다중 실행(기본 20회)으로 각 지표를 평균±표준편차로 안정화한다(Stage A/B의 rng 변주 흡수).
 3. 세트리스트당 지표(전부 순수 함수, CSV/엔진 출력 기반)를 계산해 스코어카드를 출력한다.
-4. 시나리오별 pass/fail 게이트를 평가한다(임계값은 document-archive 브랜치 archive/research/2026-07-11-verification-methodology.md).
+4. 시나리오별 pass/fail 게이트를 평가한다(임계값은 document-archive 브랜치 archive/last-papers/research/2026-07-11-verification-methodology.md).
 
 지표(요약)
 ----------
@@ -167,7 +167,7 @@ class Scenario:
         )
 
 
-# 게이트 임계값 근거: document-archive 브랜치 archive/research/2026-07-11-verification-methodology.md §4.
+# 게이트 임계값 근거: document-archive 브랜치 archive/last-papers/research/2026-07-11-verification-methodology.md §4.
 # 공통 게이트(전 시나리오): 경계 연속성·하모닉·밝기 급변.
 _COMMON_GATES = {
     "boundary_gap_mean": ("<=", 0.30),   # 평균 경계 갭 ≈ 0.5·std(intro/outro). 셔플 0.52·랜덤 0.70 대비.

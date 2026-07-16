@@ -1,6 +1,6 @@
 """통합 회귀 가드 — songs_master.csv 스냅샷을 로드해 2단계 엔진의 핵심 속성을 고정한다.
 
-R&D 보고서(document-archive 브랜치 archive/research/2026-07-11-playlist-sequencing-strategy.md §4.2)의 가드 지표:
+R&D 보고서(document-archive 브랜치 archive/last-papers/research/2026-07-11-playlist-sequencing-strategy.md §4.2)의 가드 지표:
 조용 요청에서 무드 누출 없음 + 인접 전환 매끄러움.
 
 `main`엔 더 이상 `data/`가 없다(배포된 backend는 런타임에 `data` 브랜치를 원격 fetch —

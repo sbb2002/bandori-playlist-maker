@@ -57,7 +57,7 @@
 
 ## 5. 트래픽 급증·오류 대비 (운영 하드닝)
 
-배포 문서: `document-archive` 브랜치의 `archive/ref/user-opinion/2026-07-11-beta-service-scenario.md`.
+배포 문서: `document-archive` 브랜치의 `archive/user-opinion/2026-07-11-beta-service-scenario.md`.
 
 **레이트리밋(공개 직후 동시 요청 폭주)**
 - OpenRouter 429/5xx는 **지수 백오프+지터로 재시도**(`OPENROUTER_MAX_RETRIES`, 기본 2). Retry-After 헤더 존중.
