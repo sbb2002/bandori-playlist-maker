@@ -247,4 +247,4 @@ GitHub Pages, 백엔드 Render 무료 플랜 — 이미 `render.yaml`/`pages.yml
 분류.
 
 - 기준 커밋: (PR 오픈 직전 커밋)
-- 관련 PR: (PR 오픈 후 갱신)
+- 관련 PR: [#40](https://github.com/sbb2002/bandori-playlist-maker/pull/40)
