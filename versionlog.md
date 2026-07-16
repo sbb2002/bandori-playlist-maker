@@ -217,7 +217,8 @@ GitHub Pages, 백엔드 Render 무료 플랜 — 이미 `render.yaml`/`pages.yml
 문서 정합성 정리(코드 변경 없음). `research/<주제>` 브랜치를 주제마다 새로 파던 방식을
 `data`/`document-archive`/`tools`와 같은 단일 상시 재사용 브랜치 + 폴더 단위 구분으로
 전환(`research/mfcc-timbre`·`research/mood-warmth-feature` → 단일 `research` 브랜치,
-`mfcc_analysis/`·`mood_warmth/` 폴더). `tools` 브랜치의 신곡 오토로더도 `src/scripts/` →
+`topic/mfcc_analysis/`·`topic/mood_warmth/` 폴더 — `data/`와 시각적으로 안 섞이도록
+`topic/`로 한 번 더 감쌈). `tools` 브랜치의 신곡 오토로더도 `src/scripts/` →
 `auto-loader/`로 재배치(툴 이름이 경로에 드러나도록, 경로 깊이 변경에 따른 REPO_ROOT
 하드코딩 8곳 보정 + 유닛테스트 83개로 검증). `data` 브랜치는 `data/` 외 main 스냅샷 잔재를
 전부 제거하고 브랜치 전용 `versionlog.md`(신곡 추가=Patch 등 데이터 전용 버전 체계) 신설.
