@@ -51,7 +51,7 @@ B1 이후 제대로). 즉 UX 껍데기를 먼저 붙이고, 내부 URL 생성만
 
 ---
 
-## 베타 운영 시나리오 (document-archive 브랜치 archive/ref/user-opinion/2026-07-11-beta-service-scenario.md)
+## 베타 운영 시나리오 (document-archive 브랜치 archive/user-opinion/2026-07-11-beta-service-scenario.md)
 
 ### ✅ 구현됨 (2026-07-11)
 - **레이트리밋 우아한 처리**: OpenRouter 429/5xx 백오프 재시도(Retry-After 존중) + 지속 시 429

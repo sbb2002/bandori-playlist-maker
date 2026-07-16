@@ -103,7 +103,7 @@ def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
         "한 번도 조용해지지 않는" 곡(Steer to Utopia 등)을, `i_end`는 조용한 인트로+시끄러운
         본체 곡을 잡는다(`src/scripts/data/extract_temporal_intensity.py`).
     - 결합 신호: [`energy_full`, `−acousticness_proxy` 백분위(헤비메탈 黒 등), `i_min`·`i_mean`·
-      `i_end` 백분위]. 결측 컬럼은 자동 제외. (근거: document-archive 브랜치 `archive/research/2026-07-11-*.md`.)
+      `i_end` 백분위]. 결측 컬럼은 자동 제외. (근거: document-archive 브랜치 `archive/last-papers/research/2026-07-11-*.md`.)
 
     Raises:
         FileNotFoundError: CSV가 없는 경우.

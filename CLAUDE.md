@@ -30,9 +30,10 @@ project `bandori-song-sorter` (a static "browse" site), reusing that project's a
 
 ## 문서 취급 규칙 (중요)
 
-`document-archive` 브랜치의 `archive/ref/`(특히 `archive/ref/user-opinion/`)는 **사용자가 세션에
-전달하는 참조 문서**다. 이 브랜치는 `main`에 병합되지 않으므로 `main` 워킹트리에는 존재하지 않고,
-`git show document-archive:archive/ref/...` 또는 `git worktree add`로 읽기 전용 참조만 한다.
+`document-archive` 브랜치의 `archive/user-opinion/`·`archive/verification/`(2026-07-16 이전
+`archive/ref/user-opinion/`·`archive/ref/verification/`)는 **사용자가 세션에 전달하는 참조
+문서**다. 이 브랜치는 `main`에 병합되지 않으므로 `main` 워킹트리에는 존재하지 않고,
+`git show document-archive:archive/...` 또는 `git worktree add`로 읽기 전용 참조만 한다.
 사용자의 **명시적 허락 없이 편집·삭제·이동·이름변경하지 말 것.** 필요한 내용은 인용·요약만 한다.
 
 ## Architecture mandated by the PRD (§8)

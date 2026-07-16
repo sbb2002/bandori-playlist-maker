@@ -7,7 +7,7 @@
 はいよろこんで)을 조용하다고 오판한다. 로컬 전곡 wav에서 **곡 전체 기준**의 스펙트럼/
 타악 피처를 뽑아 이 발췌 편향을 근본 해소한다.
 
-R&D 근거: document-archive 브랜치 archive/research/2026-07-11-playlist-sequencing-strategy.md §5(재추출 권고 1).
+R&D 근거: document-archive 브랜치 archive/last-papers/research/2026-07-11-playlist-sequencing-strategy.md §5(재추출 권고 1).
 
 무엇을 뽑는가 (전부 full-track, mean + p90/p95 두 집계)
 ------------------------------------------------------

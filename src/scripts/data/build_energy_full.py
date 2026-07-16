@@ -7,7 +7,7 @@
   4. 문제곡 before/after 순위·분리도를 출력,
   5. (--write 시) `data/songs_master.csv`에 `energy_full` 컬럼을 병합(기존 컬럼 보존).
 
-근거: document-archive 브랜치 archive/research/2026-07-11-playlist-sequencing-strategy.md §5.
+근거: document-archive 브랜치 archive/last-papers/research/2026-07-11-playlist-sequencing-strategy.md §5.
 
 실행
 ----

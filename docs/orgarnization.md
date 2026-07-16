@@ -35,7 +35,7 @@
   완료하지 못했다고 보고한다. 테스트 실패·미검증 상태를 "완료"로 포장하는 것을 금지한다.
 
 - **R4 (보고서)**: 사원·팀장의 보고서는 에이전트의 최종 메시지가 원본이며, 부장이 이를
-  `document-archive` 브랜치의 `archive/reports/YYYY-MM-DD-<티켓명>.md`로 정리해 남긴다(main과
+  `document-archive` 브랜치의 `archive/last-papers/reports/YYYY-MM-DD-<티켓명>.md`로 정리해 남긴다(main과
   무관한 별도 커밋). 형식: 목표 / 수행 내용 / 완료·미완료 목록 / 미완료 사유 / 다음 단계 제안.
   직책마다 별도 보고서 파일을 중복 생성하지 않는다.
 
@@ -67,8 +67,8 @@
   기기 B(전체 오디오 캐시 보유) — 를 오가며 진행한다. 동기화 채널은 GitHub 원격
   (`origin/main`)이 유일하다.
   - **기기 전환 전**: 부장은 검수 완료분을 커밋·푸시하고, 진행 중·미완료 작업을 R4 보고서로
-    남긴다. **전환 후 첫 작업**: `git pull` + `document-archive` 브랜치의 `archive/reports/` 최신
-    보고서 확인으로 상태 복원(예: `git show document-archive:archive/reports/...`).
+    남긴다. **전환 후 첫 작업**: `git pull` + `document-archive` 브랜치의 `archive/last-papers/reports/` 최신
+    보고서 확인으로 상태 복원(예: `git show document-archive:archive/last-papers/reports/...`).
   - 오디오 원본이 필요한 작업(피처 재추출, key 정확도 검증 등)은 **기기 B 전용 티켓**으로
     표시하고, 산출물은 피처 CSV/JSON만 커밋한다(오디오 파일은 .gitignore로 차단).
   - 에이전트 세션과 토큰 게이트 집계는 기기 로컬이며 기기 간 이전되지 않는다 — 토큰 게이트는
@@ -103,7 +103,7 @@
 - 이름: `부장`
   - 레벨: 3
   - 주요업무: 티켓 분할·할당, 팀장/사원 스폰과 검수 왕복 관리, `/code-review` 실행,
-    git 관리(커밋·푸시 전담), 보고서 취합(`document-archive` 브랜치 `archive/reports/`),
+    git 관리(커밋·푸시 전담), 보고서 취합(`document-archive` 브랜치 `archive/last-papers/reports/`),
     토큰 게이트 실행(R5), 사용자 보고·결재 요청
   - 실체: 메인 세션
   - 사용모델: Fable (사용자 기본 설정을 따름)
@@ -150,7 +150,7 @@
     — 주제 하나당 브랜치를 새로 파지 않고 이 단일 브랜치 안에서 폴더로 구분, 표준 구조는
     `research` 브랜치 `README.md` 참조: `src/<method-N>/`·`fig/`·`report/`·`ref/`·`paper.md`).
     연구가 종결되면 `report/`를 취합한 `paper.md`만 부장이 `document-archive` 브랜치의
-    `archive/research/`로 별도 커밋한다(코드베이스인 main과는 분리 — `research`/
+    `archive/last-papers/research/`로 별도 커밋한다(코드베이스인 main과는 분리 — `research`/
     `document-archive` 둘 다 main과 별개 브랜치 히스토리, `git-rules.md` 참조)
   - 예상 티켓: 기존 피처의 무드 매칭 적합성 검증(PRD §9), 표본 부족 밴드 제외 임계값(n<10?)
     결정, 에너지 단계 N 기본값 결정
@@ -169,7 +169,7 @@
 | 부장 | 리포지토리 전체 + git | 유일한 git 쓰기 권한 |
 | 데이터팀 | `src/scripts/data/`(main, 1회성 수동 재구축용) | 가공 스크립트. **`data/`는 main에 없음**(아래 참고) |
 | 코드설계팀 | `src/backend/`, `src/frontend/`, `src/tests/` | 도메인·어댑터·API·UI |
-| R&D팀 | `research` 브랜치의 `topic/<주제>/` (쓰기, 부장 경유) | 연구보고서 산출 — 종결 시 `paper.md`만 `document-archive` 브랜치 `archive/research/`로 반영 |
+| R&D팀 | `research` 브랜치의 `topic/<주제>/` (쓰기, 부장 경유) | 연구보고서 산출 — 종결 시 `paper.md`만 `document-archive` 브랜치 `archive/last-papers/research/`로 반영 |
 | 공통 읽기 | `docs/PRD.md`, `CLAUDE.md`, `docs/orgarnization.md` | 모든 직책 읽기 가능 |
 
 - `src/scripts/`는 존재하며(구 `scripts/`에서 2026-07-10 이전), `src/backend/`·`src/frontend/`·
@@ -186,7 +186,7 @@
 > **[2026-07-10 폐기 예고]** 아래 트랜스크립트 집계(token seeking) 방식은 세션 축 오판이
 > 실측으로 확인되어(스크립트 2.0% vs `/usage` 85%) 사용자 결정으로 폐기 예정. **MCP 기반
 > 관찰(observation) 도구로 전환**한다 — 설계·사유는 `document-archive` 브랜치의
-> `archive/reports/2026-07-10-token-gate-mcp-transition.md` 참조. 전환 완료 시 이 절과 R5를
+> `archive/last-papers/reports/2026-07-10-token-gate-mcp-transition.md` 참조. 전환 완료 시 이 절과 R5를
 > 개정할 것. 전환 전까지 게이트 수치는 참고용으로만 쓰고 `/usage` 실측을 우선한다.
 
 R5 게이트가 자동으로 동작하려면 사용량 조회 툴이 필요하다. Claude Code는 대화 트랜스크립트를
