@@ -21,7 +21,7 @@ SEL_CSV = os.path.join(HERE, "selected_songs.csv")
 LOCAL_AUDIO_DIR = r"C:\Users\user\Documents\myprojects\bandori-song-sorter\src\content\cluster\audio_full"
 DL_AUDIO_DIR = os.path.join(HERE, "audio_dl")
 STEMS_DIR = os.path.join(HERE, "stems", "htdemucs")
-FEATURES_CSV = os.path.join(HERE, "..", "..", "data", "song_features_with_proxies.csv")
+FEATURES_CSV = os.path.join(HERE, "..", "data", "song_features_with_proxies.csv")
 OUT_CSV = os.path.join(HERE, "combined_metrics.csv")
 
 PITCH_FLOOR = 75.0
