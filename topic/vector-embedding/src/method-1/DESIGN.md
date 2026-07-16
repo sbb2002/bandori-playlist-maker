@@ -213,7 +213,7 @@ PROMPTS = {
   일치이고, L1은 L4가 서술한 의도의 축약형이므로 기준문은 카테고리당 하나(L4 서술문 =
   `category_desc`)로 통일한다. 평가 부담이 절반 이하로 줄어든다(카테고리당 최대 30곡,
   실질 10~15곡 예상 → 총 40~60개 평가). **단, 이 기준문 통일이 L1 쿼리에 불리할 수 있음**
-  (L1이 요구하지 않은 뉘앙스까지 기준에 포함)은 한계(§7)에 기록한다.
+  (L1이 요구하지 않은 뉘앙스까지 기준에 포함)은 한계(§8)에 기록한다.
 - pair 목록을 `random.Random(SEED).shuffle` → `pair_id`를 `p001`부터 부여 →
   `out/eval_sheet.csv`(블라인드) + `out/eval_mapping.csv`.
 - `url`은 `SONGS_CSV`의 `url` 컬럼에서 join.
@@ -233,7 +233,35 @@ PROMPTS = {
 - 최종 보고서(`report/01-lyrics_vector-searching.md`)는 이 결과를 바탕으로 연구자/상위
   세션이 작성한다 — 이 스크립트의 범위 밖.
 
-## 7. 알려진 한계 (보고서에 그대로 기록할 것)
+## 7. 서브 로컬 샘플 실행 노트 (2026-07-16 — 이번 실행에서 §2·§5를 아래처럼 오버라이드)
+
+이번 실행은 **서브 로컬 기기**(GPU 없음, CPU 전용)에서 수행하며, 로컬에 30곡 중 21곡(7밴드×3)의
+오디오만 있고 demucs 스템은 전무하다. 전체 처리 시 수 시간이 걸리므로 **총 90분 이내** 완료를
+위해 다음과 같이 축소·조정한다:
+
+- **곡 pool = 14곡** (로컬 보유 7밴드 × idx 순 2곡). `config.py`에 명시 고정:
+  ```python
+  SAMPLE_TAGS = [
+      "afterglow__000", "afterglow__001", "ave_mujica__072", "ave_mujica__073",
+      "hello_happy_world__106", "hello_happy_world__107", "morfonica__180", "morfonica__181",
+      "mugendai_mutype__237", "mugendai_mutype__238", "mygo__260", "mygo__261",
+      "pastel_palettes__301", "pastel_palettes__302",
+  ]
+  AUDIO_DIR = r"C:\Users\user\Documents\myprojects\bandori-song-sorter\src\content\cluster\audio_full"  # <tag>.wav
+  STEMS_DIR = "work/stems"   # §5의 mfcc_analysis 경로 대신 — 이 폴더 안에서 자체 생성
+  WHISPER_MODEL = "medium"   # large-v3 대신(시간 예산). 나머지 ASR 파라미터는 §5 그대로
+  ```
+- **`00_prepare_stems.py` 추가**: `SAMPLE_TAGS` 중 `STEMS_DIR/<tag>/vocals.wav`가 없는 곡만
+  `AUDIO_DIR/<tag>.wav`에서 demucs two-stems 보컬 분리(§2의 "demucs 재구현 금지"의 예외 —
+  단, 분리 로직을 새로 짜지 말고 `topic/mfcc_analysis/_demucs_run.py`의 몽키패치 러너를
+  그대로 복사/재사용할 것. torchaudio/torchcodec 이슈 대비). 출력 구조는
+  `work/stems/<tag>/vocals.wav`로 demucs 기본 출력에서 정리.
+- 01~05는 `SAMPLE_TAGS` 14곡 기준으로 동작(=`SONGS_CSV`를 읽되 `SAMPLE_TAGS`로 필터).
+- `GROQ_API_KEY`는 환경변수 우선, 없으면 `work/groq.key` 파일(1줄, gitignore 영역)에서 읽는다.
+- **판정 유보**: pool이 14곡으로 줄어 §0 판정 기준은 참고치로만 본다 — 이번 실행의 1차 목적은
+  파이프라인 검증과 예비 판독이고, 정식 판정은 풀 30곡(또는 660곡 확장) 실행에서 한다.
+
+## 8. 알려진 한계 (보고서에 그대로 기록할 것)
 
 - 음향 통계값 미사용 — 가사 단독 효과만 측정(초안 "예상 한계점" 그대로).
 - pool 30곡 → top-5 변별력 제한. 후속으로 660곡 전체 확장 시 ASR·임베딩은 오프라인
