@@ -13,8 +13,10 @@
     window.SETLIST_API_BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
       ? "http://localhost:8000"
       : "https://bandori-playlist-maker.onrender.com";
-    // 배포 시 GitHub Actions가 __COMMIT__을 커밋 SHA로 치환(로컬은 그대로 → 'dev' 표기).
+    // 배포 시 GitHub Actions가 __COMMIT__을 커밋 SHA로, __VERSION__을 최신 태그(v1.2.3)로 치환.
+    // 로컬은 그대로 남아있어 'dev' 표기로 폴백.
     window.APP_VERSION = "__COMMIT__";
+    window.APP_MAIN_VERSION = "__VERSION__";
     window.APP_REPO = "https://github.com/sbb2002/bandori-playlist-maker";
     // Google OAuth Client ID(시크릿 아님, 공개 노출 가능). "내 재생목록에 넣기" 기능에 사용.
     // 발급: docs/DEPLOY.md "Google OAuth(YouTube 재생목록 저장)" 절 참고.
@@ -37,6 +39,10 @@
     <div class="menu-header"><strong>저장된 플레이리스트</strong></div>
     <ul id="preset-list" class="preset-list"></ul>
     <p id="preset-empty" class="preset-empty">아직 저장된 플레이리스트가 없어요.<br>플레이리스트를 만들면 자동으로 저장돼요.</p>
+    <div class="menu-footer">
+      <!-- 현재 버전(v메인버전 - 커밋). app.js가 텍스트·링크 설정. -->
+      <a id="app-version" class="app-version" target="_blank" rel="noopener" aria-label="현재 버전"></a>
+    </div>
   </aside>
 
   <main class="wrap">
@@ -129,9 +135,6 @@
       <p class="footer-links">* <a href="privacy.html">Privacy Policy</a> <span aria-hidden="true">·</span> <a href="terms.html">Terms of Service</a></p>
     </footer>
   </main>
-
-  <!-- 우하단 현재 버전(커밋 코드). app.js가 텍스트·링크 설정. -->
-  <a id="app-version" class="app-version" target="_blank" rel="noopener" aria-label="현재 버전"></a>
 
   <!-- 곡 추가 미니 브라우저(밴드 셀렉터 + 곡 리스트) — + 버튼으로 열림 -->
   <div id="song-picker" class="picker hidden" role="dialog" aria-modal="true" aria-label="곡 추가">

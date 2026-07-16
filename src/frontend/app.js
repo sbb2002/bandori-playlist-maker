@@ -564,22 +564,25 @@ loadBands();
 initStageModel();
 renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
 
-// 우하단 버전 표기 = 현재 커밋 SHA. 배포 프론트는 빌드시 __COMMIT__을 SHA로 주입하고,
-// 로컬(또는 주입 실패) 시엔 백엔드 /api/health의 version(RENDER_GIT_COMMIT 또는 git)을 가져온다.
+// 메뉴 안 버전 표기 = "v메인버전 - 커밋SHA". 배포 프론트는 빌드시 __COMMIT__을 SHA로,
+// __VERSION__을 최신 git 태그(v1.2.3)로 주입하고, 로컬(또는 주입 실패) 시엔 백엔드
+// /api/health의 version(RENDER_GIT_COMMIT 또는 git)을 커밋 SHA 대신 가져온다.
 (async function initVersion() {
   const el = $("app-version");
   if (!el) return;
-  const raw = window.APP_VERSION || "";
-  let ver = raw && raw !== "__COMMIT__" ? raw.slice(0, 7) : "";
-  if (!ver) {
+  const rawCommit = window.APP_VERSION || "";
+  let commit = rawCommit && rawCommit !== "__COMMIT__" ? rawCommit.slice(0, 7) : "";
+  if (!commit) {
     try {
       const res = await fetch(`${API_BASE}/api/health`);
       const d = await res.json();
-      ver = (d && d.version) || "dev";
-    } catch (_) { ver = "dev"; }
+      commit = (d && d.version) || "dev";
+    } catch (_) { commit = "dev"; }
   }
-  el.textContent = "" + ver;
-  if (ver && ver !== "dev" && window.APP_REPO) el.href = `${window.APP_REPO}/commit/${ver}`;
+  const rawMain = window.APP_MAIN_VERSION || "";
+  const mainVer = rawMain && rawMain !== "__VERSION__" ? rawMain : "";
+  el.textContent = mainVer ? `${mainVer} - ${commit}` : commit;
+  if (commit && commit !== "dev" && window.APP_REPO) el.href = `${window.APP_REPO}/commit/${commit}`;
   else el.removeAttribute("href");
 })();
 

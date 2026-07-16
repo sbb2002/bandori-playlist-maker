@@ -27,8 +27,13 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Inject commit SHA (version 표기)
-        run: sed -i "s/__COMMIT__/${GITHUB_SHA}/g" src/frontend/index.html
+        with:
+          fetch-depth: 0 # 태그 조회(git describe)에 필요
+      - name: Inject commit SHA + 최신 태그 (version 표기)
+        run: |
+          VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo dev)"
+          sed -i "s/__COMMIT__/${GITHUB_SHA}/g" src/frontend/index.html
+          sed -i "s/__VERSION__/${VERSION}/g" src/frontend/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
