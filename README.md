@@ -12,6 +12,7 @@
 |---|---|---|
 | [`topic/mfcc_analysis/`](topic/mfcc_analysis/README.md) | MFCC/CQT 음색·화성·멜로디 정성 탐색, 가사·음향 임베딩 결합 아이디어 | 진행 중(정량 결론 전) |
 | [`topic/mood_warmth/`](topic/mood_warmth/README.md) | 보컬 발성 feature(jitter/shimmer/HNR/F0 등)로 "가련/애절(pathos)" 지각 검증 | 1차 검증 완료(채택 0, 시사적 1) |
+| [`topic/vector-embedding/`](topic/vector-embedding/README.md) | LLM 문맥 확장 + 가사·음원 피처 벡터 임베딩 검색 + 에너지 매칭 파이프라인 가설 검증 | 가설 수립(검토 완료, 검증 미착수) |
 
 각 폴더의 배경·방법·결과는 폴더 안의 `README.md`를 참조.
 
