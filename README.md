@@ -79,7 +79,7 @@ src/backend/app/
 │  ├─ scripts/        # 데이터 추출/가공(로컬 오디오 필요)
 │  └─ tests/          # pytest(70+)
 ├─ data/              # songs_master.csv 등(읽기 전용 산출물)
-├─ docs/              # PRD · architecture · DEPLOY · BACKLOG · orgarnization · next-steps
+├─ docs/              # PRD · architecture · DEPLOY · BACKLOG · orgarnization
 ├─ render.yaml        # Render Blueprint
 └─ .github/workflows/ # GitHub Pages 배포
 ```

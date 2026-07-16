@@ -146,8 +146,12 @@
 - 이름: `R&D팀 팀장`
   - 레벨: 2
   - 주요업무: 다른 팀이 정량 분석을 요청한 경우에만 스폰. 연구 방법 고안, 정량 분석, 결론을
-    요청 부서에 통보. 요청 1건당 연구보고서 1편을 작성하되, 완료 시 부장이 `document-archive`
-    브랜치의 `archive/research/`로 별도 커밋한다(코드베이스인 main과는 분리)
+    요청 부서에 통보. 작업은 `research` 브랜치의 `topic/<주제>/`에서 진행한다(2026-07-16부터
+    — 주제 하나당 브랜치를 새로 파지 않고 이 단일 브랜치 안에서 폴더로 구분, 표준 구조는
+    `research` 브랜치 `README.md` 참조: `src/<method-N>/`·`fig/`·`report/`·`ref/`·`paper.md`).
+    연구가 종결되면 `report/`를 취합한 `paper.md`만 부장이 `document-archive` 브랜치의
+    `archive/research/`로 별도 커밋한다(코드베이스인 main과는 분리 — `research`/
+    `document-archive` 둘 다 main과 별개 브랜치 히스토리, `git-rules.md` 참조)
   - 예상 티켓: 기존 피처의 무드 매칭 적합성 검증(PRD §9), 표본 부족 밴드 제외 임계값(n<10?)
     결정, 에너지 단계 N 기본값 결정
   - 실체: 서브에이전트 (요청 건별 스폰 — 상시 유지하지 않음)
@@ -163,15 +167,19 @@
 | 직책 | 허용 경로 (읽기+쓰기) | 비고 |
 |---|---|---|
 | 부장 | 리포지토리 전체 + git | 유일한 git 쓰기 권한 |
-| 데이터팀 | `data/`, `src/scripts/` | 원본 CSV/JSON 사본과 가공 스크립트 |
+| 데이터팀 | `src/scripts/data/`(main, 1회성 수동 재구축용) | 가공 스크립트. **`data/`는 main에 없음**(아래 참고) |
 | 코드설계팀 | `src/backend/`, `src/frontend/`, `src/tests/` | 도메인·어댑터·API·UI |
-| R&D팀 | 로컬 작업 후 `document-archive` 브랜치 `archive/research/` (쓰기, 부장 경유), `data/` (읽기 전용) | 연구보고서 산출 |
+| R&D팀 | `research` 브랜치의 `topic/<주제>/` (쓰기, 부장 경유) | 연구보고서 산출 — 종결 시 `paper.md`만 `document-archive` 브랜치 `archive/research/`로 반영 |
 | 공통 읽기 | `docs/PRD.md`, `CLAUDE.md`, `docs/orgarnization.md` | 모든 직책 읽기 가능 |
 
 - `src/scripts/`는 존재하며(구 `scripts/`에서 2026-07-10 이전), `src/backend/`·`src/frontend/`·
   `src/tests/`는 README만 있는 상태 — 첫 구현 티켓에서 이 구조대로 생성한다(R11).
-- 외부 레포(`bandori-song-sorter`)는 읽기 전용이며, 필요한 파일은 데이터팀이 `data/`로 복사해
-  이 레포를 단일 소스로 만든다(원본 레포 수정 금지).
+- **[2026-07-15 변경] `main`엔 `data/` 디렉터리가 없다.** 처리된 데이터셋(`songs_master.csv`
+  등)의 정본은 별도 `data` 브랜치에만 있고, 배포된 backend가 런타임에 그 브랜치를 원격 fetch한다
+  (`git-rules.md`의 `data` 절). 상시 신곡 반영은 `tools` 브랜치의 `auto-loader/`가 전담하며
+  (이 조직도의 팀 구조 밖, 사람이 로컬에서 트리거하는 반자동 툴), 데이터팀의 `src/scripts/data/`는
+  main에 남아있는 1회성 수동 재구축용 스크립트다. 외부 레포(`bandori-song-sorter`)는 읽기
+  전용이며, 최신 데이터셋이 필요하면 `data` 브랜치를 워크트리로 참조한다(원본 레포 수정 금지).
 
 ## 4. 토큰 게이트 툴 (신규 제작 — 데이터팀 첫 티켓 후보)
 
