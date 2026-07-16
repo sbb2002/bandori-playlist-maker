@@ -158,15 +158,15 @@ class ShapeNormsTest(unittest.TestCase):
     def test_verify_roundtrip_matches_stored_shape(self):
         rows = self._rows()
         n = norms.build_shape_norms(rows)
-        audio_map_songs = [{"shape": norms.compute_shape(r, n)} for r in rows]
-        ok, total = norms.verify_shape_norms(rows, n, audio_map_songs)
+        stored_by_idx = {int(r["idx"]): norms.compute_shape(r, n) for r in rows}
+        ok, total = norms.verify_shape_norms(rows, n, stored_by_idx)
         self.assertEqual((ok, total), (len(rows), len(rows)))
 
     def test_missing_stored_shape_is_skipped_not_counted(self):
         rows = self._rows()
         n = norms.build_shape_norms(rows)
-        audio_map_songs = [{"band": "x"} for _ in rows]   # 신곡 엔트리처럼 shape 없음
-        ok, total = norms.verify_shape_norms(rows, n, audio_map_songs)
+        stored_by_idx: dict[int, str] = {}   # master.csv에 shape 없음(신곡 등)
+        ok, total = norms.verify_shape_norms(rows, n, stored_by_idx)
         self.assertEqual((ok, total), (0, 0))
 
 

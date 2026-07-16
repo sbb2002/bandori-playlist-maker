@@ -63,13 +63,16 @@ except (AttributeError, ValueError, OSError):
 
 DEFAULT_REPO_ROOT = _THIS_DIR.parents[1]
 
-# 커밋 대상(데이터 산출물 + 동결 norm 3종)
+# 커밋 대상(데이터 산출물 + 동결 norm 4종)
+# 2026-07-16: shape_norm.json이 누락돼 있던 버그 수정 — 이 목록에 없어서 한 번도
+# data 브랜치에 커밋된 적이 없었고, 로컬에 우연히 남아있던 파일에 의존하고 있었다.
 DATA_PATHS = [
     "data/songs_full.csv", "data/audio_map.json",
     "data/song_features_with_proxies.csv", "data/full_audio_features.csv",
     "data/temporal_intensity.csv", "data/songs_master.csv",
     "data/feature_norms.json", "data/energy_full_norm.json",
-    "data/intensity_norm.json", "data/provisional_intensity.json",
+    "data/intensity_norm.json", "data/shape_norm.json",
+    "data/provisional_intensity.json",
 ]
 
 PROVISIONAL_JSON_REL = "data/provisional_intensity.json"
@@ -111,7 +114,7 @@ def _prepare_norms(repo_root: Path, master_rows: list[dict], audio_dir: Path,
     p_norms = norms.load_or_build_proxy_norms(
         data / "song_features_with_proxies.csv", data / "feature_norms.json")
     shape_norms = norms.load_or_build_shape_norms(
-        data / "song_features_with_proxies.csv", data / "audio_map.json",
+        data / "song_features_with_proxies.csv", master_rows,
         data / "shape_norm.json")
 
     # energy_full 분포의 eligibility는 원시 songs_full(중복 업로드 포함) 밴드 카운트.

@@ -292,15 +292,18 @@ def compute_shape(raw: dict, norms: dict[str, dict[str, float]]) -> str:
 
 
 def verify_shape_norms(features_rows: list[dict], norms: dict[str, dict[str, float]],
-                       audio_map_songs: list[dict]) -> tuple[int, int]:
-    """기존 곡(idx==audio_map songs[] 배열 위치)의 저장된 shape 재계산 대조.
-    (일치, 비교) 반환 — 오래된 스냅샷에 shape 없는 행은 건너뛴다."""
+                       stored_shape_by_idx: dict[int, str]) -> tuple[int, int]:
+    """기존 곡(idx 매칭)의 저장된 shape 재계산 대조.
+    (일치, 비교) 반환 — 저장된 shape 없는 행은 건너뛴다.
+
+    대조군은 songs_master.csv의 이미 계산된 shape 컬럼이다(2026-07-16 변경 — 원래
+    형제 audio_map.json의 songs[] 배열 shape 필드를 대조군으로 썼으나, 형제 쪽에서
+    그 필드가 전곡(기존 곡 포함) 소실돼 대조 불가능해짐. master.csv는 그 값이 과거에
+    이미 계산·저장돼 있어 여전히 유효한 대조군이다)."""
     ok = total = 0
     for r in features_rows:
         idx = int(r["idx"])
-        if idx >= len(audio_map_songs):
-            continue
-        stored = audio_map_songs[idx].get("shape")
+        stored = stored_shape_by_idx.get(idx)
         if not stored:
             continue
         total += 1
@@ -309,16 +312,19 @@ def verify_shape_norms(features_rows: list[dict], norms: dict[str, dict[str, flo
     return ok, total
 
 
-def load_or_build_shape_norms(features_csv: Path, audio_map_json: Path, json_path: Path,
+def load_or_build_shape_norms(features_csv: Path, master_rows: list[dict], json_path: Path,
                               min_exact_ratio: float = 0.99) -> dict:
-    """영속화된 동결 shape norm 로드. 없으면 현재 분포에서 구축·검증·저장."""
+    """영속화된 동결 shape norm 로드. 없으면 현재 분포에서 구축·검증·저장.
+
+    검증 대조군은 songs_master.csv(호출측이 이미 로드해 전달하는 master_rows)의
+    shape 컬럼이다 — verify_shape_norms 문서 참조."""
     if json_path.exists():
         return json.loads(json_path.read_text(encoding="utf-8"))["norms"]
     with features_csv.open(encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f))
     norms = build_shape_norms(rows)
-    audio_map = json.loads(audio_map_json.read_text(encoding="utf-8"))
-    ok, total = verify_shape_norms(rows, norms, audio_map["songs"])
+    stored_by_idx = {int(r["idx"]): r.get("shape", "") for r in master_rows}
+    ok, total = verify_shape_norms(rows, norms, stored_by_idx)
     if total == 0 or ok / total < min_exact_ratio:
         raise RuntimeError(
             f"shape 동결 norm 재현 실패({ok}/{total}) — "
@@ -327,7 +333,9 @@ def load_or_build_shape_norms(features_csv: Path, audio_map_json: Path, json_pat
         "purpose": "재생 펄스 shape 동결 정규화 상수(신곡 증분용, 형제 audio_map "
                   "shape 필드 소실 대응)",
         "source": "형제 add_pulse_shape.py 채널 산식 이식 — "
-                  "song_features_with_proxies.csv 원시 컬럼 mean/std(ddof=0)",
+                  "song_features_with_proxies.csv 원시 컬럼 mean/std(ddof=0). "
+                  "검증 대조군은 songs_master.csv의 기존 shape 컬럼(형제 audio_map은 "
+                  "shape 필드 소실로 대조 불가, 2026-07-16 확인).",
         "built_at": datetime.date.today().isoformat(),
         "n_rows": len(rows),
         "verify": {"exact": ok, "total": total},
