@@ -58,7 +58,7 @@ CSV/JSON + `legacy/`). `data` 브랜치가 갱신된 뒤에도 이 스냅샷은 
   이렇게 바뀌어야 한다"는 근거만 만드는 역할이다.
 - **연구 보고서(`report/*.md`, `paper.md`)**: 진행 중에는 주제 폴더 안(`report/`)에 자유롭게
   쌓아두되, 연구가 종결돼 `paper.md`(초록논문 형식)까지 작성되면 그 `paper.md`만
-  `document-archive` 브랜치의 `archive/research/`로 별도 커밋한다. 중간 `report/*.md`는 이
+  `document-archive` 브랜치의 `archive/last-papers/research/`로 별도 커밋한다. 중간 `report/*.md`는 이
   브랜치에 그대로 둔다(최종 종합만 반영).
 
 ## 새 연구 주제를 시작할 때

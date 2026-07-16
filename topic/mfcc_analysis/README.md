@@ -185,4 +185,4 @@ python plot_metrics.py         # 지표 막대 → fig/metrics/
 > 이 폴더는 정량 결론이 아니라 **다음 라운드(감정 단어 직접 라벨링 → MFCC/CQT 요약통계·발성
 > 지표·(실험적으로) 가사/음향 임베딩과 상관·분류)를 위한 밑작업**이다. `research/*` 규칙상
 > `main`에 머지하지 않으며, 유의미한 결과가 나오면 보고서 `.md`만 `document-archive`의
-> `archive/research/`로 별도 반영한다.
+> `archive/last-papers/research/`로 별도 반영한다.
