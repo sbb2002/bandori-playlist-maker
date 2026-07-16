@@ -1,131 +1,41 @@
-# 🎧 Bandori-Playlist-Maker
+# research (bandori-playlist-maker)
 
-> 한 문장이면 됩니다. 기분·상황을 말하면 **뱅드림(BanG Dream!) 곡으로 긴 재생 흐름**을 만들어 드려요.
+> **브랜치 범위**: 이 브랜치는 새 알고리즘·모델·분석 방법을 검증하는 연구 전용 **단일 상시
+> 재사용 브랜치**다(`data`·`tools`·`document-archive`와 동일한 패턴). 연구 주제 하나당 새
+> git 브랜치를 파지 않고, 이 브랜치 루트에 **주제별 폴더**를 하나씩 추가한다. `main`(배포 앱
+> 소스)에는 **머지하지 않는다** — 앱 소스·문서 등 연구에 불필요한 파일은 이 브랜치에 두지
+> 않는다. 상세 정책은 `main`의 `git-rules.md` "research" 절 참조.
 
-자연어 요청 한 문장을 **LLM으로 무드·에너지 의도**로 해석하고, **하모닉 믹싱(Camelot Wheel)** 과
-**에너지 아크**로 곡을 배열해, YouTube로 순차 자동재생하는 웹 앱입니다. 660곡 규모의 오디오 피처
-(BPM·조성·에너지·음색)를 재활용합니다.
+## 폴더 구성
 
-- 🌐 **프론트(GitHub Pages)**: https://sbb2002.github.io/bandori-playlist-maker/
-- ⚙️ **백엔드(Render)**: https://bandori-playlist-maker.onrender.com
-- 📄 자세한 배경/지표는 [`docs/PRD.md`](docs/PRD.md), 배포는 [`docs/DEPLOY.md`](docs/DEPLOY.md), 향후 계획은 [`docs/BACKLOG.md`](docs/BACKLOG.md).
+| 폴더 | 주제 | 상태 |
+|---|---|---|
+| [`mfcc_analysis/`](mfcc_analysis/README.md) | MFCC/CQT 음색·화성·멜로디 정성 탐색, 가사·음향 임베딩 결합 아이디어 | 진행 중(정량 결론 전) |
+| [`mood_warmth/`](mood_warmth/README.md) | 보컬 발성 feature(jitter/shimmer/HNR/F0 등)로 "가련/애절(pathos)" 지각 검증 | 1차 검증 완료(채택 0, 시사적 1) |
 
----
+각 폴더의 배경·방법·결과는 폴더 안의 `README.md`를 참조.
 
-## ✨ 주요 기능
+## data/
 
-| 기능 | 설명 |
-|---|---|
-| 자연어 요청 | "퇴근하고 기분 좋아지는 1시간 플리" 같은 한 문장 입력 |
-| 무드 해석(LLM) | OpenRouter로 밝기·시작/종료 에너지·단계 수·**비단조 에너지 아크** 추출 |
-| 2단계 선곡 | Stage A(에너지 허용창 하드선택 + 밝기 버킷) → Stage B(곡 경계 텐션 연속성 + 하모닉 소프트 + 오프너) |
-| 하모닉 믹싱 | 이전 곡과 Camelot 인접 조성을 선호해 매끄러운 전환 |
-| YouTube 순차재생 | iframe 자동재생, 이전/다음, 재생불가 곡 자동 스킵 |
-| 플레이리스트 편집 | 드래그로 **순서 이동** · **곡 제거** · 트랙 사이 **곡 추가**(밴드/곡 미니 브라우저) · **Ctrl+Z 되돌리기** |
-| 에너지 그래프 | 요청 해석 아크를 시각화, 드래그로 직접 지정 가능(편집 시 자동 갱신) |
-| 공유 | YouTube 익명 재생목록(watch_videos)으로 열기 |
-| 필터 | 밴드(프롬프트 자동감지 포함) · Original/Cover · 재생시간 · 단계 수 |
-| 계측 | umami 커스텀 이벤트(생성·전환·절반청취·공유·추가) |
+연구 스크립트가 참조하는 데이터셋 스냅샷 — `data` 브랜치의 `data/`를 그대로 가져온 것이다(9개
+CSV/JSON + `legacy/`). `data` 브랜치가 갱신된 뒤에도 이 스냅샷은 자동으로 따라가지 않으므로,
+최신 데이터가 필요한 연구를 새로 시작할 때 `git checkout data -- data`로 다시 가져온다.
 
-## 🧠 동작 방식
+## 산출물 3종의 목적지
 
-```
-자연어 요청
-   │  (POST /api/setlist)
-   ▼
-MoodInterpreter(포트) ──▶ OpenRouter 어댑터  또는  Stub 어댑터(오프라인)
-   │        밝기 / 시작·종료 에너지 / 단계 수 / stage_energies(아크)
-   ▼
-선곡 엔진(순수 함수, 도메인)
-   ├─ Stage A: 단계별 에너지 허용창으로 후보 하드선택(+밝기 버킷·rng 변주)
-   └─ Stage B: 이전 곡 아웃트로 ↔ 다음 곡 인트로 텐션 연속성(다목적) + 하모닉 인접 소프트
-   ▼
-Setlist(곡 순서 + 이유 메타 + 추정 총재생시간)
-   │
-   ▼
-프론트: 트랙리스트 렌더 → YouTube 순차재생 · 편집 · 공유
-```
+- **분석용 스크래치 데이터**(중간 계산·샘플 서브셋 등): 각 주제 폴더 안에 자유롭게 둔다 —
+  이 브랜치는 `main`에 머지되지 않으므로 여기 쌓인 내용이 `main`을 오염시키지 않는다. 대용량
+  바이너리는 각 폴더의 `.gitignore`가 걸러낸다.
+- **검증돼서 정식 채택할 데이터**(예: `data/songs_master.csv`에 새 컬럼 추가): 이 브랜치가
+  직접 `data/`를 고쳐 `main`으로 보내지 않는다. 채택된 데이터 변경은 새 `feature/*` 브랜치
+  (또는 자동화라면 `data`/`tools` 브랜치)에서 다시 정식으로 반영한다. 이 브랜치는 "이 데이터가
+  이렇게 바뀌어야 한다"는 근거만 만드는 역할이다.
+- **연구 보고서(.md)**: 주제 폴더 안에 자유롭게 작성하되, 완료 시 그 `.md`만
+  `document-archive` 브랜치의 `archive/research/`로 별도 커밋한다.
 
-## 🏗️ 아키텍처 (클린/헥사고날)
+## 새 연구 주제를 시작할 때
 
-도메인 로직은 외부 서비스에 직접 의존하지 않습니다. LLM 호출은 **포트/인터페이스**를 통하며
-벤더 교체(OpenRouter 모델 변경, 다른 LLM 등)는 **어댑터 한 곳** 수정으로 끝납니다.
-
-```
-src/backend/app/
-├─ domain/      # 모델 + 선곡 규칙(순수 함수, LLM·HTTP 무의존) — 단위 테스트 가능
-├─ ports/       # MoodInterpreter 인터페이스(포트)
-├─ adapters/    # openrouter_adapter · stub_adapter · prompt
-├─ api/         # FastAPI 라우트 · 스키마 · 밴드 별명 자동감지
-├─ repo/        # songs_master.csv 로더
-└─ main.py      # composition root(어댑터 주입 · CORS · 예외 핸들러)
-```
-
-- **선곡 로직은 구조화된 LLM 출력(MoodParameters)에 대한 순수 함수** → LLM 호출 없이 테스트됩니다.
-- 데이터는 `data/songs_master.csv`(660곡, 13밴드) 하나로 자기완결.
-
-## 🧰 기술 스택
-
-- **백엔드**: Python · FastAPI · uvicorn · pydantic · httpx (LLM: OpenRouter, 기본 `nemotron:free`)
-- **프론트**: 바닐라 HTML/CSS/JS · YouTube IFrame API · umami
-- **호스팅**: GitHub Pages(프론트) · Render(백엔드, 무료 플랜)
-
-## 📂 프로젝트 구조
-
-```
-├─ src/
-│  ├─ backend/        # FastAPI 앱(app/) + requirements.txt
-│  ├─ frontend/       # index.html · app.js · style.css · assets/bands(밴드 아이콘)
-│  ├─ scripts/        # 데이터 추출/가공(로컬 오디오 필요)
-│  └─ tests/          # pytest(70+)
-├─ data/              # songs_master.csv 등(읽기 전용 산출물)
-├─ docs/              # PRD · architecture · DEPLOY · BACKLOG · orgarnization · next-steps
-├─ render.yaml        # Render Blueprint
-└─ .github/workflows/ # GitHub Pages 배포
-```
-
-## 🚀 로컬 실행
-
-```bash
-# 1) 백엔드 (.env 자동 로드; OPENROUTER_API_KEY 없으면 stub 오프라인 모드)
-python -m uvicorn app.main:app --app-dir src/backend --port 8000
-
-# 2) 프론트 (정적)
-python -m http.server 5500 --directory src/frontend
-#    → http://localhost:5500  (localhost면 자동으로 로컬 백엔드에 연결)
-```
-
-`.env`(리포 루트 또는 `src/backend/.env`, 커밋 금지):
-
-```
-OPENROUTER_API_KEY=sk-or-...        # 없으면 stub 휴리스틱으로 동작
-OPENROUTER_MODEL=nvidia/nemotron-3-nano-30b-a3b:free
-FRONTEND_ORIGIN=https://sbb2002.github.io   # 배포 시 CORS 허용 오리진
-```
-
-## 🧪 테스트
-
-```bash
-python -m pytest src/tests -q      # 도메인/선곡/하모닉/에너지/API 회귀
-```
-
-## 🚢 배포
-
-프론트(GitHub Pages) + 백엔드(Render Blueprint) 구성. 절차·환경변수·커스텀 도메인은
-[`docs/DEPLOY.md`](docs/DEPLOY.md) 참조.
-
-## 🗺️ 로드맵
-
-포스트-파일럿 백로그는 [`docs/BACKLOG.md`](docs/BACKLOG.md): YouTube 계정 저장형 재생목록(OAuth),
-공유 결과 팝업(URL 복사), 플레이리스트 프리셋(localStorage) 등.
-
-## 📊 데이터 출처
-
-오디오 피처·밴드 아이콘은 자매 프로젝트 [`bandori-song-sorter`](../bandori-song-sorter)에서 추출한
-데이터셋을 재활용합니다(조성·BPM·에너지·음색). 곡/오디오 저작권은 각 권리자에 있으며, 오디오 원본은
-커밋하지 않습니다.
-
-## 📝 Version Log
-
-`v1.0.0`부터 버전 이력은 [`versionlog.md`](versionlog.md)에서 관리합니다(베타 기간 커밋별
-변경 이력도 그 문서의 "Beta" 절로 이관되어 있습니다).
+새 git 브랜치를 만들지 않는다 — 이 브랜치 루트에 새 폴더(예: `lyrics_embedding/`)를 추가하는
+것으로 시작한다. 연구 결과가 유의미하지 않으면 저장소 소유자와 확인 후 해당 폴더를 정리한다.
+결과가 채택되면 새 `feature/*` 브랜치를 생성해 정식 기능(`src/`)으로 구현한다 — 이 브랜치를
+그대로 `main` 대상 PR로 열지 않는다.
