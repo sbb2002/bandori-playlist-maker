@@ -225,6 +225,10 @@ GitHub Pages, 백엔드 Render 무료 플랜 — 이미 `render.yaml`/`pages.yml
 `git-rules.md`에 `research` 절 신규 작성, `tools` 절의 경로 서술 갱신, "브랜치 설명 README"
 공통 규칙 신설(`data`·`tools`·`document-archive`·`research` 전부 브랜치 루트 README 필수).
 `CLAUDE.md`는 검토 결과 `research/*` 직접 언급이 없어 수정 대상 아님(변경 없음).
+추가로 `docs/orgarnization.md`(R&D팀 워크플로가 새 `research` 브랜치 표준구조를 반영하도록,
+`data/`가 main에 없다는 사실도 반영)와 `docs/next-steps.md`(Google 심사 대기 항목 외 나머지는
+이미 낡은 스냅샷이라 `document-archive`의 `archive/reports/2026-07-14-next-steps-handoff.md`로
+이관·삭제)도 함께 정리.
 
 - 기준 커밋: (PR 오픈 직전 커밋)
 - 관련 PR: [#37](https://github.com/sbb2002/bandori-playlist-maker/pull/37)
