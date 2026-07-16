@@ -238,6 +238,11 @@ SUB: <키워드 1개>
 아이디어는 이 (e)로 흡수됨 — desc/키워드 자체가 곧 채점 대상이자 보조자료가 되므로 별도
 프롬프트가 더 필요 없다.
 
+**(e)′ 곡 프로파일링 — 요약 기반 대체 (`PROFILE_PROMPT_FROM_SUMMARY`, §5) — work/transcripts/
+부재 시 임시 fallback.** 입력이 가사 원문이 아니라 `texts_summary.csv`의 무드 요약이라는 점
+외엔 (e)와 동일한 출력 계약(DESC/MAIN/SUB 3줄). 06-02b에서 어느 쪽을 썼는지 `source`
+컬럼으로 추적한다.
+
 ## 6. 파이프라인 단계별 명세
 
 ### 01_transcribe.py — ASR
@@ -261,17 +266,26 @@ SUB: <키워드 1개>
 
 기존 00~05 파이프라인과 독립적으로 동작한다 — 임베딩·검색과 무관하다.
 
-- 입력: `SAMPLE_TAGS`의 각 태그 → `work/transcripts/<tag>.txt`(01단계 산출물, 이미 존재).
-- 곡마다 템플릿 (e)(`PROFILE_PROMPT`)로 Groq 호출 → 응답에서 `DESC:`/`MAIN:`/`SUB:` 3줄을
+- 입력: `SAMPLE_TAGS`의 각 태그 → `work/transcripts/<tag>.txt`(01단계 산출물)가 원칙.
+  **2026-07-17 실행 시점 예외**: 이 산출물을 만들었던 서브 로컬 기기에서 `work/`(가사
+  원문 등)를 저작권 규칙(§3)에 따라 커밋하지 않고 기기에만 남겨뒀는데, 이번 세션은 그
+  기기가 아니라서 `work/transcripts/`가 없다. 이 경우 이미 커밋된 `out/texts_summary.csv`
+  (LLM 파생 무드 요약, 저작권 문제 없음)를 대신 입력으로 써서 템플릿 (e)′
+  (`PROFILE_PROMPT_FROM_SUMMARY`)를 돌린다 — **요약의 요약**이라 원문 직접 분석보다
+  충실도가 낮은 임시 대체다. 원문 확보되면 `PROFILE_PROMPT`로 재실행 권장(§8 한계 참조).
+- 곡마다 (transcript 있으면) 템플릿 (e) `PROFILE_PROMPT`, (없고 summary만 있으면) 템플릿
+  (e)′ `PROFILE_PROMPT_FROM_SUMMARY`로 Groq 호출 → 응답에서 `DESC:`/`MAIN:`/`SUB:` 3줄을
   정규식으로 파싱. 형식이 어긋나면 `retry_with_backoff`로 재시도, 그래도 실패하면 해당 곡을
   실패 목록에 남기고 사람에게 알린 뒤 중단(다른 단계와 동일한 에러 처리 원칙).
 - 캐시: 이미 `song_profiles.csv`에 있는 `tag`는 재호출하지 않는다(행 단위, 02_build_texts.py
   와 동일 패턴).
-- 출력 ①: `out/song_profiles.csv` — `tag, band, song, desc, keyword_main, keyword_sub`.
+- 출력 ①: `out/song_profiles.csv` — `tag, band, song, desc, keyword_main, keyword_sub,
+  source`(`transcript` 또는 `summary-fallback` — 어느 입력으로 만들어졌는지 추적).
 - 출력 ②: `out/profile_qc_sheet.csv` — 채점용 시트, 컬럼: `pair_id, tag, band, song, url,
-  desc, keyword_main, keyword_sub, score, comment`. 곡당 정확히 1행 — dedup 로직 불필요
-  (기존 04_search.py의 `(category_id, tag)` 문제가 애초에 발생하지 않는 구조). `pair_id`는
-  04_search.py와 같은 방식으로 `random.Random(SEED).shuffle` 후 `p001`부터 부여.
+  desc, keyword_main, keyword_sub, source, score, comment`. 곡당 정확히 1행 — dedup 로직
+  불필요(기존 04_search.py의 `(category_id, tag)` 문제가 애초에 발생하지 않는 구조).
+  `pair_id`는 04_search.py와 같은 방식으로 `random.Random(SEED).shuffle` 후 `p001`부터
+  부여.
 - **QC 체크포인트 (사람)**: `desc`에 가사 원문이 그대로 인용되지 않았는지 표본 확인(§3).
   블라인드 요구사항(다른 산출물 열람 금지)은 **해당 없음** — arm 비교가 아니므로.
 - 채점 rubric은 `README.md`의 "프로파일 QC 채점 가이드" 절이 정본.
@@ -355,3 +369,8 @@ SUB: <키워드 1개>
 - 고정 카테고리 서술문의 confound(음향 질감 언어, 카테고리 간 어휘 중복)로 2026-07-16
   파일럿(v1, 14곡 pool)이 신뢰 불가 판정됨 → §1b의 Stage 1(가사 유래 desc/키워드)로 전환.
   v1 산출물(`out/eval_sheet.csv`, 42행)은 삭제하지 않고 파일럿 기록으로만 보존.
+- 2026-07-17 Stage 1 실행: `work/transcripts/`(가사 원문)를 만들었던 서브 로컬 기기의
+  산출물이라 이번 세션 기기엔 없음 — `PROFILE_PROMPT_FROM_SUMMARY`로 `texts_summary.csv`
+  (요약의 요약)를 대신 분석. `song_profiles.csv`/`profile_qc_sheet.csv`의 `source` 컬럼이
+  `summary-fallback`인 행은 원문 직접 분석보다 충실도가 낮을 수 있음 — QC 채점 시 감안하고,
+  가사 원문을 확보하면 `PROFILE_PROMPT`로 재실행 권장.

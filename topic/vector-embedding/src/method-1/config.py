@@ -99,6 +99,34 @@ SUB: <키워드 1개>
 가사:
 {lyrics}"""
 
+# Stage 1 fallback (used only when work/transcripts/<tag>.txt is unavailable on this
+# machine -- see README.md "프로파일 QC 채점 가이드" note on 2026-07-17 run provenance).
+# Takes texts_summary.csv's mood summary as input instead of raw ASR lyrics. This is a
+# lower-fidelity proxy for PROFILE_PROMPT (summary-of-a-summary, not sentence-level
+# analysis of the actual lyrics) -- re-run with PROFILE_PROMPT against real transcripts
+# once available.
+PROFILE_PROMPT_FROM_SUMMARY = """다음은 어느 노래의 정서·분위기·에너지를 요약한 문장들이다
+(LLM이 원곡 가사를 바탕으로 미리 생성한 것 -- 가사 원문이 아니다).
+
+1. 이 요약 문장들을 하나씩 살펴 그 안에 담긴 감정을 파악하라(이 분석 과정 자체는 출력하지
+   않는다).
+2. 종합해서, 이 곡 전체를 지배하는 감정과 서사를 한국어 한 문장으로 다시 요약하라 -- 단,
+   입력 문장을 그대로 옮기지 말고 감정·상황 중심으로 재구성할 것.
+3. 그 요약 문장에서 가장 중심이 되는 감정/분위기 키워드 1개(지배적 키워드)와, 그다음으로
+   두드러지는 키워드 1개(2차적 키워드)를 뽑아라.
+
+규칙: 입력 문장을 그대로 옮기지 말 것. 곡 제목·아티스트명·고유명사를 쓰지 말 것. 키워드는
+명사 또는 형용사 단어 하나씩만(구·문장 금지). 사운드·템포·악기·질감에 대한 묘사(예:
+'몽환적', '질주감', '공격적')는 쓰지 말 것 -- 감정과 상황만 남길 것.
+
+출력 형식(반드시 이 3줄 형식으로만 출력):
+DESC: <한국어 한 문장>
+MAIN: <키워드 1개>
+SUB: <키워드 1개>
+
+요약문:
+{summary}"""
+
 # Output directory
 OUT_DIR = _SCRIPT_DIR / "out"
 

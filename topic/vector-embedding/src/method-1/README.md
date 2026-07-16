@@ -147,6 +147,12 @@ python 04_search.py
 > `DESIGN.md` §1b, `notes/02-method-01-comment.md` 참조. 아래 "부록: 폐기된 채점 기준
 > (v1)"은 고정 카테고리 방식의 이전 채점 기준으로, 더는 쓰이지 않는다.
 
+> **`source` 컬럼 참고**: `profile_qc_sheet.csv`의 `source`가 `summary-fallback`인 행은
+> 가사 원문이 아니라 `texts_summary.csv`(이미 한 번 요약된 텍스트)를 입력으로 만든
+> desc/키워드다(2026-07-17 실행 시점에 원문이 이 기기에 없어서 임시로 대체 — DESIGN.md
+> §6-02b/§8 참조). "요약의 요약"이라 원문 직접 분석보다 부정확할 수 있으니 채점 시
+> 감안하고, 낮은 점수가 나와도 곧바로 방법론 문제로 해석하지 말 것.
+
 ### 무엇을 채점하나
 
 각 행의 `desc`(LLM이 가사를 문장 단위로 분석해 종합한 한 문장 요약)와 `keyword_main`/
@@ -312,8 +318,8 @@ method-1/
 │   ├── texts_summary.csv
 │   ├── texts_keyword.csv
 │   ├── queries_expanded.csv
-│   ├── song_profiles.csv        # Stage 1: tag, band, song, desc, keyword_main, keyword_sub
-│   ├── profile_qc_sheet.csv     # Stage 1: QC form (human fills in scores)
+│   ├── song_profiles.csv        # Stage 1: tag, band, song, desc, keyword_main, keyword_sub, source
+│   ├── profile_qc_sheet.csv     # Stage 1: QC form (human fills in scores); source col: transcript|summary-fallback
 │   ├── embeddings.npz
 │   ├── results_top5.csv
 │   ├── eval_sheet.csv           # v1 pilot (superseded, see Known Limitations #6)
@@ -336,6 +342,7 @@ method-1/
 4. **ASR errors**: Not quantified; only spot-checked via QC
 5. **Unified evaluation baseline**: L4 prompt used for all categories → L1 queries may be systematically disadvantaged (see RQ2 analysis)
 6. **v1 pilot superseded**: the 2026-07-16 pilot (fixed C1-C4 categories, per-category dedup) was judged untrustworthy due to sonic-language confound in category descriptions and cross-category vocabulary overlap; superseded by Stage 1 (lyrics-derived desc/keyword profiling, see DESIGN.md §1b). v1's `out/eval_sheet.csv` is preserved as a historical record only.
+7. **Stage 1 summary-fallback provenance**: the 2026-07-17 Stage 1 run used `texts_summary.csv` (not raw lyrics) as input for songs where `work/transcripts/<tag>.txt` wasn't available on this machine (see `source` column in `song_profiles.csv`/`profile_qc_sheet.csv`). This is a lower-fidelity proxy ("summary of a summary") -- re-run with `PROFILE_PROMPT` against real transcripts once available.
 
 ---
 
