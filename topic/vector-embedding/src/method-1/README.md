@@ -139,7 +139,56 @@ python 04_search.py
 
 ---
 
-## 평가 가이드 (채점 기준) — 2026-07-16 평가 시작 전 확정
+## 프로파일 QC 채점 가이드 (Stage 1 — 가사 라벨 정확도 검증, 2026-07-17)
+
+> 이 채점은 arm(raw/summary/keyword) 검색 성능을 비교하는 게 아니다. LLM이 가사에서 뽑아낸
+> desc/키워드가 실제 곡의 정서·서사를 정확히 대표하는지만 검증한다. 이 결과가 좋아야
+> Stage 2(키워드 기반 쿼리 재설계·검색 재평가)의 근거로 쓸 수 있다. 배경은
+> `DESIGN.md` §1b, `notes/02-method-01-comment.md` 참조. 아래 "부록: 폐기된 채점 기준
+> (v1)"은 고정 카테고리 방식의 이전 채점 기준으로, 더는 쓰이지 않는다.
+
+### 무엇을 채점하나
+
+각 행의 `desc`(LLM이 가사를 문장 단위로 분석해 종합한 한 문장 요약)와 `keyword_main`/
+`keyword_sub`(그 요약에서 뽑은 지배적/2차적 키워드)가, 실제로 곡을 들어보고 느껴지는 정서·
+서사와 얼마나 일치하는지를 1~5점으로 채점한다.
+
+### 점수 앵커
+
+| 점수 | 기준 |
+|---|---|
+| 5 | desc·키워드 모두 곡을 정확히 대표 — 곡을 들으면 바로 납득됨 |
+| 4 | 대체로 맞음 — 사소한 뉘앙스 차이는 있으나 핵심 정서·서사는 맞음 |
+| 3 | 정서 방향은 맞으나 구체적 서사가 다르거나, desc·키워드 중 하나만 맞음 |
+| 2 | 대체로 틀림 — 스치는 요소 하나 정도만 맞음 |
+| 1 | 전혀 대표하지 못함 / 무관하거나 정반대 |
+
+### 채점 규칙
+
+- 판단 재료는 가사 내용(들리는 만큼 + 아는 만큼) 기준. 사운드 질감·템포 등 음향적 인상은
+  desc/키워드 자체가 다루지 않는 영역이므로 채점 근거에서 제외한다.
+- `comment`는 선택이지만 3점 이하는 이유 한 줄 권장(예: "정서는 맞는데 서사가 다름",
+  "keyword_sub이 부적절").
+- 채점자는 연구자 1인으로 고정.
+- 블라인드 요구사항 없음 — 이 단계는 arm 비교가 아니므로 다른 산출물(embeddings.npz 등)을
+  미리 봐도 무방.
+
+### 채점 후 절차
+
+1. 채점 완료된 `profile_qc_sheet.csv`를 커밋·푸시.
+2. 평균 점수가 낮으면(예: 3.5 미만) `PROFILE_PROMPT`(config.py) 개선 후 재실행 — 이 라벨을
+   Stage 2 근거로 쓰기 전에 반드시 통과해야 함.
+3. 통과하면 Stage 2(`DESIGN.md` §1b) 설계에 따라 키워드 기반 쿼리를 만들고 검색 재평가를
+   진행한다(다음 세션 범위).
+
+---
+
+## 부록: 폐기된 채점 기준 (v1, 2026-07-16) — 더 이상 사용하지 않음
+
+> 아래는 고정 카테고리(C1~C4) 방식으로 진행했던 첫 파일럿의 채점 기준이다. 카테고리
+> 서술문에 음향 질감 언어가 섞여 가사 전용 방법론을 부당하게 불리하게 만드는 문제와,
+> 카테고리 간 감정 어휘 중복 문제로 신뢰 불가 판정을 받아 폐기됨(`DESIGN.md` §1b/§8).
+> 기록 보존 목적으로만 남긴다 — 실제 채점에는 위 "프로파일 QC 채점 가이드"를 쓸 것.
 
 어느 로컬·어느 세션에서 채점해도 동일한 기준이 되도록 앵커를 고정한다.
 **변경 금지** — 채점 도중 기준을 바꾸면 이미 매긴 점수와 비교 불능이 된다.
@@ -253,8 +302,9 @@ method-1/
 ├── 00_prepare_stems.py          # Vocal separation (demucs)
 ├── 01_transcribe.py             # ASR transcription (faster-whisper)
 ├── 02_build_texts.py            # LLM text generation (Groq)
+├── 02b_profile_songs.py         # Stage 1: per-song lyrics profiling + QC sheet (Groq)
 ├── 03_embed.py                  # Embedding (sentence-transformers)
-├── 04_search.py                 # Cosine search & eval sheet generation
+├── 04_search.py                 # Cosine search & eval sheet generation (Stage 2, not yet re-run)
 ├── 05_analyze.py                # Metrics & judgment
 ├── _demucs_run.py               # Demucs runner (torchaudio shim)
 ├── out/                         # Output CSVs & embeddings (committed)
@@ -262,9 +312,11 @@ method-1/
 │   ├── texts_summary.csv
 │   ├── texts_keyword.csv
 │   ├── queries_expanded.csv
+│   ├── song_profiles.csv        # Stage 1: tag, band, song, desc, keyword_main, keyword_sub
+│   ├── profile_qc_sheet.csv     # Stage 1: QC form (human fills in scores)
 │   ├── embeddings.npz
 │   ├── results_top5.csv
-│   ├── eval_sheet.csv           # Blind form (human fills in scores)
+│   ├── eval_sheet.csv           # v1 pilot (superseded, see Known Limitations #6)
 │   ├── eval_mapping.csv
 │   └── analysis_summary.csv
 └── work/                        # Gitignored
@@ -283,6 +335,7 @@ method-1/
 3. **Single evaluator**: Blind form removes arm bias, but personal taste bias remains
 4. **ASR errors**: Not quantified; only spot-checked via QC
 5. **Unified evaluation baseline**: L4 prompt used for all categories → L1 queries may be systematically disadvantaged (see RQ2 analysis)
+6. **v1 pilot superseded**: the 2026-07-16 pilot (fixed C1-C4 categories, per-category dedup) was judged untrustworthy due to sonic-language confound in category descriptions and cross-category vocabulary overlap; superseded by Stage 1 (lyrics-derived desc/keyword profiling, see DESIGN.md §1b). v1's `out/eval_sheet.csv` is preserved as a historical record only.
 
 ---
 

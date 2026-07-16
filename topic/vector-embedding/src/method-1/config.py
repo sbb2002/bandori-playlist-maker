@@ -54,8 +54,10 @@ def get_groq_api_key():
 
 GROQ_API_KEY = None  # Will be loaded on demand in scripts
 
-# Evaluation queries: 4 categories × 2 levels (L1, L4) = 8 queries
-# (From DESIGN.md §5 — do not modify wording)
+# Evaluation queries: 4 categories x 2 levels (L1, L4) = 8 queries
+# LEGACY (2026-07-17 - DESIGN.md Section 1b): unused until Stage 2 runs. Categories
+# are now generated dynamically from song_profiles.csv's keyword_main/keyword_sub.
+# Kept as reference for Stage 2's query-expansion template design.
 CATEGORIES = {
     "C1": "슬픔/우울",
     "C2": "가련함/나아감",
@@ -73,6 +75,29 @@ PROMPTS = {
     "C4-L1": "아침에 듣기 좋은 밝은 노래.",
     "C4-L4": "이른 아침의 맑은 공기와 부드러운 햇살이 스며들 듯, 어쿠스틱한 악기들이 만드는 포근한 공간감 속에서 불안을 걷어내고 긍정적인 온기를 불어넣는 나른하면서도 화사한 순간.",
 }
+
+# Stage 1 (DESIGN.md Section 1b, 6-02b): per-song lyrics profiling prompt. Unlike
+# PROMPTS/CATEGORIES above, this does not generate search text -- it generates a
+# per-song label (desc/keyword_main/keyword_sub) for human QC scoring.
+PROFILE_PROMPT = """다음은 어느 노래의 가사다(일본어 또는 영어), 여러 문장/구절로 이루어져 있다.
+
+1. 가사를 문장(또는 절) 단위로 끊어 각 문장에서 느껴지는 감정을 파악하라(이 분석 과정
+   자체는 출력하지 않는다).
+2. 문장별 감정을 종합해, 이 곡 전체를 지배하는 감정과 서사를 한국어 한 문장으로 요약하라.
+3. 그 요약 문장에서 가장 중심이 되는 감정/분위기 키워드 1개(지배적 키워드)와, 그다음으로
+   두드러지는 키워드 1개(2차적 키워드)를 뽑아라.
+
+규칙: 가사 원문의 문장이나 구절을 그대로 인용·번역하지 말 것. 곡 제목·아티스트명·고유명사를
+쓰지 말 것. 키워드는 명사 또는 형용사 단어 하나씩만(구·문장 금지). 사운드·템포·악기에 대한
+묘사는 쓰지 말 것(감정과 상황만).
+
+출력 형식(반드시 이 3줄 형식으로만 출력):
+DESC: <한국어 한 문장>
+MAIN: <키워드 1개>
+SUB: <키워드 1개>
+
+가사:
+{lyrics}"""
 
 # Output directory
 OUT_DIR = _SCRIPT_DIR / "out"
