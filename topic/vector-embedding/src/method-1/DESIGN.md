@@ -219,6 +219,8 @@ PROMPTS = {
 - `url`은 `SONGS_CSV`의 `url` 컬럼에서 join.
 - 실행 후 안내문 출력: "eval_sheet.csv의 score(1~5)를 채우기 전에는 results_top5.csv를
   열람하지 말 것".
+- **채점 앵커(1~5 기준)와 채점 규칙은 `README.md`의 "평가 가이드 (채점 기준)" 절이 정본** —
+  평가 시작 전(2026-07-16) 확정했으며 채점 도중 변경 금지.
 
 ### 05_analyze.py — 집계
 - `eval_sheet.csv`의 score가 전부 채워졌는지 검증(빈칸 있으면 목록 출력 후 중단).
