@@ -232,3 +232,14 @@ GitHub Pages, 백엔드 Render 무료 플랜 — 이미 `render.yaml`/`pages.yml
 
 - 기준 커밋: (PR 오픈 직전 커밋)
 - 관련 PR: [#37](https://github.com/sbb2002/bandori-playlist-maker/pull/37)
+
+## v1.9.0 — 2026-07-16
+
+우하단에 상시 노출되던 작은 버전 텍스트(커밋 SHA만 표기)를 좌측 햄버거 메뉴 하단으로 옮겨
+숨기고, 표기 형식을 `v메인버전 - 커밋SHA`(예: `v1.8.3 - a1b2c3d`)로 바꿨다. GitHub Pages
+배포 워크플로(`.github/workflows/pages.yml`)가 빌드시 `git describe --tags --abbrev=0`으로
+가져온 최신 태그를 `__VERSION__` 플레이스홀더에 주입(태그 조회를 위해 `checkout`에
+`fetch-depth: 0` 추가). 코드 동작(선곡·재생)에는 영향 없음.
+
+- 기준 커밋: (PR 오픈 직전 커밋)
+- 관련 PR: (PR 오픈 후 갱신)
