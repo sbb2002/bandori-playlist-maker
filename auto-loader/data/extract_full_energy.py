@@ -33,10 +33,10 @@ R&D 근거: document-archive 브랜치 archive/research/2026-07-11-playlist-sequ
 
 실행
 ----
-    python src/scripts/data/extract_full_energy.py               # 전곡, 병렬(기본 8 worker)
-    python src/scripts/data/extract_full_energy.py --workers 10
-    python src/scripts/data/extract_full_energy.py --limit 20    # 앞 20곡만(테스트)
-    python src/scripts/data/extract_full_energy.py --idx 278,272,512  # 특정 idx만
+    python auto-loader/data/extract_full_energy.py               # 전곡, 병렬(기본 8 worker)
+    python auto-loader/data/extract_full_energy.py --workers 10
+    python auto-loader/data/extract_full_energy.py --limit 20    # 앞 20곡만(테스트)
+    python auto-loader/data/extract_full_energy.py --idx 278,272,512  # 특정 idx만
 
 중단해도 안전: 이미 `full_audio_features.csv`에 있는 idx는 건너뛴다(resume).
 """
@@ -58,8 +58,8 @@ warnings.filterwarnings("ignore")  # librosa/soundfile deprecation·UserWarning 
 # 경로
 # ---------------------------------------------------------------------------
 _THIS_DIR = Path(__file__).resolve().parent
-# .../bandori-playlist-maker/src/scripts/data/ -> repo root = parents[3]
-_REPO_ROOT = _THIS_DIR.parents[2]
+# .../bandori-playlist-maker/auto-loader/data/ -> repo root = parents[1]
+_REPO_ROOT = _THIS_DIR.parents[1]
 _MYPROJECTS_ROOT = _REPO_ROOT.parent
 
 _AUDIO_DIR = (

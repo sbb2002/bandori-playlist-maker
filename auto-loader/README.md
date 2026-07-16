@@ -1,11 +1,20 @@
-# src/scripts/ — 신곡 오토로더 (tools 브랜치)
+# auto-loader/ — 신곡 오토로더 (tools 브랜치)
 
 > **브랜치 범위**: 이 브랜치(`tools`)는 사람이 로컬에서 수동 트리거하는 운영 툴만 담는다
-> (2026-07-15 `feature/song-autoloader` → `tools` 정식 승격). `main`(배포 앱 소스)에는
-> **머지하지 않는다** — 앱 소스·문서 등 이 툴 구동에 불필요한 파일은 이 브랜치에 두지 않는다.
-> 산출 데이터는 `data` 단일 브랜치로 자동 커밋·푸시한다(PR 없음, `data`도 `main`에 병합되지
-> 않는 독립 브랜치). 공유 모듈(`data/*`)이 `main`에서 바뀌면 필요 시 이 브랜치를 `main`에
-> rebase해 최신화한다.
+> (2026-07-15 `feature/song-autoloader` → `tools` 정식 승격, 2026-07-16 `src/scripts/` →
+> `auto-loader/`로 재배치). `main`(배포 앱 소스)에는 **머지하지 않는다** — 앱 소스·문서 등
+> 이 툴 구동에 불필요한 파일은 이 브랜치에 두지 않는다. 산출 데이터는 `data` 단일 브랜치로
+> 자동 커밋·푸시한다(PR 없음, `data`도 `main`에 병합되지 않는 독립 브랜치).
+
+## 빠른 시작
+
+```
+cd auto-loader
+python autoloader/run_autoloader.py --dry                       # 검증만(파일 미변경)
+python autoloader/run_autoloader.py --repo-root <data브랜치 워크트리>  # 실반영 + data 브랜치 자동 push
+```
+곡 감별 → 다운로드 → 지표 산출 → `data/` 반영까지 한 번에 도는 원커맨드다. 세부 흐름·플래그는
+아래 "autoloader/" 절 참조.
 
 ## 작성규칙
 
@@ -15,8 +24,11 @@
      numpy/librosa/soundfile/scipy(+다운로드는 yt-dlp, ffmpeg 폴백 imageio_ffmpeg)를 쓴다.
      오디오 스택이 설치된 env에서만 실행하며, 단위 테스트는 오디오·네트워크 없이 도는
      순수 로직만 다룬다.
-2. 모든 모듈은 짝이 되는 `test_*.py` 단위 테스트를 같은 폴더에 둔다. 실행:
-   `python -m unittest discover -s src/scripts -p "test_*.py"` (하위 폴더는 개별 실행).
+2. 모든 모듈은 짝이 되는 `test_*.py` 단위 테스트를 같은 폴더에 둔다. `autoloader/`·`data/`
+   양쪽 다 패키지(`__init__.py`)가 아니라 `unittest discover`가 상위 `auto-loader/`에서
+   한번에 재귀하지 않으므로, 폴더별로 나눠 실행한다:
+   `python -m unittest discover -s auto-loader/autoloader -p "test_*.py"`
+   `python -m unittest discover -s auto-loader/data -p "test_*.py"`
 3. 산출 데이터는 `--repo-root`로 지정한 `data` 브랜치 워크트리의 `data/`에 쓴다(멱등 — 재실행
    시 덮어쓰기). `data/` 원본 소스는 외부 레포 `bandori-song-sorter`이며 읽기 전용이다.
 4. 경로는 `Path(__file__)` 기준으로 계산한다 (cwd 무가정). repo 루트까지의 `.parent` 단수는
@@ -30,12 +42,13 @@
 형제 origin/main에 반영된 곡과 `data` 브랜치 `data/songs_master.csv`의 차이만 처리한다.
 
 ```
-python src/scripts/autoloader/run_autoloader.py --dry     # 검증(파일 미변경)
-python src/scripts/autoloader/run_autoloader.py --repo-root <data브랜치 워크트리>
-                                                             # data/ 반영 + data 브랜치 자동 커밋·푸시
-python src/scripts/autoloader/run_autoloader.py --no-git   # data/ 반영만, 커밋·푸시 생략
-python src/scripts/autoloader/run_autoloader.py --soft     # 부분 wav 환경 긴급 반영(아래)
+python autoloader/run_autoloader.py --dry     # 검증(파일 미변경)
+python autoloader/run_autoloader.py --repo-root <data브랜치 워크트리>
+                                                # data/ 반영 + data 브랜치 자동 커밋·푸시
+python autoloader/run_autoloader.py --no-git   # data/ 반영만, 커밋·푸시 생략
+python autoloader/run_autoloader.py --soft     # 부분 wav 환경 긴급 반영(아래)
 ```
+(위 명령은 모두 `auto-loader/` 디렉터리 안에서 실행한다는 전제 — "빠른 시작" 참조.)
 
 - 흐름: 감별(`sources.py`) → yt-dlp 다운로드(`fetch_new.py`, 집 IP 전제) → 45s excerpt
   특징(`excerpt_features.py`, 형제 로직 벤더링) + 전곡 서브피처/시간분절 강도(기존

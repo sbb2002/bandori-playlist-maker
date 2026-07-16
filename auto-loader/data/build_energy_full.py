@@ -11,8 +11,8 @@
 
 실행
 ----
-    python src/scripts/data/build_energy_full.py            # 분석·검증만(파일 미변경)
-    python src/scripts/data/build_energy_full.py --write    # songs_master.csv 병합까지
+    python auto-loader/data/build_energy_full.py            # 분석·검증만(파일 미변경)
+    python auto-loader/data/build_energy_full.py --write    # songs_master.csv 병합까지
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 
 _THIS_DIR = Path(__file__).resolve().parent
-_REPO_ROOT = _THIS_DIR.parents[2]
+_REPO_ROOT = _THIS_DIR.parents[1]
 _MASTER_CSV = _REPO_ROOT / "data" / "songs_master.csv"
 _FEATURES_CSV = _REPO_ROOT / "data" / "full_audio_features.csv"
 

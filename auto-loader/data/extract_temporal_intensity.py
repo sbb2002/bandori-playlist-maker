@@ -11,7 +11,7 @@ robust z-정규화한 평균. (raw RMS 절대값은 라우드니스 정규화라
 출력: data/temporal_intensity.csv (idx, band, song, i_mean, i_std, i_max, i_min, i_start, i_end;
       i_* 는 전역 z 스케일. percentile 정규화는 소비 측(song_repo)에서 수행.)
 
-실행: python src/scripts/data/extract_temporal_intensity.py
+실행: python auto-loader/data/extract_temporal_intensity.py
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from pathlib import Path
 import librosa
 import numpy as np
 
-_REPO = Path(__file__).resolve().parents[3]
+_REPO = Path(__file__).resolve().parents[2]
 _MASTER = _REPO / "data" / "songs_master.csv"
 _AUDIO = Path("C:/Users/User/Documents/pyworks/bandori-song-sorter/src/content/cluster/audio_full")
 _OUT = _REPO / "data" / "temporal_intensity.csv"

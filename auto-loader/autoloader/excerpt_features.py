@@ -16,7 +16,7 @@ bandori-song-sorter origin/main a146ede, 2026-07-15):
 주의: librosa 0.11에서 `librosa.beat.tempo`가 `librosa.feature.rhythm.tempo`로
 이동 — 두 위치를 모두 지원한다(동일 알고리즘).
 
-외부 의존: numpy, librosa, soundfile, scipy (src/scripts README의 오디오 스택 예외).
+외부 의존: numpy, librosa, soundfile, scipy (auto-loader/README의 오디오 스택 예외).
 """
 from __future__ import annotations
 

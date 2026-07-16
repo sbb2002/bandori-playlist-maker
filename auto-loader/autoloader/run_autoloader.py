@@ -16,11 +16,11 @@
      remote_source.py`) main 병합 자체가 애초에 불필요하다.
 
 사용(오디오 스택 env: numpy/librosa/soundfile/scipy + yt-dlp):
-  python src/scripts/autoloader/run_autoloader.py --dry      # 검증(파일 미변경)
-  python src/scripts/autoloader/run_autoloader.py --repo-root <data브랜치 워크트리>
+  python auto-loader/autoloader/run_autoloader.py --dry      # 검증(파일 미변경)
+  python auto-loader/autoloader/run_autoloader.py --repo-root <data브랜치 워크트리>
                                                                # data/ 반영 + data 브랜치 자동 커밋·푸시
-  python src/scripts/autoloader/run_autoloader.py --no-git    # data/ 반영만, 커밋·푸시 생략
-  python src/scripts/autoloader/run_autoloader.py --soft    # 아래 참고
+  python auto-loader/autoloader/run_autoloader.py --no-git    # data/ 반영만, 커밋·푸시 생략
+  python auto-loader/autoloader/run_autoloader.py --soft    # 아래 참고
 
 soft-run(--soft): 원본 전곡 wav 캐시가 불완전해 intensity_norm 부트스트랩이 불가능한
 환경(예: 로컬 오디오 43%만 보유)에서도 신곡 다운로드·나머지 지표는 정상 반영하고 싶을
@@ -61,7 +61,7 @@ try:
 except (AttributeError, ValueError, OSError):
     pass
 
-DEFAULT_REPO_ROOT = _THIS_DIR.parents[2]
+DEFAULT_REPO_ROOT = _THIS_DIR.parents[1]
 
 # 커밋 대상(데이터 산출물 + 동결 norm 3종)
 DATA_PATHS = [

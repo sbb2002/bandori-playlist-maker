@@ -42,7 +42,7 @@ from pathlib import Path
 import numpy as np
 
 _THIS_DIR = Path(__file__).resolve().parent
-REPO_ROOT = _THIS_DIR.parents[2]
+REPO_ROOT = _THIS_DIR.parents[1]
 _DATA_SCRIPTS = _THIS_DIR.parent / "data"
 if str(_DATA_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_DATA_SCRIPTS))

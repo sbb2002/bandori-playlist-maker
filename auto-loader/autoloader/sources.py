@@ -28,9 +28,9 @@ import sys
 from pathlib import Path
 
 _THIS_DIR = Path(__file__).resolve().parent
-# .../bandori-playlist-maker/src/scripts/autoloader/sources.py
-#   parents[0]=autoloader, [1]=scripts, [2]=src, [3]=repo root
-REPO_ROOT = _THIS_DIR.parents[2]
+# .../bandori-playlist-maker/auto-loader/autoloader/sources.py
+#   parents[0]=auto-loader, [1]=repo root
+REPO_ROOT = _THIS_DIR.parents[1]
 
 # 기존 모듈 재사용(재구현 금지 규칙): video_id 추출 + 중복 업로드 drop 목록.
 _DATA_SCRIPTS = _THIS_DIR.parent / "data"
