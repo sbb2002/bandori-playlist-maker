@@ -63,7 +63,10 @@ def prepare_stems(limit=None):
         ]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=1800,
+                encoding="utf-8", errors="replace",  # child emits UTF-8; locale cp949 would crash
+            )
             if result.returncode != 0:
                 print(f"  ERROR: demucs failed")
                 print(f"  stdout: {result.stdout}")
@@ -80,7 +83,7 @@ def prepare_stems(limit=None):
 
         # Create target directory and move file
         vocal_path.parent.mkdir(parents=True, exist_ok=True)
-        demucs_out.rename(vocal_path)
+        demucs_out.replace(vocal_path)  # overwrite-safe on Windows (rename fails if target exists)
 
         print(f"  → saved to {vocal_path}")
         processed += 1

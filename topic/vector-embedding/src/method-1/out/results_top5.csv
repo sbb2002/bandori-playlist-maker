@@ -1,0 +1,121 @@
+arm,prompt_id,rank,tag,band,song,cosine
+raw,C1-L1,1,morfonica__180,morfonica,Daylight -デイライト-,0.5583321452140808
+raw,C1-L1,2,mygo__260,mygo,迷星叫,0.5526356101036072
+raw,C1-L1,3,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.5421558618545532
+raw,C1-L1,4,mygo__261,mygo,壱雫空,0.5188718438148499
+raw,C1-L1,5,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.5174176692962646
+raw,C1-L4,1,mygo__260,mygo,迷星叫,0.5847172737121582
+raw,C1-L4,2,morfonica__180,morfonica,Daylight -デイライト-,0.5666244029998779
+raw,C1-L4,3,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.5486669540405273
+raw,C1-L4,4,mygo__261,mygo,壱雫空,0.5296484231948853
+raw,C1-L4,5,afterglow__000,afterglow,ON YOUR MARK,0.5208474397659302
+raw,C2-L1,1,morfonica__180,morfonica,Daylight -デイライト-,0.5699248909950256
+raw,C2-L1,2,afterglow__000,afterglow,ON YOUR MARK,0.5348755717277527
+raw,C2-L1,3,mygo__261,mygo,壱雫空,0.5188203454017639
+raw,C2-L1,4,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.5165598392486572
+raw,C2-L1,5,morfonica__181,morfonica,メランコリックララバイ,0.5156551599502563
+raw,C2-L4,1,morfonica__180,morfonica,Daylight -デイライト-,0.5794523358345032
+raw,C2-L4,2,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.574310302734375
+raw,C2-L4,3,afterglow__000,afterglow,ON YOUR MARK,0.5728277564048767
+raw,C2-L4,4,ave_mujica__072,ave_mujica,KiLLKiSS,0.5587242841720581
+raw,C2-L4,5,morfonica__181,morfonica,メランコリックララバイ,0.5483846664428711
+raw,C3-L1,1,pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,0.5215411186218262
+raw,C3-L1,2,morfonica__180,morfonica,Daylight -デイライト-,0.5096879005432129
+raw,C3-L1,3,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.5034588575363159
+raw,C3-L1,4,ave_mujica__072,ave_mujica,KiLLKiSS,0.4905035197734833
+raw,C3-L1,5,mygo__260,mygo,迷星叫,0.48336175084114075
+raw,C3-L4,1,morfonica__180,morfonica,Daylight -デイライト-,0.50014328956604
+raw,C3-L4,2,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.4866643249988556
+raw,C3-L4,3,morfonica__181,morfonica,メランコリックララバイ,0.4796169102191925
+raw,C3-L4,4,mygo__260,mygo,迷星叫,0.4707127511501312
+raw,C3-L4,5,pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,0.468090295791626
+raw,C4-L1,1,morfonica__181,morfonica,メランコリックララバイ,0.5393826961517334
+raw,C4-L1,2,morfonica__180,morfonica,Daylight -デイライト-,0.5358065366744995
+raw,C4-L1,3,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.5229202508926392
+raw,C4-L1,4,afterglow__000,afterglow,ON YOUR MARK,0.5017092823982239
+raw,C4-L1,5,mygo__261,mygo,壱雫空,0.4932153820991516
+raw,C4-L4,1,ave_mujica__072,ave_mujica,KiLLKiSS,0.49993863701820374
+raw,C4-L4,2,mygo__261,mygo,壱雫空,0.49810683727264404
+raw,C4-L4,3,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.49721264839172363
+raw,C4-L4,4,morfonica__180,morfonica,Daylight -デイライト-,0.48265308141708374
+raw,C4-L4,5,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.48033130168914795
+summary,C1-L1,1,morfonica__180,morfonica,Daylight -デイライト-,0.7839014530181885
+summary,C1-L1,2,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.7769006490707397
+summary,C1-L1,3,mygo__261,mygo,壱雫空,0.7605383396148682
+summary,C1-L1,4,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.753497838973999
+summary,C1-L1,5,mugendai_mutype__238,mugendai_mutype,どんがらがっしゃん,0.7427163124084473
+summary,C1-L4,1,morfonica__180,morfonica,Daylight -デイライト-,0.7434060573577881
+summary,C1-L4,2,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.7350465059280396
+summary,C1-L4,3,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.7257477045059204
+summary,C1-L4,4,mygo__261,mygo,壱雫空,0.7240467667579651
+summary,C1-L4,5,mygo__260,mygo,迷星叫,0.698960542678833
+summary,C2-L1,1,morfonica__180,morfonica,Daylight -デイライト-,0.7725924253463745
+summary,C2-L1,2,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.7549088001251221
+summary,C2-L1,3,afterglow__001,afterglow,That Is How I Roll!,0.7276251912117004
+summary,C2-L1,4,mugendai_mutype__238,mugendai_mutype,どんがらがっしゃん,0.7242677211761475
+summary,C2-L1,5,pastel_palettes__301,pastel_palettes,TITLE IDOL,0.7234634160995483
+summary,C2-L4,1,afterglow__001,afterglow,That Is How I Roll!,0.8148850202560425
+summary,C2-L4,2,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.7991862297058105
+summary,C2-L4,3,pastel_palettes__301,pastel_palettes,TITLE IDOL,0.7980399131774902
+summary,C2-L4,4,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.7910317182540894
+summary,C2-L4,5,afterglow__000,afterglow,ON YOUR MARK,0.7840855717658997
+summary,C3-L1,1,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.7117943167686462
+summary,C3-L1,2,mygo__261,mygo,壱雫空,0.7108923196792603
+summary,C3-L1,3,hello_happy_world__107,hello_happy_world,ハイファイブ∞あどべんちゃっ,0.6998937726020813
+summary,C3-L1,4,pastel_palettes__301,pastel_palettes,TITLE IDOL,0.6949194073677063
+summary,C3-L1,5,ave_mujica__072,ave_mujica,KiLLKiSS,0.6877989172935486
+summary,C3-L4,1,morfonica__180,morfonica,Daylight -デイライト-,0.674738883972168
+summary,C3-L4,2,mygo__260,mygo,迷星叫,0.673133373260498
+summary,C3-L4,3,mygo__261,mygo,壱雫空,0.6657426357269287
+summary,C3-L4,4,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.644138753414154
+summary,C3-L4,5,ave_mujica__072,ave_mujica,KiLLKiSS,0.6436142921447754
+summary,C4-L1,1,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.7638611793518066
+summary,C4-L1,2,hello_happy_world__107,hello_happy_world,ハイファイブ∞あどべんちゃっ,0.7286179661750793
+summary,C4-L1,3,pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,0.7260991930961609
+summary,C4-L1,4,pastel_palettes__301,pastel_palettes,TITLE IDOL,0.7209541201591492
+summary,C4-L1,5,mygo__261,mygo,壱雫空,0.6450488567352295
+summary,C4-L4,1,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.6999388933181763
+summary,C4-L4,2,pastel_palettes__301,pastel_palettes,TITLE IDOL,0.6746854782104492
+summary,C4-L4,3,hello_happy_world__107,hello_happy_world,ハイファイブ∞あどべんちゃっ,0.6605414748191833
+summary,C4-L4,4,pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,0.6484522819519043
+summary,C4-L4,5,mygo__261,mygo,壱雫空,0.6302273273468018
+keyword,C1-L1,1,mygo__260,mygo,迷星叫,0.6389526128768921
+keyword,C1-L1,2,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.6173402667045593
+keyword,C1-L1,3,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.5936380624771118
+keyword,C1-L1,4,morfonica__180,morfonica,Daylight -デイライト-,0.5905073881149292
+keyword,C1-L1,5,mygo__261,mygo,壱雫空,0.5864620804786682
+keyword,C1-L4,1,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.5977518558502197
+keyword,C1-L4,2,mygo__260,mygo,迷星叫,0.577178955078125
+keyword,C1-L4,3,mygo__261,mygo,壱雫空,0.5532364845275879
+keyword,C1-L4,4,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.5519343614578247
+keyword,C1-L4,5,morfonica__180,morfonica,Daylight -デイライト-,0.5469708442687988
+keyword,C2-L1,1,mygo__260,mygo,迷星叫,0.5987439751625061
+keyword,C2-L1,2,mygo__261,mygo,壱雫空,0.5769435167312622
+keyword,C2-L1,3,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.5695315003395081
+keyword,C2-L1,4,morfonica__180,morfonica,Daylight -デイライト-,0.5291531085968018
+keyword,C2-L1,5,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.5164410471916199
+keyword,C2-L4,1,mygo__260,mygo,迷星叫,0.594437837600708
+keyword,C2-L4,2,morfonica__180,morfonica,Daylight -デイライト-,0.5785739421844482
+keyword,C2-L4,3,ave_mujica__072,ave_mujica,KiLLKiSS,0.5761061906814575
+keyword,C2-L4,4,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.5733236074447632
+keyword,C2-L4,5,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.5713081359863281
+keyword,C3-L1,1,pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,0.494671106338501
+keyword,C3-L1,2,mygo__260,mygo,迷星叫,0.4737403988838196
+keyword,C3-L1,3,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.4671489894390106
+keyword,C3-L1,4,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.46450403332710266
+keyword,C3-L1,5,ave_mujica__072,ave_mujica,KiLLKiSS,0.46299266815185547
+keyword,C3-L4,1,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",0.5608052611351013
+keyword,C3-L4,2,mygo__260,mygo,迷星叫,0.49571990966796875
+keyword,C3-L4,3,mugendai_mutype__237,mugendai_mutype,アイの夢限,0.48133277893066406
+keyword,C3-L4,4,ave_mujica__072,ave_mujica,KiLLKiSS,0.4721751809120178
+keyword,C3-L4,5,mygo__261,mygo,壱雫空,0.4655004143714905
+keyword,C4-L1,1,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.5515223145484924
+keyword,C4-L1,2,pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,0.504068911075592
+keyword,C4-L1,3,hello_happy_world__107,hello_happy_world,ハイファイブ∞あどべんちゃっ,0.4662066102027893
+keyword,C4-L1,4,ave_mujica__072,ave_mujica,KiLLKiSS,0.4622427821159363
+keyword,C4-L1,5,pastel_palettes__301,pastel_palettes,TITLE IDOL,0.442548543214798
+keyword,C4-L4,1,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,0.5502166748046875
+keyword,C4-L4,2,ave_mujica__072,ave_mujica,KiLLKiSS,0.514668881893158
+keyword,C4-L4,3,mygo__260,mygo,迷星叫,0.5031901001930237
+keyword,C4-L4,4,pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,0.49757662415504456
+keyword,C4-L4,5,pastel_palettes__301,pastel_palettes,TITLE IDOL,0.4788493514060974

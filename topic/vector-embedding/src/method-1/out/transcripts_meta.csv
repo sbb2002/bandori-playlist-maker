@@ -1,0 +1,15 @@
+tag,band,song,detected_lang,lang_prob,n_segments,n_chars,avg_logprob_mean
+afterglow__000,afterglow,ON YOUR MARK,ja,0.9588865637779236,38,505,-0.35038851287002665
+afterglow__001,afterglow,That Is How I Roll!,ja,0.9621031284332275,45,632,-0.3279897909140622
+ave_mujica__072,ave_mujica,KiLLKiSS,ja,0.9266312122344971,34,456,-0.4719391186104024
+ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",ja,0.9726195335388184,18,262,-0.3291964798450771
+hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,ja,0.9527817964553833,56,580,-0.2855394112125257
+hello_happy_world__107,hello_happy_world,ハイファイブ∞あどべんちゃっ,ja,0.9651999473571777,66,701,-0.24511009864874775
+morfonica__180,morfonica,Daylight -デイライト-,ja,0.8996227383613586,32,421,-0.3905106232191789
+morfonica__181,morfonica,メランコリックララバイ,ja,0.9256221652030945,46,701,-0.33261207268460796
+mugendai_mutype__237,mugendai_mutype,アイの夢限,ja,0.9827240109443665,34,460,-0.23392415584027526
+mugendai_mutype__238,mugendai_mutype,どんがらがっしゃん,ja,0.9515591859817505,34,479,-0.24984855722008645
+mygo__260,mygo,迷星叫,ja,0.7836635112762451,26,353,-0.28677601906457556
+mygo__261,mygo,壱雫空,ja,0.9508246779441833,33,507,-0.34163642395777316
+pastel_palettes__301,pastel_palettes,TITLE IDOL,ja,0.9739124774932861,49,897,-0.20170330793026517
+pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,ja,0.8696907162666321,51,802,-0.40150654696229926
