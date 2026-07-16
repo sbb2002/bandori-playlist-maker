@@ -2,16 +2,16 @@
 
 > **브랜치 범위**: 이 브랜치는 새 알고리즘·모델·분석 방법을 검증하는 연구 전용 **단일 상시
 > 재사용 브랜치**다(`data`·`tools`·`document-archive`와 동일한 패턴). 연구 주제 하나당 새
-> git 브랜치를 파지 않고, 이 브랜치 루트에 **주제별 폴더**를 하나씩 추가한다. `main`(배포 앱
-> 소스)에는 **머지하지 않는다** — 앱 소스·문서 등 연구에 불필요한 파일은 이 브랜치에 두지
-> 않는다. 상세 정책은 `main`의 `git-rules.md` "research" 절 참조.
+> git 브랜치를 파지 않고, 이 브랜치의 `topic/` 아래에 **주제별 폴더**를 하나씩 추가한다.
+> `main`(배포 앱 소스)에는 **머지하지 않는다** — 앱 소스·문서 등 연구에 불필요한 파일은 이
+> 브랜치에 두지 않는다. 상세 정책은 `main`의 `git-rules.md` "research" 절 참조.
 
 ## 폴더 구성
 
 | 폴더 | 주제 | 상태 |
 |---|---|---|
-| [`mfcc_analysis/`](mfcc_analysis/README.md) | MFCC/CQT 음색·화성·멜로디 정성 탐색, 가사·음향 임베딩 결합 아이디어 | 진행 중(정량 결론 전) |
-| [`mood_warmth/`](mood_warmth/README.md) | 보컬 발성 feature(jitter/shimmer/HNR/F0 등)로 "가련/애절(pathos)" 지각 검증 | 1차 검증 완료(채택 0, 시사적 1) |
+| [`topic/mfcc_analysis/`](topic/mfcc_analysis/README.md) | MFCC/CQT 음색·화성·멜로디 정성 탐색, 가사·음향 임베딩 결합 아이디어 | 진행 중(정량 결론 전) |
+| [`topic/mood_warmth/`](topic/mood_warmth/README.md) | 보컬 발성 feature(jitter/shimmer/HNR/F0 등)로 "가련/애절(pathos)" 지각 검증 | 1차 검증 완료(채택 0, 시사적 1) |
 
 각 폴더의 배경·방법·결과는 폴더 안의 `README.md`를 참조.
 
@@ -35,7 +35,8 @@ CSV/JSON + `legacy/`). `data` 브랜치가 갱신된 뒤에도 이 스냅샷은 
 
 ## 새 연구 주제를 시작할 때
 
-새 git 브랜치를 만들지 않는다 — 이 브랜치 루트에 새 폴더(예: `lyrics_embedding/`)를 추가하는
-것으로 시작한다. 연구 결과가 유의미하지 않으면 저장소 소유자와 확인 후 해당 폴더를 정리한다.
+새 git 브랜치를 만들지 않는다 — `topic/` 아래에 새 폴더(예: `topic/lyrics_embedding/`)를
+추가하는 것으로 시작한다. 연구 결과가 유의미하지 않으면 저장소 소유자와 확인 후 해당 폴더를
+정리한다.
 결과가 채택되면 새 `feature/*` 브랜치를 생성해 정식 기능(`src/`)으로 구현한다 — 이 브랜치를
 그대로 `main` 대상 PR로 열지 않는다.

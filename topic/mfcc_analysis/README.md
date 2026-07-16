@@ -65,7 +65,7 @@ MFCC로 알 수 있는 것: 낮은 계수(1~2)=스펙트럼 기울기(밝기/음
 ## 재생성 순서
 
 ```
-cd mfcc_analysis   # 오디오 스택 env(librosa/parselmouth/demucs/matplotlib)
+cd topic/mfcc_analysis   # 오디오 스택 env(librosa/parselmouth/demucs/matplotlib)
 python select_songs.py         # 30곡 선정 → selected_songs.csv
 python download_missing.py     # 로컬에 없는 곡만 yt-dlp 다운로드 → audio_dl/
 python separate_vocals.py      # demucs 보컬 분리 → stems/  (곡당 ~1–2분)

@@ -13,7 +13,7 @@ import os
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SONGS_CSV = os.path.join(HERE, "..", "data", "songs_full.csv")
+SONGS_CSV = os.path.join(HERE, "..", "..", "data", "songs_full.csv")
 AUDIO_DIR = r"C:\Users\user\Documents\myprojects\bandori-song-sorter\src\content\cluster\audio_full"
 OUT_CSV = os.path.join(HERE, "selected_songs.csv")
 
