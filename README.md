@@ -12,12 +12,15 @@
 
 ## archive/ 하위 구조
 
+> **[2026-07-16 재편]** `archive/ref/` 래퍼를 없애고 `user-opinion/`·`verification/`을 루트로
+> 끌어올림. `reports/`·`research/`는 `archive/last-papers/` 아래로 합침.
+
 | 경로 | 용도 |
 |---|---|
-| `archive/ref/user-opinion/` | 사용자가 세션에 전달한 참조 문서. **읽기 전용** — 사용자의 명시적 허락 없이 편집·삭제·이동·이름변경 금지(`main`의 `CLAUDE.md` "문서 취급 규칙" 참조) |
-| `archive/ref/verification/` | 검증용 참조 자료 |
-| `archive/reports/` | 작업 세션 보고서·설계 검토·인수인계 메모(날짜 접두어 `YYYY-MM-DD-...`) |
-| `archive/research/` | `research` 브랜치가 산출한 **완료된** 연구 보고서 `.md`의 최종 목적지(연구 진행 중 산출물은 `research` 브랜치 로컬에 둔다) |
+| `archive/user-opinion/` | 사용자가 세션에 전달한 참조 문서. **읽기 전용** — 사용자의 명시적 허락 없이 편집·삭제·이동·이름변경 금지(`main`의 `CLAUDE.md` "문서 취급 규칙" 참조) |
+| `archive/verification/` | 검증용 참조 자료 |
+| `archive/last-papers/reports/` | 작업 세션 보고서·설계 검토·인수인계 메모(날짜 접두어 `YYYY-MM-DD-...`) |
+| `archive/last-papers/research/` | `research` 브랜치가 산출한 **완료된** 연구 보고서 `.md`의 최종 목적지(연구 진행 중 산출물은 `research` 브랜치 로컬에 둔다) |
 | `archive/user_manual_pictures/` | 사용자 매뉴얼용 스크린샷 등 이미지 자산 |
 
 ## 읽기 참조 방법
