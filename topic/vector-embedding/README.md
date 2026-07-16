@@ -50,9 +50,16 @@
 6. **평가 방법**: "서칭 퀄리티 향상"의 측정 기준 필요 — 소규모 수작업 평가셋(프롬프트→기대곡
    페어) 또는 현행 파이프라인과의 정성 A/B. 기존에 계획된 "감정 라벨링 라운드"와 맞물림.
 
-## 다음 단계 (미착수)
+## 진행 상황
 
-- method-1 후보: 소수 곡(예: mfcc_analysis의 30곡 세트)으로 가사 확보 → 임베딩 모델 2~3종
-  (다국어 직접 임베딩 vs LLM 무드 요약문 임베딩) 비교 → 테스트 프롬프트 몇 개로 검색 결과
-  정성 평가.
+- **method-1 — 가사 벡터 검색 (설계 완료, 구현 미착수)**: 연구자 초안
+  [`notes/01-lyrics_vector-searching.md`](notes/01-lyrics_vector-searching.md)를
+  [`src/method-1/DESIGN.md`](src/method-1/DESIGN.md)로 구체화. mfcc_analysis 30곡 세트의 보컬
+  스템에 faster-whisper ASR → 3-arm 임베딩 비교(가사 원문 vs LLM 한국어 무드 요약 vs LLM
+  키워드, BGE-M3) → 감정 카테고리 4종 × 프롬프트 구체성 2단계(L1/L4, 연구자 초안의 단계
+  사다리에서 발췌) 쿼리 8종 top-5 블라인드 설문(1~5점) → (arm×level)별 mean/P@5/nDCG@5 집계.
+  판정 기준 사전 등록(평균 ≥3.5 채택 후보 / 2.5~3.5 재시도 / <2.5 기각) + 부차 질문(RQ2):
+  LLM 확장이 입력 구체성 격차를 메우는가. 구현은 DESIGN.md 명세대로 별도 세션(Haiku)이
+  수행 예정.
 - 표준 구조(`src/<method-N>/`, `report/`, `paper.md`)는 루트 `README.md` 규칙을 따른다.
+  `notes/`는 표준 외 추가 폴더 — 연구자(사용자)의 아이디어 초안 보관용.

@@ -1,0 +1,248 @@
+# method-1 실험 설계서 — 가사 벡터 검색 (lyrics vector searching)
+
+> **이 문서의 목적**: `notes/01-lyrics_vector-searching.md`(연구자 초안)를 구현 가능한 실험
+> 설계로 구체화한 것. **구현자는 이 문서만 보고 코드를 작성할 수 있어야 한다** — 여기 명시된
+> 결정(모델명·파라미터·스키마·상수)을 임의로 바꾸지 말고, 막히면 바꾸는 대신 질문할 것.
+> 구현 완료 후 저장소 규칙에 따라 이 폴더에 `README.md`(① 방법 소개 ② 실행법)를 작성한다.
+
+## 0. 연구 질문과 판정 기준 (사전 등록)
+
+**RQ1**: 보컬 스템에서 ASR로 추출한 가사를 임베딩해 벡터 검색하면, 한국어 자연어 프롬프트에
+"들어보면 맞다" 싶은 곡을 찾아주는가? 가사를 어떤 형태(원문/무드 요약/키워드)로 임베딩하는
+것이 가장 잘 맞는가?
+
+**RQ2 (부차)**: 사용자 입력의 구체성(1단계 짧은 요청 vs 4단계 세밀한 감정 서술 —
+`notes/01-lyrics_vector-searching.md`의 단계 사다리)이 LLM 확장을 거친 뒤에도 검색 품질
+차이를 만드는가? (앱은 짧은 입력을 받아 확장하므로, 확장이 이 격차를 메우는지가 제품 관점의
+질문이다.)
+
+**판정 기준 (평가 전에 확정, 사후 변경 금지)** — 최고 성능 (arm × 단계) 조합 기준:
+
+| 판정 | 조건 |
+|---|---|
+| 채택 후보 | 4개 카테고리 전체 평균 평점 ≥ 3.5 **그리고** 4개 중 3개 이상 카테고리에서 top-5 내 4점 이상 곡 ≥ 2곡 |
+| 조건부 재시도 | 전체 평균 2.5 ~ 3.5 → 원인 분해(ASR 품질/임베딩 arm/후보 pool 크기) 후 개선 재실험 |
+| 기각 | 전체 평균 < 2.5 |
+
+## 1. 실험 개요
+
+3개 임베딩 조건(arm)을 같은 곡 세트·같은 프롬프트로 비교한다:
+
+| arm | 곡 쪽 텍스트 | 근거 |
+|---|---|---|
+| `raw` | ASR 가사 원문(경량 정리만) → 다국어 임베딩 | 베이스라인. 일어 가사 ↔ 한국어 프롬프트 교차언어 검색이 되는지 확인 |
+| `summary` | LLM이 가사에서 생성한 **한국어 무드 요약문(3문장)** → 임베딩 | 언어·도메인 정규화(topic README 검토 포인트 1-(b)) + 저작권 회피 |
+| `keyword` | LLM이 추출한 **한국어 감정/분위기 키워드 8개** → 임베딩 | 초안의 "키워드 위주 산출" 옵션 |
+
+쿼리는 연구자가 `notes/01-lyrics_vector-searching.md`에 작성한 **감정 카테고리 4종(C1 슬픔/
+우울, C2 가련함/나아감, C3 힙함/세련됨/시티팝, C4 밝음/아침/위로) × 구체성 단계 사다리** 중
+**1단계(L1)와 4단계(L4) 양극단만** 사용한다 = 쿼리 8개 (2·3단계는 평가 부담을 줄이기 위해
+이번 실험에서 제외, 후속 실험용으로 notes에 보존). 세 arm 공통으로, 8개 쿼리 전부를 동일하게
+LLM으로 감성 서술문(2~3문장)으로 확장한 뒤 임베딩한다(가설 Phase 1의 문장 확장 부분 — L4도
+예외 없이 확장해 처리를 균일하게 유지. 에너지 배열은 이번 실험 범위 밖 — 초안 "예상 한계점"
+참조).
+
+곡 pool은 `topic/mfcc_analysis`의 30곡 세트(10밴드×3곡)를 재사용한다. 보컬 스템(demucs)이
+이미 그쪽 파이프라인 산출물로 존재하기 때문. **pool이 작아 검색 변별력이 낮은 것은 알려진
+한계로 기록**하고, 파이프라인 검증이 목적인 1차 실험에서는 감수한다.
+
+## 2. 전제조건 (구현 전 확인)
+
+1. `topic/mfcc_analysis/stems/htdemucs/<tag>/vocals.wav`가 30곡 모두 존재해야 한다
+   (`<tag>`는 `selected_songs.csv`의 `tag` 컬럼, 예: `afterglow__000`).
+   **없으면 이 파이프라인에서 demucs를 다시 구현하지 말고**, `topic/mfcc_analysis/README.md`의
+   "재생성 순서" 중 `select_songs.py` → `download_missing.py` → `separate_vocals.py`를 먼저
+   실행하라고 사용자에게 안내하고 중단한다. (torchaudio/torchcodec 환경 이슈와 우회 러너
+   `_demucs_run.py`도 그쪽 README 참조.)
+2. 환경변수 `GROQ_API_KEY` 필요 (02 단계). 없으면 02 실행 시점에 명확한 에러로 중단.
+3. 패키지: `requirements.txt`로 관리 — `faster-whisper`, `sentence-transformers`, `groq`,
+   `pandas`, `numpy`.
+
+## 3. 저작권 규칙 (절대 준수)
+
+- **ASR 가사 원문 텍스트는 git에 커밋하지 않는다.** `work/` 아래에만 두고, 이 폴더의
+  `.gitignore`에 `work/`를 반드시 포함한다.
+- 커밋 가능한 것: 임베딩 벡터(원문 복원 불가), LLM 파생 무드 요약문·키워드(가사 인용이
+  없어야 함 — LLM 프롬프트에서 인용 금지를 명시), 전사 메타데이터(글자수·언어·확신도 등
+  통계만).
+- LLM 요약/키워드 출력에 가사 문장이 그대로 들어가지 않았는지는 QC 체크포인트(§6)에서
+  사람이 확인한다.
+
+## 4. 폴더 구조와 파일 계약
+
+```
+src/method-1/
+├── DESIGN.md            # 이 문서
+├── README.md            # 구현 후 작성 (① 방법 소개 ② 실행법)
+├── requirements.txt
+├── .gitignore           # work/ 한 줄
+├── config.py            # 아래 §5의 상수 전부. 다른 스크립트는 config에서만 상수를 가져온다
+├── 01_transcribe.py
+├── 02_build_texts.py
+├── 03_embed.py
+├── 04_search.py
+├── 05_analyze.py
+├── out/                 # 커밋 대상 산출물 (아래 스키마)
+└── work/                # gitignore — 가사 원문 등 (work/transcripts/<tag>.txt)
+```
+
+각 스크립트는 **CLI 인자 없이** `python 01_transcribe.py`처럼 실행 가능해야 하고(경로·상수는
+전부 `config.py`), **재실행 안전(idempotent)** 해야 한다 — 산출물이 이미 있는 행은 건너뛴다
+(특히 01의 ASR과 02의 LLM 호출은 곡 단위로 캐시).
+
+### 산출물 스키마 (`out/`)
+
+| 파일 | 생성 | 컬럼/내용 |
+|---|---|---|
+| `transcripts_meta.csv` | 01 | `tag, band, song, detected_lang, lang_prob, n_segments, n_chars, avg_logprob_mean` (가사 텍스트 컬럼 금지) |
+| `texts_summary.csv` | 02 | `tag, band, song, text` (LLM 한국어 무드 요약문) |
+| `texts_keyword.csv` | 02 | `tag, band, song, text` (쉼표로 연결된 키워드 8개) |
+| `queries_expanded.csv` | 02 | `prompt_id("C1-L1" 형식), category_id, level, prompt_text, expanded_text` |
+| `embeddings.npz` | 03 | key: `raw`, `summary`, `keyword` (각 30×D, `tag` 순서는 `tags` key로 저장), `queries` (8×D, 순서는 `query_ids` key로 저장), 모두 L2 정규화 |
+| `results_top5.csv` | 04 | `arm, prompt_id, rank(1-5), tag, band, song, cosine` — **연구자는 평가(§6) 완료 전 이 파일을 열람하지 않는다** |
+| `eval_sheet.csv` | 04 | `pair_id, category_id, category_name, category_desc(해당 카테고리 L4 서술문), band, song, url, score, comment` — `score`·`comment`는 빈칸(사람이 기입). **(category, song) 단위** 중복 제거(§6-04 참조), arm·level·유사도 비표시, `SEED`로 셔플 |
+| `eval_mapping.csv` | 04 | `pair_id, arm, prompt_id, rank, tag` (eval↔arm·level 역매핑) |
+| `analysis_summary.csv` | 05 | (arm×level)×category별 `mean_score, p_at_5, ndcg_at_5` + (arm×level)별 전체 평균 행 |
+
+## 5. 상수 및 파라미터 (`config.py` 에 그대로)
+
+```python
+SEED = 42
+TOP_K = 5
+SONGS_CSV   = "../../../mfcc_analysis/selected_songs.csv"   # method-1 폴더 기준 상대경로
+STEMS_DIR   = "../../../mfcc_analysis/stems/htdemucs"       # <tag>/vocals.wav
+
+# ASR
+WHISPER_MODEL   = "large-v3"      # 환경변수 WHISPER_MODEL로 오버라이드 가능
+WHISPER_COMPUTE = "int8"          # CPU 기준. GPU면 float16으로 오버라이드
+# faster-whisper 호출 파라미터(가창 ASR 환각 대책 — 변경 금지):
+#   language=None(자동감지), vad_filter=True, temperature=0.0,
+#   condition_on_previous_text=False, beam_size=5
+
+# 임베딩
+EMBED_MODEL = "BAAI/bge-m3"       # sentence-transformers 로드, 유사도=cosine
+                                  # 메모리 부족 시 폴백: intfloat/multilingual-e5-small
+                                  # (e5는 곡 텍스트에 "passage: ", 쿼리에 "query: " 접두 필요)
+
+# LLM (Groq)
+GROQ_MODEL = "llama-3.3-70b-versatile"   # 환경변수 GROQ_MODEL로 오버라이드
+                                          # (앱 기본값 llama-3.1-8b-instant보다 상위 모델 —
+                                          #  연구 단계는 지연보다 요약 품질 우선)
+GROQ_TEMPERATURE = 0.0
+
+# 평가 쿼리: 감정 카테고리 4종 × 구체성 2단계 = 8개
+# (연구자 초안 notes/01-lyrics_vector-searching.md에서 발췌 — 문구 임의 수정 금지.
+#  L4 서술문은 eval_sheet의 평가 기준문(category_desc)으로도 사용된다.)
+CATEGORIES = {
+    "C1": "슬픔/우울",
+    "C2": "가련함/나아감",
+    "C3": "힙함/세련됨/시티팝",
+    "C4": "밝음/아침/위로",
+}
+PROMPTS = {
+    "C1-L1": "우울하고 슬픈 노래 틀어줘.",
+    "C1-L4": "짙은 밤하늘 아래 홀로 남겨진 듯한 고독감이 밀려오지만, 애써 담담하게 슬픔을 받아들이며 조용히 내면을 위로하는 애절하고 서정적인 정서.",
+    "C2-L1": "희망찬데 슬픈 노래.",
+    "C2-L4": "금방이라도 부서질 것처럼 연약하고 서글픈 보컬의 목소리 뒤로, 세차게 몰아치는 드럼과 기타 사운드가 질주하며 불안 속에서도 끝내 딛고 일어나 나아가고자 하는 아련하고 가련한 의지.",
+    "C3-L1": "힙하고 세련된 노래.",
+    "C3-L4": "지나치게 무겁지 않은 미디엄 템포 위에 재지(Jazzy)한 건반과 찰진 베이스 리듬이 얹혀, 도회적인 고독과 낭만이 교차하는 감각적이고 스타일리시한 무드.",
+    "C4-L1": "아침에 듣기 좋은 밝은 노래.",
+    "C4-L4": "이른 아침의 맑은 공기와 부드러운 햇살이 스며들 듯, 어쿠스틱한 악기들이 만드는 포근한 공간감 속에서 불안을 걷어내고 긍정적인 온기를 불어넣는 나른하면서도 화사한 순간.",
+}
+```
+
+### LLM 프롬프트 템플릿 (그대로 사용, `{lyrics}`/`{prompt}` 치환)
+
+**(a) 무드 요약 (`texts_summary`)**
+```
+다음은 어느 노래의 가사다(일본어 또는 영어).
+이 노래의 정서·분위기·에너지를 한국어 3문장으로 서술하라.
+규칙: 가사 원문의 문장이나 구절을 인용·번역해 옮기지 말 것. 곡 제목이나 고유명사를 쓰지 말 것.
+감정(예: 쓸쓸함, 벅참), 분위기(예: 몽환적, 공격적), 에너지(예: 잔잔함, 질주감) 위주로만 서술할 것.
+
+가사:
+{lyrics}
+```
+
+**(b) 키워드 추출 (`texts_keyword`)**
+```
+다음은 어느 노래의 가사다(일본어 또는 영어).
+이 노래의 감정·분위기를 나타내는 한국어 키워드 8개를 골라라.
+규칙: 명사 또는 형용사만. 가사 단어를 그대로 옮기지 말 것. 쉼표로 구분해 한 줄로만 출력할 것.
+
+가사:
+{lyrics}
+```
+
+**(c) 쿼리 확장 (`queries_expanded`)**
+```
+사용자가 플레이리스트를 요청했다: "{prompt}"
+이 요청이 원하는 노래의 정서·분위기·에너지를 한국어 2~3문장으로 더 풍부하게 서술하라.
+곡 제목·아티스트·장르 명칭은 쓰지 말고, 감정과 분위기 서술만 출력할 것.
+```
+
+## 6. 파이프라인 단계별 명세
+
+### 01_transcribe.py — ASR
+- 입력: `SONGS_CSV`의 30행, 각 `STEMS_DIR/<tag>/vocals.wav`.
+- faster-whisper로 전사(§5 파라미터). 세그먼트 텍스트를 순서대로 모은다.
+- **후처리(결정적)**: 각 세그먼트 텍스트를 strip → 연속으로 동일한 세그먼트는 1개로 축약
+  (환각 루프 대책) → 개행으로 join.
+- 출력: `work/transcripts/<tag>.txt`(원문, 커밋 금지) + `out/transcripts_meta.csv`.
+- 캐시: `<tag>.txt`가 이미 있으면 해당 곡 스킵.
+- **QC 체크포인트 (사람)**: 완료 후 연구자가 3곡 이상 골라 원문을 실제 청취와 대조해 ASR
+  품질을 확인하고 나서 02로 진행한다. 스크립트는 마지막에 이 안내문을 출력할 것.
+
+### 02_build_texts.py — 텍스트 변형 3종 + 쿼리 확장 (Groq)
+- `raw` arm 텍스트는 `work/transcripts/<tag>.txt`를 그대로 사용(추가 파일 생성 없음).
+- 곡마다 템플릿 (a)·(b)로 Groq 호출 → `out/texts_summary.csv`, `out/texts_keyword.csv`.
+- 쿼리 8종(`PROMPTS`)에 템플릿 (c) 적용 → `out/queries_expanded.csv`.
+- 캐시: 출력 CSV에 이미 있는 `tag`/`prompt_id`는 재호출하지 않는다(행 단위 append).
+- **QC 체크포인트 (사람)**: 요약·키워드에 가사 원문 인용이 섞이지 않았는지 표본 확인(§3).
+
+### 03_embed.py — 임베딩
+- `EMBED_MODEL` 로드. 곡 텍스트 3종(raw는 work/에서, summary·keyword는 out/ CSV에서)과
+  `expanded_text` 5개를 인코딩, L2 정규화 후 `out/embeddings.npz` 저장(§4 스키마).
+- 곡 순서는 `SONGS_CSV` 행 순서로 통일하고 `tags` 배열을 함께 저장.
+
+### 04_search.py — 검색 + 평가지 생성
+- 각 arm × 쿼리 8종에 대해 cosine(내적, 정규화 완료) top-5 → `out/results_top5.csv`
+  (3 arm × 8 쿼리 × 5 = 120행).
+- **평가 pair는 (category_id, tag) 단위로 중복 제거**한다 — 같은 카테고리의 L1/L4 쿼리와
+  세 arm이 뽑은 곡은 한 번만 평가한다. 근거: 평가가 측정하는 것은 "곡 ↔ 카테고리 의도"의
+  일치이고, L1은 L4가 서술한 의도의 축약형이므로 기준문은 카테고리당 하나(L4 서술문 =
+  `category_desc`)로 통일한다. 평가 부담이 절반 이하로 줄어든다(카테고리당 최대 30곡,
+  실질 10~15곡 예상 → 총 40~60개 평가). **단, 이 기준문 통일이 L1 쿼리에 불리할 수 있음**
+  (L1이 요구하지 않은 뉘앙스까지 기준에 포함)은 한계(§7)에 기록한다.
+- pair 목록을 `random.Random(SEED).shuffle` → `pair_id`를 `p001`부터 부여 →
+  `out/eval_sheet.csv`(블라인드) + `out/eval_mapping.csv`.
+- `url`은 `SONGS_CSV`의 `url` 컬럼에서 join.
+- 실행 후 안내문 출력: "eval_sheet.csv의 score(1~5)를 채우기 전에는 results_top5.csv를
+  열람하지 말 것".
+
+### 05_analyze.py — 집계
+- `eval_sheet.csv`의 score가 전부 채워졌는지 검증(빈칸 있으면 목록 출력 후 중단).
+- `eval_mapping.csv`로 (arm, level)에 점수를 되붙여 (arm×level)×category별:
+  - `mean_score` = top-5 평점 평균
+  - `p_at_5` = top-5 중 score≥4 곡 수 / 5
+  - `ndcg_at_5` = DCG(gain=score-1, log2 할인, rank순) / IDCG(그 카테고리에서 **평가된 전체
+    pair** 중 상위 5개 기준)
+- (arm×level)별 전체 평균 행 포함 `out/analysis_summary.csv` 저장 + stdout에 출력할 것:
+  ① §0 판정 기준에 따른 판정문(최고 (arm×level) 조합 기준), ② RQ2용 부차 분석 — arm별
+  L1 vs L4 평균 격차 표(확장이 입력 구체성 격차를 메우는지), ③ 마크다운 요약 표.
+- 최종 보고서(`report/01-lyrics_vector-searching.md`)는 이 결과를 바탕으로 연구자/상위
+  세션이 작성한다 — 이 스크립트의 범위 밖.
+
+## 7. 알려진 한계 (보고서에 그대로 기록할 것)
+
+- 음향 통계값 미사용 — 가사 단독 효과만 측정(초안 "예상 한계점" 그대로).
+- pool 30곡 → top-5 변별력 제한. 후속으로 660곡 전체 확장 시 ASR·임베딩은 오프라인
+  사전계산 필요.
+- 평가자 1인(연구자 본인) 설문 — 블라인드 평가지로 arm 편향은 차단하지만 개인 취향 편향은
+  남는다.
+- ASR 오류(가창 WER·환각)는 QC로 표본 확인만 하고 정량 측정하지 않는다.
+- 평가 기준문을 카테고리당 L4 서술문 하나로 통일(§6-04) — L1 쿼리가 요구하지 않은 뉘앙스까지
+  기준에 포함되어 L1 성적이 체계적으로 불리해질 수 있다. RQ2의 L1 vs L4 격차 해석 시 이
+  편향을 감안할 것.
+- 구체성 사다리의 2·3단계 프롬프트는 미사용(notes에 보존) — 단계별 세밀한 용량-반응 관계는
+  후속 실험 몫.
