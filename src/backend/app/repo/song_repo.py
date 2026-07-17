@@ -64,7 +64,9 @@ def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, 
     outro_raw = (row.get("i_end") or "").strip()
 
     song_title = row["song"]
-    tag = row.get("tag", "").strip()
+    # 오버라이드 키: songs_master.csv엔 tag 컬럼이 없다(연구용 CSV 전용 컬럼) — 곡을 유일하게
+    # 식별하는 idx를 문자열로 써서 song_alias_overrides.json과 매칭한다.
+    idx_key = (row.get("idx") or "").strip()
 
     # 검색 보조 필드 자동 계산
     song_romaji = to_romaji(song_title)
@@ -72,8 +74,8 @@ def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, 
     song_hanja_reading = to_hanja_reading(song_title)
 
     # 오버라이드 적용 (부분 오버라이드 허용 — 지정된 필드만 대체)
-    if overrides and tag and tag in overrides:
-        override_data = overrides[tag]
+    if overrides and idx_key and idx_key in overrides:
+        override_data = overrides[idx_key]
         if "song_romaji" in override_data:
             song_romaji = override_data["song_romaji"]
         if "song_hangul" in override_data:

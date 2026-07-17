@@ -42,7 +42,7 @@ architecture.md가 우선한다.
 
 ```json
 {
-  "mygo__003": {
+  "277": {
     "song_hangul": "정확한 한글 표기",
     "song_romaji": "선택적 로마자",
     "song_hanja_reading": "선택적 한자음"
@@ -50,4 +50,6 @@ architecture.md가 우선한다.
 }
 ```
 
-키는 CSV의 `tag` 컬럼 값이며, 부분 오버라이드 가능 (지정된 필드만 대체, 나머지는 자동값 유지).
+키는 `songs_master.csv`의 `idx` 컬럼 값(문자열)이다 — 이 CSV엔 `tag` 컬럼이 없으므로 곡을
+유일하게 식별하는 `idx`를 쓴다(예: mygo의 곡이 `idx=277`이면 위처럼 `"277"`). 부분 오버라이드
+가능(지정된 필드만 대체, 나머지는 자동값 유지).
