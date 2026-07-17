@@ -274,7 +274,7 @@ button.ghost {
   opacity: 0; transition: opacity 0.14s;
 }
 .track:hover .track-actions, .track:focus-within .track-actions { opacity: 1; }
-@media (hover: none) { .track-actions { opacity: 0.85; } } /* 터치 환경 상시 노출 */
+/* 터치 환경 상시 노출 규칙은 아래 공용 `@media (hover: none)` 블록(터치 어포던스 모음)에서 처리 */
 
 .track-btn {
   width: 30px; height: 30px; padding: 0; border-radius: 8px;

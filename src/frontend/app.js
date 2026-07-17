@@ -687,7 +687,11 @@ function renderTracklist(list) {
     const li = document.createElement("li");
     li.className = "track";
     li.dataset.index = String(i);
-    li.addEventListener("click", () => playSong(i, false));
+    li.addEventListener("click", () => {
+      // 길게누름으로 메뉴가 뜬 직후의 클릭(release)은 재생으로 이어지지 않도록 무시.
+      if (trackLongPressFired) { trackLongPressFired = false; return; }
+      playSong(i, false);
+    });
 
     const pos = document.createElement("div");
     pos.className = "pos";
@@ -716,9 +720,79 @@ function renderTracklist(list) {
     badges.appendChild(makeBadge("", p.camelot));
 
     bodyEl.append(title, band, reason, badges);
+    attachTrackLongPress(bodyEl, i); // 우클릭·길게누름 → "다음 곡 추가"/"현재 곡 제거" 메뉴
     li.append(pos, bodyEl, makeTrackActions(li, i));
     li.appendChild(makeInserter(i + 1)); // 이 트랙 '다음'(배열 index i+1) 삽입점
     tracklistEl.appendChild(li);
+  });
+}
+
+// ── 트랙 우클릭·길게누름 메뉴("다음 곡 추가"/"현재 곡 제거") ─────────────────────
+// attachGraphMenu(그래프 구간 메뉴)와 동일한 구조: pointerdown 시 타이머 예약 → 10px 초과
+// 이동 시 취소 → 시간 초과 시 clamp된 위치에 메뉴 표시. bodyEl(제목 영역)에만 걸어 이동 핸들
+// (track-move)·제거버튼(track-remove)·인서터(+)와는 겹치지 않는다. renderTracklist가 매 렌더마다
+// 새 li/bodyEl을 만들므로(위 replaceChildren) 리스너가 누적되지 않는다.
+let trackMenuEl = null;
+let trackLongPressFired = false;
+
+function closeTrackMenu() {
+  if (trackMenuEl) { trackMenuEl.remove(); trackMenuEl = null; }
+}
+
+function openTrackMenu(clientX, clientY, items) {
+  closeTrackMenu();
+  const menu = elDiv("graph-menu"); // 기존 컨텍스트 메뉴 스타일 재사용
+  for (const it of items) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "graph-menu-item";
+    b.textContent = it.label;
+    b.addEventListener("click", () => { closeTrackMenu(); it.onClick(); });
+    menu.appendChild(b);
+  }
+  menu.style.visibility = "hidden"; // 측정 후 위치 보정
+  document.body.appendChild(menu);
+  const r = menu.getBoundingClientRect();
+  menu.style.left = `${Math.max(8, Math.min(clientX, window.innerWidth - r.width - 8))}px`;
+  menu.style.top = `${Math.max(8, Math.min(clientY, window.innerHeight - r.height - 8))}px`;
+  menu.style.visibility = "";
+  trackMenuEl = menu;
+}
+
+document.addEventListener("pointerdown", (e) => {
+  if (trackMenuEl && !trackMenuEl.contains(e.target)) closeTrackMenu();
+}, true);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeTrackMenu(); });
+window.addEventListener("scroll", () => closeTrackMenu(), true);
+
+let trackLpTimer = null;
+let trackLpStartXY = null;
+function clearTrackLongPress() { if (trackLpTimer) { clearTimeout(trackLpTimer); trackLpTimer = null; } trackLpStartXY = null; }
+document.addEventListener("pointermove", (e) => {
+  if (trackLpStartXY && Math.hypot(e.clientX - trackLpStartXY.x, e.clientY - trackLpStartXY.y) > 10) clearTrackLongPress();
+}, true);
+document.addEventListener("pointerup", clearTrackLongPress, true);
+document.addEventListener("pointercancel", clearTrackLongPress, true);
+
+function attachTrackLongPress(bodyEl, index) {
+  const openFor = (clientX, clientY) => {
+    openTrackMenu(clientX, clientY, [
+      { label: "다음 곡 추가", onClick: () => openSongPickerAt(index + 1) },
+      { label: "현재 곡 제거", onClick: () => removeSong(index) },
+    ]);
+  };
+  bodyEl.addEventListener("contextmenu", (e) => { e.preventDefault(); openFor(e.clientX, e.clientY); });
+  bodyEl.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse") return; // 데스크톱은 contextmenu(우클릭) 사용
+    trackLongPressFired = false; // 새 제스처 시작 — 이전 제스처의 잔여 플래그 정리
+    const x = e.clientX, y = e.clientY;
+    if (trackLpTimer) clearTimeout(trackLpTimer);
+    trackLpStartXY = { x, y };
+    trackLpTimer = setTimeout(() => {
+      trackLpTimer = null;
+      trackLongPressFired = true;
+      openFor(x, y);
+    }, LONGPRESS_MS);
   });
 }
 
