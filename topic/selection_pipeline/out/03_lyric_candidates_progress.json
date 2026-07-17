@@ -1,0 +1,26 @@
+{
+  "steps": {
+    "query_expansion": {
+      "status": "done",
+      "n_done": 8,
+      "n_total": 8
+    },
+    "song_embedding": {
+      "status": "done",
+      "n_songs": 661
+    },
+    "query_embedding": {
+      "status": "done",
+      "n_queries": 8
+    },
+    "search": {
+      "status": "done",
+      "n_rows": 829
+    },
+    "overall": {
+      "status": "done"
+    }
+  },
+  "started_at": "2026-07-17T18:27:39.906327+00:00",
+  "updated_at": "2026-07-17T18:28:02.469069+00:00"
+}

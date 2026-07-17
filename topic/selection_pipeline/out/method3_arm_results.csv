@@ -1,0 +1,73 @@
+query_id,arm,rank,tag,band,song,intensity,band_pct,lyric_cosine
+Q1,arm1,1,mygo__272,mygo,栞,0.0425,0.0227,
+Q1,arm1,2,mygo__288,mygo,エガクミライ,0.0493,0.0455,
+Q1,arm1,3,mygo__281,mygo,過惰幻,0.0515,0.0682,
+Q1,arm2,1,mygo__288,mygo,エガクミライ,0.0493,0.0455,0.4978
+Q1,arm2,2,mygo__267,mygo,春日影 (MyGO!!!!! ver.),0.0864,0.0909,0.5073
+Q1,arm2,3,mygo__660,mygo,素寄曲,0.1685,0.1364,0.5427
+Q1,arm3,1,mygo__288,mygo,エガクミライ,0.0493,0.0455,0.4978
+Q1,arm3,2,mygo__267,mygo,春日影 (MyGO!!!!! ver.),0.0864,0.0909,0.5073
+Q1,arm3,3,mygo__660,mygo,素寄曲,0.1685,0.1364,0.5427
+Q2,arm1,1,raise_a_suilen__528,raise_a_suilen,Apocalypse,0.5102,0.1519,
+Q2,arm1,2,raise_a_suilen__557,raise_a_suilen,ボッカデラべリタ (Cover),0.4865,0.1392,
+Q2,arm1,3,raise_a_suilen__556,raise_a_suilen,Get Wild (Cover),0.5208,0.1646,
+Q2,arm2,1,raise_a_suilen__567,raise_a_suilen,恋しさとせつなさと心強さと (Cover),0.4781,0.1266,0.553
+Q2,arm2,2,raise_a_suilen__521,raise_a_suilen,ゆら・ゆらRing-Dong-Dance,0.5669,0.2025,0.5896
+Q2,arm2,3,raise_a_suilen__514,raise_a_suilen,Life on the Lotus,0.6064,0.2532,0.5635
+Q2,arm3,1,raise_a_suilen__555,raise_a_suilen,革命道中 (Cover),0.6965,0.481,0.5704
+Q2,arm3,2,raise_a_suilen__542,raise_a_suilen,RUNAWAY STAR,0.7256,0.557,0.5933
+Q2,arm3,3,raise_a_suilen__522,raise_a_suilen,Hey-day狂騒曲(カプリチオ),0.6766,0.4304,0.6389
+Q3,arm1,1,ave_mujica__093,ave_mujica,Angles,0.0222,0.0345,
+Q3,arm1,2,ave_mujica__091,ave_mujica,in your blue eyes,0.0229,0.069,
+Q3,arm1,3,ave_mujica__087,ave_mujica,Symbol III : ▽,0.0243,0.1034,
+Q3,arm2,1,ave_mujica__093,ave_mujica,Angles,0.0222,0.0345,0.5467
+Q3,arm2,2,raise_a_suilen__544,raise_a_suilen,Light a fire,0.0702,0.0127,0.5552
+Q3,arm2,3,pastel_palettes__343,pastel_palettes,ホワイト ノスタルジア,0.1372,0.027,0.597
+Q3,arm3,1,raise_a_suilen__544,raise_a_suilen,Light a fire,0.0702,0.0127,0.5552
+Q3,arm3,2,raise_a_suilen__568,raise_a_suilen,DEPARTURES (Cover),0.151,0.0253,0.5952
+Q3,arm3,3,pastel_palettes__343,pastel_palettes,ホワイト ノスタルジア,0.1372,0.027,0.597
+Q4,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q4,arm1,2,mugendai_mutype__257,mugendai_mutype,やわやわNERD 超FreQuency,0.9899,1.0,
+Q4,arm1,3,pastel_palettes__368,pastel_palettes,ハッピーシンセサイザ (Cover),0.9879,1.0,
+Q4,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.61
+Q4,arm2,2,pastel_palettes__368,pastel_palettes,ハッピーシンセサイザ (Cover),0.9879,1.0,0.5458
+Q4,arm2,3,pastel_palettes__318,pastel_palettes,Wonderful Sweet!,0.9439,0.9595,0.5467
+Q4,arm3,1,various_artists__104,various_artists,"Here, the world",0.5668,1.0,0.6
+Q4,arm3,2,pastel_palettes__368,pastel_palettes,ハッピーシンセサイザ (Cover),0.9879,1.0,0.5458
+Q4,arm3,3,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.61
+Q5,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q5,arm1,2,mugendai_mutype__257,mugendai_mutype,やわやわNERD 超FreQuency,0.9899,1.0,
+Q5,arm1,3,pastel_palettes__368,pastel_palettes,ハッピーシンセサイザ (Cover),0.9879,1.0,
+Q5,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.7343
+Q5,arm2,2,raise_a_suilen__490,raise_a_suilen,Invincible Fighter,0.9619,0.9747,0.6511
+Q5,arm2,3,raise_a_suilen__533,raise_a_suilen,HOWLING AMBITION,0.9388,0.9114,0.6494
+Q5,arm3,1,various_artists__104,various_artists,"Here, the world",0.5668,1.0,0.6916
+Q5,arm3,2,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.7343
+Q5,arm3,3,afterglow__005,afterglow,Hey-day狂騒曲(カプリチオ),0.8748,0.9861,0.6294
+Q6,arm1,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,
+Q6,arm1,2,poppin_party__427,poppin_party,夏に閉じこめて,0.1987,0.087,
+Q6,arm1,3,poppin_party__466,poppin_party,心絵 (Cover),0.1984,0.0783,
+Q6,arm2,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,0.5401
+Q6,arm2,2,poppin_party__427,poppin_party,夏に閉じこめて,0.1987,0.087,0.5429
+Q6,arm2,3,poppin_party__466,poppin_party,心絵 (Cover),0.1984,0.0783,0.5251
+Q6,arm3,1,poppin_party__409,poppin_party,夢を撃ち抜く瞬間に！,0.2975,0.2,0.5519
+Q6,arm3,2,raise_a_suilen__521,raise_a_suilen,ゆら・ゆらRing-Dong-Dance,0.5669,0.2025,0.5314
+Q6,arm3,3,pastel_palettes__312,pastel_palettes,はなまる◎アンダンテ,0.4806,0.2027,0.5234
+Q7,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q7,arm1,2,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,
+Q7,arm1,3,pastel_palettes__369,pastel_palettes,春擬き (Cover),0.5029,0.2162,
+Q7,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.687
+Q7,arm2,2,roselia__615,roselia,Requiem for Fate,0.4957,0.5169,0.6194
+Q7,arm2,3,roselia__594,roselia,Keep Heart,0.4952,0.5056,0.6045
+Q7,arm3,1,pastel_palettes__371,pastel_palettes,花ハ踊レヤいろはにほ (Cover),0.7067,0.5,0.6711
+Q7,arm3,2,roselia__594,roselia,Keep Heart,0.4952,0.5056,0.6045
+Q7,arm3,3,hello_happy_world__140,hello_happy_world,サンバロハッピ〜！,0.6496,0.5139,0.624
+Q8,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q8,arm1,2,ave_mujica__072,ave_mujica,KiLLKiSS,0.4028,0.5172,
+Q8,arm1,3,afterglow__015,afterglow,ランブリングメモリー,0.3956,0.2222,
+Q8,arm2,1,roselia__585,roselia,Safe and Sound,0.3954,0.3258,0.619
+Q8,arm2,2,afterglow__037,afterglow,ペトリコール・オベーション,0.4054,0.2361,0.607
+Q8,arm2,3,afterglow__060,afterglow,命に嫌われている。 (Cover),0.4066,0.25,0.609
+Q8,arm3,1,raise_a_suilen__560,raise_a_suilen,Just Awake (Cover),0.6644,0.3924,0.6438
+Q8,arm3,2,mygo__278,mygo,処救生,0.2921,0.4091,0.6148
+Q8,arm3,3,poppin_party__447,poppin_party,START!! True dreams,0.434,0.3826,0.6032

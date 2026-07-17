@@ -1,0 +1,7 @@
+dimension,label,n,mean_energy,mean_energy_proxy,mean_energy_full,mean_i_mean
+brightness,bright,8,0.54875,0.200178,0.582504,0.222185
+brightness,dark,8,0.53675,-0.623107,0.325038,0.054901
+intensity,loud,22,0.446227,-0.590282,0.695462,0.376906
+intensity,quiet,14,0.450286,0.336424,0.174141,-0.129409
+party,calm,5,0.417,1.3994,0.136447,-0.29711
+party,party,8,0.36875,-0.65717,0.846669,0.546955

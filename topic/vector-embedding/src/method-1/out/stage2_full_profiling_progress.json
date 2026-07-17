@@ -1,0 +1,9 @@
+{
+  "step": "stage1_profiling_full_catalog",
+  "n_total": 661,
+  "n_done": 661,
+  "n_failed": 0,
+  "started_at": "2026-07-17T08:15:01.242628+00:00",
+  "status": "done",
+  "updated_at": "2026-07-17T08:27:56.375943+00:00"
+}

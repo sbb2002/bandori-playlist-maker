@@ -1,0 +1,55 @@
+eval_id,query_id,prompt_text,band,song,url,score,comment
+1,Q6,새벽에 혼자 있을 때 듣고 싶은 노래.,poppin_party,夢を撃ち抜く瞬間に！,https://youtu.be/Y8-nQ9ehgZE,4,꽤 그럴듯한 감성.
+2,Q7,듣고 나면 기분이 조금 나아지는 노래.,hello_happy_world,サンバロハッピ〜！,https://youtu.be/RvtTwS_wErQ,4,실제로 기분이 나아지는 느낌.
+3,Q6,새벽에 혼자 있을 때 듣고 싶은 노래.,poppin_party,心絵 (Cover),https://youtu.be/9FhNnX_qsV0,4,
+4,Q7,듣고 나면 기분이 조금 나아지는 노래.,pastel_palettes,春擬き (Cover),https://youtu.be/LuBJ_pjwIXk,4,
+5,Q4,빵빵 터지는 하이텐션 파티 노래로만 채워줘.,various_artists,"Here, the world",https://youtu.be/LuwRRghPD1A,4,통통 튀는 리듬이 실제로 그런 느낌.
+6,Q5,운동할 때 들으면 힘 나는 노래.,raise_a_suilen,HOWLING AMBITION,https://youtu.be/XYMoaMqyf6s,5,운동할 때 진짜로 도파민이 샘솟는 노래.
+7,Q1,mygo 노래 중에 제일 잔잔한 곡 틀어줘.,mygo,春日影 (MyGO!!!!! ver.),https://youtu.be/NycFr6D6DSw,5,많은 이들이 동의할듯.
+8,Q5,운동할 때 들으면 힘 나는 노래.,raise_a_suilen,Invincible Fighter,https://youtu.be/m5z-mCUwmxM,5,운동할 때 정말로 힘날듯.
+9,Q7,듣고 나면 기분이 조금 나아지는 노래.,poppin_party,イントロダクション,https://youtu.be/KfuOq4v5H_A,4,기분이 맑아지는 느낌.
+10,Q1,mygo 노래 중에 제일 잔잔한 곡 틀어줘.,mygo,過惰幻,https://youtu.be/aggmsIQMR4I,5,정말 최고로 잔잔한 노래.
+11,Q8,마음이 무겁고 가라앉는 밤에 어울리는 노래.,roselia,Call the shots,https://youtu.be/VBn-ME6-jGs,4,마음이 무겁지만 그래도 발걸음 떼게 만드는 결심을 서게 하는 느낌.
+12,Q3,장르 상관없이 진짜 조용하고 힘 뺀 노래 틀어줘.,raise_a_suilen,DEPARTURES (Cover),https://youtu.be/TLq1MbV686M,3,"過惰幻와 같이 더 조용한 노래도 있지만, 이 또한 꽤 조용한 축에 속함."
+13,Q4,빵빵 터지는 하이텐션 파티 노래로만 채워줘.,pastel_palettes,Wonderful Sweet!,https://youtu.be/oMtLVZ4z9wM,4,텐션이 터지는 노래 맞음.
+14,Q8,마음이 무겁고 가라앉는 밤에 어울리는 노래.,afterglow,ランブリングメモリー,https://youtu.be/vRHfyDdge6s,4,인트로가 조용한게 정말로 마음이 무거울 때 들으면 위로되는 노래임
+15,Q5,운동할 때 들으면 힘 나는 노래.,various_artists,"Here, the world",https://youtu.be/LuwRRghPD1A,3,가볍게 조깅하는 정도의 느낌. 강도 높은 운동이라면 안어울림.
+16,Q8,마음이 무겁고 가라앉는 밤에 어울리는 노래.,afterglow,ペトリコール・オベーション,https://youtu.be/XUxFCXHCDkU,3,살짝은 무겁지만 그래도 나름의 감성이 있음.
+17,Q8,마음이 무겁고 가라앉는 밤에 어울리는 노래.,mygo,処救生,https://youtu.be/Z2OLVzWFaY0,2,"노래 자체는 질주감이 있는 노래로, 약간 그런 감성이 있긴 하지만 조금은 곡조 때문에 안맞는 느낌."
+18,Q8,마음이 무겁고 가라앉는 밤에 어울리는 노래.,poppin_party,START!! True dreams,https://youtu.be/SQ_-nPf-SNI,1,매우 밝고 희망찬 노래. 만약 그런 상황에 위로가 되는 곡이었다면 잘 골랐음.
+19,Q8,마음이 무겁고 가라앉는 밤에 어울리는 노래.,raise_a_suilen,Just Awake (Cover),https://youtu.be/nyn9h6BraQ4,1,위와 같음.
+20,Q2,raise a suilen 노래 중에 그나마 차분한 곡 틀어줘.,raise_a_suilen,ボッカデラべリタ (Cover),https://youtu.be/OsWFLfjctjQ,4,확실히 이 밴드 노래 중에선 차분한 편.
+21,Q2,raise a suilen 노래 중에 그나마 차분한 곡 틀어줘.,raise_a_suilen,RUNAWAY STAR,https://youtu.be/DkMyx_sLMlk,1,질주감이 꽤 있는 노래임.
+22,Q2,raise a suilen 노래 중에 그나마 차분한 곡 틀어줘.,raise_a_suilen,Life on the Lotus,https://youtu.be/zle_8SGQgcg,4,꽤 차분.
+23,Q1,mygo 노래 중에 제일 잔잔한 곡 틀어줘.,mygo,エガクミライ,https://youtu.be/T_jH9KJTlsI,5,모두가 동의할 노래.
+24,Q3,장르 상관없이 진짜 조용하고 힘 뺀 노래 틀어줘.,ave_mujica,Angles,https://youtu.be/au2A3wyiLIo,5,헤비메탈이지만 인트로가 정말 일치하는 곡.
+25,Q8,마음이 무겁고 가라앉는 밤에 어울리는 노래.,afterglow,命に嫌われている。 (Cover),https://youtu.be/03BGdH5H5xE,4,꽤 어울림.
+26,Q4,빵빵 터지는 하이텐션 파티 노래로만 채워줘.,raise_a_suilen,A DECLARATION OF ×××,https://youtu.be/9iOltuunbvs,5,
+27,Q7,듣고 나면 기분이 조금 나아지는 노래.,pastel_palettes,花ハ踊レヤいろはにほ (Cover),https://youtu.be/ZoMwONgrN_E,4,
+28,Q3,장르 상관없이 진짜 조용하고 힘 뺀 노래 틀어줘.,pastel_palettes,ホワイト ノスタルジア,https://youtu.be/oN98BBBIOnw,3,조용하긴 하지만 최고로 조용한 노래는 아님. 그러나 나쁘진 않음.
+29,Q2,raise a suilen 노래 중에 그나마 차분한 곡 틀어줘.,raise_a_suilen,革命道中 (Cover),https://youtu.be/xj_PkFdvQ0g,4,
+30,Q6,새벽에 혼자 있을 때 듣고 싶은 노래.,poppin_party,夏に閉じこめて,https://youtu.be/02n9fIuuew8,4,
+31,Q3,장르 상관없이 진짜 조용하고 힘 뺀 노래 틀어줘.,ave_mujica,in your blue eyes,https://youtu.be/kVMuEQ3uXWc,5,
+32,Q1,mygo 노래 중에 제일 잔잔한 곡 틀어줘.,mygo,素寄曲,https://youtu.be/uZSAArx6jKM,4,
+33,Q8,마음이 무겁고 가라앉는 밤에 어울리는 노래.,ave_mujica,KiLLKiSS,https://youtu.be/RexyoaXaQ1o,5,
+34,Q5,운동할 때 들으면 힘 나는 노래.,raise_a_suilen,A DECLARATION OF ×××,https://youtu.be/9iOltuunbvs,5,
+35,Q2,raise a suilen 노래 중에 그나마 차분한 곡 틀어줘.,raise_a_suilen,Apocalypse,https://youtu.be/0fBH7M4EY1M,4,
+36,Q6,새벽에 혼자 있을 때 듣고 싶은 노래.,pastel_palettes,はなまる◎アンダンテ,https://youtu.be/QKpgJFE3CgM,3,
+37,Q7,듣고 나면 기분이 조금 나아지는 노래.,roselia,Keep Heart,https://youtu.be/0e9gzU4spFU,4,
+38,Q8,마음이 무겁고 가라앉는 밤에 어울리는 노래.,roselia,Safe and Sound,https://youtu.be/0Hj-eXZzL90,4,
+39,Q4,빵빵 터지는 하이텐션 파티 노래로만 채워줘.,mugendai_mutype,やわやわNERD 超FreQuency,https://youtu.be/xzkEK0GF7fw,5,
+40,Q5,운동할 때 들으면 힘 나는 노래.,afterglow,Hey-day狂騒曲(カプリチオ),https://youtu.be/czHlLBls4oo,4,
+41,Q1,mygo 노래 중에 제일 잔잔한 곡 틀어줘.,mygo,栞,https://youtu.be/SgJFZEI6GSw,5,
+42,Q2,raise a suilen 노래 중에 그나마 차분한 곡 틀어줘.,raise_a_suilen,ゆら・ゆらRing-Dong-Dance,https://youtu.be/j69ZFBRuOlA,1,인트로 소개 멘트 떄문에 오인했다고 생각됨. 실제론 차분한 곡이 아님.
+43,Q7,듣고 나면 기분이 조금 나아지는 노래.,morfonica,Wreath of Brave,https://youtu.be/5O3gAE65_34,4,
+44,Q5,운동할 때 들으면 힘 나는 노래.,pastel_palettes,ハッピーシンセサイザ (Cover),https://youtu.be/AD3WCMhAGVs,3,운동 초반에 어울리는 노래. 운동강도가 셀 때는 안어울림.
+45,Q5,운동할 때 들으면 힘 나는 노래.,mugendai_mutype,やわやわNERD 超FreQuency,https://youtu.be/xzkEK0GF7fw,3,
+46,Q7,듣고 나면 기분이 조금 나아지는 노래.,roselia,Requiem for Fate,https://youtu.be/eoq81V4BpHQ,3,
+47,Q6,새벽에 혼자 있을 때 듣고 싶은 노래.,raise_a_suilen,ゆら・ゆらRing-Dong-Dance,https://youtu.be/j69ZFBRuOlA,3,
+48,Q2,raise a suilen 노래 중에 그나마 차분한 곡 틀어줘.,raise_a_suilen,Hey-day狂騒曲(カプリチオ),https://youtu.be/dQuVrNLZOFM,1,인트로 오인.
+49,Q3,장르 상관없이 진짜 조용하고 힘 뺀 노래 틀어줘.,ave_mujica,Symbol III : ▽,https://youtu.be/NB3PxWLn9v4,5,정말 조용한 노래. 거의 뱅드림 전체에서 조용한 곡이라고 생각함.
+50,Q2,raise a suilen 노래 중에 그나마 차분한 곡 틀어줘.,raise_a_suilen,恋しさとせつなさと心強さと (Cover),https://youtu.be/8XRwP6pLi_s,4,강렬한 사운드가 시작부터 들림. 전체중 차분한 편이긴 함.
+51,Q6,새벽에 혼자 있을 때 듣고 싶은 노래.,morfonica,Sweet Cheers!,https://youtu.be/e8IQBZMVIGw,5,
+52,Q2,raise a suilen 노래 중에 그나마 차분한 곡 틀어줘.,raise_a_suilen,Get Wild (Cover),https://youtu.be/ezQiWaCbpug,3,
+53,Q3,장르 상관없이 진짜 조용하고 힘 뺀 노래 틀어줘.,raise_a_suilen,Light a fire,https://youtu.be/oVEfC2fyvLY,5,진짜 조용한 인트로. 실제로도 RAS 오리지날 곡에서 조용한 편.
+54,Q4,빵빵 터지는 하이텐션 파티 노래로만 채워줘.,pastel_palettes,ハッピーシンセサイザ (Cover),https://youtu.be/AD3WCMhAGVs,4,

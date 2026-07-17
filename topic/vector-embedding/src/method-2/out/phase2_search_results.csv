@@ -1,0 +1,55 @@
+query_id,tier,rank,arm,tag,band,song,url,lyr_rank,acou_rank,acou_match,combined_rank
+T1-Q1,T1_literal,1,A,hello_happy_world__109,hello_happy_world,えがお･シング･あ･ソング,https://youtu.be/B-I2KAxGKD8,0.9992,0.6498,0.8182,0.9992
+T1-Q1,T1_literal,2,A,hello_happy_world__123,hello_happy_world,Happy! Happier! Happiest!,https://youtu.be/xpECEzVaWH8,0.9977,0.6785,0.8284,0.9977
+T1-Q1,T1_literal,3,A,hello_happy_world__111,hello_happy_world,にこ×にこ=ハイパースマイルパワー！,https://youtu.be/YRQHVpYDHAU,0.9962,0.472,0.7554,0.9962
+T1-Q1,T1_literal,1,B,poppin_party__423,poppin_party,イントロダクション,https://youtu.be/KfuOq4v5H_A,0.9932,0.9796,1.0,0.9796
+T1-Q1,T1_literal,2,B,poppin_party__454,poppin_party,花園電気ギター！！！,https://youtu.be/Fb6Vxj--Fq4,0.8585,0.9796,1.0,0.9796
+T1-Q1,T1_literal,3,B,afterglow__063,afterglow,ドラマツルギー (Cover),https://youtu.be/wFqN8fUMosg,0.1551,0.9796,1.0,0.9796
+T1-Q1,T1_literal,1,C,poppin_party__423,poppin_party,イントロダクション,https://youtu.be/KfuOq4v5H_A,0.9932,0.9796,1.0,0.9864
+T1-Q1,T1_literal,2,C,poppin_party__450,poppin_party,Chu Chueen!,https://youtu.be/5j2a4m1OQsg,0.9463,0.9796,1.0,0.9629
+T1-Q1,T1_literal,3,C,roselia__624,roselia,THRONE OF ROSE,https://youtu.be/H_ngLOaoMvs,0.9342,0.9796,1.0,0.9569
+T1-Q2,T1_literal,1,A,poppin_party__472,poppin_party,メランコリック (Cover),https://youtu.be/7X1NMdaFLiw,0.9992,0.8185,1.0,0.9992
+T1-Q2,T1_literal,2,A,poppin_party__465,poppin_party,幾億光年 (Cover),https://youtu.be/CHkferCyEUM,0.9977,0.0537,0.7976,0.9977
+T1-Q2,T1_literal,3,A,pastel_palettes__334,pastel_palettes,秘密の扉から会いにきて,https://youtu.be/Vfk4MdZKBn4,0.9962,0.8185,1.0,0.9962
+T1-Q2,T1_literal,1,B,raise_a_suilen__566,raise_a_suilen,SAVIOR OF SONG (Cover),https://youtu.be/M45pCdVZhHY,0.143,0.8185,1.0,0.8185
+T1-Q2,T1_literal,2,B,raise_a_suilen__564,raise_a_suilen,神っぽいな (Cover),https://youtu.be/J1pFz1b08f8,0.562,0.8185,1.0,0.8185
+T1-Q2,T1_literal,3,B,roselia__592,roselia,Sage der Rosen,https://youtu.be/z0jU3sNiA44,0.4002,0.8185,1.0,0.8185
+T1-Q2,T1_literal,1,C,poppin_party__472,poppin_party,メランコリック (Cover),https://youtu.be/7X1NMdaFLiw,0.9992,0.8185,1.0,0.9089
+T1-Q2,T1_literal,2,C,pastel_palettes__334,pastel_palettes,秘密の扉から会いにきて,https://youtu.be/Vfk4MdZKBn4,0.9962,0.8185,1.0,0.9073
+T1-Q2,T1_literal,3,C,mygo__260,mygo,迷星叫,https://youtu.be/V6gq-6dAbHA,0.9932,0.8185,1.0,0.9058
+T2-Q1,T2_idiomatic,1,A,poppin_party__472,poppin_party,メランコリック (Cover),https://youtu.be/7X1NMdaFLiw,0.9992,0.907,0.9669,0.9992
+T2-Q1,T2_idiomatic,2,A,morfonica__181,morfonica,メランコリックララバイ,https://youtu.be/D_uUbtZUOPc,0.9977,0.3623,0.7124,0.9977
+T2-Q1,T2_idiomatic,3,A,ave_mujica__081,ave_mujica,Choir ‘S’ Choir,https://youtu.be/7llj4mh4L-8,0.9962,0.6725,0.8306,0.9962
+T2-Q1,T2_idiomatic,1,B,raise_a_suilen__546,raise_a_suilen,OUTSIDER RODEO,https://youtu.be/gSVSgtA9ke4,0.0794,0.9713,1.0,0.9713
+T2-Q1,T2_idiomatic,2,B,raise_a_suilen__549,raise_a_suilen,1/3の純情な感情 (Cover),https://youtu.be/GBGMF98_oBs,0.9766,0.9713,1.0,0.9713
+T2-Q1,T2_idiomatic,3,B,raise_a_suilen__554,raise_a_suilen,第六感 (Cover),https://youtu.be/cb2c5sJShsQ,0.5091,0.9713,1.0,0.9713
+T2-Q1,T2_idiomatic,1,C,raise_a_suilen__549,raise_a_suilen,1/3の純情な感情 (Cover),https://youtu.be/GBGMF98_oBs,0.9766,0.9713,1.0,0.9739
+T2-Q1,T2_idiomatic,2,C,ave_mujica__077,ave_mujica,顔,https://youtu.be/cVfQBLdIUXk,0.975,0.9713,1.0,0.9731
+T2-Q1,T2_idiomatic,3,C,poppin_party__472,poppin_party,メランコリック (Cover),https://youtu.be/7X1NMdaFLiw,0.9992,0.907,0.9669,0.9531
+T2-Q2,T2_idiomatic,1,A,poppin_party__375,poppin_party,Yes! BanG_Dream!,https://youtu.be/tBSpLDIqbHc,0.9992,0.4947,0.2947,0.9992
+T2-Q2,T2_idiomatic,2,A,hello_happy_world__115,hello_happy_world,えがおのオーケストラっ！,https://youtu.be/24Xzx6dH5tg,0.9977,0.0492,0.0292,0.9977
+T2-Q2,T2_idiomatic,3,A,poppin_party__383,poppin_party,夢みるSunflower,https://youtu.be/yQ0ebf3C1zM,0.9962,0.82,0.62,0.9962
+T2-Q2,T2_idiomatic,1,B,poppin_party__411,poppin_party,夏空 SUN! SUN! SEVEN!,https://youtu.be/AwmICsVBWLU,0.2731,0.9924,0.7924,0.9924
+T2-Q2,T2_idiomatic,2,B,poppin_party__396,poppin_party,STAR BEAT!～ホシノコドウ～ ～Popipa Acoustic Ver.～,https://youtu.be/kj5orLd_XnA,0.7526,0.9924,0.7924,0.9924
+T2-Q2,T2_idiomatic,3,B,pastel_palettes__348,pastel_palettes,だから、ひとりじゃない (Cover),https://youtu.be/RxB9vL3xGts,0.851,0.9924,0.7924,0.9924
+T2-Q2,T2_idiomatic,1,C,poppin_party__447,poppin_party,START!! True dreams,https://youtu.be/SQ_-nPf-SNI,0.9372,0.9924,0.7924,0.9648
+T2-Q2,T2_idiomatic,2,C,poppin_party__438,poppin_party,ここから先は歌にならない,https://youtu.be/YfSxTmBzz9k,0.9735,0.9539,0.7539,0.9637
+T2-Q2,T2_idiomatic,3,C,ave_mujica__083,ave_mujica,Mas?uerade Rhapsody Re?uest,https://youtu.be/VLxM8q6PF4I,0.9705,0.9539,0.7539,0.9622
+T3-Q1,T3_metaphorical,1,A,poppin_party__465,poppin_party,幾億光年 (Cover),https://youtu.be/CHkferCyEUM,0.9992,0.1029,0.8078,0.9992
+T3-Q1,T3_metaphorical,2,A,poppin_party__480,poppin_party,＊〜アスタリスク〜 (Cover),https://youtu.be/nAmOOEi3LHc,0.9977,0.149,0.8218,0.9977
+T3-Q1,T3_metaphorical,3,A,pastel_palettes__368,pastel_palettes,ハッピーシンセサイザ (Cover),https://youtu.be/AD3WCMhAGVs,0.9962,0.8495,1.0,0.9962
+T3-Q1,T3_metaphorical,1,B,roselia__659,roselia,KING (Cover),https://youtu.be/mR86Quw762c,0.9327,0.8495,1.0,0.8495
+T3-Q1,T3_metaphorical,2,B,afterglow__022,afterglow,サクラゼンセン,https://youtu.be/RJ98HN9hl6I,0.1884,0.8495,1.0,0.8495
+T3-Q1,T3_metaphorical,3,B,afterglow__027,afterglow,Northern lights,https://youtu.be/qrbkufy83yY,0.9841,0.8495,1.0,0.8495
+T3-Q1,T3_metaphorical,1,C,pastel_palettes__368,pastel_palettes,ハッピーシンセサイザ (Cover),https://youtu.be/AD3WCMhAGVs,0.9962,0.8495,1.0,0.9228
+T3-Q1,T3_metaphorical,2,C,poppin_party__450,poppin_party,Chu Chueen!,https://youtu.be/5j2a4m1OQsg,0.9887,0.8495,1.0,0.9191
+T3-Q1,T3_metaphorical,3,C,ave_mujica__081,ave_mujica,Choir ‘S’ Choir,https://youtu.be/7llj4mh4L-8,0.9856,0.8495,1.0,0.9175
+T3-Q2,T3_metaphorical,1,A,hello_happy_world__116,hello_happy_world,にこにこねくと！,https://youtu.be/B0AssN_z5gU,0.9992,0.0068,0.5341,0.9992
+T3-Q2,T3_metaphorical,2,A,hello_happy_world__123,hello_happy_world,Happy! Happier! Happiest!,https://youtu.be/xpECEzVaWH8,0.9977,0.9334,1.0,0.9977
+T3-Q2,T3_metaphorical,3,A,hello_happy_world__115,hello_happy_world,えがおのオーケストラっ！,https://youtu.be/24Xzx6dH5tg,0.9962,0.5076,0.8128,0.9962
+T3-Q2,T3_metaphorical,1,B,roselia__641,roselia,乙女解剖 (Cover),https://youtu.be/c6pS6PEjk4c,0.792,0.9334,1.0,0.9334
+T3-Q2,T3_metaphorical,2,B,roselia__640,roselia,右肩の蝶 (Cover),https://youtu.be/XfrqZWj8jD0,0.7118,0.9334,1.0,0.9334
+T3-Q2,T3_metaphorical,3,B,roselia__611,roselia,XV,https://youtu.be/P9PXzNniuaY,0.7784,0.9334,1.0,0.9334
+T3-Q2,T3_metaphorical,1,C,hello_happy_world__123,hello_happy_world,Happy! Happier! Happiest!,https://youtu.be/xpECEzVaWH8,0.9977,0.9334,1.0,0.9656
+T3-Q2,T3_metaphorical,2,C,pastel_palettes__371,pastel_palettes,花ハ踊レヤいろはにほ (Cover),https://youtu.be/ZoMwONgrN_E,0.9856,0.9334,1.0,0.9595
+T3-Q2,T3_metaphorical,3,C,hello_happy_world__109,hello_happy_world,えがお･シング･あ･ソング,https://youtu.be/B-I2KAxGKD8,0.9841,0.9334,1.0,0.9588

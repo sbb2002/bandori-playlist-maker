@@ -1,0 +1,7 @@
+query_id,tier,prompt_text,intensity_t,brightness_t,tempo_t
+T1-Q1,T1_literal,행복한 노래 틀어줘.,,0.7,0.6
+T1-Q2,T1_literal,슬픈 노래 틀어줘.,0.3,0.4,0.2
+T2-Q1,T2_idiomatic,요즘 좀 꿀꿀해. 그런 기분에 어울리는 노래 틀어줘.,0.3,,0.4
+T2-Q2,T2_idiomatic,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,,,0.8
+T3-Q1,T3_metaphorical,먼저 떠난 이가 불러주는 듯한 위로의 노래를 듣고 싶어.,0.3,0.7,0.4
+T3-Q2,T3_metaphorical,부드럽고 포근한 자장가 같은 노래를 듣고 싶어.,0.2,,0.3

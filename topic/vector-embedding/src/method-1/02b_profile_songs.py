@@ -1,17 +1,20 @@
-"""Stage 1: per-song lyrics profiling (desc + dominant/secondary keyword) + QC sheet.
+"""Stage 1: per-song lyrics profiling (desc + 2 co-equal category keywords) + QC sheet.
 
 Independent of the 00-05 embedding/search pipeline -- no arms, no queries, no search.
-See DESIGN.md Section 1b / 6-02b.
+See DESIGN.md Section 1b / 6-02b. 2026-07-17: category1/category2 replace the earlier
+main/sub ranking (14-song pilot found 29% rank flips -- see notes/03-stage1-handoff.md).
 
 Outputs:
-  - out/song_profiles.csv: tag, band, song, desc, keyword_main, keyword_sub
+  - out/song_profiles.csv: tag, band, song, desc, category1, category2
   - out/profile_qc_sheet.csv: QC scoring form (human fills in score/comment)
 """
 from pathlib import Path
+import json
 import random
 import re
 import sys
 import time
+from datetime import datetime, timezone
 
 import pandas as pd
 from groq import Groq, APIError
@@ -23,9 +26,16 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SCRIPT_DIR = Path(__file__).parent
+PROGRESS_PATH = config.OUT_DIR / "stage2_full_profiling_progress.json"
+
+
+def save_progress(progress, **fields):
+    progress.update(fields)
+    progress["updated_at"] = datetime.now(timezone.utc).isoformat()
+    PROGRESS_PATH.write_text(json.dumps(progress, ensure_ascii=False, indent=2), encoding="utf-8")
 
 RESPONSE_RE = re.compile(
-    r"DESC:\s*(?P<desc>.+?)\s*\n+\s*MAIN:\s*(?P<main>.+?)\s*\n+\s*SUB:\s*(?P<sub>.+?)\s*$",
+    r"DESC:\s*(?P<desc>.+?)\s*\n+\s*CATEGORY1:\s*(?P<cat1>.+?)\s*\n+\s*CATEGORY2:\s*(?P<cat2>.+?)\s*$",
     re.DOTALL,
 )
 
@@ -45,26 +55,24 @@ def retry_with_backoff(func, max_retries=3, base_delay=2.0):
 
 
 def parse_profile_response(text):
-    """Parse DESC:/MAIN:/SUB: lines out of the LLM response. Returns None on failure."""
+    """Parse DESC:/CATEGORY1:/CATEGORY2: lines out of the LLM response. Returns None on failure."""
     match = RESPONSE_RE.search(text.strip())
     if not match:
         return None
     desc = match.group("desc").strip()
-    main = match.group("main").strip()
-    sub = match.group("sub").strip()
-    if not desc or not main or not sub:
+    cat1 = match.group("cat1").strip()
+    cat2 = match.group("cat2").strip()
+    if not desc or not cat1 or not cat2:
         return None
-    return desc, main, sub
+    return desc, cat1, cat2
 
 
 def profile_songs():
     """Generate per-song desc/keyword profiles and build the QC scoring sheet.
 
     Source-of-truth input is work/transcripts/<tag>.txt (raw ASR lyrics, PROFILE_PROMPT).
-    Fallback (this 2026-07-17 run): work/transcripts/ is unavailable on this machine (the
-    sub-local box that ran ASR excluded it as copyrighted, per-machine data). Falls back to
-    the already-committed out/texts_summary.csv (PROFILE_PROMPT_FROM_SUMMARY) -- a lower
-    fidelity proxy. Re-run against real transcripts once available (see README note).
+    Falls back to the already-committed out/texts_summary.csv (PROFILE_PROMPT_FROM_SUMMARY,
+    a lower-fidelity summary-of-a-summary) only when a transcript is missing for a tag.
     """
     config.WORK_DIR.mkdir(parents=True, exist_ok=True)
     config.OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -86,6 +94,15 @@ def profile_songs():
         sys.exit(1)
 
     print(f"Found {len(df_songs)} songs")
+
+    progress = {
+        "step": "stage1_profiling_full_catalog",
+        "n_total": len(df_songs),
+        "n_done": 0,
+        "n_failed": 0,
+        "started_at": datetime.now(timezone.utc).isoformat(),
+    }
+    save_progress(progress, status="in_progress")
 
     summaries_csv = config.OUT_DIR / "texts_summary.csv"
     summary_by_tag = {}
@@ -147,28 +164,38 @@ def profile_songs():
                 failed_tags.append(tag)
                 continue
 
-            desc, keyword_main, keyword_sub = parsed
+            desc, category1, category2 = parsed
             profile_results.append({
                 "tag": tag,
                 "band": band,
                 "song": song,
                 "desc": desc,
-                "keyword_main": keyword_main,
-                "keyword_sub": keyword_sub,
+                "category1": category1,
+                "category2": category2,
                 "source": source,
             })
             # Save after every song so a mid-run crash doesn't lose completed work
             # (idempotent cache above skips these tags on the next run).
             pd.DataFrame(profile_results).to_csv(profiles_csv, index=False, encoding="utf-8")
-            print(f"    (ok) MAIN={keyword_main} SUB={keyword_sub}")
+            print(f"    (ok) CATEGORY1={category1} CATEGORY2={category2}")
         except Exception as e:
             print(f"  ERROR profiling {tag}: {e}")
+            save_progress(progress, status="error", n_done=len(profile_results), n_failed=len(failed_tags))
             raise
+
+        if (idx + 1) % 10 == 0 or (idx + 1) == len(df_songs):
+            save_progress(
+                progress, status="in_progress",
+                n_done=len(profile_results), n_failed=len(failed_tags),
+            )
 
     if failed_tags:
         print(f"\nERROR: failed to parse profile for {len(failed_tags)} song(s): {failed_tags}")
         print("Fix the prompt or re-run -- already-succeeded songs are cached and will be skipped.")
+        save_progress(progress, status="error", n_done=len(profile_results), n_failed=len(failed_tags))
         sys.exit(1)
+
+    save_progress(progress, status="done", n_done=len(profile_results), n_failed=len(failed_tags))
 
     df_profiles = pd.DataFrame(profile_results)
     df_profiles.to_csv(profiles_csv, index=False, encoding="utf-8")
@@ -209,8 +236,8 @@ def profile_songs():
             "song": prof["song"],
             "url": df_songs_url.get(tag, ""),
             "desc": prof["desc"],
-            "keyword_main": prof["keyword_main"],
-            "keyword_sub": prof["keyword_sub"],
+            "category1": prof["category1"],
+            "category2": prof["category2"],
             "source": prof.get("source", ""),
             "score": prior.get("score", ""),
             "comment": prior.get("comment", ""),

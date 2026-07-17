@@ -1,0 +1,48 @@
+eval_id,query_id,prompt_text,band,song,url,score,comment
+e001,T1-Q2,슬픈 노래 틀어줘.,pastel_palettes,秘密の扉から会いにきて,https://youtu.be/Vfk4MdZKBn4,0,전혀 아님.
+e002,T1-Q1,행복한 노래 틀어줘.,afterglow,ドラマツルギー (Cover),https://youtu.be/wFqN8fUMosg,0,전혀 아님. 특히 마이너 키인데 곡조로도 행복과 연상이 안됨.
+e003,T3-Q1,먼저 떠난 이가 불러주는 듯한 위로의 노래를 듣고 싶어.,ave_mujica,Choir ‘S’ Choir,https://youtu.be/7llj4mh4L-8,2,"곡조 상 그런 느낌이 들수는 있지만, 위로와는 거리가 멈."
+e004,T1-Q2,슬픈 노래 틀어줘.,mygo,迷星叫,https://youtu.be/V6gq-6dAbHA,2,"약간의 서글픈 느낌이 있으나, 슬픈 느낌이 지배적이지 않음."
+e005,T3-Q1,먼저 떠난 이가 불러주는 듯한 위로의 노래를 듣고 싶어.,poppin_party,Chu Chueen!,https://youtu.be/5j2a4m1OQsg,0,안 어울림.
+e006,T3-Q2,부드럽고 포근한 자장가 같은 노래를 듣고 싶어.,roselia,XV,https://youtu.be/P9PXzNniuaY,0,자장가스럽지도 않음.
+e007,T2-Q2,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,pastel_palettes,だから、ひとりじゃない (Cover),https://youtu.be/RxB9vL3xGts,7,날아가는 이미지와 일치함.
+e008,T2-Q2,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,poppin_party,夏空 SUN! SUN! SEVEN!,https://youtu.be/AwmICsVBWLU,7,둥실둥실한 이미지가 연상되는 곡.
+e009,T3-Q1,먼저 떠난 이가 불러주는 듯한 위로의 노래를 듣고 싶어.,afterglow,サクラゼンセン,https://youtu.be/RJ98HN9hl6I,2,가사 상으로 억지로 연상할 수는 있음. 그러나 곡조 상 그런 느낌과는 거리가 멈.
+e010,T1-Q2,슬픈 노래 틀어줘.,raise_a_suilen,神っぽいな (Cover),https://youtu.be/J1pFz1b08f8,1,마이너 코드의 느낌. 그러나 슬프다기보다 강렬한 느낌이 지배적.
+e011,T3-Q2,부드럽고 포근한 자장가 같은 노래를 듣고 싶어.,hello_happy_world,Happy! Happier! Happiest!,https://youtu.be/xpECEzVaWH8,2,"가사 상으로는 자장가로도 연상가능하지만, 곡조 상 너무 시끄러움. 잠이 모두 달아남."
+e012,T3-Q2,부드럽고 포근한 자장가 같은 노래를 듣고 싶어.,pastel_palettes,花ハ踊レヤいろはにほ (Cover),https://youtu.be/ZoMwONgrN_E,7,부드러운 느낌의 락. 자장가라긴 조금 시끄러움.
+e013,T3-Q2,부드럽고 포근한 자장가 같은 노래를 듣고 싶어.,roselia,乙女解剖 (Cover),https://youtu.be/c6pS6PEjk4c,0,"자장가와 어울리지도 않는 가사와 곡조. 죽음과 관련된 노래이며, 곡조도 우울한 정서가 지배적."
+e014,T2-Q1,요즘 좀 꿀꿀해. 그런 기분에 어울리는 노래 틀어줘.,raise_a_suilen,OUTSIDER RODEO,https://youtu.be/gSVSgtA9ke4,0,"꿀꿀한 기분을 위로하는 격렬한 곡이면 나쁘지 않을지도 모르나, 프롬프트대로라면 전혀 안어울림."
+e015,T2-Q2,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,poppin_party,ここから先は歌にならない,https://youtu.be/YfSxTmBzz9k,7,약간의 불협화음을 사용해서 불안하지만 그래도 날아가는 느낌을 자아냄.
+e016,T1-Q1,행복한 노래 틀어줘.,poppin_party,Chu Chueen!,https://youtu.be/5j2a4m1OQsg,6,그냥 그저 그럼.
+e017,T1-Q1,행복한 노래 틀어줘.,hello_happy_world,Happy! Happier! Happiest!,https://youtu.be/xpECEzVaWH8,9,행복에 어울릴 수 있음.
+e018,T2-Q2,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,poppin_party,START!! True dreams,https://youtu.be/SQ_-nPf-SNI,9,곡조 상 정서와 비슷.
+e019,T3-Q1,먼저 떠난 이가 불러주는 듯한 위로의 노래를 듣고 싶어.,roselia,KING (Cover),https://youtu.be/mR86Quw762c,1,마이너 코드와 파워코드 위주의 곡. 강렬한 느낌이 지배적. 위로의 정서와 안어울림.
+e020,T3-Q1,먼저 떠난 이가 불러주는 듯한 위로의 노래를 듣고 싶어.,poppin_party,幾億光年 (Cover),https://youtu.be/CHkferCyEUM,6,밝은 느낌과 절제된 느낌의 곡. 끼워맞춘다면 가능 정도야 하겠음.
+e021,T2-Q1,요즘 좀 꿀꿀해. 그런 기분에 어울리는 노래 틀어줘.,morfonica,メランコリックララバイ,https://youtu.be/D_uUbtZUOPc,7,가사나 곡조 상으로 나쁘지 않음.
+e022,T1-Q2,슬픈 노래 틀어줘.,poppin_party,幾億光年 (Cover),https://youtu.be/CHkferCyEUM,0,가사 상으로 그럴 수 있을지도 모름. 그러나 곡조 상 전혀 슬픈 느낌이 아님.
+e023,T2-Q1,요즘 좀 꿀꿀해. 그런 기분에 어울리는 노래 틀어줘.,ave_mujica,顔,https://youtu.be/cVfQBLdIUXk,1,꿀꿀하다의 정의와 일치하지 않음.
+e024,T1-Q1,행복한 노래 틀어줘.,hello_happy_world,にこ×にこ=ハイパースマイルパワー！,https://youtu.be/YRQHVpYDHAU,8,신나는 정서에 어울리는 곡.
+e025,T2-Q2,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,hello_happy_world,えがおのオーケストラっ！,https://youtu.be/24Xzx6dH5tg,8,기차 소리 비슷한 인트로가 행복감과 일치.
+e026,T2-Q1,요즘 좀 꿀꿀해. 그런 기분에 어울리는 노래 틀어줘.,raise_a_suilen,第六感 (Cover),https://youtu.be/cb2c5sJShsQ,5,나쁘지 않음. 애매함.
+e027,T3-Q2,부드럽고 포근한 자장가 같은 노래를 듣고 싶어.,hello_happy_world,えがおのオーケストラっ！,https://youtu.be/24Xzx6dH5tg,4,"긍정적인 느낌이 포근하나, 곡조 사운드 상 잠과는 거리가 멀다."
+e028,T3-Q2,부드럽고 포근한 자장가 같은 노래를 듣고 싶어.,hello_happy_world,にこにこねくと！,https://youtu.be/B0AssN_z5gU,7,웅장함이 있어 조용만 하다면 조금은 자장가로 어울릴지도.
+e029,T3-Q1,먼저 떠난 이가 불러주는 듯한 위로의 노래를 듣고 싶어.,pastel_palettes,ハッピーシンセサイザ (Cover),https://youtu.be/AD3WCMhAGVs,0,전혀 안어울림.
+e030,T1-Q1,행복한 노래 틀어줘.,poppin_party,イントロダクション,https://youtu.be/KfuOq4v5H_A,8,곡조와 가사 상 어울림.
+e031,T2-Q1,요즘 좀 꿀꿀해. 그런 기분에 어울리는 노래 틀어줘.,ave_mujica,Choir ‘S’ Choir,https://youtu.be/7llj4mh4L-8,6,꿀꿀하고 꿉꿉한 감정과 약간은 인정할만 함.
+e032,T3-Q2,부드럽고 포근한 자장가 같은 노래를 듣고 싶어.,hello_happy_world,えがお･シング･あ･ソング,https://youtu.be/B-I2KAxGKD8,2,시끄러워서 잠이 깸.
+e033,T3-Q2,부드럽고 포근한 자장가 같은 노래를 듣고 싶어.,roselia,右肩の蝶 (Cover),https://youtu.be/XfrqZWj8jD0,0,자장가와 안어울림.
+e034,T2-Q1,요즘 좀 꿀꿀해. 그런 기분에 어울리는 노래 틀어줘.,raise_a_suilen,1/3の純情な感情 (Cover),https://youtu.be/GBGMF98_oBs,5,
+e035,T2-Q2,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,poppin_party,Yes! BanG_Dream!,https://youtu.be/tBSpLDIqbHc,8,
+e036,T1-Q1,행복한 노래 틀어줘.,hello_happy_world,えがお･シング･あ･ソング,https://youtu.be/B-I2KAxGKD8,8,
+e037,T1-Q1,행복한 노래 틀어줘.,poppin_party,花園電気ギター！！！,https://youtu.be/Fb6Vxj--Fq4,4,
+e038,T2-Q2,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,poppin_party,STAR BEAT!～ホシノコドウ～ ～Popipa Acoustic Ver.～,https://youtu.be/kj5orLd_XnA,3,곡조나 가사 상 별이 빛나는 우주를 헤엄치는 이미지가 연상. 그러나 신나는 기분과는 거리가 멈.
+e039,T2-Q2,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,poppin_party,夢みるSunflower,https://youtu.be/yQ0ebf3C1zM,9,
+e040,T3-Q1,먼저 떠난 이가 불러주는 듯한 위로의 노래를 듣고 싶어.,poppin_party,＊〜アスタリスク〜 (Cover),https://youtu.be/nAmOOEi3LHc,1,
+e041,T1-Q1,행복한 노래 틀어줘.,roselia,THRONE OF ROSE,https://youtu.be/H_ngLOaoMvs,0,
+e042,T1-Q2,슬픈 노래 틀어줘.,roselia,Sage der Rosen,https://youtu.be/z0jU3sNiA44,0,"마이너, 고딕풍, 강렬하고 웅장한 코러스 사운드. 슬픔과 거리가 멈."
+e043,T1-Q2,슬픈 노래 틀어줘.,raise_a_suilen,SAVIOR OF SONG (Cover),https://youtu.be/M45pCdVZhHY,1,슬픔과 거리가 멈.
+e044,T3-Q1,먼저 떠난 이가 불러주는 듯한 위로의 노래를 듣고 싶어.,afterglow,Northern lights,https://youtu.be/qrbkufy83yY,2,약간 아닌듯.
+e045,T1-Q2,슬픈 노래 틀어줘.,poppin_party,メランコリック (Cover),https://youtu.be/7X1NMdaFLiw,0,전혀 슬프지 않음.
+e046,T2-Q1,요즘 좀 꿀꿀해. 그런 기분에 어울리는 노래 틀어줘.,poppin_party,メランコリック (Cover),https://youtu.be/7X1NMdaFLiw,1,"꿀꿀한 기분을 위로하는거라면 맞겠으나, 프롬프트대로라면 아님."
+e047,T2-Q2,날아갈 것처럼 신나는 기분이야. 그런 노래 틀어줘.,ave_mujica,Mas?uerade Rhapsody Re?uest,https://youtu.be/VLxM8q6PF4I,0,전혀 신나지 않고 오히려 심각한 분위기임.

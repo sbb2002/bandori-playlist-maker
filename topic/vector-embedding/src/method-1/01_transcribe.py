@@ -4,7 +4,10 @@ Reads SAMPLE_TAGS songs, transcribes vocals, saves to work/transcripts and out/t
 """
 from pathlib import Path
 import csv
+import json
 import sys
+import time
+from datetime import datetime, timezone
 
 import pandas as pd
 from faster_whisper import WhisperModel
@@ -12,6 +15,13 @@ from faster_whisper import WhisperModel
 import config
 
 SCRIPT_DIR = Path(__file__).parent
+PROGRESS_PATH = config.OUT_DIR / "stage2_full_asr_progress.json"
+
+
+def save_progress(progress, **fields):
+    progress.update(fields)
+    progress["updated_at"] = datetime.now(timezone.utc).isoformat()
+    PROGRESS_PATH.write_text(json.dumps(progress, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def transcribe_all():
@@ -32,6 +42,14 @@ def transcribe_all():
 
     print(f"Found {len(df_songs)} songs to transcribe")
 
+    progress = {
+        "step": "asr_full_catalog",
+        "n_total": len(df_songs),
+        "n_done": 0,
+        "started_at": datetime.now(timezone.utc).isoformat(),
+    }
+    save_progress(progress, status="in_progress")
+
     # Previous metadata (for cached transcripts on rerun)
     meta_csv_path = config.OUT_DIR / "transcripts_meta.csv"
     prev_meta = {}
@@ -40,11 +58,13 @@ def transcribe_all():
         prev_meta = {r["tag"]: r.to_dict() for _, r in prev_df.iterrows()}
 
     # Load whisper model
-    print(f"Loading WhisperModel: {config.WHISPER_MODEL} (compute: {config.WHISPER_COMPUTE})")
-    model = WhisperModel(config.WHISPER_MODEL, compute_type=config.WHISPER_COMPUTE)
+    device = getattr(config, "WHISPER_DEVICE", "cpu")
+    print(f"Loading WhisperModel: {config.WHISPER_MODEL} (device: {device}, compute: {config.WHISPER_COMPUTE})")
+    model = WhisperModel(config.WHISPER_MODEL, device=device, compute_type=config.WHISPER_COMPUTE)
 
     # Transcribe each song
     results = []
+    t0 = time.time()
     for idx, row in df_songs.iterrows():
         tag = row["tag"]
         band = row["band"]
@@ -117,6 +137,17 @@ def transcribe_all():
             "avg_logprob_mean": sum(logprobs) / len(logprobs) if logprobs else None,
         }
         results.append(meta)
+
+        if (idx + 1) % 10 == 0 or (idx + 1) == len(df_songs):
+            elapsed = time.time() - t0
+            rate = (idx + 1) / elapsed if elapsed > 0 else 0
+            eta_min = (len(df_songs) - idx - 1) / rate / 60 if rate > 0 else None
+            save_progress(
+                progress, status="in_progress", n_done=idx + 1,
+                eta_min=round(eta_min, 1) if eta_min else None,
+            )
+
+    save_progress(progress, status="done", n_done=len(df_songs))
 
     # Save metadata CSV
     meta_csv = config.OUT_DIR / "transcripts_meta.csv"

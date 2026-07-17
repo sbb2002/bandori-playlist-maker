@@ -1,0 +1,9 @@
+[extract] built 661 targets from catalog
+[extract] 661 targets, 0 done, 661 pending (n_jobs=-1, batch=40)
+[extract] batch 1: 40 tracks in 381.1s (9.53s/track) â€” 40/661 done
+¿À·ù: PID 24216ÀÎ ÇÁ·Î¼¼½º(PID 1532ÀÎ ÀÚ½Ä ÇÁ·Î¼¼½º)¸¦ Á¾·áÇÒ ¼ö ¾ø½À´Ï´Ù.
+¿øÀÎ: ½ÃµµÇÑ ÀÛ¾÷Àº Áö¿øÇÏÁö ¾Ê½À´Ï´Ù.
+[extract] built 661 targets from catalog
+[extract] resuming â€” 40 tracks already in vocal_features_full.csv
+[extract] 661 targets, 40 done, 621 pending (n_jobs=-1, batch=40)
+[extract] batch 1: 40 tracks in 292.5s (7.31s/track) â€” 80/661 done

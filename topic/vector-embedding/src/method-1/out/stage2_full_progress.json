@@ -1,0 +1,12 @@
+{
+  "step": "demucs_full_catalog",
+  "n_total": 661,
+  "n_done": 661,
+  "n_skipped": 0,
+  "n_failed": 0,
+  "started_at": "2026-07-17T05:11:14.888384+00:00",
+  "status": "done",
+  "updated_at": "2026-07-17T06:31:05.535333+00:00",
+  "n_processed": 661,
+  "eta_min": null
+}

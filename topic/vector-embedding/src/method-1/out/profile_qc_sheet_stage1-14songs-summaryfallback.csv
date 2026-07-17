@@ -1,0 +1,15 @@
+pair_id,tag,band,song,url,desc,keyword_main,keyword_sub,source,score,comment
+p001,mugendai_mutype__238,mugendai_mutype,どんがらがっしゃん,https://youtu.be/DvZohC30iOw,어둡고 비관적인 감정과 자유와 반란의 에너지가 공존하는 쓸쓸한 상황이 펼쳐진다.,쓸쓸함,반란,summary-fallback,2,"키워드는 동의함. 그런데 반란이 main, 쓸쓸함이 sub인데 아주 희소함. 곡조까지 함께 고려하면 밝은 노래임."
+p002,pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,https://youtu.be/2tsI2LPugWE,밝고 경쾌한 분위기 속에서 낙관적이고 도전적인 감정이 듣는 이의 마음을 들뜨게 만든다.,도전,낙관,summary-fallback,5,곡조도 도전적이고 낙관적인 느낌이 듦.
+p003,mugendai_mutype__237,mugendai_mutype,アイの夢限,https://youtu.be/fSa8XH8d-T4,어둠과 불확실성 속에서 희망과 사랑을 찾으려는 절실함과 간절함이 느껴진다.,절실함,불안감,summary-fallback,5,"정말 정확한 감성. main, sub도 동의."
+p004,morfonica__181,morfonica,メランコリックララバイ,https://youtu.be/D_uUbtZUOPc,"깊은 생각과 자기 성찰을 통해 자신의 감정을 이해하고 앞으로 나아가기 위한 힘을 찾는 과정을 담은 노래로, 쓸쓸함과 벅참이 공존하는 감정으로 가득 차 있다.",성찰,쓸쓸함,summary-fallback,3,"코멘트에 동의하나, 쓸쓸한 감정에 대한 가사가 있긴 하나, 그럼에도 불구하고 희망차게 발돋음하려는 느낌이 느껴짐. 이건 가사뿐만 아니라 곡조도 그러한 느낌이 듦."
+p005,hello_happy_world__107,hello_happy_world,ハイファイブ∞あどべんちゃっ,https://youtu.be/_Smbu0U70Ko,이 노래는 밝고 경쾌한 분위기 속에서 벅찬 기쁨과 흥분이 넘쳐나는 감정을 담고 있다.,기쁨,흥분,summary-fallback,5,"곡조만 들어도 이건 기쁨, 흥분이 맞음."
+p006,pastel_palettes__301,pastel_palettes,TITLE IDOL,https://youtu.be/DYcKUe6QYtQ,"이 노래는 밝고 활기찬 분위기로 가득 차 있으며, 따뜻함과 희망을 전달하며 청취자를 위로하고 격려하는 감정을 담고 있다.",희망,자신감,summary-fallback,5,코멘트에 동의.
+p007,morfonica__180,morfonica,Daylight -デイライト-,https://youtu.be/oT-B-uUUG28,쓸쓸함과 불안감이 공존하는 희망과 어둠의 혼합된 감정으로 가득 찬 노래이다.,불안감,희망,summary-fallback,3,메인과 서브가 뒤바뀜. 곡조까지 고려한다면 불안하지만 그럼에도 최종적으로 희망을 염두한 노래임.
+p008,ave_mujica__072,ave_mujica,KiLLKiSS,https://youtu.be/RexyoaXaQ1o,벅찬 감정과 자유로운 기분이 공존하는 열정적인 순간이 느껴진다.,열정,자유,summary-fallback,1,"열정은 어느 정도 맞으나, 메인 & 서브에 들어올 정도는 아님. 자유에 대한 갈망이라기보다, 구속에서 벗어나고 싶어하는 몸부림에 가깝고 끝없는 자기 기만적인 노래임. 헤비 메탈적인 곡조와 오페라의 음색과 메타포적인 가사가 있어 일치하지 않은 인상을 줌."
+p009,mygo__260,mygo,迷星叫,https://youtu.be/V6gq-6dAbHA,쓸쓸함과 벅참이 감성적인 분위기 속에서 격앙된 감정을 담고 있다.,쓸쓸함,벅참,summary-fallback,3,이것도 main과 sub가 뒤 바뀜.
+p010,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",https://youtu.be/vKDa7yfpd2M,"쓸쓸함과 애절함이 가득한 감정으로 듣는 이의 마음을 사로잡으며, 강렬한 감정의 폭발을 느끼게 한다.",애절함,쓸쓸함,summary-fallback,5,피아노 솔로 인트로와 독백하는 듯한 1절은 애절함과 쓸쓸함을 배가시킴. 그러나 1절이 끝나갈 무렵 헤비메탈 색채가 드러나며 마치 애절함에 미쳐 광기에 휩싸인듯한 사운드를 자아냄.
+p011,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,https://youtu.be/9itZp8utiAw,기쁨과 행복감이 넘치며 따뜻한 감정과 함께하는 사람들과의 유대감을 강조하는 노래이다.,행복,기쁨,summary-fallback,5,곡조만 들어도 그 분류가 맞음.
+p012,afterglow__000,afterglow,ON YOUR MARK,https://youtu.be/09B-WljIiTo,"강한 결의와 열정, 그리고 동료애와 희망이 가득한 노래이다.",결의,희망,summary-fallback,5,정확함.
+p013,afterglow__001,afterglow,That Is How I Roll!,https://youtu.be/_lfuqSepLNw,강렬한 불만과 격렬한 에너지 속에서 희망과 자신감을 찾으려는 결심이 느껴진다.,불만,결심,summary-fallback,5,곡조와 함께 들었을 때도 그 느낌이 딱 들어맞음.
+p014,mygo__261,mygo,壱雫空,https://youtu.be/bqDL0mTUiLs,깊은 생각에 잠기게 만드는 내성적이고 감성적인 감정의 흐름이 노래를 지배한다.,쓸쓸함,감성,summary-fallback,4,메인과 서브가 뒤바뀜. 곡조를 고려했을 때 감성적이면서도 벅참. 약간 쓸쓸하면서 가련한 느낌이 있으나 그런 우수를 이겨내겠다는 느낌이 절로 드는 곡.
