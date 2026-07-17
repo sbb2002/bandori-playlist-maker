@@ -31,6 +31,11 @@ class Song:
     # 시퀀싱에서 이전 곡 아웃트로 ↔ 다음 곡 인트로를 매끄럽게 잇는 데 쓴다.
     intro_energy: float = 0.0
     outro_energy: float = 0.0
+    # 검색 보조용(원문 CSV엔 없음 — song_repo가 로드 시 pykakasi/hanja로 1회 계산해 캐싱).
+    # 일본어를 모르는 사용자가 '곡 추가' 미니 브라우저에서 검색할 수 있도록 로마자/한글 음차 제공.
+    song_romaji: str = ""
+    song_hangul: str = ""
+    song_hanja_reading: str = ""  # 한자 → 한국 한자음(음독)
 
 
 @dataclass(frozen=True)

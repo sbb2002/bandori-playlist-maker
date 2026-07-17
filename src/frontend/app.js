@@ -1419,7 +1419,11 @@ function renderPickerSongs() {
     if (!q) return true;
     return s.song.toLowerCase().includes(q)
       || prettyBand(s.band).toLowerCase().includes(q)
-      || s.band.toLowerCase().includes(q);
+      || s.band.toLowerCase().includes(q)
+      // 로마자/한글 음차/한자음 검색(구버전 백엔드엔 필드가 없을 수 있음 — optional chaining으로 안전 처리).
+      || (s.song_romaji?.toLowerCase().includes(q) ?? false)
+      || (s.song_hangul?.toLowerCase().includes(q) ?? false)
+      || (s.song_hanja_reading?.toLowerCase().includes(q) ?? false);
   });
   pickerSongsEl.replaceChildren();
   if (!list.length) { pickerSongsEl.textContent = "일치하는 곡이 없어요."; return; }
