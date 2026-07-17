@@ -1922,10 +1922,29 @@ playbarRepeatBtn.addEventListener("click", () => {
   playbarRepeatBtn.setAttribute("aria-label", repeatOne ? "한 곡 반복 끄기" : "한 곡 반복 켜기");
   playbarRepeatBtn.title = repeatOne ? "한 곡 반복 (켜짐)" : "한 곡 반복 (꺼짐)";
 });
-// 곡 정보 클릭 → 플레이어로 스크롤(진행바가 있으니 필수는 아니지만, 큰 화면으로 보고 싶을 때 유용).
+// 뷰포트 중심과 엘리먼트 중심 사이의 거리(px). 값이 작을수록 "지금 그 엘리먼트를 보고 있다"에 가깝다.
+function getViewportCenterDistance(el) {
+  const rect = el.getBoundingClientRect();
+  const elCenter = rect.top + rect.height / 2;
+  const viewportCenter = window.innerHeight / 2;
+  return Math.abs(elCenter - viewportCenter);
+}
+
+// 곡 정보 클릭 → 플레이어 카드 / 트랙리스트 현재 곡 중 "지금 보고 있지 않은 쪽"으로 스크롤.
+// 토글 변수 없이 매번 실제 스크롤 위치(뷰포트 중심과의 거리)를 기준으로 판단한다:
+// 두 후보 중 더 가까운(=지금 보고 있는) 쪽이 아닌 다른 쪽으로 이동. 어느 쪽도 뚜렷이
+// "보고 있지 않은" 애매한 위치라도 이 규칙을 그대로 적용하면 둘 중 가까운 쪽으로 자연스럽게 붙는다.
 $("playbar-info").addEventListener("click", () => {
-  const el = document.querySelector(".player-card");
-  if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  const playerEl = document.querySelector(".player-card");
+  const trackEl = current >= 0 ? tracklistEl.children[current] : null;
+
+  if (playerEl && trackEl) {
+    const target =
+      getViewportCenterDistance(playerEl) <= getViewportCenterDistance(trackEl) ? trackEl : playerEl;
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+  } else if (playerEl) {
+    playerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 });
 
 function prettyBand(band) {
