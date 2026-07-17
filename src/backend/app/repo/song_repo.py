@@ -15,6 +15,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from ..domain.models import Song
+from .ja_transliteration import to_hangul, to_romaji
 
 # cross-team import(허용): video_id 추출 헬퍼. 경로 삽입 후 import.
 #   song_repo.py: .../src/backend/app/repo/song_repo.py → parents[3] == .../src
@@ -49,10 +50,12 @@ def _to_song(row: dict[str, str], energy: float) -> Song:
     intro_raw = (row.get("i_start") or "").strip()
     outro_raw = (row.get("i_end") or "").strip()
 
+    song_title = row["song"]
+
     return Song(
         idx=int(row["idx"]),
         band=row["band"],
-        song=row["song"],
+        song=song_title,
         video_id=video_id,
         camelot=row["camelot"],
         energy=energy,
@@ -62,6 +65,9 @@ def _to_song(row: dict[str, str], energy: float) -> Song:
         duration_sec=duration_sec,
         intro_energy=float(intro_raw) if intro_raw else 0.0,
         outro_energy=float(outro_raw) if outro_raw else 0.0,
+        # 검색 보조 필드(§ja_transliteration) — 서버 기동 시 이 함수 호출 때 1회 계산돼 캐싱됨.
+        song_romaji=to_romaji(song_title),
+        song_hangul=to_hangul(song_title),
     )
 
 

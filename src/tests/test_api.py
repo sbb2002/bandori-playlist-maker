@@ -167,7 +167,9 @@ def test_songs_endpoint(client):
     songs = r.json()["songs"]
     assert songs, "곡 목록이 비어 있으면 안 됨"
     s0 = songs[0]
-    assert {"idx", "band", "song", "video_id", "camelot", "energy"} <= set(s0)
+    assert {"idx", "band", "song", "video_id", "camelot", "energy", "song_romaji", "song_hangul"} <= set(s0)
+    # 로마자/한글은 pykakasi로 로드 시 계산되는 검색 보조 필드 — 빈 문자열이면 안 됨.
+    assert all(s["song_romaji"] and s["song_hangul"] for s in songs)
     # 밴드→곡 순 정렬
     keys = [(s["band"], s["song"].lower()) for s in songs]
     assert keys == sorted(keys)
