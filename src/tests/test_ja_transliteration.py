@@ -17,8 +17,8 @@ def test_to_hangul_basic():
 
 
 def test_to_hangul_handles_sokuon_geminate():
-    # 촉음(っ) → 앞 음절에 ㅅ받침.
-    assert kana_to_hangul("はっぴー") == "핫피이"
+    # 촉음(っ) → 앞 음절에 받침. ぴ는 ぱ행이라 ㅂ받침(はっぴー→"합피이").
+    assert kana_to_hangul("はっぴー") == "합피이"
 
 
 def test_to_hangul_handles_hatsuon_n():
@@ -72,6 +72,27 @@ def test_loanword_longest_match_priority():
     # "らぶそんぐ" 전체가 사전에 있으면 "러브송", 없으면 "라부송구" 등이 됨
     # 테스트: 사전에 있는 경우 예상값은 "러브송"
     assert "러브송" in result or result == "러브송"
+
+
+def test_loanword_hangul_big_mouse():
+    # ビッグマウス(실제 카탈로그 곡, mugendai_mutype) → "빅마우스"
+    # (촉음 규칙만 적용하면 "빅구마우스"가 되어 사용자가 실제로 검색해본 값과 어긋남 — 사전 등록으로 보정)
+    assert kana_to_hangul("びっぐまうす") == "빅마우스"
+
+
+def test_sokuon_before_g_row_uses_giyeok_batchim():
+    # 촉음(っ) 뒤에 か/が행이 오면 ㅅ이 아니라 ㄱ받침(외래어 관용 표기에 가깝게).
+    assert kana_to_hangul("ばっぐ") == "박구"
+
+
+def test_sokuon_before_b_row_uses_bieup_batchim():
+    # 촉음(っ) 뒤에 ぱ/ば행이 오면 ㅂ받침.
+    assert kana_to_hangul("とっぷ") == "톱푸"
+
+
+def test_sokuon_default_still_uses_siot_batchim():
+    # か/が·ぱ/ば행이 아닌 경우(さ/ざ/た/だ행 등)는 기존처럼 ㅅ받침.
+    assert kana_to_hangul("あっさり") == "앗사리"
 
 
 def test_loanword_hangul_telepathy():
