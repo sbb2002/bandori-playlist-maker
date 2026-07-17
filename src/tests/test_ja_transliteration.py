@@ -12,7 +12,8 @@ def test_to_romaji_passes_through_ascii():
 
 
 def test_to_hangul_basic():
-    assert to_hangul("さくら") == "사구라"
+    # か행(무성)은 が행(유성)과 구분되도록 ㅋ 계열(카/키/쿠/케/코)로 매핑한다.
+    assert to_hangul("さくら") == "사쿠라"
 
 
 def test_to_hangul_handles_sokuon_geminate():
