@@ -19,6 +19,11 @@ Because the beta is serving users, **do not merge to `main` on your own.** For e
 2. Commit and push that branch.
 3. **Open a PR against `main`, then stop.** The repo owner reviews the PR and merges it —
    you never merge `main` yourself, and you don't wait to be asked to open the PR.
+4. **The PR description must state a clear rationale**: what the change does and why (the
+   problem it solves, the tradeoff it made, anything a reviewer would need to decide whether
+   to merge). Opening the PR itself needs no separate approval, but a thin/rationale-free PR
+   body defeats the point — the owner reviews and merge-approves based on that description
+   alone, often without re-reading every commit.
 
 ## What this project is
 
