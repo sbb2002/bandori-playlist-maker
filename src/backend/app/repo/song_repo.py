@@ -9,13 +9,14 @@ from __future__ import annotations
 
 import bisect
 import csv
+import json
 import os
 import sys
 from collections.abc import Callable
 from pathlib import Path
 
 from ..domain.models import Song
-from .ja_transliteration import to_hangul, to_romaji
+from .ja_transliteration import to_hangul, to_hanja_reading, to_romaji
 
 # cross-team import(허용): video_id 추출 헬퍼. 경로 삽입 후 import.
 #   song_repo.py: .../src/backend/app/repo/song_repo.py → parents[3] == .../src
@@ -29,6 +30,7 @@ from video_id import extract_video_id  # noqa: E402  (cross-team, 경로 삽입 
 # 기본 데이터 경로: 리포지토리 루트 data/songs_master.csv. env로 override 가능.
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_CSV_PATH = _REPO_ROOT / "data" / "songs_master.csv"
+DEFAULT_OVERRIDES_PATH = Path(__file__).resolve().parent / "song_alias_overrides.json"
 
 
 def _resolve_path(csv_path: str | os.PathLike[str] | None) -> Path:
@@ -38,7 +40,18 @@ def _resolve_path(csv_path: str | os.PathLike[str] | None) -> Path:
     return Path(env_path) if env_path else DEFAULT_CSV_PATH
 
 
-def _to_song(row: dict[str, str], energy: float) -> Song:
+def _load_overrides() -> dict[str, dict[str, str]]:
+    """song_alias_overrides.json 로드(없거나 비어 있으면 빈 딕셔너리 반환)."""
+    try:
+        if DEFAULT_OVERRIDES_PATH.exists():
+            with DEFAULT_OVERRIDES_PATH.open(encoding="utf-8") as f:
+                return json.load(f) or {}
+    except (json.JSONDecodeError, IOError):
+        pass
+    return {}
+
+
+def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, str]] | None = None) -> Song:
     url = (row.get("url") or "").strip()
     video_id = (row.get("video_id") or "").strip()
     if not video_id:
@@ -51,6 +64,22 @@ def _to_song(row: dict[str, str], energy: float) -> Song:
     outro_raw = (row.get("i_end") or "").strip()
 
     song_title = row["song"]
+    tag = row.get("tag", "").strip()
+
+    # 검색 보조 필드 자동 계산
+    song_romaji = to_romaji(song_title)
+    song_hangul = to_hangul(song_title)
+    song_hanja_reading = to_hanja_reading(song_title)
+
+    # 오버라이드 적용 (부분 오버라이드 허용 — 지정된 필드만 대체)
+    if overrides and tag and tag in overrides:
+        override_data = overrides[tag]
+        if "song_romaji" in override_data:
+            song_romaji = override_data["song_romaji"]
+        if "song_hangul" in override_data:
+            song_hangul = override_data["song_hangul"]
+        if "song_hanja_reading" in override_data:
+            song_hanja_reading = override_data["song_hanja_reading"]
 
     return Song(
         idx=int(row["idx"]),
@@ -66,8 +95,9 @@ def _to_song(row: dict[str, str], energy: float) -> Song:
         intro_energy=float(intro_raw) if intro_raw else 0.0,
         outro_energy=float(outro_raw) if outro_raw else 0.0,
         # 검색 보조 필드(§ja_transliteration) — 서버 기동 시 이 함수 호출 때 1회 계산돼 캐싱됨.
-        song_romaji=to_romaji(song_title),
-        song_hangul=to_hangul(song_title),
+        song_romaji=song_romaji,
+        song_hangul=song_hangul,
+        song_hanja_reading=song_hanja_reading,
     )
 
 
@@ -144,4 +174,7 @@ def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
                 signals.append(ranker(float(v)))
         return (sum(s ** p for s in signals) / len(signals)) ** (1.0 / p)
 
-    return [_to_song(r, intensity(r)) for r in rows]
+    # 오버라이드 로드 (매 서버 시작 시 1회 — 빈 딕셔너리로 폴백 가능)
+    overrides = _load_overrides()
+
+    return [_to_song(r, intensity(r), overrides) for r in rows]

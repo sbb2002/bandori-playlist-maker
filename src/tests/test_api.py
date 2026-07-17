@@ -167,9 +167,11 @@ def test_songs_endpoint(client):
     songs = r.json()["songs"]
     assert songs, "곡 목록이 비어 있으면 안 됨"
     s0 = songs[0]
-    assert {"idx", "band", "song", "video_id", "camelot", "energy", "song_romaji", "song_hangul"} <= set(s0)
-    # 로마자/한글은 pykakasi로 로드 시 계산되는 검색 보조 필드 — 빈 문자열이면 안 됨.
+    assert {"idx", "band", "song", "video_id", "camelot", "energy", "song_romaji", "song_hangul", "song_hanja_reading"} <= set(s0)
+    # 로마자/한글/한자음은 pykakasi/hanja로 로드 시 계산되는 검색 보조 필드 — 빈 문자열이어도 됨(한자 없으면).
     assert all(s["song_romaji"] and s["song_hangul"] for s in songs)
+    # 한자음은 한자가 없는 곡이면 원문 그대로(빈 문자열 아님)
+    assert all("song_hanja_reading" in s for s in songs)
     # 밴드→곡 순 정렬
     keys = [(s["band"], s["song"].lower()) for s in songs]
     assert keys == sorted(keys)
@@ -267,3 +269,16 @@ def test_stage_without_size_is_invalid(client):
     r = client.post("/api/setlist", json={"prompt": "x", "stages": [{"energy": 0.5}]})
     assert r.status_code == 400
     assert r.json()["error"]["code"] == "INVALID_REQUEST"
+
+
+# ── 검색 보조 필드 테스트(로마자·한글·한자음) ──────────────────────────────────────
+def test_songs_search_includes_hanja_reading_field(client):
+    """곡 목록 응답에 한자음 검색 필드가 포함된다."""
+    r = client.get("/api/songs")
+    assert r.status_code == 200
+    songs = r.json()["songs"]
+    assert songs
+    # 모든 곡이 song_hanja_reading 필드를 가져야 함(한자 없으면 원문)
+    for s in songs:
+        assert "song_hanja_reading" in s
+        assert isinstance(s["song_hanja_reading"], str)
