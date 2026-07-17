@@ -181,15 +181,22 @@ def _decompose(ch: str) -> tuple[int, int, int] | None:
     return code // (21 * 28), (code % (21 * 28)) // 28, code % 28
 
 
-def _add_batchim(syllable: str, jong_idx: int) -> str:
-    """받침 없는 한글 음절에 종성을 얹는다. 이미 받침이 있으면 그대로 둔다(단순화)."""
-    parts = _decompose(syllable)
+def _add_batchim(text: str, jong_idx: int) -> str:
+    """`text`의 마지막 글자(받침 없는 한글 음절)에 종성을 얹는다.
+
+    `text`는 외래어 사전 치환으로 여러 글자짜리 문자열(예: "텔레파시")일 수 있으므로,
+    전체를 한 음절로 취급하지 않고 **마지막 한 글자만** 분해·재조합한다. 이미 받침이
+    있거나 마지막 글자가 완성형 한글이 아니면 그대로 둔다(단순화).
+    """
+    if not text:
+        return text
+    parts = _decompose(text[-1])
     if parts is None:
-        return syllable
+        return text
     cho, jung, jong = parts
     if jong != 0:
-        return syllable
-    return chr(0xAC00 + (cho * 21 + jung) * 28 + jong_idx)
+        return text
+    return text[:-1] + chr(0xAC00 + (cho * 21 + jung) * 28 + jong_idx)
 
 
 def kana_to_hangul(hira: str) -> str:
@@ -237,7 +244,8 @@ def kana_to_hangul(hira: str) -> str:
 
         if ch == "ー":
             if out:
-                parts = _decompose(out[-1])
+                # 외래어 치환으로 out[-1]이 여러 글자일 수 있으므로 마지막 글자만 본다.
+                parts = _decompose(out[-1][-1])
                 if parts is not None:
                     echo = _VOWEL_ECHO.get(_JUNG[parts[1]])
                     if echo:

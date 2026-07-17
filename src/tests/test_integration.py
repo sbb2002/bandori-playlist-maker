@@ -8,11 +8,13 @@ R&D 보고서(document-archive 브랜치 archive/last-papers/research/2026-07-11
 (코드/테스트팀 소유 고정 스냅샷, 오토로더가 갱신하지 않음)로 결정론적으로 돈다.
 """
 
+import json
 import random
 from pathlib import Path
 
 from app.domain.models import MoodParameters
 from app.domain.selection import build_setlist
+from app.repo import song_repo
 from app.repo.song_repo import load_songs as _load_songs_from
 
 _FIXTURE = Path(__file__).parent / "fixtures" / "songs_master.csv"
@@ -127,3 +129,20 @@ def test_seed_reproducible_on_real_data():
     a = build_setlist(songs, params, target_seconds=60 * 60, rng=random.Random(7))
     b = build_setlist(songs, params, target_seconds=60 * 60, rng=random.Random(7))
     assert [p.idx for p in a.picks] == [p.idx for p in b.picks]
+
+
+def test_song_alias_override_applies_by_idx(monkeypatch, tmp_path):
+    """song_alias_overrides.json은 idx(문자열)로 매칭돼야 한다 — songs_master.csv엔
+    tag 컬럼이 없으므로 tag로 매칭하면 항상 무적용(dead code)이 된다는 회귀를 잡는다."""
+    overrides_path = tmp_path / "song_alias_overrides.json"
+    overrides_path.write_text(
+        json.dumps({"0": {"song_hangul": "온 유어 마크(수동 지정)"}}), encoding="utf-8",
+    )
+    monkeypatch.setattr(song_repo, "DEFAULT_OVERRIDES_PATH", overrides_path)
+
+    songs = load_songs()
+    target = next(s for s in songs if s.idx == 0)
+    assert target.song_hangul == "온 유어 마크(수동 지정)"
+
+    # 오버라이드 미지정 필드(song_romaji)는 자동 계산값을 그대로 유지해야 한다(부분 오버라이드).
+    assert target.song_romaji and target.song_romaji != "온 유어 마크(수동 지정)"
