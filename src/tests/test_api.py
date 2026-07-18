@@ -282,3 +282,32 @@ def test_songs_search_includes_hanja_reading_field(client):
     for s in songs:
         assert "song_hanja_reading" in s
         assert isinstance(s["song_hanja_reading"], str)
+
+
+def test_refresh_data_forbidden_when_token_not_configured(client, monkeypatch):
+    monkeypatch.delenv("DATA_REFRESH_TOKEN", raising=False)
+    r = client.post("/api/admin/refresh-data")
+    assert r.status_code == 403
+
+
+def test_refresh_data_forbidden_with_wrong_token(client, monkeypatch):
+    monkeypatch.setenv("DATA_REFRESH_TOKEN", "correct-token")
+    r = client.post("/api/admin/refresh-data", headers={"X-Refresh-Token": "wrong-token"})
+    assert r.status_code == 403
+
+
+def test_refresh_data_succeeds_with_correct_token(client, monkeypatch):
+    monkeypatch.setenv("DATA_REFRESH_TOKEN", "correct-token")
+    calls = []
+
+    def fake_refresh(*, force):
+        calls.append(force)
+        return client.app.state.songs  # 기존 곡 목록 그대로 반환(단위테스트라 네트워크 안 탐)
+
+    monkeypatch.setattr(client.app.state, "refresh_songs", fake_refresh)
+    r = client.post("/api/admin/refresh-data", headers={"X-Refresh-Token": "correct-token"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "ok"
+    assert body["song_count"] == len(client.app.state.songs)
+    assert calls == [True]
