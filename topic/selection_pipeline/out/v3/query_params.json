@@ -1,0 +1,558 @@
+[
+  {
+    "query_id": "R01",
+    "text": "poppin'party 노래로 신나게 하루 시작하고 싶어.",
+    "category": "band",
+    "band_filter": [],
+    "params": {
+      "brightness": 1.0,
+      "start_energy": 0.7,
+      "end_energy": 0.85,
+      "stage_count": 3,
+      "target_minutes": 30,
+      "interpretation_summary": "신나는 하루를 시작하는 팝핀 파티의 열정적인 분위기",
+      "stage_energies": null,
+      "tags": [
+        "신나게",
+        "하루시작",
+        "팝핀파티"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R02",
+    "text": "roselia 노래 중에 무겁고 진지한 분위기로 틀어줘.",
+    "category": "band",
+    "band_filter": [
+      "roselia"
+    ],
+    "params": {
+      "brightness": -0.8,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_count": 2,
+      "target_minutes": null,
+      "interpretation_summary": "무거운 마음을 달래는 진지한 분위기의 로세리아 노래로, 마음의 안정을 찾을 수 있는 시간입니다.",
+      "stage_energies": null,
+      "tags": [
+        "로세리아",
+        "진지",
+        "무거움",
+        "안정"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R03",
+    "text": "raise a suilen 노래로 미친듯이 달리고 싶어.",
+    "category": "band",
+    "band_filter": [
+      "raise_a_suilen"
+    ],
+    "params": {
+      "brightness": 1.0,
+      "start_energy": 0.6,
+      "end_energy": 0.9,
+      "stage_count": 4,
+      "target_minutes": 40,
+      "interpretation_summary": "달리는 마음을 노래로 표현하는 강렬한 에너지로 가득한 플레이리스트",
+      "stage_energies": null,
+      "tags": [
+        "달리기",
+        "raise a suilen",
+        "고조되는"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R04",
+    "text": "mygo 노래로 조용히 감성에 잠기고 싶어.",
+    "category": "band",
+    "band_filter": [
+      "mygo"
+    ],
+    "params": {
+      "brightness": -0.8,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_count": 2,
+      "target_minutes": 50,
+      "interpretation_summary": "조용한 밤, 감성적인 음악으로 마음을 평온하게 해요",
+      "stage_energies": null,
+      "tags": [
+        "조용",
+        "감성",
+        "밝은",
+        "밤"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R05",
+    "text": "ave mujica 노래로 스산하고 어두운 분위기 잡고 싶어.",
+    "category": "band",
+    "band_filter": [
+      "ave_mujica"
+    ],
+    "params": {
+      "brightness": -0.8,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_count": 2,
+      "target_minutes": null,
+      "interpretation_summary": "스산하고 어두운 분위기의 음악으로 무드가 고요하고 침착한 분위기를 연출합니다.",
+      "stage_energies": null,
+      "tags": [
+        "스산",
+        "어두움",
+        "고요",
+        "침착"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R06",
+    "text": "hello happy world 노래로 밝고 유쾌하게 놀고 싶어.",
+    "category": "band",
+    "band_filter": [
+      "hello_happy_world"
+    ],
+    "params": {
+      "brightness": 1.0,
+      "start_energy": 0.7,
+      "end_energy": 0.9,
+      "stage_count": 3,
+      "target_minutes": 120,
+      "interpretation_summary": "밝고 즐거운 분위기로 친구들과 함께 즐거운 시간을 보내는 노래로 가득한 플레이리스트입니다.",
+      "stage_energies": null,
+      "tags": [
+        "노래",
+        "놀기",
+        "친구",
+        "밝은"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R07",
+    "text": "완전 조용하고 힘 빠진 노래로 채워줘.",
+    "category": "intensity_brightness",
+    "band_filter": [],
+    "params": {
+      "brightness": -0.8,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_count": 2,
+      "target_minutes": 30,
+      "interpretation_summary": "조용하고 편안한 음악으로 하루를 시작하는 시간",
+      "stage_energies": null,
+      "tags": [
+        "조용",
+        "편안",
+        "수면",
+        "힘 빠진"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R08",
+    "text": "미친듯이 텐션 폭발하는 노래로 채워줘.",
+    "category": "intensity_brightness",
+    "band_filter": [],
+    "params": {
+      "brightness": 1.0,
+      "start_energy": 0.7,
+      "end_energy": 0.95,
+      "stage_count": 4,
+      "target_minutes": 120,
+      "interpretation_summary": "미친듯이 텐션 폭발하는 노래로 주말 파티를 열어보세요",
+      "stage_energies": null,
+      "tags": [
+        "파티",
+        "텐션",
+        "폭발",
+        "주말"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R09",
+    "text": "햇살 가득한 것처럼 밝은 노래 듣고 싶어.",
+    "category": "intensity_brightness",
+    "band_filter": [],
+    "params": {
+      "brightness": 1.0,
+      "start_energy": 0.6,
+      "end_energy": 0.8,
+      "stage_count": 3,
+      "target_minutes": null,
+      "interpretation_summary": "햇살 가득한 분위기의 밝고 기분 좋은 노래로 하루를 시작해 보세요.",
+      "stage_energies": null,
+      "tags": [
+        "밝은",
+        "햇살",
+        "기분좋은"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R10",
+    "text": "칠흑같이 어둡고 무거운 노래 듣고 싶어.",
+    "category": "intensity_brightness",
+    "band_filter": [],
+    "params": {
+      "brightness": -0.9,
+      "start_energy": 0.1,
+      "end_energy": 0.1,
+      "stage_count": 2,
+      "target_minutes": null,
+      "interpretation_summary": "어둡고 무거운 감정을 표현하는 노래로 마음을 가라앉히는 시간",
+      "stage_energies": null,
+      "tags": [
+        "어둡다",
+        "무거움",
+        "감성",
+        "노래"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R11",
+    "text": "중간 정도 텐션에 살짝 우울한 느낌으로.",
+    "category": "intensity_brightness",
+    "band_filter": [],
+    "params": {
+      "brightness": -0.2,
+      "start_energy": 0.2,
+      "end_energy": 0.2,
+      "stage_count": 3,
+      "target_minutes": 40,
+      "interpretation_summary": "조용한 오후, 마음을 추스르는 음악으로 가득한 시간",
+      "stage_energies": null,
+      "tags": [
+        "우울",
+        "조용",
+        "추스러짐"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R12",
+    "text": "살짝 들뜨는데 시끄럽진 않은 노래로.",
+    "category": "intensity_brightness",
+    "band_filter": [],
+    "params": {
+      "brightness": 0.5,
+      "start_energy": 0.4,
+      "end_energy": 0.7,
+      "stage_count": 3,
+      "target_minutes": 30,
+      "interpretation_summary": "조용하지만 들뜨는 분위기의 노래로 주말을 시작하는 데 딱 좋다",
+      "stage_energies": null,
+      "tags": [
+        "주말",
+        "조용",
+        "들뜨는"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R13",
+    "text": "헬스장에서 웨이트 할 때 들을 노래.",
+    "category": "situational",
+    "band_filter": [],
+    "params": {
+      "brightness": 0.8,
+      "start_energy": 0.6,
+      "end_energy": 0.8,
+      "stage_count": 3,
+      "target_minutes": 40,
+      "interpretation_summary": "힘을 내는 헬스장에서 열정적인 음악으로 고조되는 에너지를 느껴보세요",
+      "stage_energies": null,
+      "tags": [
+        "헬스장",
+        "웨이트",
+        "힘내",
+        "고조되는"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R14",
+    "text": "독서할 때 배경으로 틀어놓을 노래.",
+    "category": "situational",
+    "band_filter": [],
+    "params": {
+      "brightness": 0.2,
+      "start_energy": 0.1,
+      "end_energy": 0.1,
+      "stage_count": 2,
+      "target_minutes": 50,
+      "interpretation_summary": "조용하고 집중적인 분위기의 음악으로 독서를 즐기세요",
+      "stage_energies": null,
+      "tags": [
+        "독서",
+        "조용",
+        "집중"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R15",
+    "text": "장거리 운전할 때 졸음 안 오게 들을 노래.",
+    "category": "situational",
+    "band_filter": [],
+    "params": {
+      "brightness": 0.5,
+      "start_energy": 0.2,
+      "end_energy": 0.2,
+      "stage_count": 2,
+      "target_minutes": 120,
+      "interpretation_summary": "장거리 운전을 위한 편안한 음악, 졸음 없이 안전한 여행을 위한 음악",
+      "stage_energies": null,
+      "tags": [
+        "장거리운전",
+        "운전",
+        "편안한음악",
+        "안전한여행"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R16",
+    "text": "빨래 개면서 듣기 좋은 노래.",
+    "category": "situational",
+    "band_filter": [],
+    "params": {
+      "brightness": 0.2,
+      "start_energy": 0.1,
+      "end_energy": 0.1,
+      "stage_count": 2,
+      "target_minutes": 20,
+      "interpretation_summary": "조용하고 편안한 분위기의 노래로 집안일을 하며 듣기 좋습니다.",
+      "stage_energies": null,
+      "tags": [
+        "빨래",
+        "편안",
+        "조용"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R17",
+    "text": "친구 생일파티에서 틀 노래.",
+    "category": "situational",
+    "band_filter": [],
+    "params": {
+      "brightness": 1.0,
+      "start_energy": 0.6,
+      "end_energy": 0.8,
+      "stage_count": 4,
+      "target_minutes": 120,
+      "interpretation_summary": "친구 생일파티의 즐거운 분위기, 신나는 음악으로 함께 즐기다",
+      "stage_energies": null,
+      "tags": [
+        "파티",
+        "생일",
+        "친구",
+        "즐거움"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R18",
+    "text": "잠들기 전 조명 끄고 듣는 노래.",
+    "category": "situational",
+    "band_filter": [],
+    "params": {
+      "brightness": -1.0,
+      "start_energy": 0.1,
+      "end_energy": 0.1,
+      "stage_count": 2,
+      "target_minutes": 20,
+      "interpretation_summary": "조용한 밤, 가라앉는 마음, 편안한 잠들기",
+      "stage_energies": null,
+      "tags": [
+        "잠들기",
+        "조용",
+        "편안",
+        "밤"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R19",
+    "text": "달리기 준비운동부터 본운동, 마무리까지 이어지는 러닝 플레이리스트.",
+    "category": "arc",
+    "band_filter": [
+      "raise_a_suilen"
+    ],
+    "params": {
+      "brightness": 0.8,
+      "start_energy": 0.2,
+      "end_energy": 0.8,
+      "stage_count": 4,
+      "target_minutes": 40,
+      "interpretation_summary": "달리기 준비운동부터 본운동, 마무리까지 이어지는 러닝 플레이리스트, 점점 달아오르는 에너지로 달리기 준비를 시작하고 본 운동에 집중하며 마무리를 한다.",
+      "stage_energies": null,
+      "tags": [
+        "달리기",
+        "러닝",
+        "운동",
+        "고조되는"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R20",
+    "text": "천천히 달아오르는 파티 분위기로 만들어줘.",
+    "category": "arc",
+    "band_filter": [],
+    "params": {
+      "brightness": 0.9,
+      "start_energy": 0.25,
+      "end_energy": 0.85,
+      "stage_count": 4,
+      "target_minutes": 120,
+      "interpretation_summary": "주말 파티의 시작, 점점 고조되는 분위기와 함께 즐거운 시간",
+      "stage_energies": null,
+      "tags": [
+        "파티",
+        "고조되는",
+        "주말",
+        "즐거운"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R21",
+    "text": "가라앉은 기분에서 서서히 힘을 되찾는 느낌으로.",
+    "category": "arc",
+    "band_filter": [],
+    "params": {
+      "brightness": -0.2,
+      "start_energy": 0.15,
+      "end_energy": 0.6,
+      "stage_count": 4,
+      "target_minutes": 40,
+      "interpretation_summary": "가라앉은 기분에서 서서히 힘을 되찾는 느낌으로, 조용한 분위기에서 점점 밝아지는 음악을 듣다",
+      "stage_energies": null,
+      "tags": [
+        "조용",
+        "가라앉은",
+        "힘을되찾는"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R22",
+    "text": "공부 시작할 때 차분하다가 집중력 오르면서 점점 몰입되는 느낌으로.",
+    "category": "arc",
+    "band_filter": [],
+    "params": {
+      "brightness": 0.2,
+      "start_energy": 0.15,
+      "end_energy": 0.8,
+      "stage_count": 4,
+      "target_minutes": 50,
+      "interpretation_summary": "공부 시작에 차분한 분위기, 점점 몰입되는 집중력",
+      "stage_energies": null,
+      "tags": [
+        "공부",
+        "집중",
+        "몰입",
+        "차분"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R23",
+    "text": "새벽 드라이브, 조용히 출발해서 해뜰 때쯤 신나지는 느낌으로.",
+    "category": "arc",
+    "band_filter": [],
+    "params": {
+      "brightness": 0.2,
+      "start_energy": 0.15,
+      "end_energy": 0.65,
+      "stage_count": 3,
+      "target_minutes": 60,
+      "interpretation_summary": "새벽 드라이브, 조용한 출발부터 해뜨는 아침까지의 설렘과 신나는 시간",
+      "stage_energies": null,
+      "tags": [
+        "새벽",
+        "드라이브",
+        "조용",
+        "신나",
+        "해뜨는"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  },
+  {
+    "query_id": "R24",
+    "text": "운동 마무리하고 차분히 식히는 쿨다운 느낌으로.",
+    "category": "arc",
+    "band_filter": [],
+    "params": {
+      "brightness": -0.2,
+      "start_energy": 0.6,
+      "end_energy": 0.2,
+      "stage_count": 3,
+      "target_minutes": 20,
+      "interpretation_summary": "운동을 마치고 차분하게 식히는 쿨다운의 시간",
+      "stage_energies": null,
+      "tags": [
+        "쿨다운",
+        "운동",
+        "식히기"
+      ],
+      "song_type": "all",
+      "same_as_previous": false
+    }
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "steps": {
+    "extract_targets": {
+      "status": "done",
+      "n_done": 84,
+      "n_total": 84
+    },
+    "overall": {
+      "status": "done"
+    }
+  },
+  "started_at": "2026-07-18T02:27:45.731710+00:00",
+  "updated_at": "2026-07-18T02:29:58.699289+00:00"
+}

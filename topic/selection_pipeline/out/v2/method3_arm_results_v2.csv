@@ -1,0 +1,169 @@
+query_id,arm,rank,tag,band,song,intensity,band_pct,lyric_cosine
+Q101,arm1,1,poppin_party__427,poppin_party,夏に閉じこめて,0.1987,0.087,
+Q101,arm2,1,poppin_party__427,poppin_party,夏に閉じこめて,0.1987,0.087,0.6291
+Q102,arm1,1,poppin_party__472,poppin_party,メランコリック (Cover),0.8124,0.913,
+Q102,arm2,1,poppin_party__419,poppin_party,What's the POPIPA!?,0.8376,0.9478,0.6419
+Q103,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q103,arm2,1,roselia__585,roselia,Safe and Sound,0.3954,0.3258,0.593
+Q104,arm1,1,roselia__635,roselia,ヒバナ -Reloaded- (Cover),0.9566,1.0,
+Q104,arm2,1,roselia__604,roselia,Synchrogazer,0.852,0.9438,0.6025
+Q105,arm1,1,raise_a_suilen__562,raise_a_suilen,ボッカデラベリタ (Cover),0.4135,0.0886,
+Q105,arm2,1,raise_a_suilen__562,raise_a_suilen,ボッカデラベリタ (Cover),0.4135,0.0886,0.6693
+Q106,arm1,1,raise_a_suilen__550,raise_a_suilen,ヒトリノ夜 (Cover),0.8993,0.8354,
+Q106,arm2,1,raise_a_suilen__498,raise_a_suilen,!NVADE SHOW!,0.887,0.8101,0.5824
+Q107,arm1,1,pastel_palettes__326,pastel_palettes,気まぐれロマンティック,0.3047,0.0811,
+Q107,arm2,1,pastel_palettes__343,pastel_palettes,ホワイト ノスタルジア,0.1372,0.027,0.6525
+Q108,arm1,1,pastel_palettes__305,pastel_palettes,あっつあつ 常夏 らぶ☆サマー！,0.7976,0.6486,
+Q108,arm2,1,pastel_palettes__344,pastel_palettes,Y.O.L.O！！！！！(パスパレver.),0.8059,0.6757,0.7051
+Q109,arm1,1,afterglow__028,afterglow,トーキョーワンダー。,0.3037,0.1111,
+Q109,arm2,1,afterglow__027,afterglow,Northern lights,0.2889,0.0972,0.6657
+Q110,arm1,1,afterglow__016,afterglow,COMIC PANIC!!!,0.7968,0.9444,
+Q110,arm2,1,afterglow__005,afterglow,Hey-day狂騒曲(カプリチオ),0.8748,0.9861,0.6492
+Q111,arm1,1,hello_happy_world__149,hello_happy_world,Listen to Smile!,0.2834,0.0417,
+Q111,arm2,1,hello_happy_world__116,hello_happy_world,にこにこねくと！,0.3635,0.0556,0.6607
+Q112,arm1,1,hello_happy_world__175,hello_happy_world,ノーポイッ！ (Cover),0.8008,0.8472,
+Q112,arm2,1,hello_happy_world__119,hello_happy_world,きらっ☆と キミフェス！,0.7769,0.7917,0.6877
+Q113,arm1,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,
+Q113,arm2,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,0.6182
+Q114,arm1,1,morfonica__180,morfonica,Daylight -デイライト-,0.8101,1.0,
+Q114,arm2,1,morfonica__182,morfonica,flame of hope,0.7374,0.9298,0.6222
+Q115,arm1,1,mygo__287,mygo,証命讃歌,0.8291,1.0,
+Q115,arm2,1,mygo__287,mygo,証命讃歌,0.8291,1.0,0.5584
+Q116,arm1,1,mygo__265,mygo,潜在表明,0.2114,0.2045,
+Q116,arm2,1,mygo__260,mygo,迷星叫,0.1832,0.1591,0.6541
+Q117,arm1,1,ave_mujica__075,ave_mujica,Crucifix X,0.2994,0.3448,
+Q117,arm2,1,ave_mujica__100,ave_mujica,暗黒天国 (Cover),0.3611,0.4483,0.5711
+Q118,arm1,1,ave_mujica__077,ave_mujica,顔,0.8627,1.0,
+Q118,arm2,1,ave_mujica__086,ave_mujica,Symbol II : Air,0.7608,0.9655,0.596
+Q119,arm1,1,mugendai_mutype__251,mugendai_mutype,コハク,0.4072,0.2174,
+Q119,arm2,1,mugendai_mutype__251,mugendai_mutype,コハク,0.4072,0.2174,0.5038
+Q120,arm1,1,mugendai_mutype__257,mugendai_mutype,やわやわNERD 超FreQuency,0.9899,1.0,
+Q120,arm2,1,mugendai_mutype__257,mugendai_mutype,やわやわNERD 超FreQuency,0.9899,1.0,0.4878
+Q121,arm1,1,roselia__659,roselia,KING (Cover),0.858,0.9775,
+Q121,arm2,1,roselia__604,roselia,Synchrogazer,0.852,0.9438,0.63
+Q122,arm1,1,ave_mujica__093,ave_mujica,Angles,0.0222,0.0345,
+Q122,arm2,1,poppin_party__415,poppin_party,キミにもらったもの,0.0415,0.0087,0.5982
+Q123,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q123,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.6607
+Q124,arm1,1,ave_mujica__093,ave_mujica,Angles,0.0222,0.0345,
+Q124,arm2,1,poppin_party__415,poppin_party,キミにもらったもの,0.0415,0.0087,0.5477
+Q125,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q125,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.6968
+Q126,arm1,1,ave_mujica__093,ave_mujica,Angles,0.0222,0.0345,
+Q126,arm2,1,poppin_party__415,poppin_party,キミにもらったもの,0.0415,0.0087,0.5864
+Q127,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q127,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.6271
+Q128,arm1,1,ave_mujica__093,ave_mujica,Angles,0.0222,0.0345,
+Q128,arm2,1,poppin_party__415,poppin_party,キミにもらったもの,0.0415,0.0087,0.5506
+Q129,arm1,1,raise_a_suilen__550,raise_a_suilen,ヒトリノ夜 (Cover),0.8993,0.8354,
+Q129,arm2,1,raise_a_suilen__550,raise_a_suilen,ヒトリノ夜 (Cover),0.8993,0.8354,0.5634
+Q130,arm1,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,
+Q130,arm2,1,poppin_party__427,poppin_party,夏に閉じこめて,0.1987,0.087,0.6128
+Q131,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q131,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.7082
+Q132,arm1,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,
+Q132,arm2,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,0.5941
+Q133,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q133,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.6509
+Q134,arm1,1,ave_mujica__093,ave_mujica,Angles,0.0222,0.0345,
+Q134,arm2,1,raise_a_suilen__544,raise_a_suilen,Light a fire,0.0702,0.0127,0.5695
+Q135,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q135,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.7304
+Q136,arm1,1,ave_mujica__093,ave_mujica,Angles,0.0222,0.0345,
+Q136,arm2,1,poppin_party__415,poppin_party,キミにもらったもの,0.0415,0.0087,0.535
+Q137,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q137,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.6306
+Q138,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q138,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.6096
+Q139,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q139,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.6406
+Q140,arm1,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,
+Q140,arm2,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,0.6296
+Q141,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q141,arm2,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,0.6944
+Q142,arm1,1,ave_mujica__093,ave_mujica,Angles,0.0222,0.0345,
+Q142,arm2,1,poppin_party__415,poppin_party,キミにもらったもの,0.0415,0.0087,0.6104
+Q143,arm1,1,hello_happy_world__175,hello_happy_world,ノーポイッ！ (Cover),0.8008,0.8472,
+Q143,arm2,1,pastel_palettes__344,pastel_palettes,Y.O.L.O！！！！！(パスパレver.),0.8059,0.6757,0.5999
+Q144,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q144,arm2,1,roselia__585,roselia,Safe and Sound,0.3954,0.3258,0.5192
+Q145,arm1,1,roselia__647,roselia,This game (Cover),0.6011,0.6854,
+Q145,arm2,1,raise_a_suilen__514,raise_a_suilen,Life on the Lotus,0.6064,0.2532,0.5589
+Q146,arm1,1,ave_mujica__075,ave_mujica,Crucifix X,0.2994,0.3448,
+Q146,arm2,1,poppin_party__409,poppin_party,夢を撃ち抜く瞬間に！,0.2975,0.2,0.5858
+Q147,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q147,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.6331
+Q148,arm1,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,
+Q148,arm2,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,0.5386
+Q149,arm1,1,ave_mujica__075,ave_mujica,Crucifix X,0.2994,0.3448,
+Q149,arm2,1,poppin_party__409,poppin_party,夢を撃ち抜く瞬間に！,0.2975,0.2,0.53
+Q150,arm1,1,hello_happy_world__175,hello_happy_world,ノーポイッ！ (Cover),0.8008,0.8472,
+Q150,arm2,1,pastel_palettes__344,pastel_palettes,Y.O.L.O！！！！！(パスパレver.),0.8059,0.6757,0.659
+Q151,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q151,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.5816
+Q152,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q152,arm2,1,roselia__585,roselia,Safe and Sound,0.3954,0.3258,0.6136
+Q153,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q153,arm2,1,roselia__585,roselia,Safe and Sound,0.3954,0.3258,0.5223
+Q154,arm1,1,ave_mujica__075,ave_mujica,Crucifix X,0.2994,0.3448,
+Q154,arm2,1,poppin_party__409,poppin_party,夢を撃ち抜く瞬間に！,0.2975,0.2,0.595
+Q155,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q155,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.5981
+Q156,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q156,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.5748
+Q157,arm1,1,hello_happy_world__175,hello_happy_world,ノーポイッ！ (Cover),0.8008,0.8472,
+Q157,arm2,1,pastel_palettes__344,pastel_palettes,Y.O.L.O！！！！！(パスパレver.),0.8059,0.6757,0.5774
+Q158,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q158,arm2,1,poppin_party__469,poppin_party,私は最強 (Cover),0.4075,0.3391,0.5495
+Q159,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q159,arm2,1,ave_mujica__072,ave_mujica,KiLLKiSS,0.4028,0.5172,0.6691
+Q160,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q160,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.7384
+Q161,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q161,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.5942
+Q162,arm1,1,raise_a_suilen__509,raise_a_suilen,BATTLE CRY,0.7009,0.4937,
+Q162,arm2,1,afterglow__071,afterglow,I love your way！,0.7038,0.8194,0.5545
+Q163,arm1,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,
+Q163,arm2,1,morfonica__189,morfonica,Sweet Cheers!,0.1993,0.0526,0.5815
+Q164,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q164,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.6447
+Q165,arm1,1,ave_mujica__075,ave_mujica,Crucifix X,0.2994,0.3448,
+Q165,arm2,1,poppin_party__409,poppin_party,夢を撃ち抜く瞬間に！,0.2975,0.2,0.6112
+Q166,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q166,arm2,1,afterglow__001,afterglow,That Is How I Roll!,0.8656,0.9722,0.6286
+Q167,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q167,arm2,1,ave_mujica__072,ave_mujica,KiLLKiSS,0.4028,0.5172,0.6806
+Q168,arm1,1,raise_a_suilen__509,raise_a_suilen,BATTLE CRY,0.7009,0.4937,
+Q168,arm2,1,pastel_palettes__330,pastel_palettes,DISCOTHEQUE,0.6956,0.4865,0.6005
+Q169,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q169,arm2,1,ave_mujica__072,ave_mujica,KiLLKiSS,0.4028,0.5172,0.6661
+Q170,arm1,1,raise_a_suilen__509,raise_a_suilen,BATTLE CRY,0.7009,0.4937,
+Q170,arm2,1,poppin_party__438,poppin_party,ここから先は歌にならない,0.694,0.8174,0.6409
+Q171,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q171,arm2,1,ave_mujica__072,ave_mujica,KiLLKiSS,0.4028,0.5172,0.6102
+Q172,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q172,arm2,1,afterglow__001,afterglow,That Is How I Roll!,0.8656,0.9722,0.6773
+Q173,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q173,arm2,1,ave_mujica__072,ave_mujica,KiLLKiSS,0.4028,0.5172,0.6727
+Q174,arm1,1,raise_a_suilen__509,raise_a_suilen,BATTLE CRY,0.7009,0.4937,
+Q174,arm2,1,pastel_palettes__330,pastel_palettes,DISCOTHEQUE,0.6956,0.4865,0.5976
+Q175,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q175,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.6141
+Q176,arm1,1,raise_a_suilen__509,raise_a_suilen,BATTLE CRY,0.7009,0.4937,
+Q176,arm2,1,pastel_palettes__330,pastel_palettes,DISCOTHEQUE,0.6956,0.4865,0.6304
+Q177,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q177,arm2,1,ave_mujica__072,ave_mujica,KiLLKiSS,0.4028,0.5172,0.6373
+Q178,arm1,1,raise_a_suilen__509,raise_a_suilen,BATTLE CRY,0.7009,0.4937,
+Q178,arm2,1,poppin_party__438,poppin_party,ここから先は歌にならない,0.694,0.8174,0.6363
+Q179,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q179,arm2,1,ave_mujica__072,ave_mujica,KiLLKiSS,0.4028,0.5172,0.652
+Q180,arm1,1,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,0.9932,1.0,
+Q180,arm2,1,afterglow__002,afterglow,SENSENFUKOKU,0.5828,0.625,0.6087
+Q181,arm1,1,roselia__623,roselia,Call the shots,0.3997,0.3371,
+Q181,arm2,1,ave_mujica__072,ave_mujica,KiLLKiSS,0.4028,0.5172,0.712
+Q182,arm1,1,hello_happy_world__175,hello_happy_world,ノーポイッ！ (Cover),0.8008,0.8472,
+Q182,arm2,1,pastel_palettes__344,pastel_palettes,Y.O.L.O！！！！！(パスパレver.),0.8059,0.6757,0.6824
+Q183,arm1,1,roselia__647,roselia,This game (Cover),0.6011,0.6854,
+Q183,arm2,1,mygo__661,mygo,羅永線,0.597,0.8636,0.6521
+Q184,arm1,1,morfonica__194,morfonica,Wreath of Brave,0.4997,0.6316,
+Q184,arm2,1,poppin_party__423,poppin_party,イントロダクション,0.5008,0.4696,0.6419

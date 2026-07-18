@@ -1,0 +1,2 @@
+R24 start=0.6 end=0.2 arc=None
+R01 text=poppin'party 노래로 신나게 하루 시작하고 싶어. band_filter=[]

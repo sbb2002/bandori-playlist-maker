@@ -1,12 +1,21 @@
 # selection_pipeline: 선곡 파이프라인 3-way 비교 실험
 
+> **🔒 종결(2026-07-18)**: v1·v2는 프로덕션을 단순 재현한 버전으로 비교했다는 게 드러나(밝기
+> tie-break·Stage B 시퀀싱 생략), v3에서 **실제 프로덕션 코드(`build_setlist()`)를 그대로
+> 재사용**해 Method1(현행) vs Method2(+Stage C)로 재검증 — 역시 유의한 차이 없음(오히려 Method1
+> 근소 우위). 세 번의 독립 시도 모두 가사 후보추림 도입 근거를 못 냈다 →
+> **주제 최종 종결, `selection.py`는 현행 유지 확정**. 최종 결론은
+> `report/03-selection_pipeline_v3_method_comparison.md`, 이전 라운드는 `report/01-*.md`·
+> `report/02-*.md` + `DESIGN.md`(v1)/`DESIGN_v2.md`(v2)/`DESIGN_v3.md`(v3)에 보존. 아래 실행
+> 가이드는 v1 재현/참고용으로 남겨둔다.
+
 선곡 로직의 세 가지 구조를 비교하는 블라인드 평가 실험.
 
 - **Arm 1**: 절대 강도(intensity) 매칭만 사용 — 현재 프로덕션 방식
 - **Arm 2**: 가사 후보추림 + 절대 강도
-- **Arm 3**: 가사 후보추림 + 밴드 상대 백분위(band_pct)
+- **Arm 3**: 가사 후보추림 + 밴드 상대 백분위(band_pct) — v1에서 구조 기각, v2 재검증 대상 아님
 
-**설계 문서**: `DESIGN.md` (필독)
+**설계 문서**: `DESIGN.md`(v1, 3-way) · `DESIGN_v2.md`(v2, 84쿼리 재검증)
 
 ---
 
