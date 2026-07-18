@@ -141,3 +141,53 @@ def test_network_error_raises_upstream():
 def test_empty_api_key_raises_value_error():
     with pytest.raises(ValueError):
         GroqMultistageMoodInterpreter(api_key="")
+
+
+# ── 회귀: 실제 llama-3.1-8b-instant 로컬 테스트에서 관측된 패턴 ─────────────────
+# "숫자만 답해" 지시를 무시하고 장문 설명을 앞세우는 모델이라, 마커 이전 텍스트에 나온
+# 숫자(요청 인용 등)를 정답으로 잘못 집지 않는지 확인한다.
+
+def test_stage1_ignores_numbers_in_reasoning_preamble_before_marker():
+    verbose = (
+        "5km 러닝을 위한 플레이리스트라면 보통 30~45분 정도가 적당합니다. "
+        "천천히 시작해서 점점 빨라지는 구성을 고려하면 40분이 적절해 보입니다.\n\n"
+        "===ANSWER===\n40"
+    )
+    interp, _ = _make([_chat(verbose), _chat(_STAGE2_OK), _chat(_STAGE3_OK)])
+    params = interp.interpret("5km 러닝")
+    assert params.target_minutes == 40  # 서두의 "5km"의 5나 "30~45"가 아니라 마커 뒤 40
+
+
+def test_stage3_ignores_numbered_list_prefix_before_marker():
+    # 실측 패턴: 마커 앞에서 "1. 잔잔한: ... 0.05로 설정" 식으로 번호+설명을 붙이고,
+    # 마커 뒤에는 지시대로 값만 순서대로 나열.
+    verbose = (
+        "1. 잔잔한: 도입부라 낮게, 0.05 근처로 설정.\n"
+        "2. 고조되는: 점점 올라가는 구간, 0.70 정도.\n"
+        "3. 여운: 마무리라 다시 낮게, 0.40 근처.\n\n"
+        "===ANSWER===\n0.05\n0.70\n0.40"
+    )
+    interp, _ = _make([_chat(_STAGE1_OK), _chat(_STAGE2_OK), _chat(verbose)])
+    params = interp.interpret("x")
+    assert params.stage_energies == pytest.approx([0.05, 0.70, 0.40])
+
+
+def test_stage2_marker_skips_reasoning_preamble():
+    verbose = (
+        "먼저 도입부는 잔잔하게 6분 정도, 그 다음은 신나게 올리고...\n"
+        "고민 끝에 아래처럼 정리합니다.\n\n"
+        "===ANSWER===\n2\n15,잔잔한\n25,신나는"
+    )
+    interp, _ = _make([_chat(_STAGE1_OK), _chat(verbose), _chat("0.2\n0.8")])
+    params = interp.interpret("x")
+    assert params.stage_count == 2
+    assert params.stage_energies == pytest.approx([0.2, 0.8])
+
+
+def test_stage1_no_marker_falls_back_to_last_number_in_text():
+    # 마커를 아예 안 붙인 경우: 결론이 보통 끝에 오므로 "마지막" 숫자를 취해야
+    # 서두의 "5km" 같은 요청 인용 숫자를 오답으로 집지 않는다.
+    no_marker = "5km 정도 되는 러닝이라면 대략 40분짜리 플레이리스트가 좋겠습니다."
+    interp, _ = _make([_chat(no_marker), _chat(_STAGE2_OK), _chat(_STAGE3_OK)])
+    params = interp.interpret("x")
+    assert params.target_minutes == 40

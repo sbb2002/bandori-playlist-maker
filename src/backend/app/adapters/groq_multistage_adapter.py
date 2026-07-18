@@ -55,6 +55,14 @@ def _clamp(value: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, value))
 
 
+def _after_marker(content: str, marker: str) -> str:
+    """마커 뒤 텍스트만 반환. 마커가 없으면(모델이 지시를 어긴 경우) 전체 텍스트로 폴백."""
+    idx = content.rfind(marker)
+    if idx == -1:
+        return content
+    return content[idx + len(marker):]
+
+
 class GroqMultistageMoodInterpreter:
     """3회 순차 Groq 호출로 무드를 해석하는 MoodInterpreter 구현(실험용)."""
 
@@ -155,21 +163,35 @@ class GroqMultistageMoodInterpreter:
         assert last_error is not None
         raise MoodInterpretationError(f"[{stage_name}] {last_error}")
 
+    # 무료 경량 모델(llama-3.1-8b-instant)은 "숫자만 답해" 지시를 자주 무시하고 장문
+    # 설명을 덧붙인다(로컬 테스트에서 실측 확인 — 예: "5km 러닝을 위해..." 같은 서술 후 결론).
+    # 그래서 프로덕션 groq_adapter.py의 관용 파싱 철학(전문 설명은 허용하고 최종 값만
+    # 마커로 구분해 추출)을 그대로 따른다: 자유 서술은 허용하되 마지막에 반드시
+    # `_ANSWER_MARKER` 뒤에 최종 값만 쓰게 하고, 마커를 못 찾으면 전체 텍스트에서 관용적으로
+    # 재추출한다(첫 숫자가 아니라 "마지막" 숫자/줄 — 결론이 보통 끝에 오므로).
+    _ANSWER_MARKER = "===ANSWER==="
+
     # ── 1차: 전체 재생시간(분) ──────────────────────────────────────────────
     _STAGE1_SYSTEM = (
         "너는 뱅드림(BanG Dream!) 세트리스트의 전체 재생시간을 정하는 보조자다. "
-        "사용자 요청을 읽고 이 플레이리스트가 총 몇 분이면 좋을지 상식적으로 추정해 "
-        "정수(분)만 출력해라. 단위·설명·다른 글자 없이 숫자만 답한다. "
-        "예: 5km 러닝은 보통 30~45분이니 '40'."
+        "사용자 요청을 읽고 이 플레이리스트가 총 몇 분이면 좋을지 상식적으로 추정한다 "
+        "(예: 5km 러닝은 보통 30~45분이니 40 정도).\n"
+        f"생각 과정은 자유롭게 적어도 좋지만, 맨 마지막 줄에 반드시 정확히 "
+        f"'{_ANSWER_MARKER}' 를 쓰고 그다음 줄에 정수(분) 하나만 적어라. 그 뒤에는 아무것도 "
+        "쓰지 마라."
     )
 
     def _stage1_minutes(self, prompt: str) -> int:
         def parse() -> int:
             content = self._chat(self._STAGE1_SYSTEM, prompt)
-            match = re.search(r"-?\d+", content)
-            if not match:
-                raise MoodInterpretationError(f"1차 응답에서 정수를 찾지 못함: {content[:100]!r}")
-            return int(_clamp(int(match.group()), *_MINUTES_RANGE))
+            tail = _after_marker(content, self._ANSWER_MARKER)
+            numbers = re.findall(r"-?\d+", tail)
+            if not numbers:
+                raise MoodInterpretationError(f"1차 응답에서 정수를 찾지 못함: {content[:150]!r}")
+            # 마커를 찾았으면 그 뒤 첫 숫자, 못 찾아 전체 텍스트로 폴백했으면 결론이 보통
+            # 끝에 오므로 마지막 숫자를 쓴다(첫 숫자는 "5km"처럼 요청 인용일 위험이 큼).
+            value = numbers[0] if tail is not content else numbers[-1]
+            return int(_clamp(int(value), *_MINUTES_RANGE))
 
         return self._call_with_stage_retry("1차/재생시간", parse)
 
@@ -177,36 +199,41 @@ class GroqMultistageMoodInterpreter:
     _STAGE2_SYSTEM = (
         "너는 뱅드림 세트리스트의 구간(단계) 설계자다. 사용자 요청과 전체 재생시간(분)을 보고, "
         "전체를 2~5개 구간으로 나누고 각 구간의 길이(분)와 그 구간의 분위기를 나타내는 "
-        "짧은 한국어 감정 키워드 하나를 정해라(예: 잔잔한, 고조되는, 신나는, 차분한).\n"
-        "출력 형식(다른 설명 절대 금지):\n"
-        "첫 줄에 구간 수(정수) 하나만.\n"
-        "그다음 줄부터 구간마다 한 줄씩 '길이(정수),감정키워드' 형식으로, 구간 순서대로.\n"
-        "구간 길이의 합은 전체 재생시간과 최대한 비슷하게 맞춰라.\n"
-        "예:\n3\n15,잔잔한\n25,고조되는\n10,여운"
+        "짧은 한국어 감정 키워드 하나를 정해라(예: 잔잔한, 고조되는, 신나는, 차분한). 구간 "
+        "길이의 합은 전체 재생시간과 최대한 비슷하게 맞춘다.\n"
+        f"생각 과정은 자유롭게 적어도 좋지만, 맨 마지막에 반드시 정확히 '{_ANSWER_MARKER}' 줄을 "
+        "쓰고 그 다음부터 최종 답만 다음 형식으로 적어라(번호 매기지 말고 딱 이 형식만):\n"
+        "첫 줄: 구간 수(정수) 하나만.\n"
+        "그다음 줄부터 구간마다 한 줄씩 '길이(정수),감정키워드' 형식, 구간 순서대로.\n"
+        f"예:\n{_ANSWER_MARKER}\n3\n15,잔잔한\n25,고조되는\n10,여운"
     )
 
     def _stage2_stages(self, prompt: str, target_minutes: int) -> list[tuple[int, str]]:
         def parse() -> list[tuple[int, str]]:
             user_prompt = f"[요청]\n{prompt}\n\n[전체 재생시간] {target_minutes}분"
             content = self._chat(self._STAGE2_SYSTEM, user_prompt)
-            lines = [ln.strip() for ln in content.splitlines() if ln.strip()]
+            tail = _after_marker(content, self._ANSWER_MARKER)
+            lines = [ln.strip() for ln in tail.splitlines() if ln.strip()]
             if not lines:
                 raise MoodInterpretationError("2차 응답이 비어 있음")
 
             count_match = re.search(r"\d+", lines[0])
             if not count_match:
                 raise MoodInterpretationError(f"2차 첫 줄에서 구간 수를 찾지 못함: {lines[0]!r}")
-            stage_count = int(_clamp(int(count_match.group()), *_STAGE_RANGE))
+            declared_count = int(_clamp(int(count_match.group()), *_STAGE_RANGE))
 
             stages: list[tuple[int, str]] = []
             for line in lines[1:]:
                 if "," not in line:
                     continue
                 length_str, mood_str = line.split(",", 1)
-                length_match = re.search(r"\d+", length_str)
-                length = int(length_match.group()) if length_match else 1
+                # 모델이 번호("1. 15")를 덧붙여도 실제 길이는 마지막 숫자이므로 rfind로 취한다.
+                length_matches = re.findall(r"\d+", length_str)
+                length = int(length_matches[-1]) if length_matches else 1
                 mood = mood_str.strip().lstrip("#").strip() or _DEFAULT_MOOD
                 stages.append((max(1, length), mood))
+                if len(stages) >= declared_count:
+                    break
 
             if len(stages) < 2:
                 raise MoodInterpretationError(f"2차 응답에서 구간을 2개 이상 파싱하지 못함: {lines!r}")
@@ -224,21 +251,30 @@ class GroqMultistageMoodInterpreter:
         "너는 뱅드림 세트리스트의 구간별 에너지(강도)를 정하는 보조자다. 순서대로 나열된 "
         "구간별 감정 키워드를 보고, 각 구간의 에너지를 0.00(아주 잔잔함)~1.00(아주 신남) 사이 "
         "소수 둘째자리까지의 실수로 정해라.\n"
-        "출력 형식(다른 설명 절대 금지): 구간 순서대로 한 줄에 숫자 하나씩, 줄 수는 구간 수와 "
-        "정확히 같게.\n예(구간 3개): 0.25\n0.7\n0.4"
+        f"생각 과정은 자유롭게 적어도 좋지만, 맨 마지막에 반드시 정확히 '{_ANSWER_MARKER}' 줄을 "
+        "쓰고 그 다음부터 구간 순서대로 한 줄에 숫자 하나씩만 적어라(번호·설명 없이 숫자만, "
+        "줄 수는 구간 수와 정확히 같게).\n"
+        f"예(구간 3개):\n{_ANSWER_MARKER}\n0.25\n0.70\n0.40"
     )
 
     def _stage3_energies(self, moods: list[str]) -> list[float]:
         def parse() -> list[float]:
             listing = "\n".join(f"{i + 1}. {m}" for i, m in enumerate(moods))
             content = self._chat(self._STAGE3_SYSTEM, listing)
-            values = re.findall(r"\d*\.\d+|\d+", content)
-            if len(values) < len(moods):
+            tail = _after_marker(content, self._ANSWER_MARKER)
+            lines = [ln.strip() for ln in tail.splitlines() if ln.strip()]
+            # 줄마다 "마지막" 숫자만 취한다 — 모델이 "1. 0.75"처럼 번호를 덧붙여도 실제 값은
+            # 그 줄의 마지막 숫자이므로(맨 앞 "1"을 값으로 오인하는 사고를 방지).
+            energies: list[float] = []
+            for line in lines:
+                nums = re.findall(r"\d*\.\d+|\d+", line)
+                if nums:
+                    energies.append(_clamp(float(nums[-1]), *_ENERGY_RANGE))
+            if len(energies) < len(moods):
                 raise MoodInterpretationError(
-                    f"3차 응답 개수 부족(필요 {len(moods)}, 파싱 {len(values)}): {content[:150]!r}"
+                    f"3차 응답 개수 부족(필요 {len(moods)}, 파싱 {len(energies)}): {content[:150]!r}"
                 )
-            energies = [_clamp(float(v), *_ENERGY_RANGE) for v in values[: len(moods)]]
-            return energies
+            return energies[: len(moods)]
 
         return self._call_with_stage_retry("3차/구간에너지", parse)
 
