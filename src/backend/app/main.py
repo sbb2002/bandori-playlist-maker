@@ -131,7 +131,33 @@ def _build_interpreter() -> MoodInterpreter:
     mode = os.environ.get("MOOD_INTERPRETER", "").strip().lower()
     api_key = os.environ.get("GROQ_API_KEY", "").strip()
 
-    use_llm = mode in ("groq", "openrouter") or (mode != "stub" and bool(api_key))
+    use_llm = mode in ("groq", "openrouter", "groq_multistage") or (mode != "stub" and bool(api_key))
+
+    if use_llm and mode == "groq_multistage":
+        # (실험, topic/llm-param-control-separate) 파라미터마다 순차 LLM 호출로 나눠 JSON을
+        # 조립하는 파일럿 어댑터. 벤더 어댑터 자체를 통째로 교체하는 실험이라 groq_adapter와
+        # 별도 분기로 둔다 — 운영 분기(아래)에는 영향 없음.
+        if not api_key:
+            raise RuntimeError("MOOD_INTERPRETER=groq_multistage인데 GROQ_API_KEY가 없습니다.")
+
+        from .adapters.groq_multistage_adapter import (
+            DEFAULT_BASE_URL as MS_DEFAULT_BASE_URL,
+            DEFAULT_MODEL as MS_DEFAULT_MODEL,
+            GroqMultistageMoodInterpreter,
+        )
+
+        model = os.environ.get("GROQ_MODEL", MS_DEFAULT_MODEL)
+        base_url = os.environ.get("GROQ_BASE_URL", MS_DEFAULT_BASE_URL)
+        max_retries = _env_int("GROQ_MAX_RETRIES", 2)
+        stage_retries = _env_int("GROQ_MOOD_RETRIES", 2)
+        logger.info(
+            "MoodInterpreter: GroqMultistage (실험, model=%s, stage_retries=%s)",
+            model, stage_retries,
+        )
+        return GroqMultistageMoodInterpreter(
+            api_key=api_key, model=model, base_url=base_url,
+            max_retries=max_retries, stage_retries=stage_retries,
+        )
 
     if use_llm:
         if not api_key:
