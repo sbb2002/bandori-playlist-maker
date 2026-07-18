@@ -53,6 +53,33 @@
 - 기준 커밋: `aad2c0e`
 - 관련 PR: [#46](https://github.com/sbb2002/bandori-playlist-maker/pull/46)
 
+## v1.8.8 — 2026-07-18
+
+에너지 그래프 편집기(`syncGraphToParams`)가 백엔드가 실제 선곡에 쓴 `stages[].energy_target`
+(비단조 아크 포함)을 무시하고 `start_energy`/`end_energy`만으로 재선형보간해, 피크 등 비단조
+아크가 실제 선곡과 무관하게 항상 직선으로 보이던 버그를 수정. `stages`가 있으면 그대로 쓰고,
+없을 때만(구버전 백엔드 폴백) 기존 선형보간 유지. 함께, 디테일한 다단계 절대시간 요청("10분에
+중간, 20분에 높게, 30분에 최고조...")에서 Groq가 200 응답이면서도 content가 JSON으로 안 풀리는
+간헐적 무드 파싱 실패(`MOOD_UNINTERPRETABLE`)가 있어 `GROQ_MOOD_RETRIES`(기본 3)만큼 재호출
+후에도 실패하면 기존과 동일하게 폴백하도록 재시도 로직 추가(429/5xx 재시도와는 별개 경로).
+기존 동작을 보정하는 버그 수정이라 신규 기능(Minor)이 아니라 Patch로 분류.
+
+- 기준 커밋: `789b039`
+- 관련 PR: [#47](https://github.com/sbb2002/bandori-playlist-maker/pull/47)
+
+## v1.9.0 — 2026-07-18
+
+에너지 그래프가 스테이지 중앙을 스플라인으로 부드럽게 잇는 것과 달리, 실제 선곡은 스테이지
+경계에서 flat 목표값이 계단식으로 뚝 끊기던 것을 보완 — `continuous_slot_targets()`로 스테이지별
+flat 목표를 곡 하나하나 단위로 조각별 선형보간해 경계 근처 곡이 이웃 스테이지 쪽으로 서서히
+흘러가게 했다. 검증 중 곡 순서 재배치(`_sequence_by_continuity`, 경계 텐션 정렬)가 강도와 무관한
+아웃트로/인트로 신호만으로 애써 매칭해둔 강도 순서를 뒤섞는 것을 발견해, 비용함수에 슬롯목표
+이탈 항을 추가하고 2-opt 국소 개선(`_local_refine_order`)으로 탐욕 알고리즘의 후반 슬롯 강제
+배치 문제를 보정했다. 선곡 알고리즘 자체에 새 보간 능력을 추가하는 신규 기능이라 Minor로 분류.
+
+- 기준 커밋: `97b4820`
+- 관련 PR: [#48](https://github.com/sbb2002/bandori-playlist-maker/pull/48)
+
 ---
 
 ## Beta (v1.0.0 이전)
