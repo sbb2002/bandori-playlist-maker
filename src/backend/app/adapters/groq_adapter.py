@@ -42,6 +42,7 @@ class GroqMoodInterpreter:
         response_format_mode: str = "none",
         max_retries: int = 2,
         retry_base: float = 0.5,
+        mood_parse_retries: int = 3,
         rate_per_min: float = 0.0,
         rate_max_wait: float = 20.0,
         rate_max_waiters: int = 100,
@@ -61,6 +62,11 @@ class GroqMoodInterpreter:
         # 위험이 있어 쓰지 않고, 리미터는 대기 상한(max_wait)·대기열 상한(max_waiters)으로 보호.
         self._max_retries = max(0, max_retries)
         self._retry_base = max(0.0, retry_base)
+        # 절대시간·다단계 마커가 많이 섞인 디테일한 요청은 200 응답이면서도 content가 JSON으로
+        # 파싱 안 되는 경우가 간헐적으로 있다(모델이 장문 설명을 섞어 내보내는 등) — 이건 HTTP
+        # 재시도(_post_with_retry, 429/5xx 대상)로는 안 잡히므로 별도로 재호출한다. 그래도 전부
+        # 실패하면 기존과 동일하게 MoodInterpretationError를 올려 422 폴백 처리한다(동작 유지).
+        self._mood_parse_retries = max(0, mood_parse_retries)
         self._limiter = (
             TokenBucketLimiter(rate_per_min, max_wait=rate_max_wait, max_waiters=rate_max_waiters)
             if rate_per_min and rate_per_min > 0
@@ -98,18 +104,30 @@ class GroqMoodInterpreter:
         if self._limiter is not None and not self._limiter.acquire():
             raise LLMRateLimitError("요청이 많아 대기열이 가득 찼습니다(레이트리밋).")
 
-        response = self._post_with_retry(payload)
+        last_error: MoodInterpretationError | None = None
+        for attempt in range(self._mood_parse_retries + 1):
+            response = self._post_with_retry(payload)
 
-        try:
-            data = response.json()
-            content = data["choices"][0]["message"]["content"]
-        except (ValueError, KeyError, IndexError, TypeError) as exc:
-            raise MoodInterpretationError(f"Groq 응답 구조 예상 밖: {exc}") from exc
+            try:
+                data = response.json()
+                content = data["choices"][0]["message"]["content"]
+            except (ValueError, KeyError, IndexError, TypeError) as exc:
+                last_error = MoodInterpretationError(f"Groq 응답 구조 예상 밖: {exc}")
+                continue
 
-        if not isinstance(content, str) or not content.strip():
-            raise MoodInterpretationError("Groq 응답 content가 비어 있습니다.")
+            if not isinstance(content, str) or not content.strip():
+                last_error = MoodInterpretationError("Groq 응답 content가 비어 있습니다.")
+                continue
 
-        return prompt_mod.parse_mood(content)
+            try:
+                return prompt_mod.parse_mood(content)
+            except MoodInterpretationError as exc:
+                last_error = exc
+                continue
+
+        # mood_parse_retries회 재시도 후에도 전부 실패 — 기존과 동일하게 폴백(422 처리는 main.py가 담당).
+        assert last_error is not None
+        raise last_error
 
     def _post_with_retry(self, payload: dict) -> httpx.Response:
         """chat/completions POST. 429/5xx는 백오프 재시도, 지속 시 적절한 예외로 매핑.

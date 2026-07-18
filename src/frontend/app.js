@@ -545,16 +545,29 @@ function clampInt(raw, lo, hi, dflt) { const n = parseInt(raw, 10); return Numbe
 
 // 응답 후 그래프를 LLM 해석 아크로 동기화(사용자가 드래그로 조정하기 전까지만).
 // → 그래프가 요청을 '반영'만 하고 간섭하지 않는다(코멘트 #1 대안 2).
-function syncGraphToParams(params) {
+// stages(백엔드가 실제로 곡 선곡에 쓴 단계별 energy_target — stage_energies 비단조 아크 반영)가
+// 있으면 그대로 쓴다. params.start_energy/end_energy만으로 재선형보간하면 피크·비단조 아크가
+// 직선으로 뭉개져 실제 선곡과 그래프가 어긋난다(버그 — stages 응답 도입 후 그래프 동기화 누락).
+function syncGraphToParams(params, stages) {
   if (stageTouched || !params) return;
-  const n = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, params.stage_count || 3));
-  const start = typeof params.start_energy === "number" ? params.start_energy : 0.3;
-  const end = typeof params.end_energy === "number" ? params.end_energy : 0.7;
   const total = params.target_minutes || (stageModel ? stageModel.totalMinutes : 60);
-  const segments = [];
-  for (let i = 0; i < n; i++) {
-    const energy = n === 1 ? start : start + ((end - start) * i) / (n - 1);
-    segments.push({ energy: clamp01(+energy.toFixed(2)), width: 1 / n });
+  let segments;
+  if (Array.isArray(stages) && stages.length >= MIN_SEGMENTS) {
+    const n = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, stages.length));
+    segments = stages.slice(0, n).map((s) => {
+      const e = typeof s.energy_target === "number" ? s.energy_target : 0.4;
+      return { energy: clamp01(+e.toFixed(2)), width: 1 / n };
+    });
+  } else {
+    // stages 응답이 없을 때만(구버전 백엔드 등) start/end 선형보간으로 폴백.
+    const n = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, params.stage_count || 3));
+    const start = typeof params.start_energy === "number" ? params.start_energy : 0.3;
+    const end = typeof params.end_energy === "number" ? params.end_energy : 0.7;
+    segments = [];
+    for (let i = 0; i < n; i++) {
+      const energy = n === 1 ? start : start + ((end - start) * i) / (n - 1);
+      segments.push({ energy: clamp01(+energy.toFixed(2)), width: 1 / n });
+    }
   }
   stageModel = { totalMinutes: total, segments };
   renderStageGraph();
@@ -618,7 +631,7 @@ function renderResult(data) {
   renderSummary(data);
   renderTracklist(picks);
   syncBandChecks(data.applied_bands); // 적용된 밴드(프롬프트 자동감지 포함)를 체크박스에 반영
-  syncGraphToParams(data.params); // 그래프에 이번 해석 아크 반영(미조정 시)
+  syncGraphToParams(data.params, data.stages); // 그래프에 이번 해석 아크 반영(미조정 시, stages 우선)
   reflectSettings(data); // 재생시간·단계 수·커버 필터를 세부 설정 UI에 반영(미조정 시)
   show(resultEl);
   showPlaybar();
