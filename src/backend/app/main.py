@@ -8,6 +8,8 @@
     GROQ_MODEL           모델 ID override(기본: groq_adapter.DEFAULT_MODEL).
     GROQ_BASE_URL        베이스 URL override.
     GROQ_MAX_RETRIES     429/5xx 백오프 재시도 횟수(기본 2).
+    GROQ_MOOD_RETRIES    200 응답인데 content가 무드 JSON으로 파싱 안 될 때 재호출 횟수(기본 3,
+                         디테일한 다단계 절대시간 요청에서 간헐적 파싱 실패 완화).
     MOOD_INTERPRETER     "stub" | "groq" 로 강제 선택(기본: 키 유무로 자동).
     FRONTEND_ORIGIN      CORS 허용 오리진(쉼표 구분). 개발용 localhost는 항상 허용.
     TELEGRAM_BOT_TOKEN·TELEGRAM_CHAT_ID   운영 오류 Telegram 알림(선택, 둘 다 필요).
@@ -143,14 +145,16 @@ def _build_interpreter() -> MoodInterpreter:
         referer = os.environ.get("FRONTEND_ORIGIN", "").split(",")[0].strip() or None
         response_format = os.environ.get("GROQ_RESPONSE_FORMAT", "none")
         max_retries = _env_int("GROQ_MAX_RETRIES", 2)  # 트래픽 급증 시 429 백오프 재시도 횟수
+        mood_parse_retries = _env_int("GROQ_MOOD_RETRIES", 3)  # 무드 파싱 실패 시 재호출 횟수
         rate_per_min = _env_int("GROQ_RATE_PER_MIN", 25)  # 프로액티브 RPM 준수(0=비활성)
         logger.info(
-            "MoodInterpreter: Groq (model=%s, response_format=%s, rate_per_min=%s)",
-            model, response_format, rate_per_min,
+            "MoodInterpreter: Groq (model=%s, response_format=%s, rate_per_min=%s, mood_parse_retries=%s)",
+            model, response_format, rate_per_min, mood_parse_retries,
         )
         return GroqMoodInterpreter(
             api_key=api_key, model=model, base_url=base_url, referer=referer,
             response_format_mode=response_format, max_retries=max_retries,
+            mood_parse_retries=mood_parse_retries,
             rate_per_min=rate_per_min,
         )
 
