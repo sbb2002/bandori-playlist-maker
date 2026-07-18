@@ -70,6 +70,33 @@ except (AttributeError, ValueError, OSError):
 
 DEFAULT_REPO_ROOT = _THIS_DIR.parents[1]
 
+
+def _load_dotenv() -> None:
+    """의존성 없이 .env를 읽어 os.environ에 주입한다(이미 설정된 값은 유지).
+
+    탐색 위치: 현재 작업 디렉터리의 .env(보통 `bandori-playlist-maker` 레포 루트에서 실행하므로
+    거기), 형제 `bandori-playlist-maker` 레포 루트의 .env(cwd가 다를 때 폴백). BACKEND_REFRESH_URL·
+    DATA_REFRESH_TOKEN처럼 오토로더가 직접 읽는 시크릿을 매번 export하지 않아도 되게 하기 위함
+    (backend `main.py`의 `_load_dotenv`와 동일 패턴). 시크릿 파일이므로 커밋 금지.
+    """
+    candidates = [
+        Path.cwd() / ".env",
+        DEFAULT_REPO_ROOT.parent / "bandori-playlist-maker" / ".env",
+    ]
+    for path in candidates:
+        if not path.exists():
+            continue
+        for raw in path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
 # 커밋 대상(데이터 산출물 + 동결 norm 4종)
 # 2026-07-16: shape_norm.json이 누락돼 있던 버그 수정 — 이 목록에 없어서 한 번도
 # data 브랜치에 커밋된 적이 없었고, 로컬에 우연히 남아있던 파일에 의존하고 있었다.
@@ -307,6 +334,7 @@ def _trigger_backend_refresh() -> None:
 
 
 def main(argv=None) -> int:
+    _load_dotenv()  # BACKEND_REFRESH_URL·DATA_REFRESH_TOKEN 등을 .env에서 주입(이미 설정된 값은 유지)
     ap = argparse.ArgumentParser(description="신곡 오토로더(감별→다운로드→분석→반영)")
     ap.add_argument("--repo-root", default=str(DEFAULT_REPO_ROOT),
                     help="data/를 갱신할 레포 루트(기본: 이 스크립트의 레포). "
