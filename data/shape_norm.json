@@ -1,0 +1,36 @@
+{
+  "purpose": "재생 펄스 shape 동결 정규화 상수(신곡 증분용, 형제 audio_map shape 필드 소실 대응)",
+  "source": "형제 add_pulse_shape.py 채널 산식 이식 — song_features_with_proxies.csv 원시 컬럼 mean/std(ddof=0)",
+  "built_at": "2026-07-15",
+  "n_rows": 660,
+  "verify": {
+    "exact": 659,
+    "total": 660
+  },
+  "norms": {
+    "harmonic_ratio": {
+      "mean": 0.7264974545454546,
+      "std": 0.06898531273332463
+    },
+    "centroid": {
+      "mean": 2720.805826151515,
+      "std": 261.17185466075716
+    },
+    "rolloff": {
+      "mean": 5682.191355969697,
+      "std": 554.0555386210926
+    },
+    "flatness": {
+      "mean": 0.033981727272727275,
+      "std": 0.011511703111689446
+    },
+    "flux": {
+      "mean": 1.2641376818181818,
+      "std": 0.11567106000227662
+    },
+    "zcr": {
+      "mean": 0.1273112424242424,
+      "std": 0.0206710654378329
+    }
+  }
+}
