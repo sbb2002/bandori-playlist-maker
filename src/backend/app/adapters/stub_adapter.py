@@ -77,7 +77,10 @@ def _essentially_same(prompt: str, previous_prompt: str) -> bool:
 class StubMoodInterpreter:
     """키워드 휴리스틱 기반 MoodInterpreter(오프라인·결정적)."""
 
-    def interpret(self, prompt: str, previous_prompt: str | None = None) -> MoodParameters:
+    def interpret(
+        self, prompt: str, previous_prompt: str | None = None,
+        energy_stats: dict | None = None,
+    ) -> MoodParameters:
         text = prompt.lower()
 
         # 밝기: 밝음/어두움 키워드 카운트 차이를 -1~1로 스케일.

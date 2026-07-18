@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import statistics
 from dataclasses import replace
 
 from fastapi import APIRouter, Request, Response
@@ -104,7 +105,26 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
 
     interpreter = request.app.state.interpreter
 
-    params: MoodParameters = interpreter.interpret(payload.prompt, payload.previous_prompt)
+    # 밴드 필터(설정 §5-1b, 스코프 필터): 항상 적용 — 수동 선택 밴드 ∪ 현재 프롬프트 자동감지.
+    # interpreter.interpret() 호출 전에 계산 (band_filter는 LLM 결과에 의존하지 않음).
+    band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
+    band_names |= detect_bands(payload.prompt)  # 현재 프롬프트에 밴드명(별명) 언급 시 자동 필터
+    band_filter = band_names or None
+
+    # band_filter를 이용해 현재 필터 곡 풀의 에너지 분포 통계 계산 (3차 LLM 프롬프트용).
+    pool = [s for s in request.app.state.songs if not band_filter or s.band in band_filter]
+    if pool:
+        energies = [s.energy for s in pool]
+        energy_stats = {
+            "min": min(energies),
+            "max": max(energies),
+            "mean": statistics.fmean(energies),
+            "std": statistics.pstdev(energies) if len(energies) > 1 else 0.0,
+        }
+    else:
+        energy_stats = None
+
+    params: MoodParameters = interpreter.interpret(payload.prompt, payload.previous_prompt, energy_stats=energy_stats)
 
     # 핫픽스(세부설정 우선순위): 'honor'는 **재생 형태 설정**(에너지 아크·단계 수·재생시간)에만 적용.
     # 직전 요청과 의도가 본질적으로 같을 때만 사용자가 건드린 이 값들을 존중하고, 1회차이거나 의도가
@@ -118,11 +138,6 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
         payload.include_original, payload.include_cover, params.song_type
     )
     songs = _apply_cover_filter(request.app.state.songs, inc_original, inc_cover)
-
-    # 밴드 필터(설정 §5-1b, 스코프 필터): 항상 적용 — 수동 선택 밴드 ∪ 현재 프롬프트 자동감지.
-    band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
-    band_names |= detect_bands(payload.prompt)  # 현재 프롬프트에 밴드명(별명) 언급 시 자동 필터
-    band_filter = band_names or None
 
     # 사용자 지정 단계(설정 §5-1a): honor일 때만 에너지 아크·곡 수를 강제(그래프 수동, 최대 11구간).
     stage_specs = None
