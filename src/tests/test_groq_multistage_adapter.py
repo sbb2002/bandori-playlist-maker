@@ -233,3 +233,21 @@ def test_ro_particle_picks_ro_without_batchim_or_rieul():
 def test_fallback_summary_uses_correct_particle_for_batchim_moods():
     interp, _ = _make([])
     assert interp._fallback_summary(["긴장감", "승리"]) == "긴장감으로 시작해 승리로 이어지는 2단계 흐름"
+
+
+def test_stage3_prompt_includes_energy_stats_when_provided():
+    interp, client = _make([_chat(_STAGE1_OK), _chat(_STAGE2_OK), _chat(_STAGE3_OK), _chat(_STAGE4_OK)])
+    interp.interpret("x", energy_stats={"min": 0.1, "max": 0.9, "mean": 0.5, "std": 0.2})
+    stage3_content = client.calls[2]["json"]["messages"][1]["content"]
+    assert "곡 에너지 분포" in stage3_content
+    assert "0.10" in stage3_content
+    assert "0.90" in stage3_content
+    assert "0.50" in stage3_content
+    assert "0.20" in stage3_content
+
+
+def test_stage3_prompt_omits_energy_stats_when_absent():
+    interp, client = _make([_chat(_STAGE1_OK), _chat(_STAGE2_OK), _chat(_STAGE3_OK), _chat(_STAGE4_OK)])
+    interp.interpret("x")
+    stage3_content = client.calls[2]["json"]["messages"][1]["content"]
+    assert "곡 에너지 분포" not in stage3_content

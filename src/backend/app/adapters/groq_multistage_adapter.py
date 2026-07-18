@@ -272,16 +272,23 @@ class GroqMultistageMoodInterpreter:
     _STAGE3_SYSTEM = (
         "너는 뱅드림 세트리스트의 구간별 에너지(강도)를 정하는 보조자다. 순서대로 나열된 "
         "구간별 감정 키워드를 보고, 각 구간의 에너지를 0.00(아주 잔잔함)~1.00(아주 신남) 사이 "
-        "소수 둘째자리까지의 실수로 정해라.\n"
+        "소수 둘째자리까지의 실수로 정해라. 만약 사용자 메시지에 '[곡 에너지 분포]' 통계(최소/최대/평균/표준편차)가 "
+        "주어지면, 그 범위를 벗어나는 비현실적인 극단값 대신 그 분포 안에서 목표를 잡아라.\n"
         f"생각 과정은 자유롭게 적어도 좋지만, 맨 마지막에 반드시 정확히 '{_ANSWER_MARKER}' 줄을 "
         "쓰고 그 다음부터 구간 순서대로 한 줄에 숫자 하나씩만 적어라(번호·설명 없이 숫자만, "
         "줄 수는 구간 수와 정확히 같게).\n"
         f"예(구간 3개):\n{_ANSWER_MARKER}\n0.25\n0.70\n0.40"
     )
 
-    def _stage3_energies(self, moods: list[str]) -> list[float]:
+    def _stage3_energies(self, moods: list[str], energy_stats: dict | None = None) -> list[float]:
         def parse() -> list[float]:
-            listing = "\n".join(f"{i + 1}. {m}" for i, m in enumerate(moods))
+            stats_line = ""
+            if energy_stats:
+                stats_line = (
+                    f"[곡 에너지 분포] 최소 {energy_stats['min']:.2f}, 최대 {energy_stats['max']:.2f}, "
+                    f"평균 {energy_stats['mean']:.2f}, 표준편차 {energy_stats['std']:.2f}\n\n"
+                )
+            listing = stats_line + "\n".join(f"{i + 1}. {m}" for i, m in enumerate(moods))
             content = self._chat(self._STAGE3_SYSTEM, listing)
             tail = _after_marker(content, self._ANSWER_MARKER)
             lines = [ln.strip() for ln in tail.splitlines() if ln.strip()]
@@ -341,11 +348,14 @@ class GroqMultistageMoodInterpreter:
             f"{moods[-1]}{_ro_particle(moods[-1])} 이어지는 {len(moods)}단계 흐름"
         )
 
-    def interpret(self, prompt: str, previous_prompt: str | None = None) -> MoodParameters:
+    def interpret(
+        self, prompt: str, previous_prompt: str | None = None,
+        energy_stats: dict | None = None,
+    ) -> MoodParameters:
         target_minutes = self._stage1_minutes(prompt)
         stages = self._stage2_stages(prompt, target_minutes)
         moods = [m for _length, m in stages]
-        energies = self._stage3_energies(moods)
+        energies = self._stage3_energies(moods, energy_stats)
         summary = self._stage4_summary(prompt, moods, energies, target_minutes)
 
         stage_count = len(stages)

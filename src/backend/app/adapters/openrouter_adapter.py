@@ -71,7 +71,10 @@ class OpenRouterMoodInterpreter:
             headers["HTTP-Referer"] = self._referer
         return headers
 
-    def interpret(self, prompt: str, previous_prompt: str | None = None) -> MoodParameters:
+    def interpret(
+        self, prompt: str, previous_prompt: str | None = None,
+        energy_stats: dict | None = None,
+    ) -> MoodParameters:
         payload = {
             "model": self._model,
             "messages": prompt_mod.build_messages(prompt, previous_prompt),

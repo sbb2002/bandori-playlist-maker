@@ -29,13 +29,19 @@ class LLMRateLimitError(LLMUpstreamError):
 class MoodInterpreter(Protocol):
     """무드 해석 포트. 구현은 `adapters/` 하위 단일 파일(벤더별)."""
 
-    def interpret(self, prompt: str, previous_prompt: str | None = None) -> MoodParameters:
+    def interpret(
+        self, prompt: str, previous_prompt: str | None = None,
+        energy_stats: dict | None = None,
+    ) -> MoodParameters:
         """자연어 발화를 검증된 MoodParameters로 변환한다.
 
         Args:
             prompt: 현재 회차 자연어 요청.
             previous_prompt: 직전 회차 요청(2회차+). 주어지면 결과의 same_as_previous에 두
                 요청의 의도 동일 여부를 판정해 담는다(핫픽스: 세부설정 우선순위). None이면 판정 없음.
+            energy_stats: 현재 필터(밴드 등)에 해당하는 곡 풀의 에너지 분포 통계
+                ({"min":.., "max":.., "mean":.., "std":..}, float 값들). 구현이 이 값을 실제로
+                쓸지는 어댑터 자유(현재는 groq_multistage_adapter만 사용). None이면 통계 없음.
 
         Raises:
             MoodInterpretationError: 응답을 해석할 수 없는 경우(재시도 없음, PRD §7).
