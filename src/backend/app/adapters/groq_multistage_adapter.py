@@ -5,16 +5,20 @@
 LLM에 물어 JSON을 조립한다 — LLM 응답은 매번 숫자/짧은 텍스트뿐이라 관용 JSON 파서가 필요
 없다("json 조립은 직접 파싱하기").
 
-3단계 호출:
+4단계 호출:
     1차 — 전체 재생시간(분, 정수).
     2차 — 구간 수(2~5)와 구간별 (길이(분), 감정 키워드).
     3차 — 구간별 감정 키워드를 보고 구간별 에너지(0.00~1.00).
+    4차 — 위 결과(재생시간·구간별 무드·에너지)를 보고 요약 카드 한 문장(interpretation_summary).
+          원래 의도가 이 필드도 LLM이 쓰게 하는 것이었어서(결정론적 조립 대신) 4차로 추가함.
 
 스코프 결정(배경 문서에 없는 필드는 이 실험에서 다루지 않음, 확장은 별도 라운드):
     - brightness: 이 파이프라인엔 밝기 축 질문이 없다 → 중립값 0.0 고정.
     - song_type / same_as_previous: 배경 문서 미언급 → 기본값(all / None). same_as_previous가
       항상 None이므로 라우트의 `honor`는 이 인터프리터에서는 항상 False로 평가된다(세부설정
       override가 회차 간 유지되지 않음 — 실험 범위 밖의 알려진 제약).
+    - tags: 4차에서 받은 것이 아니라 2차 감정 키워드를 그대로 재사용(ensure_min_tags로 최소
+      2개 보장) — 별도 LLM 호출 없이 충분히 자연스러워 추가 비용을 들이지 않기로 함.
     - 2차에서 받은 구간별 '길이(분)'는 3차 프롬프트의 맥락으로만 쓰고, 최종 target_minutes는
       1차 값을 그대로 쓴다(도메인이 구간별 개별 길이를 지원하지 않고 stage_count로 균등분배하기
       때문 — `domain/selection.py`의 `_stage_targets_and_counts` 참고).
@@ -49,6 +53,7 @@ _DEFAULT_MINUTES = 60
 _DEFAULT_STAGE_COUNT = 3
 _DEFAULT_MOOD = "평온"
 _DEFAULT_ENERGY = 0.5
+_SUMMARY_MAX = 120
 
 
 def _clamp(value: float, lo: float, hi: float) -> float:
@@ -61,6 +66,23 @@ def _after_marker(content: str, marker: str) -> str:
     if idx == -1:
         return content
     return content[idx + len(marker):]
+
+
+def _ro_particle(word: str) -> str:
+    """단어 끝음절 받침 유무로 '로'/'으로' 조사를 고른다(예: 긴장감→으로, 승리→로).
+
+    한글 음절(U+AC00~U+D7A3)의 마지막 문자만 판단한다. 받침이 없거나 ㄹ받침이면 '로',
+    그 외 받침이 있으면 '으로'. 한글이 아닌 문자로 끝나면(영문 등) 무난한 '로'로 폴백.
+    """
+    word = word.strip()
+    if not word:
+        return "로"
+    last = word[-1]
+    code = ord(last) - 0xAC00
+    if not (0 <= code <= 11171):
+        return "로"
+    jong = code % 28
+    return "로" if jong in (0, 8) else "으로"
 
 
 class GroqMultistageMoodInterpreter:
@@ -278,16 +300,57 @@ class GroqMultistageMoodInterpreter:
 
         return self._call_with_stage_retry("3차/구간에너지", parse)
 
+    # ── 4차: 요약 카드 문장(interpretation_summary) ─────────────────────────
+    # 원래 의도가 이 필드도 LLM이 쓰게 하는 것이었다(결정론적 문장 조립 대신). 다만 요약
+    # 문구는 세트리스트 조립에 필수 입력이 아니라 UI 장식용이라, 4차가 실패해도 전체
+    # interpret()을 실패시키지 않고 결정론적 폴백 문장(_fallback_summary)으로 내려간다.
+    _STAGE4_SYSTEM = (
+        "너는 뱅드림(BanG Dream!) 세트리스트 요약 카드에 들어갈 문구를 쓰는 보조자다. "
+        "주어진 재생시간·구간별 분위기·에너지 흐름을 보고, 이 플레이리스트의 분위기를 "
+        "따뜻하고 감성적인 한국어 한 문장으로 요약해라(80자 이내). 숫자·수치(에너지 0.7 같은) "
+        "나열 금지, 코드블록·따옴표 금지.\n"
+        f"생각 과정은 자유롭게 적어도 좋지만, 맨 마지막에 반드시 정확히 '{_ANSWER_MARKER}' 줄을 "
+        "쓰고 그다음 줄에 완성된 요약 문장 하나만 적어라(그 뒤엔 아무것도 쓰지 마라)."
+    )
+
+    def _stage4_summary(
+        self, prompt: str, moods: list[str], energies: list[float], target_minutes: int
+    ) -> str:
+        fallback = self._fallback_summary(moods)
+
+        def parse() -> str:
+            arc = ", ".join(f"{m}({e:.2f})" for m, e in zip(moods, energies))
+            user_prompt = f"[요청]\n{prompt}\n\n[재생시간] {target_minutes}분\n[구간 흐름] {arc}"
+            content = self._chat(self._STAGE4_SYSTEM, user_prompt)
+            tail = _after_marker(content, self._ANSWER_MARKER)
+            lines = [ln.strip() for ln in tail.splitlines() if ln.strip()]
+            if not lines:
+                raise MoodInterpretationError(f"4차 응답에서 요약 문장을 찾지 못함: {content[:150]!r}")
+            return lines[0].strip('"\'`')[:_SUMMARY_MAX]
+
+        try:
+            return self._call_with_stage_retry("4차/요약", parse)
+        except MoodInterpretationError:
+            # 요약은 UI 장식용이라 실패해도 세트리스트 생성 자체를 막지 않는다 — 결정론적
+            # 문장으로 안전하게 폴백(§4차 docstring 참고).
+            return fallback
+
+    def _fallback_summary(self, moods: list[str]) -> str:
+        return (
+            f"{moods[0]}{_ro_particle(moods[0])} 시작해 "
+            f"{moods[-1]}{_ro_particle(moods[-1])} 이어지는 {len(moods)}단계 흐름"
+        )
+
     def interpret(self, prompt: str, previous_prompt: str | None = None) -> MoodParameters:
         target_minutes = self._stage1_minutes(prompt)
         stages = self._stage2_stages(prompt, target_minutes)
         moods = [m for _length, m in stages]
         energies = self._stage3_energies(moods)
+        summary = self._stage4_summary(prompt, moods, energies, target_minutes)
 
         stage_count = len(stages)
         start_energy = energies[0]
         end_energy = energies[-1]
-        summary = f"{moods[0]}로 시작해 {moods[-1]}로 이어지는 {stage_count}단계 흐름"
         tags = ensure_min_tags(list(dict.fromkeys(moods))[:5], 0.0, start_energy, end_energy, target_minutes)
 
         return MoodParameters(
