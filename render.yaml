@@ -48,3 +48,7 @@ services:
         sync: false
       - key: TELEGRAM_CHAT_ID
         sync: false
+      # 오토로더가 push 직후 강제 리프레시를 트리거할 때 쓰는 인증 토큰(선택, opt-in).
+      # 미설정이면 POST /api/admin/refresh-data는 항상 403 — 안전한 기본값.
+      - key: DATA_REFRESH_TOKEN
+        sync: false

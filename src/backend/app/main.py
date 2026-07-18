@@ -16,6 +16,8 @@
     SONGS_CSV            songs_master.csv 경로 override(설정 시 `data` 브랜치 원격 fetch를 건너뜀).
     DATA_REFRESH_INTERVAL_SEC   `data` 브랜치 재fetch 주기(초, 기본 1800=30분). 0=주기 리프레시 비활성
                                 (기동 시 최초 1회만 로드).
+    DATA_REFRESH_TOKEN    관리자 강제 리프레시 엔드포인트(POST /api/admin/refresh-data)의 인증
+                          토큰. 미설정이면 그 엔드포인트는 항상 403(비활성 취급).
 """
 
 from __future__ import annotations
@@ -338,6 +340,7 @@ def create_app() -> FastAPI:
     app.state.interpreter_name = type(app.state.interpreter).__name__  # /api/health 진단(stub|groq 확인)
     app.state.notifier = _build_notifier()
     app.state.songs = _load_current_songs()
+    app.state.refresh_songs = _load_current_songs  # 관리자 강제 리프레시 엔드포인트가 재사용
     logger.info("곡 %d건 적재 완료.", len(app.state.songs))
 
     app.include_router(router)

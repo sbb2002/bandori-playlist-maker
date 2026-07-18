@@ -6,10 +6,12 @@
 
 from __future__ import annotations
 
+import os
+import secrets
 import statistics
 from dataclasses import replace
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Header, HTTPException, Request, Response
 
 from ..domain.models import MoodParameters, StageSpec
 from ..domain.selection import DEFAULT_AVG_SONG_SECONDS, build_setlist
@@ -186,3 +188,22 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     # 새 해석으로 되돌리는 데 사용(밴드·커버 스코프 필터는 항상 적용이라 무관).
     result["honored_overrides"] = honor
     return result
+
+
+@router.post("/api/admin/refresh-data")
+def refresh_data(request: Request, x_refresh_token: str | None = Header(default=None)) -> dict:
+    """`data` 브랜치 songs_master.csv를 즉시 재fetch — 오토로더가 push 직후 호출해서 백엔드가
+    이미 깨어있는(웜) 상태일 때 DATA_REFRESH_INTERVAL_SEC(기본 30분) 대기 없이 신곡을 바로
+    반영하기 위함. 백엔드가 잠들어 있으면 이 호출 자체가 콜드부팅을 유발해 어차피 최신 데이터를
+    받아오므로 무해하다.
+
+    DATA_REFRESH_TOKEN env가 설정돼 있어야 하고, 헤더 X-Refresh-Token이 정확히 일치해야 한다.
+    env 미설정(기본, 로컬 개발)이면 이 엔드포인트는 항상 403이다 — 옵트인 전용 기능.
+    """
+    expected = os.environ.get("DATA_REFRESH_TOKEN", "").strip()
+    provided = x_refresh_token or ""
+    if not expected or not secrets.compare_digest(provided, expected):
+        raise HTTPException(status_code=403, detail="forbidden")
+    songs = request.app.state.refresh_songs(force=True)
+    request.app.state.songs = songs
+    return {"status": "ok", "song_count": len(songs)}
