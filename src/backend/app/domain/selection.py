@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import random
 
-from .energy import distribute_counts, stage_energy_targets, total_song_count
+from .energy import continuous_slot_targets, distribute_counts, stage_energy_targets, total_song_count
 from .harmonic import harmonic_label, is_compatible
 from .models import (
     MoodParameters,
@@ -40,9 +40,13 @@ DEFAULT_AVG_SONG_SECONDS = 213
 # 2단계 엔진 파라미터(R&D §4.2 권장 기본값). 파일럿 후 실사용 피드백으로 튜닝.
 _TOL = 0.08              # Stage A 강도 허용창(목표에서 이 이내만 후보)
 _BRIGHTNESS_BUCKET = 0.25  # Stage A 밝기 근접 버킷 폭(같은 버킷 내에선 rng 변주)
-# Stage B 시퀀싱: 경계갭 + 하모닉을 다목적 비용으로 최소화. (검증 하네스로 튜닝 — R&D §8.)
+# Stage B 시퀀싱: 경계갭 + 하모닉 + 강도순서이탈을 다목적 비용으로 최소화. (검증 하네스로 튜닝 — R&D §8.)
 _RANDOM_SLACK = 0.05     # 최소 비용 대비 이 범위 내 후보는 랜덤(곡 선택 변주는 Stage A가 담당)
 _HARMONIC_PENALTY = 0.15  # 비하모닉 전환 비용(경계갭과 동일 단위; 경계 최소화와 하모닉 균형점)
+# feature/energy-stream: Stage A가 슬롯별로 부드럽게 매칭해둔 곡을, Stage B가 경계텐션만
+# 보고 순서를 재배치하면서 강도 흐름이 다시 계단(더 나쁘면 요철)처럼 튀는 문제를 막기 위한
+# 가중치 — 후보의 energy가 이 슬롯의 목표(continuous_slot_targets)에서 멀수록 비용 가산.
+_ENERGY_ORDER_WEIGHT = 1.5
 
 
 def _clamp(value: float, lo: float, hi: float) -> float:
@@ -68,6 +72,7 @@ def _sequence_by_continuity(
     target: float,
     prev_outro: float | None,
     rng: random.Random,
+    slot_targets: list[float] | None = None,
 ) -> list[Song]:
     """곡 경계 텐션 연속성 기반 방향성 그리디 체인(사용자 §종합, 2026-07-11).
 
@@ -78,6 +83,10 @@ def _sequence_by_continuity(
       스테이지) 단계 강도 목표 근접 곡.
     - 이후: 직전 곡 아웃트로와 인트로 차가 최소인 후보(±`_CONT_WINDOW`) 중, 하모닉 호환을
       소프트 우선하고 그 안에서 랜덤 선택(사용자 '랜덤 셀렉트' + 다양성).
+
+    `slot_targets`(feature/energy-stream, 이 스테이지분 `continuous_slot_targets` 구간)를 주면,
+    Stage A가 슬롯별로 매칭해둔 강도 순서를 Stage B가 텐션 이음새만 보고 뒤섞지 않도록 각
+    위치의 비용에 "이 슬롯 목표에서 얼마나 먼가"도 반영한다. 없으면(레거시 호출) 기존과 동일.
     """
     if prev_outro is None:
         # 오프너(전체 첫 곡): 강도 부합 후보 중 **인트로 텐션이 가장 높은** 곡으로 시드한다
@@ -86,17 +95,31 @@ def _sequence_by_continuity(
         fit_window = [s for s in by_fit if abs(s.energy - target) <= _TOL] or by_fit[:5]
         seed = max(fit_window, key=lambda s: (s.intro_energy, -s.idx))
     else:
-        # 스테이지 경계 접합: 이전 스테이지 아웃트로와 인트로가 가장 가까운 곡.
-        seed = min(members, key=lambda s: (abs(prev_outro - s.intro_energy), s.idx))
+        # 스테이지 경계 접합: 이전 스테이지 아웃트로와 인트로가 가깝고, 이 스테이지 첫
+        # 슬롯의 목표 강도에도 가까운 곡(둘 다 반영, 순수 텐션 하나만으로 강도 순서가
+        # 깨지지 않게).
+        seed_target = slot_targets[0] if slot_targets else target
+        seed = min(
+            members,
+            key=lambda s: (
+                abs(prev_outro - s.intro_energy) + _ENERGY_ORDER_WEIGHT * abs(s.energy - seed_target),
+                s.idx,
+            ),
+        )
     seq = [seed]
     rem = [s for s in members if s.idx != seed.idx]
     while rem:
         current = seq[-1]
+        position = len(seq)  # 다음에 채울 슬롯 인덱스
+        slot_target = (
+            slot_targets[position] if slot_targets and position < len(slot_targets) else target
+        )
 
-        def cost(candidate: Song, cur: Song = current) -> float:
+        def cost(candidate: Song, cur: Song = current, st: float = slot_target) -> float:
             gap = abs(cur.outro_energy - candidate.intro_energy)
             penalty = 0.0 if is_compatible(cur.camelot, candidate.camelot) else _HARMONIC_PENALTY
-            return gap + penalty
+            order_penalty = _ENERGY_ORDER_WEIGHT * abs(candidate.energy - st)
+            return gap + penalty + order_penalty
 
         rem.sort(key=lambda c: (cost(c), c.idx))
         best = cost(rem[0])
@@ -104,7 +127,57 @@ def _sequence_by_continuity(
         pick = rng.choice(window)
         seq.append(pick)
         rem.remove(pick)
+
+    if slot_targets:
+        # feature/energy-stream: 탐욕 체인은 뒤로 갈수록 남은 후보가 줄어(마지막 슬롯은 종종
+        # 선택지가 1개뿐) 강제로 나쁜 배치가 남는다 — 2-opt로 국소 개선한다.
+        seq = _local_refine_order(seq, slot_targets)
     return seq
+
+
+_MAX_LOCAL_REFINE_SIZE = 40  # 이보다 큰 스테이지는 O(n^3) 스왑 탐색을 건너뛴다(그리디 결과 유지)
+
+
+def _stage_sequence_cost(seq: list[Song], slot_targets: list[float]) -> float:
+    """스테이지 내 시퀀스 하나의 총비용(경계갭+하모닉+슬롯목표 이탈 합)."""
+    cost = 0.0
+    for i in range(len(seq) - 1):
+        cur, nxt = seq[i], seq[i + 1]
+        cost += abs(cur.outro_energy - nxt.intro_energy)
+        if not is_compatible(cur.camelot, nxt.camelot):
+            cost += _HARMONIC_PENALTY
+    for i, s in enumerate(seq):
+        if i < len(slot_targets):
+            cost += _ENERGY_ORDER_WEIGHT * abs(s.energy - slot_targets[i])
+    return cost
+
+
+def _local_refine_order(seq: list[Song], slot_targets: list[float], max_passes: int = 3) -> list[Song]:
+    """2-opt 스왑으로 탐욕 체인 결과를 국소 개선(feature/energy-stream).
+
+    탐욕 알고리즘은 뒤쪽 슬롯일수록 후보가 고갈돼(마지막 슬롯은 종종 후보 1개뿐) 강도
+    순서에서 크게 벗어난 곡이 강제로 남을 수 있다 — 총비용이 줄어드는 두 위치 교환을
+    개선이 없을 때까지(또는 `max_passes`까지) 반복 적용해 보정한다. 큰 스테이지
+    (`_MAX_LOCAL_REFINE_SIZE` 초과)는 O(n^3) 탐색 비용을 피해 건너뛴다.
+    """
+    n = len(seq)
+    if n < 3 or n > _MAX_LOCAL_REFINE_SIZE:
+        return seq
+    best = list(seq)
+    best_cost = _stage_sequence_cost(best, slot_targets)
+    for _ in range(max_passes):
+        improved = False
+        for i in range(n):
+            for j in range(i + 1, n):
+                candidate = list(best)
+                candidate[i], candidate[j] = candidate[j], candidate[i]
+                c = _stage_sequence_cost(candidate, slot_targets)
+                if c < best_cost - 1e-9:
+                    best, best_cost = candidate, c
+                    improved = True
+        if not improved:
+            break
+    return best
 
 
 def _make_reason(
@@ -201,24 +274,33 @@ def build_setlist(
         params, target_seconds, avg_song_seconds, len(pool), stage_specs
     )
 
-    # ── Stage A: SELECT — 단계별 강도 목표에 부합하는 곡을 하드 선택(누출 차단) ──
+    # ── Stage A: SELECT — 곡 하나하나를 스테이지 경계에서 부드럽게 흐르는 목표에 매칭 ──
+    # feature/energy-stream: 스테이지 전체에 flat 목표 하나만 쓰던 기존 방식 대신, 곡
+    # 슬롯마다 continuous_slot_targets()로 보간한 목표값을 쓴다 — 그래프가 스테이지 중앙을
+    # 스플라인으로 잇는 시각(부드러운 곡선)과 실제 곡 강도 전환을 일치시킨다. 보고용
+    # Stage.energy_target은 원래 flat targets 그대로(그래프 호환 유지, 아래서 별도 사용).
+    slot_targets = continuous_slot_targets(targets, counts)
     remaining = {s.idx: s for s in pool}
     stage_members: list[list[Song]] = []
-    for target, count in zip(targets, counts):
-        if not remaining:
-            stage_members.append([])
-            continue
-        cand = sorted(remaining.values(), key=lambda s: (abs(s.energy - target), s.idx))
-        window = [s for s in cand if abs(s.energy - target) <= _TOL]
-        if len(window) >= count:
-            # 허용창 내 곡은 모두 무드 부합 → rng 셔플로 변주 후 밝기 버킷 근접 우선(재현적).
-            rng.shuffle(window)
-            window.sort(key=lambda s: round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET))
-            chosen = window[:count]
-        else:
-            chosen = cand[:count]  # 후보 부족 → 강도 근접 우선(변주 없음)
-        for s in chosen:
-            del remaining[s.idx]
+    slot = 0
+    for count in counts:
+        chosen: list[Song] = []
+        for _ in range(count):
+            if not remaining:
+                break
+            slot_target = slot_targets[slot]
+            slot += 1
+            cand = sorted(remaining.values(), key=lambda s: (abs(s.energy - slot_target), s.idx))
+            window = [s for s in cand if abs(s.energy - slot_target) <= _TOL]
+            if window:
+                # 허용창 내 곡은 모두 무드 부합 → rng 셔플로 변주 후 밝기 버킷 근접 우선(재현적).
+                rng.shuffle(window)
+                window.sort(key=lambda s: round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET))
+                pick = window[0]
+            else:
+                pick = cand[0]  # 후보 부족 → 강도 근접 우선(변주 없음)
+            del remaining[pick.idx]
+            chosen.append(pick)
         stage_members.append(chosen)
 
     # ── Stage B: SEQUENCE — 곡 경계 텐션 연속성 체인(이전 아웃트로 ↔ 다음 인트로) ──
@@ -227,12 +309,15 @@ def build_setlist(
     prev: Song | None = None
     position = 0
     prev_outro: float | None = None  # 직전 스테이지 마지막 곡의 아웃트로 텐션(경계 접합용)
+    slot_cursor = 0  # slot_targets에서 이 스테이지가 차지하는 구간 추적(Stage A와 동일 순서)
 
     for stage_index, (target, members) in enumerate(zip(targets, stage_members)):
         stages_out.append(Stage(index=stage_index, energy_target=round(target, 4)))
         if not members:
             continue
-        seq = _sequence_by_continuity(members, target, prev_outro, rng)
+        stage_slot_targets = slot_targets[slot_cursor : slot_cursor + len(members)]
+        slot_cursor += len(members)
+        seq = _sequence_by_continuity(members, target, prev_outro, rng, slot_targets=stage_slot_targets)
         for s in seq:
             harmonic = harmonic_label(None if prev is None else prev.camelot, s.camelot)
             reason = _make_reason(

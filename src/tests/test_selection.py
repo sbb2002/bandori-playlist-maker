@@ -5,7 +5,7 @@ import random
 import pytest
 
 from app.domain.models import MoodParameters, NoSetlistError, Song, StageSpec
-from app.domain.selection import build_setlist
+from app.domain.selection import _local_refine_order, _stage_sequence_cost, build_setlist
 
 
 def _songs() -> list[Song]:
@@ -103,6 +103,68 @@ def test_low_target_favors_low_intensity():
     hi = build_setlist(songs, _params(start=0.85, end=0.85), target_seconds=3 * 213, rng=random.Random(1))
     avg = lambda sl: sum(p.energy for p in sl.picks) / len(sl.picks)
     assert avg(lo) < avg(hi)
+
+
+def _fine_grained_pool(n: int = 50) -> list[Song]:
+    """0.00~0.98 사이 촘촘한 강도 값의 곡 풀(경계 보간 검증용, feature/energy-stream §b)."""
+    return [
+        Song(idx=i, band=f"b{i % 4}", song=f"s{i}", video_id=f"vid{i:08d}",
+             camelot=f"{(i % 12) + 1}A", energy=i / n, mode_score=0.0,
+             shape="neutral", eligible_band=True)
+        for i in range(n)
+    ]
+
+
+def test_stage_boundary_energy_flows_smoothly_not_stepwise():
+    # 3단계 상승 아크(0.2→0.8)에서, 스테이지0 경계 근처 곡은 flat 목표(0.2)만 봤다면 절대
+    # 못 골랐을 더 높은 강도(허용창 밖)까지 자연스럽게 포함되어야 한다 — 계단식이 아니라는 증거.
+    pool = _fine_grained_pool(50)
+    params = MoodParameters(brightness=0.0, start_energy=0.2, end_energy=0.8, stage_count=3,
+                            target_minutes=None, interpretation_summary="")
+    setlist = build_setlist(pool, params, target_seconds=12 * 213, rng=random.Random(0))
+    stage0_energies = [p.energy for p in setlist.picks if p.stage_index == 0]
+    stage2_energies = [p.energy for p in setlist.picks if p.stage_index == 2]
+    # flat target(0.2) ± 허용창(0.08)이면 stage0은 0.28을 못 넘는다 — 보간 덕에 넘을 수 있다.
+    assert max(stage0_energies) > 0.28
+    # 반대쪽 끝(stage2, flat target 0.8)도 대칭적으로 허용창 아래(0.72)까지 내려올 수 있다.
+    assert min(stage2_energies) < 0.72
+    # 스테이지 보고값(그래프용) 자체는 여전히 flat 그대로 — API·그래프 호환 유지.
+    assert [s.energy_target for s in setlist.stages] == pytest.approx([0.2, 0.5, 0.8])
+
+
+def test_local_refine_order_fixes_forced_bad_placement():
+    # 5곡, 하모닉·경계텐션 전부 동일(intro/outro=0, 같은 camelot)이라 비용은 순수하게
+    # "슬롯 목표에서 얼마나 벗어났는가"만 남는다 — 이 경우 정답은 에너지 내림차순 배치.
+    songs = [
+        Song(idx=i, band="a", song=f"s{i}", video_id=f"vid{i:07d}0", camelot="8A",
+             energy=e, mode_score=0.0, shape="neutral", eligible_band=True)
+        for i, e in enumerate([0.8, 0.5, 0.1, 0.5, 0.8])
+    ]
+    bad_order = [songs[2], songs[0], songs[4], songs[1], songs[3]]  # 일부러 강도 순서 무시
+    slot_targets = [0.8, 0.65, 0.5, 0.35, 0.1]  # 하강 아크
+    improved = _local_refine_order(bad_order, slot_targets)
+    assert _stage_sequence_cost(improved, slot_targets) <= _stage_sequence_cost(bad_order, slot_targets)
+    assert [s.energy for s in improved] == [0.8, 0.8, 0.5, 0.5, 0.1]
+
+
+def test_manual_v_shape_arc_has_bounded_reversal():
+    # 실사용 재현(수동 배치 [0.8, 0.10, 0.80]): Stage A가 슬롯별로 부드럽게 골라도 Stage B가
+    # 순서를 다시 섞으면 경계에서 크게 튈 수 있었다(버그) — 이제 인접 곡 간 에너지 역전폭이
+    # 크게 벌어지지 않아야 한다.
+    pool = _fine_grained_pool(60)
+    specs = [StageSpec(energy_target=0.8, song_count=5),
+             StageSpec(energy_target=0.10, song_count=5),
+             StageSpec(energy_target=0.80, song_count=5)]
+    params = MoodParameters(brightness=0.0, start_energy=0.8, end_energy=0.8, stage_count=3,
+                            target_minutes=None, interpretation_summary="")
+    for seed in range(10):
+        setlist = build_setlist(pool, params, target_seconds=15 * 213, stage_specs=specs,
+                                rng=random.Random(seed))
+        energies = [p.energy for p in setlist.picks]
+        # 인접 곡 사이의 "역행폭"(하강해야 할 구간에서 갑자기 튀는 정도)이 버그 재현치(0.3+)
+        # 만큼 크면 안 된다 — 완벽한 단조는 못 보장해도(이산적 후보 제약) 급반전은 막는다.
+        jumps = [abs(b - a) for a, b in zip(energies, energies[1:])]
+        assert max(jumps) < 0.3, f"seed={seed} energies={energies}"
 
 
 def test_stage_specs_override_energy_and_counts():
