@@ -159,5 +159,23 @@
 | `pulse_acf_fast` | 빠른 옥타브 후보의 onset 자기상관 원값이다. |
 | `pulse_tau` | 빠른 pulse 채택 여부를 가르는 임계값(형제 프로젝트에서 0.96으로 튜닝됨)이다. |
 
+## ACF 대칭 확장 — 절반 후보 검증 (337곡만 값 존재)
+
+형제 프로젝트의 `perceptual_pulse()`는 base보다 빠른 후보(base×2)만 검사하고 느린 후보(base÷2)는
+검사하지 않는 비대칭 구조다. 이 저장소에서 그 반대 방향(`ACF(base÷2)/ACF(base)`)을 추가로 계산해
+`drum_tempo_bpm×2ⁿ`(n=-2..2) 후보가 [85,220] 범위 안에 2개 존재하는 337곡에 한해 채웠다. 자세한
+배경·검증 과정은 `report/01-tempo-octave-ambiguity.md` 참조.
+
+| 컬럼 | 의미 |
+|---|---|
+| `pulse_acf_half` | base tempo의 절반(`drum_tempo_bpm÷2`)에서 계산한 onset-ACF 값이다. |
+| `pulse_ratio_down` | `pulse_acf_half / pulse_acf_slow`(=ACF(base)) 비율로, 값이 높을수록 절반 후보가 더 두드러진다는 뜻이다. |
+| `pulse_recommend_half` | `pulse_ratio_down ≥ 0.96`이고 절반값이 장르 관측 범위(85 BPM) 이상일 때 True — 절반 후보를 채택하라는 권고다. |
+
+⚠️ 이 3개 컬럼은 절반 후보가 애초에 [85,220] 범위에 드는 경우(즉 base가 170 이상인 337곡 중 10곡)에만
+의미가 있다 — 나머지는 절반 후보 자체가 장르 관측 범위 밖이라 `pulse_recommend_half`가 항상 False다.
+4곡 청취 검증 결과 3/4 일치(礎の花冠·Original Call·LET'Sあちあちトレーニング！은 정답과 일치), 1건
+(悪魔の子)은 ACF 신호 자체가 약해 불일치 — 신호만으로는 못 가르는 진짜 난제로 판단됨.
+
 ### 주의: 템포 vs Pulse
 원본 `tempo_bpm`(전체 믹스, librosa beat_track)과 이 pulse 값들은 서로 다른 목적으로 설계되었다. `tempo_bpm`은 음향적으로 정확한 템포를 추정하는 반면, pulse 값들은 같은 bpm이라도 드럼 편곡 밀도에 따라 달라지는 **체감 속도(지각적 pulse rate)**를 나타낸다. 따라서 직접 비교보다는 상호보완적으로 활용하기를 권장한다.
