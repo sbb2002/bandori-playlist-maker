@@ -108,3 +108,56 @@ mugendai 「LET'Sあちあちトレーニング！」[89.1, 178.2])이 정확히
   원본 알고리즘과 τ=0.96 튜닝 배경.
 - Gouyon et al. (2006), *"An experimental comparison of audio tempo induction algorithms"*, IEEE TASLP —
   옥타브 오류를 별도 평가지표(Accuracy2)로 다루는 MIR 분야의 표준 관행.
+
+## 6. 다음 세션 인수인계
+
+**오늘 세션은 여기서 마무리한다.** 아래는 다음 세션(이 대화를 모르는 상태)이 그대로 읽고 이어갈
+수 있도록 현재 상태와 다음 할 일을 정리한 것이다.
+
+### 6.1 지금까지 뭘 했는지 (현재 상태)
+- `topic/audio_feats-analysis/out/audio_feats.csv`(661행)에 다음이 모두 병합돼 있다:
+  - MFCC·LUFS·코드진행 파생 피쳐(신규 추출)
+  - `songs_master`/`full_audio_features`/`song_features_with_proxies`(기존 산출물)
+  - 형제 프로젝트 `bandori-song-sorter`의 드럼 스템 기반 pulse 데이터
+    (`drum_tempo_bpm`, `pulse_bpm`, `pulse_div`, `pulse_ratio`, `pulse_acf_slow`, `pulse_acf_fast`, `pulse_tau`)
+  - 이번 세션에서 추가한 절반-후보 검증 컬럼(`pulse_acf_half`, `pulse_ratio_down`, `pulse_recommend_half`,
+    337곡만 값 존재 — §3.4 참조)
+- 각 컬럼의 뜻과 산출 방법은 `out/metadata.md`에 전부 정리돼 있다(재현 명령 포함).
+- **핵심 미해결 문제**: `drum_tempo_bpm`/`pulse_bpm`은 원본 알고리즘(`perceptual_pulse()`)이
+  "느린 쪽 base를 빠른 쪽(base×2)으로 바꿀지"만 검사하고 그 반대(느린 쪽이 맞는지)는 검사하지
+  않아서, 실제로는 느린 곡인데 빠르게 잘못 추정되는 사례가 있다(§3의 ave_mujica「Symbol III : ▽」
+  등). 이번 세션에 그 반대 방향(`pulse_ratio_down`)을 추가했지만 **337곡 중 절반 후보가 애초에
+  유효한 건 10곡뿐**이었고, 그중 청취 검증 4곡 기준 3/4만 정답과 일치했다(§3.4). 즉 여전히
+  완전히 풀리지 않았다.
+
+### 6.2 다음에 할 일 — ACF 기반 단일 후보 선출 + bestdori 검증
+사용자가 요청한 다음 단계는 두 가지다:
+
+1. **"BPM 배수 후보군에서 ACF로 후보 1개를 선출"하는 로직을 모든 곡에 통일 적용**한다.
+   - 지금은 "위쪽만 검사하는 원본 로직(`pulse_ratio`)"과 "아래쪽만 검사하는 이번 세션 추가분
+     (`pulse_ratio_down`)"이 별도 컬럼으로 나뉘어 있다.
+   - 다음 세션에서는 `drum_tempo_bpm × 2ⁿ` (n=-2..2, [85,220] 범위 — 이 범위는 사용자가 bestdori를
+     skimming해서 관측한 근사치이니 필요하면 재검토) 후보군 **전체**에 대해 각 후보의 ACF 값을
+     한 번에 비교해서, **매 곡마다 최종 후보 1개를 선출**하는 단일 파이프라인으로 재정리한다.
+   - 후보가 1개뿐인 324곡도 같은 파이프라인에 포함시켜(그냥 그 1개를 그대로 채택), 661곡 전체가
+     "최종 선출 BPM" 컬럼 하나를 갖도록 한다.
+2. **bestdori 공식 BPM과 비교해서 이 방법론 전체의 정확도를 정량 측정**한다.
+   - bestdori는 게임 채보 기반이라 공식 BPM에는 옥타브 오류가 있을 수 없다(정답으로 취급 가능).
+   - 단, 이번 세션에 확인했듯 **최근 발매곡(예: mygo 신곡 3곡, `mygo__660/661/662`)은 게임에
+     아직 미구현이라 bestdori에 없다** — bestdori API(`https://bestdori.com/api/songs/all.0.json`
+     등)로 존재 여부부터 확인하고, **실제로 조회 가능한 곡만 골라 비교 모집단을 구성**한다(661곡
+     전수조사가 아니라 가능한 만큼만).
+   - "우리가 선출한 BPM" vs "bestdori 공식 BPM"의 일치율(옥타브 허용/불허 둘 다)과 오차 분포를
+     계산해서 이 방법론이 실제로 얼마나 쓸 만한지 처음으로 정량 검증한다 — 지금까지는 사용자
+     청취 검증 4곡(극소 표본)에만 의존했었다.
+
+### 6.3 참고할 파일/경로
+- 후보군 생성 로직(§2.2 4단계) 및 검증(§3.2)의 원본 계산은 이 대화 세션에서 직접 실행한 것으로,
+  별도 스크립트 파일로 저장돼 있지 않다 — 필요하면 이 보고서 §2.2, §3.2의 코드/설명을 참고해
+  다시 짜야 한다.
+- 절반-후보 검증(§3.4) 스크립트: `topic/audio_feats-analysis/src/method-1/acf_symmetric_check.py`,
+  `merge_results.py`.
+- 형제 프로젝트 원본 알고리즘: `bandori-song-sorter/src/tools/cluster/build_beat_track.py`의
+  `perceptual_pulse()` (SR=22050, HOP=256, τ=0.96).
+- 드럼 스템 캐시(demucs 불필요, 이미 분리됨): `bandori-song-sorter/src/content/cluster/audio_drums/
+  {tag}.wav` (661곡 전체 커버 확인됨).
