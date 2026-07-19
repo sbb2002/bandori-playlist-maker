@@ -117,3 +117,18 @@
 | `acousticness_proxy_proxies` | 이 파이프라인에서 계산한 어쿠스틱함 정도의 대리 지표다. |
 | `instrumentalness_proxy_proxies` | 이 파이프라인에서 계산한 악기 위주 정도의 대리 지표다. |
 | `energy_proxy_proxies` | ⚠️ 부호가 역전된 것으로 확인된 에너지 대리 지표다(신뢰 불가). |
+
+## 형제 프로젝트(bandori-song-sorter) pulse 분석 유래
+
+| 컬럼 | 의미 |
+|---|---|
+| `drum_tempo_bpm` | 드럼 스템만 분리해 추정한 템포로, 전체 믹스 기준 `tempo_bpm`과 다를 수 있다. |
+| `pulse_bpm` | 형제 프로젝트가 최종 채택한 지각적 pulse 템포(체감 속도)다. |
+| `pulse_div` | 채택된 pulse의 세분화 수준이다(1=박/느림, 2=8분/빠름). |
+| `pulse_ratio` | 빠른 옥타브(×2)와 느린 옥타브의 onset ACF 비율로, 값이 높을수록(0.96 이상) 빠른 pulse가 두드러진다는 뜻이다. |
+| `pulse_acf_slow` | 느린 옥타브 후보의 onset 자기상관 원값이다. |
+| `pulse_acf_fast` | 빠른 옥타브 후보의 onset 자기상관 원값이다. |
+| `pulse_tau` | 빠른 pulse 채택 여부를 가르는 임계값(형제 프로젝트에서 0.96으로 튜닝됨)이다. |
+
+### 주의: 템포 vs Pulse
+원본 `tempo_bpm`(전체 믹스, librosa beat_track)과 이 pulse 값들은 서로 다른 목적으로 설계되었다. `tempo_bpm`은 음향적으로 정확한 템포를 추정하는 반면, pulse 값들은 같은 bpm이라도 드럼 편곡 밀도에 따라 달라지는 **체감 속도(지각적 pulse rate)**를 나타낸다. 따라서 직접 비교보다는 상호보완적으로 활용하기를 권장한다.
