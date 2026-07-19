@@ -17,6 +17,35 @@
   `tempo_excerpt`/`tempo_excerpt_proxies`) — 각각 다른 파이프라인(스니펫 vs 전체곡 등)에서 나온
   값이라 수치가 정확히 같지 않을 수 있다.
 
+## 산출 방법 (재현 안내)
+
+### 신규 추출 피쳐 — `src/method-1/extract_features.py`
+- **오디오 로딩**: 형제 프로젝트 `bandori-song-sorter`의 `src/content/cluster/audio_full/{tag}.wav`(661곡, 곡 전체 mix)를 `librosa.load(path, sr=22050, mono=True)`로 로드.
+- **`lufs`**: `pyloudnorm.Meter(sr).integrated_loudness(y)` — ITU-R BS.1770 통합 러프니스.
+- **`mfcc_*_mean`/`mfcc_*_std`**: `librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)` 계산 후 시간축(axis=1) 기준 mean/std.
+- **`tempo_bpm`, `n_beats`, `est_key`, `pct_major`, `chord_change_rate`, `borrowed_chord_rate`**:
+  1. `librosa.feature.chroma_cqt(y, sr)`로 프레임별 12차원 크로마 추출.
+  2. `librosa.onset.onset_strength` → `librosa.beat.beat_track`으로 비트 시각(및 `tempo_bpm`) 추정.
+  3. 비트 구간별 크로마를 평균해 비트 단위 크로마 시퀀스로 축약.
+  4. 24개 장/단 3화음 템플릿(`config.py`의 `ALL_CHORD_TEMPLATES`, 근음+장/단3도+완전5도 이진 벡터)과 코사인 유사도로 비트별 코드 판정.
+  5. 곡 전체 평균 크로마와 Krumhansl-Schmuckler 12조성×2(장/단) 프로파일(`KS_PROFILES`)의 피어슨 상관으로 `est_key` 추정.
+  6. `pct_major`=장조 판정 비트 비율, `chord_change_rate`=분당 코드 변경 횟수, `borrowed_chord_rate`=추정 키의 다이아토닉 풀(`DIATONIC_POOLS`)에 없는 코드 비트 비율.
+  - 이 로직은 `topic/chord_progression/02_extract_chords.py`·`03_compute_features.py`의 검증된 알고리즘을 그대로 이식한 것이다(코드 자체는 독립적으로 재작성, 상수/알고리즘은 동일).
+- **재현**: `cd topic/audio_feats-analysis/src/method-1 && python extract_features.py` (idempotent, `out/progress.json` 기준 이어서 처리).
+
+### `songs_master.csv`/`full_audio_features.csv`/`song_features_with_proxies.csv` 유래 컬럼
+- 이번 작업에서 새로 계산한 것이 아니라, `data/` 브랜치 스냅샷에 이미 존재하던 값을 `idx`(전역 고유 정수) 기준으로 그대로 가져와 붙인 것이다.
+- 각 CSV를 실제로 산출한 원본 스크립트(`build_master.py`, `extract_full_energy.py`, `extract_temporal_intensity.py` 등으로 추정)는 이 저장소의 다른 브랜치/워크트리 히스토리에 있고 `research` 브랜치 현재 시점에는 포함되어 있지 않다 — 정확한 재현이 필요하면 해당 스크립트의 원본 커밋을 먼저 찾아야 한다.
+- 병합 자체의 재현: `topic/audio_feats-analysis/src/method-1/extract_features.py` 실행 시 병합 단계가 함께 수행된다(`idx` 컬럼으로 3개 CSV를 left-merge).
+
+### 형제 프로젝트(bandori-song-sorter) pulse 컬럼 — `src/method-1/merge_pulse.py`
+- **원본 산출**(bandori-song-sorter 저장소, 이 저장소 밖의 별도 로컬 프로젝트):
+  1. `src/tools/cluster/separate_drums.py <band> <idx>` — demucs(htdemucs)로 `audio_full/{tag}.wav`에서 드럼 스템만 분리해 `audio_drums/{tag}.wav` 생성(CPU 추론, 곡당 수 분).
+  2. `src/tools/cluster/build_beat_track.py <band> <idx>` — 드럼 스템에서 `librosa.beat.beat_track`으로 base tempo 추정 후, onset-envelope 자기상관(ACF)을 base와 그 ×2에서 비교(`ratio = ACF(fast)/ACF(slow)`, `ratio ≥ tau=0.96`이면 빠른 pulse 채택)해 `pulse_bpm`/`pulse_div`/`ratio`/`acf_slow`/`acf_fast`를 계산, `onsets/{tag}.json`으로 저장.
+  3. 상세 배경·검증 과정은 `bandori-song-sorter/docs/research/pulse-onset-extraction.md` 참조.
+- **병합**: `topic/audio_feats-analysis/src/method-1/merge_pulse.py`가 `onsets/{tag}.json`을 읽어 `tag` 기준으로 `audio_feats.csv`에 좌측 조인(기존 660여 곡 커버, 분석 시점 이후 추가된 신곡은 개별적으로 위 1~2단계를 다시 실행해 채워야 함).
+- **재현**: `bandori-song-sorter` 저장소 루트에서 1~2단계 스크립트 실행 → `bandori-playlist-maker` 저장소의 `topic/audio_feats-analysis/src/method-1/merge_pulse.py` 재실행.
+
 ## 식별자 컬럼
 
 | 컬럼 | 출처 | 의미 |
