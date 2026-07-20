@@ -15,8 +15,8 @@ TOPIC_DIR = _SCRIPT_DIR.parent
 PROJECT_ROOT = TOPIC_DIR.parent
 
 # Paths to dependencies (method-1 and method-2)
-METHOD1_DIR = TOPIC_DIR / "vector-embedding" / "src" / "method-1"
-METHOD2_DIR = TOPIC_DIR / "vector-embedding" / "src" / "method-2"
+METHOD1_DIR = TOPIC_DIR / "vector_embedding" / "src" / "method-1"
+METHOD2_DIR = TOPIC_DIR / "vector_embedding" / "src" / "method-2"
 
 # Input files (DESIGN.md §1)
 FULL_CATALOG_CSV = METHOD1_DIR / "full_catalog_songs.csv"

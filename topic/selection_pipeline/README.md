@@ -40,10 +40,10 @@ export GROQ_API_KEY="your-api-key-here"
 ```
 
 ### 선행 단계 완료
-- `topic/vector-embedding/src/method-1/` ✓ Stage 1 완료
+- `topic/vector_embedding/src/method-1/` ✓ Stage 1 완료
   - `full_catalog_songs.csv` (661곡)
   - `out/song_profiles.csv` (가사 기반 프로파일)
-- `topic/vector-embedding/src/method-2/` ✓ Stage 2 완료
+- `topic/vector_embedding/src/method-2/` ✓ Stage 2 완료
   - `out/song_acoustics.csv` (음향 지표)
 
 ---
@@ -272,6 +272,6 @@ topic/selection_pipeline/
 ## 참고 문서
 
 - `DESIGN.md` — 전체 설계 (구현의 원본)
-- `topic/vector-embedding/report/05-energy_distribution_by_band.md` — 밴드별 강도 분포 (band_pct 맥락)
-- `topic/vector-embedding/src/method-1/06_stage2_search.py` — 가사 임베딩 검색 (재사용 참고)
-- `topic/vector-embedding/src/method-2/DESIGN.md` — 음향 지표 정의 (intensity 축)
+- `topic/vector_embedding/report/05-energy_distribution_by_band.md` — 밴드별 강도 분포 (band_pct 맥락)
+- `topic/vector_embedding/src/method-1/06_stage2_search.py` — 가사 임베딩 검색 (재사용 참고)
+- `topic/vector_embedding/src/method-2/DESIGN.md` — 음향 지표 정의 (intensity 축)

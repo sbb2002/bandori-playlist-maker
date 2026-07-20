@@ -5,7 +5,7 @@ pyin f0_median/range/std, vocal_centroid), with three changes for the full run
 (ROUND2-valence-proxy-DESIGN.md):
 
   1. Input: demucs vocal stems at
-     topic/vector-embedding/src/method-1/work/stems_full/htdemucs/<tag>/vocals.wav
+     topic/vector_embedding/src/method-1/work/stems_full/htdemucs/<tag>/vocals.wav
      (tag = {band}__{idx:03d}). Target list from full_catalog_songs.csv (661).
   2. NO mix-dependent feature: vocal_ratio is dropped (original mixes only partially
      present) — librosa.load(mix) is removed entirely. vocals.wav-only features:
@@ -57,11 +57,11 @@ else:  # pragma: no cover
 HERE = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 STEMS_DIR = os.path.join(
-    _REPO_ROOT, "topic", "vector-embedding", "src", "method-1",
+    _REPO_ROOT, "topic", "vector_embedding", "src", "method-1",
     "work", "stems_full", "htdemucs",
 )
 CATALOG_CSV = os.path.join(
-    _REPO_ROOT, "topic", "vector-embedding", "src", "method-1", "full_catalog_songs.csv",
+    _REPO_ROOT, "topic", "vector_embedding", "src", "method-1", "full_catalog_songs.csv",
 )
 OUT_CSV = os.path.join(HERE, "vocal_features_full.csv")
 SMOKE_CSV = os.path.join(HERE, "vocal_features_smoke.csv")

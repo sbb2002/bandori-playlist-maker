@@ -16,10 +16,10 @@ SEED = 20260717
 # Input data paths
 GROUND_TRUTH_LABELS = PROJECT_ROOT / "data" / "ground_truth_labels.csv"
 SONGS_MASTER = PROJECT_ROOT / "data" / "songs_master.csv"
-FULL_CATALOG = PROJECT_ROOT / "topic" / "vector-embedding" / "src" / "method-1" / "full_catalog_songs.csv"
+FULL_CATALOG = PROJECT_ROOT / "topic" / "vector_embedding" / "src" / "method-1" / "full_catalog_songs.csv"
 
 # Stems path: DESIGN.md §1
-STEMS_BASE = PROJECT_ROOT / "topic" / "vector-embedding" / "src" / "method-1" / "work" / "stems_full" / "htdemucs"
+STEMS_BASE = PROJECT_ROOT / "topic" / "vector_embedding" / "src" / "method-1" / "work" / "stems_full" / "htdemucs"
 
 # Output directory
 OUT_DIR = _SCRIPT_DIR / "out"

@@ -20,7 +20,7 @@ import librosa
 SR = 22050
 HOP = 256
 DRUMS_ROOT = "C:/Users/User/Documents/pyworks/bandori-song-sorter/src/content/cluster/audio_drums"
-CSV_PATH = "topic/audio_feats-analysis/out/audio_feats.csv"
+CSV_PATH = "topic/audio_feats_analysis/out/audio_feats.csv"
 TAU_THRESHOLD = 0.96
 MIN_BPM = 85.0
 

@@ -11,18 +11,18 @@ from pathlib import Path
 # ============================================================================
 _SCRIPT_DIR = Path(__file__).parent
 # selection_pipeline lives at topic/selection_pipeline, a sibling of
-# topic/vector-embedding. TOPIC_DIR (== .../topic) is one level up, not two —
+# topic/vector_embedding. TOPIC_DIR (== .../topic) is one level up, not two —
 # a previous version used _SCRIPT_DIR.parent.parent (the repo root) and then
-# appended "vector-embedding" directly, which skipped the "topic/" segment
-# and pointed at a nonexistent path (repo_root/vector-embedding/... instead
-# of repo_root/topic/vector-embedding/...), causing FileNotFoundError on
+# appended "vector_embedding" directly, which skipped the "topic/" segment
+# and pointed at a nonexistent path (repo_root/vector_embedding/... instead
+# of repo_root/topic/vector_embedding/...), causing FileNotFoundError on
 # every input CSV read.
 TOPIC_DIR = _SCRIPT_DIR.parent
 PROJECT_ROOT = TOPIC_DIR.parent
 
 # Paths to dependencies (method-1 and method-2)
-METHOD1_DIR = TOPIC_DIR / "vector-embedding" / "src" / "method-1"
-METHOD2_DIR = TOPIC_DIR / "vector-embedding" / "src" / "method-2"
+METHOD1_DIR = TOPIC_DIR / "vector_embedding" / "src" / "method-1"
+METHOD2_DIR = TOPIC_DIR / "vector_embedding" / "src" / "method-2"
 
 # Input files (DESIGN.md §1)
 FULL_CATALOG_CSV = METHOD1_DIR / "full_catalog_songs.csv"

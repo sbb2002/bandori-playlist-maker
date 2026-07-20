@@ -45,7 +45,7 @@
 **결정**: 화성(코드)은 동시에 울리는 여러 음의 조합이며, 보컬은 단선율(monophonic)이라
 원리적으로 코드진행을 담을 수 없다. 코드는 반주(기타/베이스/키보드)가 쥐고 있다.
 
-`topic/vector-embedding/src/method-1/work/stems_full/htdemucs/<tag>/no_vocals.wav`를 쓴다
+`topic/vector_embedding/src/method-1/work/stems_full/htdemucs/<tag>/no_vocals.wav`를 쓴다
 (2-stem 분리, `vocals.wav`+`no_vocals.wav`만 존재 — 4-stem 아님, 확인됨). 보컬이 제거된
 반주 트랙이라 풀 믹스보다 크로마 특징이 깨끗하다. 재분리 필요 없음(661곡 전부 이미 존재).
 

@@ -2,13 +2,13 @@ from pathlib import Path
 import numpy as np
 
 _SCRIPT_DIR = Path(__file__).parent
-PROJECT_ROOT = _SCRIPT_DIR.parent.parent.parent.parent  # topic/audio_feats-analysis/src/method-1 -> repo root
+PROJECT_ROOT = _SCRIPT_DIR.parent.parent.parent.parent  # topic/audio_feats_analysis/src/method-1 -> repo root
 
 # 형제 프로젝트(bandori-song-sorter)의 원본 오디오. 이 저장소 밖에 있는 별도 로컬 프로젝트다.
 AUDIO_DIR = Path("C:/Users/User/Documents/pyworks/bandori-song-sorter/src/content/cluster/audio_full")
 
 # 661곡 tag 목록 (band__idx 형식, audio_full/<tag>.wav 파일명과 일치)
-FULL_CATALOG = PROJECT_ROOT / "topic" / "vector-embedding" / "src" / "method-1" / "full_catalog_songs.csv"
+FULL_CATALOG = PROJECT_ROOT / "topic" / "vector_embedding" / "src" / "method-1" / "full_catalog_songs.csv"
 
 OUT_DIR = _SCRIPT_DIR.parent.parent / "out"
 OUT_DIR.mkdir(parents=True, exist_ok=True)

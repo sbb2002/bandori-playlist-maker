@@ -1,13 +1,13 @@
 # selection_pipeline 실험 설계서 — 선곡 파이프라인 3-way 비교
 ## (프로덕션 절대강도 매칭 vs 가사후보추림+절대강도 vs 가사후보추림+밴드상대백분위)
 
-> **위치와 성격**: `topic/vector-embedding`의 하위 method가 아니라 **별개 주제**다. 가사 임베딩은
+> **위치와 성격**: `topic/vector_embedding`의 하위 method가 아니라 **별개 주제**다. 가사 임베딩은
 > arm 2·3에서 후보군을 좁히는 재료로만 쓰이고, RQ는 "선곡 파이프라인 구조(후보추림+강도해석)"이지
-> "가사 벡터 검색"이 아니다 — `mood_warmth`·`chord_progression`처럼 vector-embedding의 산출물
+> "가사 벡터 검색"이 아니다 — `mood_warmth`·`chord_progression`처럼 vector_embedding의 산출물
 > (`BAAI/bge-m3` 임베딩, `intensity` 등)을 **재사용하는 소비자**일 뿐이다. 아래 경로는 모두
-> 저장소 루트 기준 전체경로로 표기한다(예: `topic/vector-embedding/src/method-2/...`).
+> 저장소 루트 기준 전체경로로 표기한다(예: `topic/vector_embedding/src/method-2/...`).
 >
-> **배경**: `topic/vector-embedding/report/05-energy_distribution_by_band.md`가 프로덕션
+> **배경**: `topic/vector_embedding/report/05-energy_distribution_by_band.md`가 프로덕션
 > `selection.py`의 구조적 갭을
 > 지적했다 — Stage A는 강도(intensity)를 **전역 절대값**으로 `|energy-target|≤0.08` 매칭하는데,
 > 밴드마다 강도 분포가 전혀 달라(mygo 중앙값 0.360 vs mutype 0.765) 저텐션 꼬리(<0.1, 14곡)가
@@ -15,9 +15,9 @@
 > 이 연구는 그 제안을 실측으로 검증하고, 동시에 연구자가 새로 제기한 구조적 아이디어
 > ("가사로 후보군을 먼저 추리고, 그 안에서 강도로 정렬/추출")를 함께 비교한다.
 >
-> **Phase 2(`topic/vector-embedding/src/method-2`)와의 차이 — 중요**: Phase 2의 결합(arm C)은
+> **Phase 2(`topic/vector_embedding/src/method-2`)와의 차이 — 중요**: Phase 2의 결합(arm C)은
 > 가사 백분위와 음향 백분위를 **가중합(α=0.5)**해 하나의 점수로 섞었고, 이 복합 점수(`acou_match`)가
-> 만족도와 ρ=−0.588로 **유해**했다(`topic/vector-embedding/report/04-lyrics_acoustic_fusion.md`
+> 만족도와 ρ=−0.588로 **유해**했다(`topic/vector_embedding/report/04-lyrics_acoustic_fusion.md`
 > 결론). 이번 arm 2·3은 그 구조가 아니다 — **가사는 후보군을
 > 좁히는 필터로만 쓰고, 최종 정렬/추출은 검증된 강도(intensity) 단일 축**으로 한다(가중합 없음).
 > 오염원이었던 밝기/LLM목표매핑을 아예 배제한 구조라, Phase 2의 실패 원인이 재현되지 않을
@@ -40,7 +40,7 @@
 | 쿼리 카테고리 | 예측 |
 |---|---|
 | 밴드 지정 + 상대 감성("이 밴드에서 가장 잔잔한/신나는") | **arm3 > arm2 ≥ arm1** — 프로덕션(arm1)은 밴드필터 내에서도 절대강도라 그 밴드의 실제 저텐션 곡에 못 미칠 수 있음 |
-| 밴드 미지정 + 전체카탈로그 절대 표현("진짜 조용한 노래") | **arm1·arm2 ≥ arm3** — 상대 백분위를 여러 밴드에 걸쳐 쓰면 "조용함"의 절대적 의미가 깨짐(`topic/vector-embedding/report/05-energy_distribution_by_band.md` 트레이드오프) |
+| 밴드 미지정 + 전체카탈로그 절대 표현("진짜 조용한 노래") | **arm1·arm2 ≥ arm3** — 상대 백분위를 여러 밴드에 걸쳐 쓰면 "조용함"의 절대적 의미가 깨짐(`topic/vector_embedding/report/05-energy_distribution_by_band.md` 트레이드오프) |
 | 상황/기능성(가사 신호 약함) | 예측 없음(탐색) — 가사 후보추림이 관련 없는 곡을 걸러내 도움이 될 수도, 반대로 약한 가사 신호가 좋은 후보를 잘못 배제할 수도 있음 |
 | 밝기 재확인(신규 표현, T1~T3 재사용 아님) | 예측 없음(탐색) — Phase 2 A4(`mismatch_query`↔만족도 ρ=−0.382)의 재현 여부 확인용 |
 
@@ -65,18 +65,18 @@
 
 ### 공통 입력
 - LLM이 자연어 쿼리에서 **`intensity_target`(0~1, 661곡 백분위 목표)** 와 **`band_filter`(밴드
-  태그 1개 또는 NA)** 를 추출한다. 프롬프트는 `topic/vector-embedding/src/method-2/DESIGN.md` §3의
+  태그 1개 또는 NA)** 를 추출한다. 프롬프트는 `topic/vector_embedding/src/method-2/DESIGN.md` §3의
   `INTENSITY` 축 정의를 그대로 승계(음량/밀도, 감정 아님을 명시)하고, `BAND`는 카탈로그 밴드 태그
-  11개 중 하나 또는 `NA`로 강제한다. 모델은 `topic/vector-embedding/src/method-1/config.py`의
+  11개 중 하나 또는 `NA`로 강제한다. 모델은 `topic/vector_embedding/src/method-1/config.py`의
   `GROQ_MODEL`(현재 `meta-llama/llama-4-scout-17b-16e-instruct`) — **`openai/gpt-oss-20b`
   절대 금지**(배포 모델).
-- `eligible_pool` = `topic/vector-embedding/src/method-1/full_catalog_songs.csv` 661곡 중
+- `eligible_pool` = `topic/vector_embedding/src/method-1/full_catalog_songs.csv` 661곡 중
   `band_filter`가 있으면 그 밴드만(프로덕션 `build_setlist`의 band_filter 적용 순서와 동일 —
   후보추림보다 먼저 적용).
-- `intensity`/`intensity_pct`는 `topic/vector-embedding/src/method-2/out/song_acoustics.csv`를
-  그대로 재사용(재계산 금지 — 이미 검증된 값, `topic/vector-embedding/src/method-2/DESIGN.md` §2).
+- `intensity`/`intensity_pct`는 `topic/vector_embedding/src/method-2/out/song_acoustics.csv`를
+  그대로 재사용(재계산 금지 — 이미 검증된 값, `topic/vector_embedding/src/method-2/DESIGN.md` §2).
 - `band_pct(곡)` = 그 곡의 **자기 밴드 population**(`eligible_band==True`인 동일 밴드 전체) 내
-  `intensity` 백분위. `topic/vector-embedding/report/05-energy_distribution_by_band.md`의 표
+  `intensity` 백분위. `topic/vector_embedding/report/05-energy_distribution_by_band.md`의 표
   (밴드별 하위 20% 절대값 등)와 동일한 계산 방식.
 
 ### Arm 1 — 프로덕션 재현 (가사 미사용)
@@ -133,7 +133,7 @@ window = { s in candidate_pool : |s.band_pct - intensity_target| <= 0.08 }
 | Q7 | 밝기 재확인(신규 표현) | "듣고 나면 기분이 조금 나아지는 노래." | Phase 2 A4(`mismatch_query`) 재현 확인용, 기존 문구와 다르게 표현해 앵커링 방지 |
 | Q8 | 밝기 재확인(신규 표현) | "마음이 무겁고 가라앉는 밤에 어울리는 노래." | 동일 논리, 반대 극 |
 
-밴드 태그는 `topic/vector-embedding/src/method-1/full_catalog_songs.csv`의 실제 값(`mygo`,
+밴드 태그는 `topic/vector_embedding/src/method-1/full_catalog_songs.csv`의 실제 값(`mygo`,
 `raise_a_suilen` 등)과 정확히 일치시켜
 LLM `BAND` 추출 프롬프트에 카탈로그를 인지시킨다.
 
@@ -141,10 +141,10 @@ LLM `BAND` 추출 프롬프트에 카탈로그를 인지시킨다.
 
 ## 3. 가사 후보추림 (arm 2·3 공통)
 
-`topic/vector-embedding/src/method-1/06_stage2_search.py`의 방식을 **그대로 재사용**한다 —
+`topic/vector_embedding/src/method-1/06_stage2_search.py`의 방식을 **그대로 재사용**한다 —
 새로 설계하지 않는다:
 1. LLM으로 쿼리를 2~3문장 서술로 확장(`06_stage2_search.py`의 `expand_prompt` 템플릿 그대로).
-2. `BAAI/bge-m3`로 확장문과 `topic/vector-embedding/src/method-1/out/song_profiles.csv`의
+2. `BAAI/bge-m3`로 확장문과 `topic/vector_embedding/src/method-1/out/song_profiles.csv`의
    `desc`를 임베딩, 코사인 유사도.
 3. **`candidate_pool` 크기 N (사전 고정, 결과를 본 뒤 바꾸지 않음)**:
    `N = max(15, ceil(0.20 * len(eligible_pool)))` — eligible_pool(밴드필터 적용 후)의 상위 20%,

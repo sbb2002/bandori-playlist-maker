@@ -23,7 +23,7 @@ import librosa
 SR = 22050  # Sample rate (must match existing pulse analysis)
 HOP = 256   # Hop length (must match existing pulse analysis)
 DRUMS_ROOT = "C:/Users/User/Documents/pyworks/bandori-song-sorter/src/content/cluster/audio_drums"
-CSV_PATH = "topic/audio_feats-analysis/out/audio_feats.csv"
+CSV_PATH = "topic/audio_feats_analysis/out/audio_feats.csv"
 PILOT_COUNT = 15  # Set to None to process all ambiguous songs
 PROCESS_ALL = True  # Override pilot count to process all 337 songs
 TAU_THRESHOLD = 0.96
@@ -181,8 +181,8 @@ def main():
         'tag', 'drum_tempo_bpm', 'pulse_acf_slow',
         'pulse_acf_half', 'pulse_ratio_down', 'pulse_recommend_half'
     ]].copy()
-    pilot_output.to_csv('topic/audio_feats-analysis/out/pilot_15_results.csv', index=False)
-    print(f"\nPilot results saved to: topic/audio_feats-analysis/out/pilot_15_results.csv")
+    pilot_output.to_csv('topic/audio_feats_analysis/out/pilot_15_results.csv', index=False)
+    print(f"\nPilot results saved to: topic/audio_feats_analysis/out/pilot_15_results.csv")
 
     return 0 if total_estimated_time_337 <= 300 else 1
 

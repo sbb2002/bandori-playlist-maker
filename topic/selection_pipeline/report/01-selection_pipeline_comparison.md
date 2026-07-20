@@ -95,7 +95,7 @@ Q8(마음이 무겁고 가라앉는 밤) arm3가 유독 낮음(1.333) — 저점
 - `raise_a_suilen__560` "Just Awake (Cover)"(1점): "위와 같음."
 - `mygo__278` "処救生"(2점): "질주감이 있는 노래... 곡조 때문에 안맞는 느낌."
 
-이는 `topic/vector-embedding/report/04-lyrics_acoustic_fusion.md`·[[vector-embedding-phase2-status]]가
+이는 `topic/vector_embedding/report/04-lyrics_acoustic_fusion.md`·[[vector-embedding-phase2-status]]가
 이미 확인한 바(강도(intensity)는 텐션이지 valence가 아니다, 이 카탈로그엔 검증된 valence 축이 없다)와
 정확히 같은 병목이다 — 가사 후보추림(arm2/3)이 여전히 valence를 못 잡고, 밴드 상대 백분위(arm3)로
 바꾼다고 이 문제가 해소되지 않는다는 것을 재확인한 셈이다.
@@ -243,7 +243,7 @@ Q5("운동할 때 들으면 힘 나는 노래")는 arm2가 5.0 만점 — 가사
      테스트) 없이 바로 프로덕션에 넣는 것은 권장하지 않는다.**
 3. **인프라 설계** (arm2를 어느 범위로 하든 공통으로 필요):
    - `desc`(가사 요약) 필드를 661곡 전체에 대해 오프라인 사전계산 — 소스는
-     `topic/vector-embedding/src/method-1/out/song_profiles.csv`의 기존 산출물을 재사용 가능한지
+     `topic/vector_embedding/src/method-1/out/song_profiles.csv`의 기존 산출물을 재사용 가능한지
      먼저 확인(이미 있다면 새로 만들 필요 없음), 신곡 추가 시 이 필드를 채우는 단계를
      오토로더([[pending-song-autoloader]])에 추가해야 함.
    - 곡 임베딩(`BAAI/bge-m3`)은 요청마다 재계산하지 말고 오프라인 사전계산+캐싱(파일 또는 벡터

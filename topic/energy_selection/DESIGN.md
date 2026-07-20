@@ -1,6 +1,6 @@
 # energy_selection 실험 설계서 — LLM 에너지 파라미터 해석 프롬프트 튜닝
 
-> **위치와 성격**: `chord_progression`·`mood_warmth`·`vector-embedding`·`selection_pipeline`은 모두
+> **위치와 성격**: `chord_progression`·`mood_warmth`·`vector_embedding`·`selection_pipeline`은 모두
 > 오디오/가사 신호 기반 음향 지표 연구였다. 이 주제는 다르다 — 오디오 처리도 임베딩도 없고,
 > `src/backend/app/adapters/prompt.py`의 `SYSTEM_PROMPT` 한 곳이 실험 대상 전부다. 순수 LLM
 > JSON 산출 정확도 문제이므로 **저비용·고속 A/B 루프**(오디오 다운로드·Demucs·bge-m3 불필요)로

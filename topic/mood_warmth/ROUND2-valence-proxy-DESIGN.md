@@ -7,7 +7,7 @@
 >    rating과 상관 ρ=−0.086(≈0).** (`analysis_results.md`·`README.md`)
 > 2. 1라운드 null은 rating("esora 유사도") 결함 탓이라 "미검증"이지 "확정 무의미"는 아니었으나,
 >    그 뒤 축적된 증거가 기대값을 크게 낮췄다: **넓은 음향공간 ⊥ 가사 valence**(GroupKFold R²≈0),
->    **가사 슬픔곡 vs 행복곡이 강도에서 구분 안 됨**(d=−0.14, ns) — `vector-embedding/report/03·04`.
+>    **가사 슬픔곡 vs 행복곡이 강도에서 구분 안 됨**(d=−0.14, ns) — `vector_embedding/report/03·04`.
 > 3. 이 설계 자체가 "경계 시나리오(c3=드라마성이지 valence 아님)가 유력"이라고 **비관을 사전
 >    등록**해 뒀다. 낮은 사전확률에 청취(비록 14곡)를 더 얹을 근거가 약하다.
 >
@@ -22,7 +22,7 @@
 ---
 
 
-> 계기: 가사 벡터 검색 Phase 1·2(`topic/vector-embedding/report/01·04`)가 **valence(슬픔↔기쁨)
+> 계기: 가사 벡터 검색 Phase 1·2(`topic/vector_embedding/report/01·04`)가 **valence(슬픔↔기쁨)
 > 대리축 부재**를 병목으로 확증했다("슬픈 노래" 3개 arm 모두 0점, 강도축만 유효). 1라운드
 > (`README.md`·`analysis_results.md`)의 미해결 가설 **c3**를 661곡으로 확장해, 이 축이 valence를
 > 대변하는지 극단층 청취로 확인한다.
@@ -32,7 +32,7 @@
 
 ## 데이터
 
-- 보컬 스템 661곡: `topic/vector-embedding/src/method-1/work/stems_full/htdemucs/<tag>/vocals.wav`
+- 보컬 스템 661곡: `topic/vector_embedding/src/method-1/work/stems_full/htdemucs/<tag>/vocals.wav`
   (Phase 1 ASR 준비 산출물, 재분리 비용 0). 검증: vocals.wav 661/661 존재.
 - 발성 지표: `extract_vocal_features.py` 재사용, 단 **mix 의존 `vocal_ratio` 제외**(원본 mix가
   일부만 존재). vocals.wav만으로 계산되는 지표만 쓴다: `jitter_local`·`shimmer_local`·`hnr_mean`

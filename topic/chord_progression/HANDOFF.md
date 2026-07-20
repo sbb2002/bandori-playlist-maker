@@ -46,7 +46,7 @@
      "코드는 맞는데 지표 설계가 이 현상을 못 잡아서"인지 구분하는 게 핵심.
    - roselia·ave_mujica 중 최소 1곡(디스토션 기타 배음이 크로마를 오염시킬 수 있다고 DESIGN.md
      §0이 사전에 우려한 지점).
-   - 오디오 원본: `topic/vector-embedding/src/method-1/work/stems_full/htdemucs/<tag>/no_vocals.wav`
+   - 오디오 원본: `topic/vector_embedding/src/method-1/work/stems_full/htdemucs/<tag>/no_vocals.wav`
      (2-stem 분리, 661곡 전부 이미 존재 — 재분리 불필요).
    - 대조 방법: `out/chord_sequences.csv`를 tag로 필터링해 `(beat_idx, chord_root, chord_quality,
      confidence)` 시퀀스를 곡을 들으며 눈으로/귀로 따라가거나, 필요하면 비트 타임스탬프를 별도
