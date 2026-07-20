@@ -1,6 +1,13 @@
 """곡 제목 로마자/한글 음차 변환 테스트(검색 보조 필드, ja_transliteration.py)."""
 
-from app.repo.ja_transliteration import kana_to_hangul, to_hangul, to_hanja_reading, to_romaji
+from app.repo.ja_transliteration import (
+    kana_to_hangul,
+    kana_to_hangul_variants,
+    to_hangul,
+    to_hangul_variants,
+    to_hanja_reading,
+    to_romaji,
+)
 
 
 def test_to_romaji_basic_hiragana():
@@ -102,6 +109,46 @@ def test_loanword_hangul_telepathy():
     result = full_to_hangul("テレパシー")
     # 히라가나로 변환 후 사전 적용: "てれぱしー" → "텔레파시"
     assert "텔레" in result or "텔" in result  # 최소한 "텔" 포함
+
+
+# ── 장음 변형 병기(한국식 관용 표기 검색) 테스트 ────────────────────────────────
+def test_variants_first_equals_legacy_output():
+    # 변형 0은 종전 kana_to_hangul 출력(원문 음차)과 동일해야 한다(하위호환).
+    for hira in ("はっぴー", "らーめん", "そんぐ", "さくら"):
+        assert kana_to_hangul_variants(hira, strip_separators=False)[0] == kana_to_hangul(hira)
+
+
+def test_variants_carnation_korean_convention():
+    # カーネーション: 원문 음차(모음 반복)·장음 생략형·한국식(에이+션) 모두 병기돼야 한다.
+    variants = to_hangul_variants("カーネーション")
+    assert "카네이션" in variants  # 사용자가 실제로 치는 한국식 관용 표기
+    assert "카네숀" in variants  # 장음 생략형
+    assert any(v in ("카아네에숀", "카아네에션") for v in variants)  # 원문 음차 병행
+
+
+def test_variants_carnation_full_title_substring_match():
+    # 실제 신곡 제목 전체에서 "카네이션" 검색어가 substring으로 걸려야 한다.
+    search_text = " / ".join(to_hangul_variants("カーネーションの咲く日に"))
+    assert "카네이션" in search_text
+
+
+def test_variants_homii_tai_final_sokuon_and_nakaguro():
+    # ホーミー・タイッ: 장음 생략 + 가운뎃점 제거 + 어말 촉음 생략 → "호미타이".
+    variants = to_hangul_variants("ホーミー・タイッ")
+    assert any("호미타이" in v for v in variants)
+    assert any(v.startswith("호오미이") for v in variants)  # 원문 음차 병행
+
+
+def test_variants_ou_diphthong_after_o():
+    # お단+ー: 오/오오/오우 세 갈래(포즈→포우즈 관용 대응).
+    variants = kana_to_hangul_variants("ろーど")
+    assert "로도" in variants and "로오도" in variants and "로우도" in variants
+
+
+def test_variants_word_internal_sokuon_keeps_batchim():
+    # 어중 촉음은 분기하지 않고 종전대로 받침 고정(はっぴ→합피 하나만).
+    variants = kana_to_hangul_variants("はっぴ")
+    assert variants == ["합피"]
 
 
 # ── 한자음(한글 음독) 테스트 ────────────────────────────────────────────────────

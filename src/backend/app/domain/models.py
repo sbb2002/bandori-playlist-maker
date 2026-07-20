@@ -35,6 +35,7 @@ class Song:
     # 일본어를 모르는 사용자가 '곡 추가' 미니 브라우저에서 검색할 수 있도록 로마자/한글 음차 제공.
     song_romaji: str = ""
     song_hangul: str = ""
+    song_hangul_search: str = ""  # 한글 음차 변형 병기(" / " 연결, 검색 매칭 전용 — 표시 안 함)
     song_hanja_reading: str = ""  # 한자 → 한국 한자음(음독)
 
 

@@ -1436,6 +1436,8 @@ function renderPickerSongs() {
       // 로마자/한글 음차/한자음 검색(구버전 백엔드엔 필드가 없을 수 있음 — optional chaining으로 안전 처리).
       || (s.song_romaji?.toLowerCase().includes(q) ?? false)
       || (s.song_hangul?.toLowerCase().includes(q) ?? false)
+      // 장음(ー) 변형 병기 필드 — 원문 음차("카아네에숀")와 한국식 관용("카네이션") 모두 매칭.
+      || (s.song_hangul_search?.toLowerCase().includes(q) ?? false)
       || (s.song_hanja_reading?.toLowerCase().includes(q) ?? false);
   });
   pickerSongsEl.replaceChildren();
