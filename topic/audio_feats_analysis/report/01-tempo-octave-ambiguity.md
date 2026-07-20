@@ -111,11 +111,16 @@ mugendai 「LET'Sあちあちトレーニング！」[89.1, 178.2])이 정확히
 
 ## 6. 다음 세션 인수인계
 
+> **[2026-07-20 완료]** 이 절의 두 작업(단일 후보 선출 파이프라인·bestdori 정량 검증)은
+> `src/method-2/`로 구현·실행 완료됐다. 결과는 `report/02-bestdori-bpm-validation.md` 참조 —
+> 요지: 주파수 정밀도는 우수(옥타브 접은 오차 ±1.1%), τ 규칙은 옥타브 판별 불가로 폐기,
+> "[85,220] 내 최대 후보" 규칙이 Accuracy1 92.5%.
+
 **오늘 세션은 여기서 마무리한다.** 아래는 다음 세션(이 대화를 모르는 상태)이 그대로 읽고 이어갈
 수 있도록 현재 상태와 다음 할 일을 정리한 것이다.
 
 ### 6.1 지금까지 뭘 했는지 (현재 상태)
-- `topic/audio_feats-analysis/out/audio_feats.csv`(661행)에 다음이 모두 병합돼 있다:
+- `topic/audio_feats_analysis/out/audio_feats.csv`(661행)에 다음이 모두 병합돼 있다:
   - MFCC·LUFS·코드진행 파생 피쳐(신규 추출)
   - `songs_master`/`full_audio_features`/`song_features_with_proxies`(기존 산출물)
   - 형제 프로젝트 `bandori-song-sorter`의 드럼 스템 기반 pulse 데이터
@@ -155,7 +160,7 @@ mugendai 「LET'Sあちあちトレーニング！」[89.1, 178.2])이 정확히
 - 후보군 생성 로직(§2.2 4단계) 및 검증(§3.2)의 원본 계산은 이 대화 세션에서 직접 실행한 것으로,
   별도 스크립트 파일로 저장돼 있지 않다 — 필요하면 이 보고서 §2.2, §3.2의 코드/설명을 참고해
   다시 짜야 한다.
-- 절반-후보 검증(§3.4) 스크립트: `topic/audio_feats-analysis/src/method-1/acf_symmetric_check.py`,
+- 절반-후보 검증(§3.4) 스크립트: `topic/audio_feats_analysis/src/method-1/acf_symmetric_check.py`,
   `merge_results.py`.
 - 형제 프로젝트 원본 알고리즘: `bandori-song-sorter/src/tools/cluster/build_beat_track.py`의
   `perceptual_pulse()` (SR=22050, HOP=256, τ=0.96).
