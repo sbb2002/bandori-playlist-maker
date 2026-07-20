@@ -1,0 +1,662 @@
+idx,tag,band,song,selected_bpm_m2,selected_bpm_m5,switched
+0,afterglow__000,afterglow,ON YOUR MARK,184.6,184.6,False
+1,afterglow__001,afterglow,That Is How I Roll!,181.4,181.4,False
+2,afterglow__002,afterglow,SENSENFUKOKU,198.8,198.8,False
+3,afterglow__003,afterglow,I knew it!,198.8,198.8,False
+4,afterglow__004,afterglow,ツナグ、ソラモヨウ,191.4,191.4,False
+5,afterglow__005,afterglow,Hey-day狂騒曲(カプリチオ),156.6,156.6,False
+6,afterglow__006,afterglow,"Easy come, Easy go!",136.0,136.0,False
+7,afterglow__007,afterglow,Sasanqua,198.8,198.8,False
+8,afterglow__008,afterglow,RED RED RED,188.0,188.0,False
+9,afterglow__009,afterglow,ONE OF US,211.0,211.0,False
+10,afterglow__010,afterglow,Y.O.L.O!!!!!,211.0,211.0,False
+11,afterglow__011,afterglow,Scarlet Sky,181.4,181.4,False
+12,afterglow__012,afterglow,Off we go.,120.2,120.2,False
+13,afterglow__013,afterglow,いつも通りのBrand new days,191.4,191.4,False
+14,afterglow__014,afterglow,SWITCH ON NOW,198.8,198.8,False
+15,afterglow__015,afterglow,ランブリングメモリー,126.0,126.0,False
+16,afterglow__016,afterglow,COMIC PANIC!!!,211.0,211.0,False
+17,afterglow__017,afterglow,Trouble Joyful!!,195.0,195.0,False
+18,afterglow__018,afterglow,Jamboree!Journey!,156.6,156.6,False
+19,afterglow__019,afterglow,カナユメ,126.0,126.0,False
+20,afterglow__020,afterglow,独創収差,126.0,126.0,False
+21,afterglow__021,afterglow,極彩色,184.6,184.6,False
+22,afterglow__022,afterglow,サクラゼンセン,139.7,139.7,False
+23,afterglow__023,afterglow,True color,159.0,159.0,False
+24,afterglow__024,afterglow,Crow Song,175.2,175.2,False
+25,afterglow__025,afterglow,カサブタ,172.2,57.39999999999999,True
+26,afterglow__026,afterglow,アイのシナリオ,181.4,181.4,False
+27,afterglow__027,afterglow,Northern lights,136.0,136.0,False
+28,afterglow__028,afterglow,トーキョーワンダー。,136.0,136.0,False
+29,afterglow__029,afterglow,Reach Out To The Truth,169.4,169.4,False
+30,afterglow__030,afterglow,Listen!!,175.2,175.2,False
+31,afterglow__031,afterglow,青い栞,132.5,132.5,False
+32,afterglow__032,afterglow,イマジネーション,202.6,202.6,False
+33,afterglow__033,afterglow,Butter-Fly,172.2,172.2,False
+34,afterglow__034,afterglow,燦々,195.0,195.0,False
+35,afterglow__035,afterglow,That's why I'm here.,184.6,184.6,False
+36,afterglow__036,afterglow,IGNITE GLOW,132.5,132.5,False
+37,afterglow__037,afterglow,ペトリコール・オベーション,184.6,184.6,False
+38,afterglow__038,afterglow,Made My Day,191.4,191.4,False
+39,afterglow__039,afterglow,Glowing After,198.8,66.26666666666667,True
+40,afterglow__040,afterglow,A Sunset So Bright,126.0,126.0,False
+41,afterglow__041,afterglow,Start as Usual,181.4,181.4,False
+42,afterglow__042,afterglow,“Say cheese!!!!!”,120.2,120.2,False
+43,afterglow__043,afterglow,花笑みのデュオ,198.8,198.8,False
+44,afterglow__044,afterglow,READY STEADY GO (Cover),143.6,143.6,False
+45,afterglow__045,afterglow,abnormalize (Cover),175.2,175.2,False
+46,afterglow__046,afterglow,メンタルチェンソー (Cover),188.0,188.0,False
+47,afterglow__047,afterglow,Bunny Girl (Cover),159.0,159.0,False
+48,afterglow__048,afterglow,オレンジ (Cover),198.8,198.8,False
+49,afterglow__049,afterglow,カゲロウデイズ (Cover),198.8,198.8,False
+50,afterglow__050,afterglow,DAY×DAY (Cover),191.4,191.4,False
+51,afterglow__051,afterglow,ロキ (Cover),147.7,147.7,False
+52,afterglow__052,afterglow,CHAINSAW BLOOD (Cover),147.7,147.7,False
+53,afterglow__053,afterglow,チルドレンレコード (Re:boot) (Cover),206.8,206.8,False
+54,afterglow__054,afterglow,青のすみか (Cover),152.0,152.0,False
+55,afterglow__055,afterglow,GO!!! (Cover),132.5,132.5,False
+56,afterglow__056,afterglow,天ノ弱 (Cover),198.8,66.26666666666667,True
+57,afterglow__057,afterglow,アスノヨゾラ哨戒班 (Cover),184.6,184.6,False
+58,afterglow__058,afterglow,瞬間センチメンタル (Cover),169.4,169.4,False
+59,afterglow__059,afterglow,プライド革命 (Cover),184.6,184.6,False
+60,afterglow__060,afterglow,命に嫌われている。 (Cover),198.8,198.8,False
+61,afterglow__061,afterglow,Redo (Cover),191.4,191.4,False
+62,afterglow__062,afterglow,インフェルノ (Cover),184.6,184.6,False
+63,afterglow__063,afterglow,ドラマツルギー (Cover),149.8,149.8,False
+64,afterglow__064,afterglow,COLORS (Cover),136.0,136.0,False
+65,afterglow__065,afterglow,午夜の待ち合わせ (Cover),188.0,188.0,False
+66,afterglow__066,afterglow,サムライハート（Some Like It Hot!!） (Cover),112.3,112.3,False
+67,afterglow__067,afterglow,ベノム (Cover),152.0,152.0,False
+68,afterglow__068,afterglow,Don't say “lazy” (Cover),181.4,181.4,False
+69,afterglow__069,afterglow,Part of the Life,184.6,184.6,False
+70,afterglow__070,afterglow,Punchline Halloween!!!,181.4,181.4,False
+71,afterglow__071,afterglow,I love your way！,129.2,129.2,False
+72,ave_mujica__072,ave_mujica,KiLLKiSS,132.5,132.5,False
+73,ave_mujica__073,ave_mujica,"Georgette Me, Georgette You",143.6,143.6,False
+74,ave_mujica__074,ave_mujica,Imprisoned XII,211.0,158.25,True
+75,ave_mujica__075,ave_mujica,Crucifix X,136.0,204.0,True
+76,ave_mujica__076,ave_mujica,八芒星ダンス,114.8,114.8,False
+77,ave_mujica__077,ave_mujica,顔,139.7,139.7,False
+78,ave_mujica__078,ave_mujica,天球のMúsica,129.2,129.2,False
+79,ave_mujica__079,ave_mujica,黒のバースデイ,198.8,198.8,False
+80,ave_mujica__080,ave_mujica,ふたつの月 ~Deep Into The Forest~,120.2,120.2,False
+81,ave_mujica__081,ave_mujica,Choir ‘S’ Choir,147.7,147.7,False
+82,ave_mujica__082,ave_mujica,神さま、バカ,120.2,120.2,False
+83,ave_mujica__083,ave_mujica,Mas?uerade Rhapsody Re?uest,191.4,191.4,False
+84,ave_mujica__084,ave_mujica,Ave Mujica,112.3,112.3,False
+85,ave_mujica__085,ave_mujica,Symbol I : △,117.5,117.5,False
+86,ave_mujica__086,ave_mujica,Symbol II : Air,198.8,198.8,False
+87,ave_mujica__087,ave_mujica,Symbol III : ▽,166.7,166.7,False
+88,ave_mujica__088,ave_mujica,Symbol IV : Earth,147.7,147.7,False
+89,ave_mujica__089,ave_mujica,Ether,126.0,126.0,False
+90,ave_mujica__090,ave_mujica,The Whole Blue World,198.8,198.8,False
+91,ave_mujica__091,ave_mujica,in your blue eyes,191.4,191.4,False
+92,ave_mujica__092,ave_mujica,素晴らしき世界 でも どこにもない場所,132.5,132.5,False
+93,ave_mujica__093,ave_mujica,Angles,129.2,129.2,False
+94,ave_mujica__094,ave_mujica,DIVINE,117.5,117.5,False
+95,ave_mujica__095,ave_mujica,Sophie,198.8,198.8,False
+96,ave_mujica__096,ave_mujica,‘S/’ The Way,156.6,156.6,False
+97,ave_mujica__097,ave_mujica,碧い瞳の中に,191.4,191.4,False
+98,ave_mujica__098,ave_mujica,堕天 (Cover),206.8,206.8,False
+99,ave_mujica__099,ave_mujica,KINGS (Cover),175.2,58.39999999999999,True
+100,ave_mujica__100,ave_mujica,暗黒天国 (Cover),191.4,191.4,False
+101,various_artists__101,various_artists,Don't be afraid!,181.4,181.4,False
+102,various_artists__102,various_artists,Glee! Glee! Glee!,181.4,181.4,False
+103,various_artists__103,various_artists,"Be shine, shining!",117.5,117.5,False
+104,various_artists__104,various_artists,"Here, the world",123.0,123.0,False
+105,various_artists__105,various_artists,CiRCLE THANKS MUSiC♪,123.0,123.0,False
+106,hello_happy_world__106,hello_happy_world,キミがいなくちゃっ！,123.0,123.0,False
+107,hello_happy_world__107,hello_happy_world,ハイファイブ∞あどべんちゃっ,198.8,198.8,False
+108,hello_happy_world__108,hello_happy_world,スマイルブーケで た〜まや〜！,152.0,152.0,False
+109,hello_happy_world__109,hello_happy_world,えがお･シング･あ･ソング,152.0,152.0,False
+110,hello_happy_world__110,hello_happy_world,YAPPY! SCHOOL CARNIVAL☆彡,172.2,172.2,False
+111,hello_happy_world__111,hello_happy_world,にこ×にこ=ハイパースマイルパワー！,191.4,191.4,False
+112,hello_happy_world__112,hello_happy_world,ないすみちゅっ！,175.2,175.2,False
+113,hello_happy_world__113,hello_happy_world,ゴーカ！ごーかい！？ファントムシーフ！,215.4,215.4,False
+114,hello_happy_world__114,hello_happy_world,うぃーきゃん☆フレフレっ！,181.4,181.4,False
+115,hello_happy_world__115,hello_happy_world,えがおのオーケストラっ！,139.7,139.7,False
+116,hello_happy_world__116,hello_happy_world,にこにこねくと！,166.8,166.8,False
+117,hello_happy_world__117,hello_happy_world,ふぁいぶスマイル◯オールインっ！,126.0,126.0,False
+118,hello_happy_world__118,hello_happy_world,せかいのっびのびトレジャー！,169.4,56.46666666666667,True
+119,hello_happy_world__119,hello_happy_world,きらっ☆と キミフェス！,129.2,129.2,False
+120,hello_happy_world__120,hello_happy_world,うちゃパ！で ぱっぴかポーんっ！,195.0,195.0,False
+121,hello_happy_world__121,hello_happy_world,はれやか すこやか ぴかりんりん♪,114.8,114.8,False
+122,hello_happy_world__122,hello_happy_world,ふわふわ☆ゆめいろサンドイッチ,129.2,129.2,False
+123,hello_happy_world__123,hello_happy_world,Happy! Happier! Happiest!,172.2,172.2,False
+124,hello_happy_world__124,hello_happy_world,現るっ！大怪盗ハロハッピー！,184.6,184.6,False
+125,hello_happy_world__125,hello_happy_world,わちゃ・もちゃ・ぺったん行進曲,161.5,161.5,False
+126,hello_happy_world__126,hello_happy_world,おもいでイルミネーション,166.7,166.7,False
+127,hello_happy_world__127,hello_happy_world,おもいやりハーモニー,136.0,136.0,False
+128,hello_happy_world__128,hello_happy_world,ハピネスっ！ハピィーマジカルっ♪,184.6,184.6,False
+129,hello_happy_world__129,hello_happy_world,えがお、あーゆーれでぃ???,139.7,139.7,False
+130,hello_happy_world__130,hello_happy_world,ハッピーサマーウェディング,129.2,129.2,False
+131,hello_happy_world__131,hello_happy_world,ひまわりの約束,159.0,53.0,True
+132,hello_happy_world__132,hello_happy_world,ハッピー☆マテリアル,164.0,164.0,False
+133,hello_happy_world__133,hello_happy_world,太陽曰く燃えよカオス,143.6,143.6,False
+134,hello_happy_world__134,hello_happy_world,エクストラ・マジック・アワー,181.4,181.4,False
+135,hello_happy_world__135,hello_happy_world,コレカラ,161.5,161.5,False
+136,hello_happy_world__136,hello_happy_world,全力少年,132.5,132.5,False
+137,hello_happy_world__137,hello_happy_world,オレンジ,139.7,139.7,False
+138,hello_happy_world__138,hello_happy_world,Happy Girl,143.6,143.6,False
+139,hello_happy_world__139,hello_happy_world,ン・パカマーチ,117.5,78.33333333333333,True
+140,hello_happy_world__140,hello_happy_world,サンバロハッピ〜！,129.2,129.2,False
+141,hello_happy_world__141,hello_happy_world,ボクらの夏's☆ショーたいむっ！！,178.2,178.2,False
+142,hello_happy_world__142,hello_happy_world,むすんでわらって,129.2,129.2,False
+143,hello_happy_world__143,hello_happy_world,キミを れっつ・はぶ・ふぁん♪,156.6,156.6,False
+144,hello_happy_world__144,hello_happy_world,らいふ・いず・みゅーじかるっ♪♪♪,139.7,139.7,False
+145,hello_happy_world__145,hello_happy_world,れっつ・スマイル・すとり〜みんぐっ♪,149.8,149.8,False
+146,hello_happy_world__146,hello_happy_world,やっほー！いっぽ！わんだふぉー！,156.6,156.6,False
+147,hello_happy_world__147,hello_happy_world,とーくとぅみー・とーくとぅゆー,136.0,136.0,False
+148,hello_happy_world__148,hello_happy_world,ハイタッチ／＼びりーばーず☆,166.7,166.7,False
+149,hello_happy_world__149,hello_happy_world,Listen to Smile!,126.0,126.0,False
+150,hello_happy_world__150,hello_happy_world,スマイリーキャロル,220.0,220.0,False
+151,hello_happy_world__151,hello_happy_world,えがお、み〜っけた！,143.6,143.6,False
+152,hello_happy_world__152,hello_happy_world,上海ハニー (Cover),129.2,129.2,False
+153,hello_happy_world__153,hello_happy_world,シル・ヴ・プレジデント (Cover),175.2,175.2,False
+154,hello_happy_world__154,hello_happy_world,ヒャダインのじょーじょーゆーじょー (Cover),198.8,198.8,False
+155,hello_happy_world__155,hello_happy_world,はいよろこんで (Cover),147.7,147.7,False
+156,hello_happy_world__156,hello_happy_world,シカ色デイズ (Cover),184.6,184.6,False
+157,hello_happy_world__157,hello_happy_world,強風オールバック (Cover),136.0,136.0,False
+158,hello_happy_world__158,hello_happy_world,最高到達点 (Cover),132.5,132.5,False
+159,hello_happy_world__159,hello_happy_world,許婚っきゅん (Cover),147.7,147.7,False
+160,hello_happy_world__160,hello_happy_world,新宝島 (Cover),156.6,156.6,False
+161,hello_happy_world__161,hello_happy_world,ドレミファロンド (Cover),126.0,126.0,False
+162,hello_happy_world__162,hello_happy_world,きゅうくらりん (Cover),220.0,220.0,False
+163,hello_happy_world__163,hello_happy_world,ロメオ (Cover),139.7,139.7,False
+164,hello_happy_world__164,hello_happy_world,エイリアンエイリアン (Cover),152.0,152.0,False
+165,hello_happy_world__165,hello_happy_world,いーあるふぁんくらぶ (Cover),143.6,143.6,False
+166,hello_happy_world__166,hello_happy_world,回レ！雪月花 (Cover),159.0,159.0,False
+167,hello_happy_world__167,hello_happy_world,恋愛裁判 (Cover),132.5,132.5,False
+168,hello_happy_world__168,hello_happy_world,TOMORROW (Cover),132.5,132.5,False
+169,hello_happy_world__169,hello_happy_world,GO! GO! MANIAC (Cover),126.0,126.0,False
+170,hello_happy_world__170,hello_happy_world,Dragon Night (Cover),123.0,123.0,False
+171,hello_happy_world__171,hello_happy_world,ようこそジャパリパークへ (Cover),169.4,169.4,False
+172,hello_happy_world__172,hello_happy_world,ウィーアー！ (Cover),169.4,169.4,False
+173,hello_happy_world__173,hello_happy_world,おジャ魔女カーニバル!! (Cover),147.7,147.7,False
+174,hello_happy_world__174,hello_happy_world,ダーリンダンス (Cover),152.0,152.0,False
+175,hello_happy_world__175,hello_happy_world,ノーポイッ！ (Cover),156.6,156.6,False
+176,hello_happy_world__176,hello_happy_world,SHINY DAYS (Cover),220.0,73.33333333333333,True
+177,hello_happy_world__177,hello_happy_world,シルエット (Cover),184.6,184.6,False
+178,ikka_dumb_rock__178,ikka_dumb_rock,ホーミー・タイッ！！,129.2,129.2,False
+179,millsage__179,millsage,起死開戦,112.3,112.3,False
+180,morfonica__180,morfonica,Daylight -デイライト-,184.6,184.6,False
+181,morfonica__181,morfonica,メランコリックララバイ,181.4,181.4,False
+182,morfonica__182,morfonica,flame of hope,191.4,191.4,False
+183,morfonica__183,morfonica,ブルームブルーム,181.4,181.4,False
+184,morfonica__184,morfonica,カラフルリバティー,184.6,184.6,False
+185,morfonica__185,morfonica,fly with the night,169.4,169.4,False
+186,morfonica__186,morfonica,金色へのプレリュード,175.2,175.2,False
+187,morfonica__187,morfonica,The Circle Of Butterflies,175.2,175.2,False
+188,morfonica__188,morfonica,ハーモニー・デイ,181.4,181.4,False
+189,morfonica__189,morfonica,Sweet Cheers!,220.0,220.0,False
+190,morfonica__190,morfonica,"寄る辺のSunny, Sunny",184.6,184.6,False
+191,morfonica__191,morfonica,誓いのWingbeat,206.8,206.8,False
+192,morfonica__192,morfonica,Ever Sky Blue,195.0,195.0,False
+193,morfonica__193,morfonica,Polyphonyscape,152.0,152.0,False
+194,morfonica__194,morfonica,Wreath of Brave,136.0,136.0,False
+195,morfonica__195,morfonica,Merry Merry Thanks!!,143.6,143.6,False
+196,morfonica__196,morfonica,Sonorous,132.5,132.5,False
+197,morfonica__197,morfonica,両翼のBrilliance,172.2,172.2,False
+198,morfonica__198,morfonica,Steer to Utopia,195.0,65.0,True
+199,morfonica__199,morfonica,Fateful...,132.5,132.5,False
+200,morfonica__200,morfonica,ティリカモニカリラ,139.7,139.7,False
+201,morfonica__201,morfonica,Secret Dawn,132.5,88.33333333333333,True
+202,morfonica__202,morfonica,Angel's Ladder,198.8,198.8,False
+203,morfonica__203,morfonica,One step at a time,175.2,175.2,False
+204,morfonica__204,morfonica,Tempest,202.6,202.6,False
+205,morfonica__205,morfonica,フレージング ミラージュ,191.4,191.4,False
+206,morfonica__206,morfonica,MUGEN Reverberate!,188.0,62.66666666666666,True
+207,morfonica__207,morfonica,わたしまちがいさがし,120.2,120.2,False
+208,morfonica__208,morfonica,esora no clover,161.5,161.5,False
+209,morfonica__209,morfonica,きょうもMerry go rounD,136.0,136.0,False
+210,morfonica__210,morfonica,Feathered Dreams,175.2,175.2,False
+211,morfonica__211,morfonica,Portray Empathy,172.2,172.2,False
+212,morfonica__212,morfonica,ビューティ・フォー,198.8,198.8,False
+213,morfonica__213,morfonica,胡蝶翔る星月夜,198.8,198.8,False
+214,morfonica__214,morfonica,Color of Us,195.0,195.0,False
+215,morfonica__215,morfonica,Resonant Strings,195.0,195.0,False
+216,morfonica__216,morfonica,Shining Leaves,184.6,184.6,False
+217,morfonica__217,morfonica,音がえしのセレナーデ,184.6,184.6,False
+218,morfonica__218,morfonica,蒼穹へのトレイル,191.4,191.4,False
+219,morfonica__219,morfonica,QUEEN (Cover),169.4,169.4,False
+220,morfonica__220,morfonica,again (Cover),188.0,141.0,True
+221,morfonica__221,morfonica,輪舞-revolution (Cover),129.2,86.13333333333333,True
+222,morfonica__222,morfonica,メロウ (Cover),145.6,145.6,False
+223,morfonica__223,morfonica,祝福 (Cover),169.4,169.4,False
+224,morfonica__224,morfonica,Overdose (Cover),117.5,117.5,False
+225,morfonica__225,morfonica,かくれんぼ (Cover),181.4,181.4,False
+226,morfonica__226,morfonica,chAngE (Cover),164.0,164.0,False
+227,morfonica__227,morfonica,ALIVE (Cover),178.2,178.2,False
+228,morfonica__228,morfonica,Nameless Story (Cover),195.0,195.0,False
+229,morfonica__229,morfonica,青空のラプソディ (Cover),136.0,136.0,False
+230,morfonica__230,morfonica,Nevereverland (Cover),206.8,206.8,False
+231,morfonica__231,morfonica,メリッサ (Cover),169.4,169.4,False
+232,morfonica__232,morfonica,COLORFUL BOX (Cover),161.5,161.5,False
+233,morfonica__233,morfonica,unravel (Cover),136.0,136.0,False
+234,morfonica__234,morfonica,アゲハ蝶 (Cover),114.8,114.8,False
+235,morfonica__235,morfonica,V.I.P (Cover),184.6,184.6,False
+236,morfonica__236,morfonica,CQCQ (Cover),143.6,143.6,False
+237,mugendai_mutype__237,mugendai_mutype,アイの夢限,120.2,120.2,False
+238,mugendai_mutype__238,mugendai_mutype,どんがらがっしゃん,132.5,132.5,False
+239,mugendai_mutype__239,mugendai_mutype,みゅーたんとミュータント,152.0,152.0,False
+240,mugendai_mutype__240,mugendai_mutype,チューニング,195.0,195.0,False
+241,mugendai_mutype__241,mugendai_mutype,Dream Voyage,156.6,156.6,False
+242,mugendai_mutype__242,mugendai_mutype,グラディエント,120.2,120.2,False
+243,mugendai_mutype__243,mugendai_mutype,LET'Sあちあちトレーニング！,178.2,178.2,False
+244,mugendai_mutype__244,mugendai_mutype,真夜中遊園地,195.0,195.0,False
+245,mugendai_mutype__245,mugendai_mutype,テレパシー,178.2,59.39999999999999,True
+246,mugendai_mutype__246,mugendai_mutype,TRASH LIFE,120.2,120.2,False
+247,mugendai_mutype__247,mugendai_mutype,新人類は仮想世界の夢を見るか?,181.4,181.4,False
+248,mugendai_mutype__248,mugendai_mutype,コミュ着火Fire!,198.8,198.8,False
+249,mugendai_mutype__249,mugendai_mutype,Calling,175.2,175.2,False
+250,mugendai_mutype__250,mugendai_mutype,Hi-Vision,202.6,202.6,False
+251,mugendai_mutype__251,mugendai_mutype,コハク,195.0,195.0,False
+252,mugendai_mutype__252,mugendai_mutype,✞animaるパーティ✞開催中✞,195.0,195.0,False
+253,mugendai_mutype__253,mugendai_mutype,エンプティパペット,126.0,126.0,False
+254,mugendai_mutype__254,mugendai_mutype,限界現実サバイブ天使,188.0,188.0,False
+255,mugendai_mutype__255,mugendai_mutype,ビッグマウス,143.6,143.6,False
+256,mugendai_mutype__256,mugendai_mutype,夢現妄想世界,195.0,195.0,False
+257,mugendai_mutype__257,mugendai_mutype,やわやわNERD 超FreQuency,147.7,147.7,False
+258,mugendai_mutype__258,mugendai_mutype,超惑星Xへの旅,136.0,136.0,False
+259,mugendai_mutype__259,mugendai_mutype,これはぼくたちの生存のあらすじ,191.4,191.4,False
+260,mygo__260,mygo,迷星叫,191.4,191.4,False
+261,mygo__261,mygo,壱雫空,202.6,202.6,False
+262,mygo__262,mygo,碧天伴走,191.4,191.4,False
+263,mygo__263,mygo,影色舞,166.7,166.7,False
+264,mygo__264,mygo,歌いましょう鳴らしましょう,220.0,73.33333333333333,True
+265,mygo__265,mygo,潜在表明,136.0,136.0,False
+266,mygo__266,mygo,音一会,198.8,198.8,False
+267,mygo__267,mygo,春日影 (MyGO!!!!! ver.),195.0,65.0,True
+268,mygo__268,mygo,詩超絆,191.4,191.4,False
+269,mygo__269,mygo,迷路日々,129.2,129.2,False
+270,mygo__270,mygo,無路矢,120.2,120.2,False
+271,mygo__271,mygo,名無声,191.4,191.4,False
+272,mygo__272,mygo,栞,175.2,58.39999999999999,True
+273,mygo__273,mygo,歩拾道,129.2,129.2,False
+274,mygo__274,mygo,明弦音,184.6,184.6,False
+275,mygo__275,mygo,孤壊牢,181.4,181.4,False
+276,mygo__276,mygo,霧周途,220.0,220.0,False
+277,mygo__277,mygo,端程山,181.4,181.4,False
+278,mygo__278,mygo,処救生,191.4,191.4,False
+279,mygo__279,mygo,輪符雨,152.0,152.0,False
+280,mygo__280,mygo,夜隠染,112.3,112.3,False
+281,mygo__281,mygo,過惰幻,169.4,169.4,False
+282,mygo__282,mygo,回層浮,198.8,198.8,False
+283,mygo__283,mygo,砂寸奏,181.4,181.4,False
+284,mygo__284,mygo,焚音打,191.4,191.4,False
+285,mygo__285,mygo,残痕字,175.2,175.2,False
+286,mygo__286,mygo,掌心正銘,184.6,184.6,False
+287,mygo__287,mygo,証命讃歌,211.0,211.0,False
+288,mygo__288,mygo,エガクミライ,175.2,58.39999999999999,True
+289,mygo__289,mygo,静降想,123.0,184.5,True
+290,mygo__290,mygo,聿日箋秋,181.4,181.4,False
+291,mygo__291,mygo,往欄印,181.4,181.4,False
+292,mygo__292,mygo,だれかの心臓になれたなら (Cover),145.6,145.6,False
+293,mygo__293,mygo,遥か彼方 (Cover),175.2,175.2,False
+294,mygo__294,mygo,雑踏、僕らの街 (Cover),172.2,172.2,False
+295,mygo__295,mygo,過去を喰らう (Cover),188.0,188.0,False
+296,mygo__296,mygo,君の神様になりたい。 (Cover),195.0,195.0,False
+297,mygo__297,mygo,ノンブレス・オブリージュ (Cover),147.6,147.6,False
+298,mygo__298,mygo,swim (Cover),195.0,195.0,False
+299,mygo__299,mygo,猛独が襲う (Cover),156.6,156.6,False
+300,mygo__300,mygo,春日影,129.2,96.9,True
+301,pastel_palettes__301,pastel_palettes,TITLE IDOL,143.6,143.6,False
+302,pastel_palettes__302,pastel_palettes,ワクワクmeetsトリップ,136.0,136.0,False
+303,pastel_palettes__303,pastel_palettes,ゆら・ゆらRing-Dong-Dance,172.2,57.39999999999999,True
+304,pastel_palettes__304,pastel_palettes,もういちど ルミナス,169.4,169.4,False
+305,pastel_palettes__305,pastel_palettes,あっつあつ 常夏 らぶ☆サマー！,172.2,172.2,False
+306,pastel_palettes__306,pastel_palettes,天下トーイツ A to Z☆,152.0,152.0,False
+307,pastel_palettes__307,pastel_palettes,しゅわりん☆どり〜みん,175.2,175.2,False
+308,pastel_palettes__308,pastel_palettes,Power of LOVE!!!,175.2,175.2,False
+309,pastel_palettes__309,pastel_palettes,きゅ～まい＊flower,184.6,184.6,False
+310,pastel_palettes__310,pastel_palettes,Winking☆Cheer,198.8,198.8,False
+311,pastel_palettes__311,pastel_palettes,ゆめゆめグラデーション,136.0,90.66666666666666,True
+312,pastel_palettes__312,pastel_palettes,はなまる◎アンダンテ,166.7,166.7,False
+313,pastel_palettes__313,pastel_palettes,パスパレボリューションず☆,175.2,175.2,False
+314,pastel_palettes__314,pastel_palettes,SURVIVOR ねばーぎぶあっぷ!,198.8,198.8,False
+315,pastel_palettes__315,pastel_palettes,Wonderland Girl,136.0,136.0,False
+316,pastel_palettes__316,pastel_palettes,ゼッタイ宣言～Recital～,178.2,178.2,False
+317,pastel_palettes__317,pastel_palettes,ぎゅっDAYS♪,172.3,172.3,False
+318,pastel_palettes__318,pastel_palettes,Wonderful Sweet!,166.8,166.8,False
+319,pastel_palettes__319,pastel_palettes,るんっ♪てぃてぃー！,164.0,54.66666666666666,True
+320,pastel_palettes__320,pastel_palettes,パッパレ☆人生！バーン万歳！,169.4,169.4,False
+321,pastel_palettes__321,pastel_palettes,Brand new Pastel Road!,172.3,172.3,False
+322,pastel_palettes__322,pastel_palettes,あこがれacross,191.4,191.4,False
+323,pastel_palettes__323,pastel_palettes,ハレハレ☆フォーチュン,147.7,147.7,False
+324,pastel_palettes__324,pastel_palettes,ハナヒバナ,191.4,191.4,False
+325,pastel_palettes__325,pastel_palettes,そばかす,169.4,169.4,False
+326,pastel_palettes__326,pastel_palettes,気まぐれロマンティック,112.3,112.3,False
+327,pastel_palettes__327,pastel_palettes,ドリームパレード,172.2,172.2,False
+328,pastel_palettes__328,pastel_palettes,ラムのラブソング,120.2,180.3,True
+329,pastel_palettes__329,pastel_palettes,DANCE! おジャ魔女,152.0,152.0,False
+330,pastel_palettes__330,pastel_palettes,DISCOTHEQUE,143.6,143.6,False
+331,pastel_palettes__331,pastel_palettes,ゆりゆららららゆるゆり大事件,175.2,175.2,False
+332,pastel_palettes__332,pastel_palettes,SAKURAスキップ,164.0,164.0,False
+333,pastel_palettes__333,pastel_palettes,Stay Alive,139.7,139.7,False
+334,pastel_palettes__334,pastel_palettes,秘密の扉から会いにきて,184.6,184.6,False
+335,pastel_palettes__335,pastel_palettes,トリドリ＊パレット,178.2,178.2,False
+336,pastel_palettes__336,pastel_palettes,ドラマチック！アライブ,184.6,184.6,False
+337,pastel_palettes__337,pastel_palettes,Radiate Warriors,129.2,129.2,False
+338,pastel_palettes__338,pastel_palettes,ReReReエボリューションず☆,188.0,188.0,False
+339,pastel_palettes__339,pastel_palettes,everyday flower,136.0,136.0,False
+340,pastel_palettes__340,pastel_palettes,With〜きみとわたしたちの物語〜,188.0,188.0,False
+341,pastel_palettes__341,pastel_palettes,フレっとパレットFight Song!!,143.6,143.6,False
+342,pastel_palettes__342,pastel_palettes,デイオフ・ラフ・ラブ・サンクス,139.7,139.7,False
+343,pastel_palettes__343,pastel_palettes,ホワイト ノスタルジア,139.7,139.7,False
+344,pastel_palettes__344,pastel_palettes,Y.O.L.O！！！！！(パスパレver.),211.0,211.0,False
+345,pastel_palettes__345,pastel_palettes,奏（かなで） (Cover),152.0,152.0,False
+346,pastel_palettes__346,pastel_palettes,Sparkling Daydream (Cover),175.2,175.2,False
+347,pastel_palettes__347,pastel_palettes,春を告げる (Cover),120.2,120.2,False
+348,pastel_palettes__348,pastel_palettes,だから、ひとりじゃない (Cover),181.4,181.4,False
+349,pastel_palettes__349,pastel_palettes,サインはB (Cover),175.2,175.2,False
+350,pastel_palettes__350,pastel_palettes,愛包ダンスホール (Cover),139.7,139.7,False
+351,pastel_palettes__351,pastel_palettes,最上級にかわいいの！ (Cover),166.7,166.7,False
+352,pastel_palettes__352,pastel_palettes,♡桃色片想い♡ (Cover),152.0,152.0,False
+353,pastel_palettes__353,pastel_palettes,金曜日のおはよう (Cover),152.0,152.0,False
+354,pastel_palettes__354,pastel_palettes,魔法少女とチョコレゐト (Cover),152.0,152.0,False
+355,pastel_palettes__355,pastel_palettes,可愛くてごめん (Cover),161.5,161.5,False
+356,pastel_palettes__356,pastel_palettes,からくりピエロ (Cover),202.6,202.6,False
+357,pastel_palettes__357,pastel_palettes,みくみくにしてあげる♪【してやんよ】 (Cover),161.5,161.5,False
+358,pastel_palettes__358,pastel_palettes,ルカルカ★ナイトフィーバー (Cover),161.5,161.5,False
+359,pastel_palettes__359,pastel_palettes,アイドル (Cover),166.7,166.7,False
+360,pastel_palettes__360,pastel_palettes,secret base ～君がくれたもの～ (Cover),143.6,143.6,False
+361,pastel_palettes__361,pastel_palettes,ふわふわ時間 (Cover),181.4,181.4,False
+362,pastel_palettes__362,pastel_palettes,Fantastic future (Cover),172.2,172.2,False
+363,pastel_palettes__363,pastel_palettes,Baby Sweet Berry Love (Cover),169.4,169.4,False
+364,pastel_palettes__364,pastel_palettes,Q＆A　リサイタル！ (Cover),181.4,60.46666666666667,True
+365,pastel_palettes__365,pastel_palettes,ヒトリゴト (Cover),166.7,166.7,False
+366,pastel_palettes__366,pastel_palettes,惑星ループ (Cover),169.4,169.4,False
+367,pastel_palettes__367,pastel_palettes,世界は恋に落ちている (Cover),129.2,129.2,False
+368,pastel_palettes__368,pastel_palettes,ハッピーシンセサイザ (Cover),126.0,126.0,False
+369,pastel_palettes__369,pastel_palettes,春擬き (Cover),172.3,172.3,False
+370,pastel_palettes__370,pastel_palettes,Make it! (Cover),172.2,172.2,False
+371,pastel_palettes__371,pastel_palettes,花ハ踊レヤいろはにほ (Cover),161.5,161.5,False
+372,pastel_palettes__372,pastel_palettes,夜に駆ける (Cover),129.2,129.2,False
+373,pastel_palettes__373,pastel_palettes,徒花ネクロマンシー (Cover),172.2,172.2,False
+374,pastel_palettes__374,pastel_palettes,ノスタルジックレインフォール (Cover),166.7,166.7,False
+375,poppin_party__375,poppin_party,Yes! BanG_Dream!,184.6,184.6,False
+376,poppin_party__376,poppin_party,STAR BEAT!～ホシノコドウ～,195.0,195.0,False
+377,poppin_party__377,poppin_party,走り始めたばかりのキミに,166.7,166.7,False
+378,poppin_party__378,poppin_party,ティアドロップス,191.4,191.4,False
+379,poppin_party__379,poppin_party,ときめきエクスペリエンス！,181.4,181.4,False
+380,poppin_party__380,poppin_party,キラキラだとか夢だとか ～Sing Girls～,181.4,181.4,False
+381,poppin_party__381,poppin_party,私の心はチョココロネ,132.5,132.5,False
+382,poppin_party__382,poppin_party,前へススメ！,181.4,181.4,False
+383,poppin_party__383,poppin_party,夢みるSunflower,164.0,164.0,False
+384,poppin_party__384,poppin_party,ティアドロップス ～Popipa Acoustic Ver.～,178.2,178.2,False
+385,poppin_party__385,poppin_party,走り始めたばかりのキミに ～Popipa Acoustic Ver.～,215.4,71.8,True
+386,poppin_party__386,poppin_party,Time Lapse,191.4,191.4,False
+387,poppin_party__387,poppin_party,八月のif,120.2,120.2,False
+388,poppin_party__388,poppin_party,クリスマスのうた,139.7,139.7,False
+389,poppin_party__389,poppin_party,B.O.F,175.2,175.2,False
+390,poppin_party__390,poppin_party,CiRCLING,159.0,159.0,False
+391,poppin_party__391,poppin_party,二重の虹(ダブル レインボウ),188.0,188.0,False
+392,poppin_party__392,poppin_party,最高(さあ行こう)！,181.4,181.4,False
+393,poppin_party__393,poppin_party,ガールズコード,126.0,126.0,False
+394,poppin_party__394,poppin_party,Yes! BanG_Dream! ～Popipa Acoustic Ver.～,169.4,169.4,False
+395,poppin_party__395,poppin_party,夏空 SUN! SUN! SEVEN! ～Popipa Acoustic Ver.～,161.5,161.5,False
+396,poppin_party__396,poppin_party,STAR BEAT!～ホシノコドウ～ ～Popipa Acoustic Ver.～,175.2,175.2,False
+397,poppin_party__397,poppin_party,Breakthrough!,184.6,184.6,False
+398,poppin_party__398,poppin_party,NO GIRL NO CRY/Poppin'Party Ver.,191.4,191.4,False
+399,poppin_party__399,poppin_party,イニシャル,191.4,191.4,False
+400,poppin_party__400,poppin_party,Hello! Wink!,152.0,152.0,False
+401,poppin_party__401,poppin_party,Step×Step!,147.7,147.7,False
+402,poppin_party__402,poppin_party,Jumpin',195.0,195.0,False
+403,poppin_party__403,poppin_party,White Afternoon,143.6,143.6,False
+404,poppin_party__404,poppin_party,キラキラスター！,149.8,49.93333333333334,True
+405,poppin_party__405,poppin_party,Returns,184.6,184.6,False
+406,poppin_party__406,poppin_party,Dreamers Go!,184.6,184.6,False
+407,poppin_party__407,poppin_party,キズナミュージック♪,188.0,188.0,False
+408,poppin_party__408,poppin_party,ミライトレイン,175.2,175.2,False
+409,poppin_party__409,poppin_party,夢を撃ち抜く瞬間に！,202.6,202.6,False
+410,poppin_party__410,poppin_party,ぽっぴん'しゃっふる,220.0,220.0,False
+411,poppin_party__411,poppin_party,夏空 SUN! SUN! SEVEN!,175.2,175.2,False
+412,poppin_party__412,poppin_party,1000回潤んだ空,181.4,60.46666666666667,True
+413,poppin_party__413,poppin_party,HAPPY HAPPY PARTY!,139.6,139.6,False
+414,poppin_party__414,poppin_party,夏のドーン！,159.0,159.0,False
+415,poppin_party__415,poppin_party,キミにもらったもの,147.7,147.7,False
+416,poppin_party__416,poppin_party,Light Delight,181.4,181.4,False
+417,poppin_party__417,poppin_party,切ないSandglass,184.6,184.6,False
+418,poppin_party__418,poppin_party,Home Street,211.0,211.0,False
+419,poppin_party__419,poppin_party,What's the POPIPA!?,184.6,184.6,False
+420,poppin_party__420,poppin_party,SAKURA MEMORIES,175.2,175.2,False
+421,poppin_party__421,poppin_party,アニバーサリー,169.4,169.4,False
+422,poppin_party__422,poppin_party,Tomorrow's Door,178.2,178.2,False
+423,poppin_party__423,poppin_party,イントロダクション,164.0,164.0,False
+424,poppin_party__424,poppin_party,TARINAI,191.4,191.4,False
+425,poppin_party__425,poppin_party,DOKI DOKI SCARY,143.6,143.6,False
+426,poppin_party__426,poppin_party,Photograph,152.0,152.0,False
+427,poppin_party__427,poppin_party,夏に閉じこめて,191.4,191.4,False
+428,poppin_party__428,poppin_party,ぽっぴん'どりーむ！,198.8,198.8,False
+429,poppin_party__429,poppin_party,星の約束,175.2,175.2,False
+430,poppin_party__430,poppin_party,新しい季節に,126.0,126.0,False
+431,poppin_party__431,poppin_party,トレモロアイズ,164.0,164.0,False
+432,poppin_party__432,poppin_party,雨上がり、キミと,188.0,188.0,False
+433,poppin_party__433,poppin_party,花咲く未来に,139.6,139.6,False
+434,poppin_party__434,poppin_party,Live Beyond!!,191.4,191.4,False
+435,poppin_party__435,poppin_party,Sweets BAN!,156.6,156.6,False
+436,poppin_party__436,poppin_party,キミが始まる！,178.2,178.2,False
+437,poppin_party__437,poppin_party,Moonlight Walk,191.4,191.4,False
+438,poppin_party__438,poppin_party,ここから先は歌にならない,191.4,191.4,False
+439,poppin_party__439,poppin_party,青春 To Be Continued,132.5,132.5,False
+440,poppin_party__440,poppin_party,Future Place,184.6,184.6,False
+441,poppin_party__441,poppin_party,大好き！,166.7,166.7,False
+442,poppin_party__442,poppin_party,Five Letters,129.2,129.2,False
+443,poppin_party__443,poppin_party,最強☆ソング,181.4,181.4,False
+444,poppin_party__444,poppin_party,RiNG A BELL,181.4,60.46666666666667,True
+445,poppin_party__445,poppin_party,Drive Your Heart,147.7,147.7,False
+446,poppin_party__446,poppin_party,とっておきAnswer,191.4,191.4,False
+447,poppin_party__447,poppin_party,START!! True dreams,178.2,178.2,False
+448,poppin_party__448,poppin_party,どきどきデエト,184.6,184.6,False
+449,poppin_party__449,poppin_party,チョコレイトの低音レシピ,191.4,191.4,False
+450,poppin_party__450,poppin_party,Chu Chueen!,211.0,211.0,False
+451,poppin_party__451,poppin_party,どきどきSING OUT!,195.0,195.0,False
+452,poppin_party__452,poppin_party,Freedom,159.0,159.0,False
+453,poppin_party__453,poppin_party,Game Changer,198.8,198.8,False
+454,poppin_party__454,poppin_party,花園電気ギター！！！,188.0,188.0,False
+455,poppin_party__455,poppin_party,す、好きなんかじゃない！,166.8,166.8,False
+456,poppin_party__456,poppin_party,遠い音楽 ～ハートビート～,169.4,169.4,False
+457,poppin_party__457,poppin_party,ほな！,184.6,184.6,False
+458,poppin_party__458,poppin_party,世界中の青空をあつめて,195.0,195.0,False
+459,poppin_party__459,poppin_party,勇気Limit！,112.3,112.3,False
+460,poppin_party__460,poppin_party,開けたらDream!,139.7,139.7,False
+461,poppin_party__461,poppin_party,絆色のアンサンブル,188.0,62.66666666666666,True
+462,poppin_party__462,poppin_party,NO GIRL NO CRY (Poppin'Party Ver.),191.4,191.4,False
+463,poppin_party__463,poppin_party,ちゅ、多様性。 (Cover),152.0,152.0,False
+464,poppin_party__464,poppin_party,フィクション (Cover),123.0,123.0,False
+465,poppin_party__465,poppin_party,幾億光年 (Cover),191.4,191.4,False
+466,poppin_party__466,poppin_party,心絵 (Cover),191.4,191.4,False
+467,poppin_party__467,poppin_party,じょいふる (Cover),159.0,159.0,False
+468,poppin_party__468,poppin_party,MATSURI BAYASHI (Cover),152.0,152.0,False
+469,poppin_party__469,poppin_party,私は最強 (Cover),191.4,63.8,True
+470,poppin_party__470,poppin_party,トウキョウ・シャンディ・ランデヴ (Cover),136.0,136.0,False
+471,poppin_party__471,poppin_party,夜行性ハイズ (Cover),132.5,132.5,False
+472,poppin_party__472,poppin_party,メランコリック (Cover),139.7,139.7,False
+473,poppin_party__473,poppin_party,怪獣の花唄 (Cover),149.8,49.93333333333334,True
+474,poppin_party__474,poppin_party,光るなら (Cover),159.0,159.0,False
+475,poppin_party__475,poppin_party,ミュージック・アワー (Cover),136.0,136.0,False
+476,poppin_party__476,poppin_party,only my railgun (Cover),143.6,143.6,False
+477,poppin_party__477,poppin_party,ロミオとシンデレラ (Cover),169.4,169.4,False
+478,poppin_party__478,poppin_party,Daydream café (Cover),147.7,147.7,False
+479,poppin_party__479,poppin_party,君じゃなきゃダメみたい (Cover),132.5,132.5,False
+480,poppin_party__480,poppin_party,＊〜アスタリスク〜 (Cover),129.2,129.2,False
+481,poppin_party__481,poppin_party,DAYS of DASH (Cover),159.0,159.0,False
+482,poppin_party__482,poppin_party,檄！帝国華撃団 (Cover),143.6,47.86666666666666,True
+483,poppin_party__483,poppin_party,DAYS (Cover),136.0,136.0,False
+484,poppin_party__484,poppin_party,ディスカバリー！ (Cover),172.2,172.2,False
+485,poppin_party__485,poppin_party,チェリボム (Cover),191.4,191.4,False
+486,poppin_party__486,poppin_party,ヴァンパイア (Cover),164.0,164.0,False
+487,poppin_party__487,poppin_party,怪物 (Cover),169.4,169.4,False
+488,poppin_party__488,poppin_party,大河よ共に泣いてくれ (Cover),175.2,175.2,False
+489,poppin_party__489,poppin_party,空色デイズ (Cover),175.2,175.2,False
+490,raise_a_suilen__490,raise_a_suilen,Invincible Fighter,198.8,198.8,False
+491,raise_a_suilen__491,raise_a_suilen,A DECLARATION OF ×××,152.0,152.0,False
+492,raise_a_suilen__492,raise_a_suilen,SOUL SOLDIER,191.4,63.8,True
+493,raise_a_suilen__493,raise_a_suilen,UNSTOPPABLE,169.4,169.4,False
+494,raise_a_suilen__494,raise_a_suilen,HELL! or HELL?,198.8,198.8,False
+495,raise_a_suilen__495,raise_a_suilen,Beautiful Birthday,175.2,175.2,False
+496,raise_a_suilen__496,raise_a_suilen,Takin’ my Heart,184.6,61.53333333333333,True
+497,raise_a_suilen__497,raise_a_suilen,DRIVE US CRAZY,211.0,211.0,False
+498,raise_a_suilen__498,raise_a_suilen,!NVADE SHOW!,169.4,56.46666666666667,True
+499,raise_a_suilen__499,raise_a_suilen,REIGNING,181.4,181.4,False
+500,raise_a_suilen__500,raise_a_suilen,EXPOSE ‘Burn out!!!’,191.4,191.4,False
+501,raise_a_suilen__501,raise_a_suilen,R・I・O・T,139.7,139.7,False
+502,raise_a_suilen__502,raise_a_suilen,V.I.P MONSTER,172.3,172.3,False
+503,raise_a_suilen__503,raise_a_suilen,mind of Prominence,188.0,188.0,False
+504,raise_a_suilen__504,raise_a_suilen,Ray of hope,126.0,126.0,False
+505,raise_a_suilen__505,raise_a_suilen,EXIST,139.7,139.7,False
+506,raise_a_suilen__506,raise_a_suilen,Sacred world,141.6,141.6,False
+507,raise_a_suilen__507,raise_a_suilen,-N-E-M-E-S-I-S-,143.6,143.6,False
+508,raise_a_suilen__508,raise_a_suilen,DANCING DARING,188.0,188.0,False
+509,raise_a_suilen__509,raise_a_suilen,BATTLE CRY,188.0,188.0,False
+510,raise_a_suilen__510,raise_a_suilen,Domination to world,198.8,198.8,False
+511,raise_a_suilen__511,raise_a_suilen,THE WAY OF LIFE,169.4,169.4,False
+512,raise_a_suilen__512,raise_a_suilen,灼熱 Bonfire!,156.6,156.6,False
+513,raise_a_suilen__513,raise_a_suilen,Repaint,206.8,206.8,False
+514,raise_a_suilen__514,raise_a_suilen,Life on the Lotus,136.0,136.0,False
+515,raise_a_suilen__515,raise_a_suilen,CORUSCATE -DNA-,147.7,147.7,False
+516,raise_a_suilen__516,raise_a_suilen,That Is How I Roll!,181.4,181.4,False
+517,raise_a_suilen__517,raise_a_suilen,しゅわりん☆どり～みん,175.2,175.2,False
+518,raise_a_suilen__518,raise_a_suilen,パスパレボリューションず☆,175.2,175.2,False
+519,raise_a_suilen__519,raise_a_suilen,えがおのオーケストラっ！,139.7,139.7,False
+520,raise_a_suilen__520,raise_a_suilen,Don't be afraid!,181.4,181.4,False
+521,raise_a_suilen__521,raise_a_suilen,ゆら・ゆらRing-Dong-Dance,172.2,172.2,False
+522,raise_a_suilen__522,raise_a_suilen,Hey-day狂騒曲(カプリチオ),159.0,159.0,False
+523,raise_a_suilen__523,raise_a_suilen,Scarlet Sky,181.4,181.4,False
+524,raise_a_suilen__524,raise_a_suilen,ゴーカ！ごーかい！？ファントムシーフ！,215.4,215.4,False
+526,raise_a_suilen__526,raise_a_suilen,That Is How I Roll! (ライブ / アンコール),181.4,181.4,False
+527,raise_a_suilen__527,raise_a_suilen,R･I･O･T (ライブ / アンコール),139.6,139.6,False
+528,raise_a_suilen__528,raise_a_suilen,Apocalypse,152.0,152.0,False
+529,raise_a_suilen__529,raise_a_suilen,TWIN TALE,198.8,198.8,False
+530,raise_a_suilen__530,raise_a_suilen,STRAY CERBERUS,181.4,181.4,False
+531,raise_a_suilen__531,raise_a_suilen,BERSER-KEY,120.2,120.2,False
+532,raise_a_suilen__532,raise_a_suilen,POLARIS,184.6,184.6,False
+533,raise_a_suilen__533,raise_a_suilen,HOWLING AMBITION,136.0,136.0,False
+534,raise_a_suilen__534,raise_a_suilen,VIVID FIRST TIME,198.8,198.8,False
+535,raise_a_suilen__535,raise_a_suilen,'FIGHT' ADDICT,195.0,195.0,False
+536,raise_a_suilen__536,raise_a_suilen,Drown Out the Noise and Push Through the Trash,191.4,191.4,False
+537,raise_a_suilen__537,raise_a_suilen,FIVE as ONE,191.4,191.4,False
+538,raise_a_suilen__538,raise_a_suilen,EXPOSE 'Burn out!!!' (English),191.4,191.4,False
+539,raise_a_suilen__539,raise_a_suilen,Takin' my Heart (English),184.6,61.53333333333333,True
+540,raise_a_suilen__540,raise_a_suilen,WELCOME TO PANDEMONIUM,202.6,202.6,False
+541,raise_a_suilen__541,raise_a_suilen,WHAT AN EXPLOSION,191.4,191.4,False
+542,raise_a_suilen__542,raise_a_suilen,RUNAWAY STAR,198.8,198.8,False
+543,raise_a_suilen__543,raise_a_suilen,Bad Kids All Bet,169.4,169.4,False
+544,raise_a_suilen__544,raise_a_suilen,Light a fire,139.7,139.7,False
+545,raise_a_suilen__545,raise_a_suilen,Embrace of light,202.6,151.95,True
+546,raise_a_suilen__546,raise_a_suilen,OUTSIDER RODEO,147.7,147.7,False
+547,raise_a_suilen__547,raise_a_suilen,JUST THE WAY I AM,181.4,181.4,False
+548,raise_a_suilen__548,raise_a_suilen,ラスハピーポー！,195.0,195.0,False
+549,raise_a_suilen__549,raise_a_suilen,1/3の純情な感情 (Cover),152.0,152.0,False
+550,raise_a_suilen__550,raise_a_suilen,ヒトリノ夜 (Cover),175.2,175.2,False
+551,raise_a_suilen__551,raise_a_suilen,激動 (Cover),112.3,112.3,False
+552,raise_a_suilen__552,raise_a_suilen,メギツネ (Cover),143.6,143.6,False
+553,raise_a_suilen__553,raise_a_suilen,Bling-Bang-Bang-Born (Cover),156.6,156.6,False
+554,raise_a_suilen__554,raise_a_suilen,第六感 (Cover),132.5,132.5,False
+555,raise_a_suilen__555,raise_a_suilen,革命道中 (Cover),188.0,188.0,False
+556,raise_a_suilen__556,raise_a_suilen,Get Wild (Cover),132.5,132.5,False
+557,raise_a_suilen__557,raise_a_suilen,ボッカデラべリタ (Cover),169.4,169.4,False
+558,raise_a_suilen__558,raise_a_suilen,第ゼロ感 (Cover),152.0,152.0,False
+559,raise_a_suilen__559,raise_a_suilen,劣等上等 (Cover),161.5,161.5,False
+560,raise_a_suilen__560,raise_a_suilen,Just Awake (Cover),191.4,191.4,False
+561,raise_a_suilen__561,raise_a_suilen,Keep the Heat and Fire Yourself Up (Cover),152.0,152.0,False
+562,raise_a_suilen__562,raise_a_suilen,ボッカデラベリタ (Cover),169.4,169.4,False
+563,raise_a_suilen__563,raise_a_suilen,VORACITY (Cover),198.8,66.26666666666667,True
+564,raise_a_suilen__564,raise_a_suilen,神っぽいな (Cover),143.6,143.6,False
+565,raise_a_suilen__565,raise_a_suilen,狂乱 Hey Kids!! (Cover),143.6,143.6,False
+566,raise_a_suilen__566,raise_a_suilen,SAVIOR OF SONG (Cover),191.4,191.4,False
+567,raise_a_suilen__567,raise_a_suilen,恋しさとせつなさと心強さと (Cover),129.2,129.2,False
+568,raise_a_suilen__568,raise_a_suilen,DEPARTURES (Cover),198.8,198.8,False
+569,raise_a_suilen__569,raise_a_suilen,CORE PRIDE (Cover),184.6,184.6,False
+570,roselia__570,roselia,Neo-Aspect,120.2,180.3,True
+571,roselia__571,roselia,BLACK SHOUT,184.6,184.6,False
+572,roselia__572,roselia,Opera of the wasteland,136.0,136.0,False
+573,roselia__573,roselia,陽だまりロードナイト,143.6,143.6,False
+574,roselia__574,roselia,ONENESS,191.4,191.4,False
+575,roselia__575,roselia,Re:birth day,169.4,169.4,False
+576,roselia__576,roselia,Legendary,143.6,143.6,False
+577,roselia__577,roselia,- HEROIC ADVENT -,181.4,181.4,False
+578,roselia__578,roselia,Determination Symphony,191.4,191.4,False
+579,roselia__579,roselia,熱色スターマイン,188.0,188.0,False
+580,roselia__580,roselia,軌跡,169.4,56.46666666666667,True
+581,roselia__581,roselia,LOUDER,195.0,195.0,False
+582,roselia__582,roselia,R,188.0,188.0,False
+583,roselia__583,roselia,BRAVE JEWEL,191.4,191.4,False
+584,roselia__584,roselia,FIRE BIRD,152.0,152.0,False
+585,roselia__585,roselia,Safe and Sound,181.4,60.46666666666667,True
+586,roselia__586,roselia,Avant-garde HISTORY,152.0,152.0,False
+587,roselia__587,roselia,Break your desire,206.8,206.8,False
+589,roselia__589,roselia,約束,123.0,123.0,False
+590,roselia__590,roselia,"""UNIONS"" Road",136.0,90.66666666666666,True
+591,roselia__591,roselia,Song I am.,191.4,191.4,False
+592,roselia__592,roselia,Sage der Rosen,159.0,159.0,False
+593,roselia__593,roselia,覚悟のLiberation,184.6,184.6,False
+594,roselia__594,roselia,Keep Heart,198.8,198.8,False
+595,roselia__595,roselia,Original Call,172.3,172.3,False
+596,roselia__596,roselia,Always recall.,123.0,123.0,False
+597,roselia__597,roselia,Floral Haven,191.4,191.4,False
+598,roselia__598,roselia,Sprechchor,147.7,147.7,False
+599,roselia__599,roselia,閃光,178.2,178.2,False
+600,roselia__600,roselia,THE HISTORIC...,175.2,175.2,False
+601,roselia__601,roselia,ROZEN HORIZON,161.5,161.5,False
+602,roselia__602,roselia,廻廻奇譚,184.6,61.53333333333333,True
+603,roselia__603,roselia,鳥の詩,123.0,123.0,False
+604,roselia__604,roselia,Synchrogazer,159.0,53.0,True
+605,roselia__605,roselia,名前のない怪物,181.4,181.4,False
+606,roselia__606,roselia,Dazzle the Destiny,191.4,191.4,False
+607,roselia__607,roselia,Grateful Melting,120.2,120.2,False
+608,roselia__608,roselia,Second to None,184.6,184.6,False
+609,roselia__609,roselia,Steadfast Spirits,191.4,191.4,False
+610,roselia__610,roselia,紫炎,191.4,191.4,False
+611,roselia__611,roselia,XV,191.4,191.4,False
+612,roselia__612,roselia,Blessing Chord,152.0,152.0,False
+613,roselia__613,roselia,Fear Nothing,114.8,114.8,False
+614,roselia__614,roselia,PASSIONATE ANTHEM,195.0,195.0,False
+615,roselia__615,roselia,Requiem for Fate,152.0,152.0,False
+616,roselia__616,roselia,Sanctuary,120.2,120.2,False
+617,roselia__617,roselia,Sunlit Musical,184.6,61.53333333333333,True
+618,roselia__618,roselia,Talk to My Tone,139.7,209.55,True
+619,roselia__619,roselia,一逢のFull Glory,198.8,198.8,False
+620,roselia__620,roselia,礎の花冠,172.3,172.3,False
+621,roselia__621,roselia,FRONTIER FANTASIA,178.2,178.2,False
+622,roselia__622,roselia,Dear Gleam,195.0,195.0,False
+623,roselia__623,roselia,Call the shots,188.0,62.66666666666666,True
+624,roselia__624,roselia,THRONE OF ROSE,161.5,161.5,False
+625,roselia__625,roselia,VIOLET LINE,198.8,198.8,False
+626,roselia__626,roselia,Ringing Bloom,195.0,195.0,False
+627,roselia__627,roselia,ZEAL of proud,195.0,195.0,False
+628,roselia__628,roselia,Singing “OURS”,126.0,84.0,True
+629,roselia__629,roselia,競宴Red×Violet,147.7,147.7,False
+630,roselia__630,roselia,overtuRe,191.4,191.4,False
+631,roselia__631,roselia,Proud of oneself,191.4,191.4,False
+632,roselia__632,roselia,Sing Alive,195.0,195.0,False
+633,roselia__633,roselia,Swear ～Night & Day～,112.3,112.3,False
+634,roselia__634,roselia,Reweave (Cover),184.6,184.6,False
+635,roselia__635,roselia,ヒバナ -Reloaded- (Cover),198.8,198.8,False
+636,roselia__636,roselia,ファタール (Cover),156.6,156.6,False
+637,roselia__637,roselia,HONEY (Cover),181.4,181.4,False
+638,roselia__638,roselia,悪魔の子 (Cover),178.2,178.2,False
+639,roselia__639,roselia,slash (Cover),143.6,143.6,False
+640,roselia__640,roselia,右肩の蝶 (Cover),139.7,139.7,False
+641,roselia__641,roselia,乙女解剖 (Cover),134.2,134.2,False
+642,roselia__642,roselia,六兆年と一夜物語 (Cover),184.6,184.6,False
+643,roselia__643,roselia,残酷な天使のテーゼ (Cover),139.7,139.7,False
+644,roselia__644,roselia,海色 (Cover),195.0,195.0,False
+645,roselia__645,roselia,ETERNAL BLAZE (Cover),156.6,156.6,False
+646,roselia__646,roselia,魂のルフラン (Cover),129.2,129.2,False
+647,roselia__647,roselia,This game (Cover),147.7,147.7,False
+648,roselia__648,roselia,スカイクラッドの観測者 (Cover),166.8,166.8,False
+649,roselia__649,roselia,シャルル (Cover),145.6,145.6,False
+650,roselia__650,roselia,新時代 (Cover),175.2,175.2,False
+651,roselia__651,roselia,革命デュアリズム (Cover),206.8,206.8,False
+652,roselia__652,roselia,Red fraction (Cover),143.6,143.6,False
+653,roselia__653,roselia,深愛 (Cover),139.7,139.7,False
+654,roselia__654,roselia,Paradisus‐Paradoxum (Cover),202.6,67.53333333333333,True
+655,roselia__655,roselia,Realize (Cover),206.8,206.8,False
+656,roselia__656,roselia,Preserved Roses (Cover),166.8,166.8,False
+657,roselia__657,roselia,My Dearest (Cover),166.7,166.7,False
+658,roselia__658,roselia,Shangri-La (Cover),156.6,156.6,False
+659,roselia__659,roselia,KING (Cover),166.8,166.8,False
+660,mygo__660,mygo,素寄曲,117.5,117.5,False
+661,mygo__661,mygo,羅永線,191.4,191.4,False
+662,mygo__662,mygo,騒混出,181.4,181.4,False
