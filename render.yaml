@@ -12,7 +12,7 @@ services:
     startCommand: uvicorn app.main:app --app-dir src/backend --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     autoDeploy: true # main 푸시 시 자동 재배포
-    # 이 allowlist에 안 걸리는 변경(CLAUDE.md·git-rules.md·docs/·versionlog.md·
+    # 이 allowlist에 안 걸리는 변경(CLAUDE.md·git-rules.md·docs/·
     # src/frontend/** 등 정책 문서·프론트 전용 변경)은 재배포를 일으키지 않는다 —
     # data/를 main에서 분리한 것과 같은 이유(불필요한 재배포로 인한 프리징 방지).
     buildFilter:
