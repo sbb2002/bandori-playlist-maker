@@ -16,6 +16,27 @@
 - 기준 커밋: `94e1327`
 - 관련 PR: [#54](https://github.com/sbb2002/bandori-playlist-maker/pull/54)
 
+## v1.11.0 — 2026-07-19
+
+오토로더 push 직후 즉시 데이터 반영하는 강제 리프레시 엔드포인트 추가(토큰 인증, opt-in).
+
+- 기준 커밋: `c29da40`
+- 관련 PR: [#53](https://github.com/sbb2002/bandori-playlist-maker/pull/53)
+
+## v1.10.1 — 2026-07-19
+
+requirements.txt의 존재하지 않는 hanja 버전 핀으로 Render 배포가 막혀있던 것 수정.
+
+- 기준 커밋: `f932ea9`
+- 관련 PR: [#52](https://github.com/sbb2002/bandori-playlist-maker/pull/52)
+
+## v1.10.0 — 2026-07-19
+
+무드 파라미터를 4단계로 나눠 순차 LLM 호출하는 실험 어댑터 추가(opt-in, 기본 경로 무영향).
+
+- 기준 커밋: `f537b69`
+- 관련 PR: [#51](https://github.com/sbb2002/bandori-playlist-maker/pull/51)
+
 ## v1.9.0 — 2026-07-18
 
 스테이지 경계 에너지 계단식 전환을 곡 단위 선형보간으로 완화, 2-opt로 순서 재배치 부작용 보정.
