@@ -6056,6 +6056,14 @@
             "x": -16.3,
             "y": 33.05,
             "bpm": 152.0
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "song": "Keep on Riddim",
+            "url": "https://youtu.be/h0QJo5XjosA",
+            "x": 11.77,
+            "y": 15.72,
+            "bpm": 107.7
         }
     ],
     "centroids": [
@@ -6079,9 +6087,9 @@
         },
         {
             "band": "ikka_dumb_rock",
-            "n": 1,
-            "x": 21.1,
-            "y": 8.72
+            "n": 2,
+            "x": 16.44,
+            "y": 12.22
         },
         {
             "band": "millsage",
@@ -6143,7 +6151,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 664,
+        "n": 665,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
