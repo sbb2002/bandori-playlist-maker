@@ -190,6 +190,23 @@ def _sokuon_jong(nxt: str) -> int:
 # 장음(ー) 처리용 — 직전 음절 모음(중성)을 한 글자 더 반복할 때 쓸 홑글자.
 _VOWEL_ECHO = {"ㅏ": "아", "ㅣ": "이", "ㅜ": "우", "ㅔ": "에", "ㅗ": "오", "ㅓ": "어", "ㅡ": "으"}
 
+# 장음 지점의 한국식 이중모음 관용 표기(직전 중성 → 추가 후보): カーネーション→카네"이"션,
+# レインボー→레인보"우". 외래어의 ー가 영어 /eɪ/·/oʊ/에서 온 경우 한국어 표기는 에이/오우가 관용.
+_DIPHTHONG_AFTER = {"ㅔ": "이", "ㅐ": "이", "ㅗ": "우"}
+
+# ション/ジョン 관용(스테이션·비전) — 바로 뒤에 ん이 올 때만 ㅕ형을 병행 생성한다.
+_YO_TO_YEO_BEFORE_N = {"しょ": "셔", "じょ": "저"}
+
+# 검색 문자열에서 제거하는 구분 기호 — 한국어 키보드로 입력할 수 없어 검색을 끊는 문자들.
+_SEPARATOR_CHARS = {"・", "･", "·"}
+
+# 순수 모음 가나가 만드는 한글 홑글자 → 중성(pykakasi가 ー를 모음 반복으로 미리 풀어내는
+# 경우의 장음 지점 탐지용: かあ/ねえ/おう 등).
+_BARE_VOWEL_JUNG = {"아": "ㅏ", "이": "ㅣ", "우": "ㅜ", "에": "ㅔ", "오": "ㅗ", "으": "ㅡ"}
+
+# 장음·촉음 분기 조합의 변형 개수 상한(폭주 방지 — 장음 3곳 × 션 분기 정도까지 수용).
+_VARIANT_CAP = 16
+
 
 def _decompose(ch: str) -> tuple[int, int, int] | None:
     """완성형 한글 음절 1글자를 (초성,중성,종성) 인덱스로 분해. 한글이 아니면 None."""
@@ -227,7 +244,43 @@ def kana_to_hangul(hira: str) -> str:
     - 장음(ー): 직전 음절의 모음을 한 글자 반복.
     - 매핑에 없는 문자(칸지 잔존·영숫자·기호 등)는 원문 그대로 통과.
     """
-    out: list[str] = []
+    return kana_to_hangul_variants(hira, strip_separators=False)[0]
+
+
+def _last_jung(text: str) -> str | None:
+    """문자열 마지막 글자의 중성. 완성형 한글이 아니면 None."""
+    if not text:
+        return None
+    parts = _decompose(text[-1])
+    return None if parts is None else _JUNG[parts[1]]
+
+
+def kana_to_hangul_variants(hira: str, *, strip_separators: bool = True) -> list[str]:
+    """히라가나 → 한글 음차 **변형 목록**(검색 보조용).
+
+    변형 0은 종전 `kana_to_hangul`과 동일한 원문 음차(장음=모음 반복, 어말 촉음=받침)이고,
+    이후 변형은 다음을 조합해 만든다(등장 순서 유지·중복 제거, 최대 `_VARIANT_CAP`개):
+
+    - 장음 지점(명시적 ー, 또는 pykakasi가 미리 풀어낸 かあ/ねえ/おう류 모음 연속)에서
+      {모음 반복(원문식), 생략, 에이/오우(한국식 이중모음)} 분기
+    - ション/ジョン → 션/전 관용 분기(ん 앞의 しょ/じょ)
+    - 어말 촉음(タイッ의 ッ) 받침 생략 분기
+    - `strip_separators=True`면 가운뎃점(・) 등 한국어로 입력 불가한 구분 기호 제거
+
+    "카아네에숀"(원문 음차)과 "카네이션"(한국식 관용) 어느 쪽으로 검색해도 걸리게 하는
+    것이 목적이다. 원문 CSV·표시용 필드는 건드리지 않는다.
+    """
+    partials: list[str] = [""]
+
+    def extend(cands_of) -> None:
+        nonlocal partials
+        new: list[str] = []
+        for p in partials:
+            for c in cands_of(p):
+                if c not in new:
+                    new.append(c)
+        partials = new[:_VARIANT_CAP]
+
     i, n = 0, len(hira)
     while i < n:
         # 외래어 사전 최장일치 시도 (이 위치부터 시작하는 가장 긴 부분 문자열 찾기)
@@ -240,7 +293,8 @@ def kana_to_hangul(hira: str) -> str:
                 best_len = j - i
 
         if best_match:
-            out.append(_LOANWORD_HANGUL[best_match])
+            piece = _LOANWORD_HANGUL[best_match]
+            extend(lambda p, piece=piece: [p + piece])
             i += best_len
             continue
 
@@ -248,45 +302,77 @@ def kana_to_hangul(hira: str) -> str:
         nxt = hira[i + 1] if i + 1 < n else ""
 
         if ch == "っ":
-            if out:
-                out[-1] = _add_batchim(out[-1], _sokuon_jong(nxt))
+            # 어말(또는 가나가 아닌 문자 앞) 촉음은 받침 표기/생략을 병행("타잇"/"타이").
+            word_final = not nxt or (nxt not in _MONOGRAPHS and nxt not in ("っ", "ん", "ー"))
+            jong = _sokuon_jong(nxt)
+            if word_final:
+                extend(lambda p, jong=jong: [_add_batchim(p, jong), p])
+            else:
+                extend(lambda p, jong=jong: [_add_batchim(p, jong)])
             i += 1
             continue
 
         if ch == "ん":
-            if out:
-                out[-1] = _add_batchim(out[-1], _JONG_NIEUN)
-            else:
-                out.append("응")
+            extend(lambda p: [_add_batchim(p, _JONG_NIEUN) if p else "응"])
             i += 1
             continue
 
         if ch == "ー":
-            if out:
-                # 외래어 치환으로 out[-1]이 여러 글자일 수 있으므로 마지막 글자만 본다.
-                parts = _decompose(out[-1][-1])
-                if parts is not None:
-                    echo = _VOWEL_ECHO.get(_JUNG[parts[1]])
-                    if echo:
-                        out.append(echo)
+            def cands(p):
+                jung = _last_jung(p)
+                echo = _VOWEL_ECHO.get(jung) if jung else None
+                if echo is None:
+                    return [p]  # 종전 동작: 분해 불가 시 장음 무시
+                out = [p + echo, p]
+                diph = _DIPHTHONG_AFTER.get(jung)
+                if diph and diph != echo:
+                    out.append(p + diph)
+                return out
+            extend(cands)
             i += 1
             continue
 
         digraph = ch + nxt
         if nxt and digraph in _DIGRAPHS:
-            out.append(_DIGRAPHS[digraph])
+            piece = _DIGRAPHS[digraph]
+            follows_n = hira[i + 2:i + 3] == "ん"
+            alt = _YO_TO_YEO_BEFORE_N.get(digraph) if follows_n else None
+            extend(lambda p, piece=piece, alt=alt:
+                   [p + piece] + ([p + alt] if alt else []))
             i += 2
             continue
 
         if ch in _MONOGRAPHS:
-            out.append(_MONOGRAPHS[ch])
+            piece = _MONOGRAPHS[ch]
+            v_in = _BARE_VOWEL_JUNG.get(piece)
+
+            def cands(p, piece=piece, v_in=v_in):
+                if v_in is None:
+                    return [p + piece]
+                jung = _last_jung(p)
+                is_long = jung is not None and (
+                    v_in == jung
+                    or (v_in == "ㅣ" and jung in ("ㅔ", "ㅐ"))
+                    or (v_in == "ㅜ" and jung == "ㅗ"))
+                if not is_long:
+                    return [p + piece]
+                out = [p + piece, p]
+                diph = _DIPHTHONG_AFTER.get(jung)
+                if diph is not None and v_in == jung and diph != piece:
+                    out.append(p + diph)
+                return out
+            extend(cands)
             i += 1
             continue
 
-        out.append(ch)  # 매핑 밖 문자는 원문 통과(칸지 잔존 등)
+        if strip_separators and ch in _SEPARATOR_CHARS:
+            i += 1
+            continue
+
+        extend(lambda p, ch=ch: [p + ch])  # 매핑 밖 문자는 원문 통과(칸지 잔존 등)
         i += 1
 
-    return "".join(out)
+    return partials
 
 
 def to_romaji(title: str) -> str:
@@ -298,6 +384,12 @@ def to_hangul(title: str) -> str:
     """제목을 pykakasi 히라가나 단계에서 곧장 한글 음차로 변환한다(로마자 비경유)."""
     hira = "".join(item["hira"] for item in _kks.convert(title))
     return kana_to_hangul(hira)
+
+
+def to_hangul_variants(title: str) -> list[str]:
+    """제목의 한글 음차 변형 목록(원문 음차 + 장음 생략형 + 한국식 관용형, 검색 전용)."""
+    hira = "".join(item["hira"] for item in _kks.convert(title))
+    return kana_to_hangul_variants(hira)
 
 
 def to_hanja_reading(title: str) -> str:

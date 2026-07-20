@@ -16,7 +16,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from ..domain.models import Song
-from .ja_transliteration import to_hangul, to_hanja_reading, to_romaji
+from .ja_transliteration import to_hangul, to_hangul_variants, to_hanja_reading, to_romaji
 
 # cross-team import(허용): video_id 추출 헬퍼. 경로 삽입 후 import.
 #   song_repo.py: .../src/backend/app/repo/song_repo.py → parents[3] == .../src
@@ -71,6 +71,7 @@ def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, 
     # 검색 보조 필드 자동 계산
     song_romaji = to_romaji(song_title)
     song_hangul = to_hangul(song_title)
+    song_hangul_variants = to_hangul_variants(song_title)
     song_hanja_reading = to_hanja_reading(song_title)
 
     # 오버라이드 적용 (부분 오버라이드 허용 — 지정된 필드만 대체)
@@ -82,6 +83,9 @@ def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, 
             song_hangul = override_data["song_hangul"]
         if "song_hanja_reading" in override_data:
             song_hanja_reading = override_data["song_hanja_reading"]
+
+    # 검색 매칭용 병기 문자열 — 오버라이드된 song_hangul(수동 관용 표기)도 항상 포함한다.
+    song_hangul_search = " / ".join(dict.fromkeys([song_hangul, *song_hangul_variants]))
 
     return Song(
         idx=int(row["idx"]),
@@ -99,6 +103,7 @@ def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, 
         # 검색 보조 필드(§ja_transliteration) — 서버 기동 시 이 함수 호출 때 1회 계산돼 캐싱됨.
         song_romaji=song_romaji,
         song_hangul=song_hangul,
+        song_hangul_search=song_hangul_search,
         song_hanja_reading=song_hanja_reading,
     )
 

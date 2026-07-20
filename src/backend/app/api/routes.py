@@ -91,6 +91,7 @@ def list_songs(request: Request) -> dict:
             # 검색 보조(로마자·한글 음차·한자음) — pykakasi/hanja로 로드 시 1회 계산된 캐시값(§ja_transliteration).
             "song_romaji": s.song_romaji,
             "song_hangul": s.song_hangul,
+            "song_hangul_search": s.song_hangul_search,
             "song_hanja_reading": s.song_hanja_reading,
         }
         for s in request.app.state.songs
