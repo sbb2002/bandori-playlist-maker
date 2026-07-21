@@ -1,0 +1,8 @@
+.env
+
+# Essentia standalone 바이너리 (AGPL-3.0) — subprocess로만 호출, repo엔 산출 CSV만 커밋
+topic/audio_feats_analysis/tools_external/
+
+# 재추출 스크래치 로그·백업
+topic/audio_feats_analysis/src/method-1/*.log
+topic/audio_feats_analysis/out/*.bak_prebugfix
