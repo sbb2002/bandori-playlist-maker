@@ -59,7 +59,7 @@ C, F#만 우연히 정상(자기 자신과 대칭인 두 조성)
 ```
 
 `np.roll(_KS_MAJOR, pc_idx)` / `np.roll(_KS_MINOR, pc_idx)`로 부호를 고친 뒤 재검증하면
-12개 조성(장/단조 총 24개 프로파일) 전부 라벨과 실제 피크 위치가 일치한다(완료, §5).
+12개 조성(장/단조 총 24개 프로파일) 전부 라벨과 실제 피크 위치가 일치한다(완료, §6).
 
 ## 4. 이 버그가 설명하는 것과 설명하지 못하는 것
 
@@ -75,9 +75,31 @@ C, F#만 우연히 정상(자기 자신과 대칭인 두 조성)
 2. **장/단조 자체의 혼동** — K-S 상관계수 방식의 고질적 약점(relative major/minor가 피치클래스
    집합을 공유해 원래 상관계수가 붙어있음) + `report/05`가 이미 지적한 실제 오디오 신호의
    노이즈(보컬/타악기 프레임 혼입 등)가 결합된 것으로 추정. 버그 수정만으로는 해소 안 될 수
-   있다 — §6 참조.
+   있다 — §7 참조.
 
-## 5. 수정 사항
+## 5. 전체 피쳐 신뢰도 정리 (이 조사를 계기로 재점검)
+
+이번 버그 발견을 계기로 "그동안 뽑은 피쳐가 전반적으로 못 미더운 것 아니냐"는 질문이
+나왔다. 지금까지의 리포트를 모아 스코프별로 정리하면 **"대부분 불신뢰"가 아니라 소수의
+특정 컬럼만 깨졌고 나머지는 검증된 범위 안에서 유효**하다.
+
+| 피쳐 | 판정 | 근거 |
+|---|---|---|
+| `key`/`est_key`(범주형 조성) | ❌ **불신뢰였음 — 이번에 수정** | `KS_PROFILES` roll 부호 버그(§3), tunebat 7곡 중 5곡 불일치(§2) |
+| `energy`, `energy_proxy`, `acousticness_proxy`, `instrumentalness_proxy` | ❌ **불신뢰 확정, 기존에 이미 알려진 문제** | `vector_embedding/report/02` — 발췌구간만 반영, `energy`는 부호까지 반전. 프로덕션 앱은 이미 우회 중, 이 CSV를 직접 읽는 연구 파이프라인만 위험 |
+| `drum_tempo_bpm`(원시 오디오 추정치) | ⚠️ **알려진 한계 안에서 사용 가능** | 옥타브/헤미올라 오차 있지만 method-2로 Acc1 92.5%, RMS 23.61까지 개선(report/02, 05). 661곡 중 573곡은 bestdori 공식 BPM(`bpm_final`, 오디오 추정이 아님)을 써서 이 오차 자체가 적용 안 됨 — 추정치가 실제로 필요한 건 나머지 88곡뿐 |
+| `mode_score`(연속값, 조성 축) | ✅ **유효, 단 스코프 주의** | ground-truth 라벨(65행)로 방향 검증됨(bright +0.352 vs dark −0.286, `vector_embedding/report/02` §2b). "밝음/어두움" 자체가 아니라 "장/단조"만 잡는다는 정의상 한계는 있지만 계산 자체가 틀린 건 아님 |
+| `mfcc_*` | ✅ **오히려 가장 강한 신호** | `report/03`에서 `mfcc_4_mean` eta²=0.456으로 89개 피쳐 중 밴드 판별력 1위. 불신뢰 판정 받은 적 없음 |
+| `contrast`, `energy_full`, `rms`/`rms_mean`(밴드 판별용) | ✅ **유효** | `report/03`·`04`에서 검증된 timbre/에너지 축으로 계속 사용 중 |
+
+**실질적으로 재검토가 필요한 분석**: (a) `energy`/`energy_proxy` 계열을 입력으로 썼던 분석
+(`mood_warmth` 1라운드는 이미 `vector_embedding/report/02`에서 "측정 도구가 고장나
+있었다"로 재해석됨), (b) `key`/`est_key` 범주형 라벨을 직접 쓴 분석(이번 조사가 처음 건드린
+영역 — `report/04`의 mode-tempo 산점도가 `mode_score`는 쓰되 `est_key` 자체는 안 써서 영향
+밖). 그 외 `mfcc`·`contrast`·`mode_score`·`energy_full` 기반 분석(`report/03`, `04` 등
+대부분)은 그대로 신뢰 가능.
+
+## 6. 수정 사항
 
 `topic/audio_feats_analysis/src/method-1/config.py`:
 ```python
@@ -93,11 +115,11 @@ KS_PROFILES[f"{pc}min"] = np.roll(_KS_MINOR, pc_idx)   # was: -pc_idx
 버그를 공유하는 별도 계산인지 (b) 애초에 같은 값을 복사한 건지 원인을 못 밝혔다 — 메인
 기기에서 이 파일의 출처를 먼저 확인할 것.
 
-## 6. 다음 세션 인수인계 (메인 기기에서 할 일)
+## 7. 다음 세션 인수인계 (메인 기기에서 할 일)
 
 1. **661곡 전체 재산출**: `topic/audio_feats_analysis/src/method-1/extract_features.py`를
    수정된 `config.py`로 재실행 → `est_key`/`key` 컬럼 갱신 → `out/audio_feats.csv`,
-   `data/songs_master.csv` 재병합. `key_proxies` 출처(§5 미해결)도 먼저 확인 후 필요시 같이
+   `data/songs_master.csv` 재병합. `key_proxies` 출처(§6 미해결)도 먼저 확인 후 필요시 같이
    처리.
 2. **재산출 후 재검증**: §2와 동일한 방식으로 tunebat 교차대조를 더 넓은 표본(morfonica
    외 밴드 포함)으로 재실행 — 버그 수정으로 불일치율이 실제로 줄었는지 확인.
@@ -115,7 +137,7 @@ KS_PROFILES[f"{pc}min"] = np.roll(_KS_MINOR, pc_idx)   # was: -pc_idx
    확인했지 "개별 곡 라벨이 정확하다"는 아니었으므로, 재산출 후 같은 ground-truth로 재검증
    권장.
 
-## 7. 산출물
+## 8. 산출물
 - 코드 수정: `topic/audio_feats_analysis/src/method-1/config.py` (`KS_PROFILES` 생성부,
   `np.roll` 부호 수정)
 - 이 세션에서 재현용으로 쓴 검증 스니펫은 파일로 저장하지 않음 — §3/§5의 시뮬레이션 로직
