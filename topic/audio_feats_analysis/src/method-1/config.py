@@ -35,8 +35,8 @@ _KS_MINOR = _KS_MINOR / np.sum(_KS_MINOR)
 
 KS_PROFILES = {}
 for pc_idx, pc in enumerate(PITCH_CLASSES):
-    KS_PROFILES[f"{pc}maj"] = np.roll(_KS_MAJOR, -pc_idx)
-    KS_PROFILES[f"{pc}min"] = np.roll(_KS_MINOR, -pc_idx)
+    KS_PROFILES[f"{pc}maj"] = np.roll(_KS_MAJOR, pc_idx)
+    KS_PROFILES[f"{pc}min"] = np.roll(_KS_MINOR, pc_idx)
 
 
 def _get_diatonic_chords(root, is_major):
