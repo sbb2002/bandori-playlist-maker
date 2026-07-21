@@ -1,0 +1,18 @@
+tag,song,ks_best_key,ks_best_corr,ks_second_key,ks_second_corr,cadence_final_chord_score_best,cadence_final_chord_score_second,cadence_vi_count_best,cadence_vi_count_second,cadence_pick,ground_truth,matches_ground_truth
+morfonica__182,flame of hope,Amin,0.4838005935419486,Emaj,0.3900976638608979,0,0,19,0,Amin,Gmaj,False
+morfonica__191,誓いのWingbeat,Amin,0.5813464097643732,Emaj,0.4438239445505874,3,0,33,0,Amin,Amin,True
+morfonica__197,両翼のBrilliance,Amin,0.5498776381736366,Amaj,0.35479596213352194,0,0,4,3,Amin,,
+morfonica__202,Angel's Ladder,Amin,0.477819779047519,Fmaj,0.43632108603952663,0,0,0,2,Fmaj,Bbmaj,False
+morfonica__204,Tempest,Amin,0.49853957769332713,Emaj,0.4885296712910316,0,0,7,5,Amin,,
+morfonica__208,esora no clover,Amin,0.5603177107817636,Fmaj,0.43822665501260316,3,0,0,2,Amin,,
+morfonica__210,Feathered Dreams,Amin,0.5414107281061497,Amaj,0.39386801271934857,3,0,8,7,Amin,,
+morfonica__215,Resonant Strings,Amin,0.39192550113537844,Amaj,0.1968944172389848,0,0,5,5,Amin,,
+morfonica__220,again (Cover),Amin,0.4876278662205753,Emaj,0.41738634024980537,0,3,16,4,Amin,,
+morfonica__221,輪舞-revolution (Cover),Amin,0.4918501951896318,Amaj,0.3737598957791611,0,0,0,1,Amaj,Amin,False
+morfonica__223,祝福 (Cover),Amin,0.5188976063263373,Emin,0.42847599574984324,0,0,9,1,Amin,,
+morfonica__224,Overdose (Cover),Amin,0.537264598491428,Amaj,0.4427611181950061,0,0,4,1,Amin,,
+morfonica__226,chAngE (Cover),Amin,0.3081434977784594,A#maj,0.30551659671114945,0,0,2,5,A#maj,,
+morfonica__228,Nameless Story (Cover),Amin,0.5083869812031928,Amaj,0.2877671909186403,0,0,4,2,Amin,,
+morfonica__229,青空のラプソディ (Cover),Amin,0.4880577394703369,Emaj,0.2537769237682277,0,0,23,0,Amin,,
+morfonica__230,Nevereverland (Cover),Amin,0.45808214385144486,Gmaj,0.26096985166318126,3,0,11,4,Amin,,
+morfonica__234,アゲハ蝶 (Cover),Amin,0.3573623541185161,Gmin,0.29067097038317014,0,0,5,4,Amin,,
