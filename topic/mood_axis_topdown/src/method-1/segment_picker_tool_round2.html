@@ -1,0 +1,1029 @@
+<title>GEMS-9 구간 설정 툴</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<script type="application/json" id="songs-data">
+[
+  {
+    "idx": 68,
+    "band": "afterglow",
+    "song": "Don't say “lazy” (Cover)",
+    "videoId": "PThqwHLyPpU",
+    "energyFull": 0.953292
+  },
+  {
+    "idx": 61,
+    "band": "afterglow",
+    "song": "Redo (Cover)",
+    "videoId": "Q5ld_AEJAWw",
+    "energyFull": 0.493874
+  },
+  {
+    "idx": 31,
+    "band": "afterglow",
+    "song": "青い栞",
+    "videoId": "bzJW33heiqw",
+    "energyFull": 0.062021
+  },
+  {
+    "idx": 91,
+    "band": "ave_mujica",
+    "song": "in your blue eyes",
+    "videoId": "kVMuEQ3uXWc",
+    "energyFull": 0.003828
+  },
+  {
+    "idx": 157,
+    "band": "hello_happy_world",
+    "song": "強風オールバック (Cover)",
+    "videoId": "EGxEKCHDAFE",
+    "energyFull": 0.997703
+  },
+  {
+    "idx": 179,
+    "band": "millsage",
+    "song": "起死開戦",
+    "videoId": "bzPxdHmMW3s",
+    "energyFull": 0.163859
+  },
+  {
+    "idx": 189,
+    "band": "morfonica",
+    "song": "Sweet Cheers!",
+    "videoId": "e8IQBZMVIGw",
+    "energyFull": 0.045176
+  },
+  {
+    "idx": 245,
+    "band": "mugendai_mutype",
+    "song": "テレパシー",
+    "videoId": "mKiBvYqfBfk",
+    "energyFull": 0.065084
+  },
+  {
+    "idx": 339,
+    "band": "pastel_palettes",
+    "song": "everyday flower",
+    "videoId": "zEHPkLXcX1I",
+    "energyFull": 0.121746
+  },
+  {
+    "idx": 560,
+    "band": "raise_a_suilen",
+    "song": "Just Awake (Cover)",
+    "videoId": "nyn9h6BraQ4",
+    "energyFull": 0.590352
+  },
+  {
+    "idx": 654,
+    "band": "roselia",
+    "song": "Paradisus‐Paradoxum (Cover)",
+    "videoId": "A12CMqrBFSw",
+    "energyFull": 0.43415
+  },
+  {
+    "idx": 580,
+    "band": "roselia",
+    "song": "軌跡",
+    "videoId": "P2BT98BC1N8",
+    "energyFull": 0.042113
+  }
+]
+</script>
+
+<style>
+  :root {
+    --ground: #f1f2f4;
+    --surface: #ffffff;
+    --surface-2: #e4e6ea;
+    --border: #d4d7dd;
+    --ink: #1b1e24;
+    --ink-dim: #666e7c;
+    --accent: #b8720f;
+    --accent-strong: #935c0c;
+    --accent-tint: rgba(184, 114, 15, 0.14);
+    --ok: #2b8058;
+    --ok-tint: rgba(43, 128, 88, 0.14);
+    --warn: #c23f2d;
+    --warn-tint: rgba(194, 63, 45, 0.12);
+    --shadow: 0 1px 2px rgba(20, 23, 28, 0.06), 0 8px 24px rgba(20, 23, 28, 0.08);
+
+    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
+      "Malgun Gothic", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Roboto Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #14171c;
+      --surface: #1c2027;
+      --surface-2: #262b33;
+      --border: #343a44;
+      --ink: #edeef0;
+      --ink-dim: #8b93a1;
+      --accent: #e4a64a;
+      --accent-strong: #f2bb6c;
+      --accent-tint: rgba(228, 166, 74, 0.16);
+      --ok: #3fa772;
+      --ok-tint: rgba(63, 167, 114, 0.16);
+      --warn: #e0604d;
+      --warn-tint: rgba(224, 96, 77, 0.16);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #14171c;
+    --surface: #1c2027;
+    --surface-2: #262b33;
+    --border: #343a44;
+    --ink: #edeef0;
+    --ink-dim: #8b93a1;
+    --accent: #e4a64a;
+    --accent-strong: #f2bb6c;
+    --accent-tint: rgba(228, 166, 74, 0.16);
+    --ok: #3fa772;
+    --ok-tint: rgba(63, 167, 114, 0.16);
+    --warn: #e0604d;
+    --warn-tint: rgba(224, 96, 77, 0.16);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px rgba(0, 0, 0, 0.4);
+  }
+
+  :root[data-theme="light"] {
+    --ground: #f1f2f4;
+    --surface: #ffffff;
+    --surface-2: #e4e6ea;
+    --border: #d4d7dd;
+    --ink: #1b1e24;
+    --ink-dim: #666e7c;
+    --accent: #b8720f;
+    --accent-strong: #935c0c;
+    --accent-tint: rgba(184, 114, 15, 0.14);
+    --ok: #2b8058;
+    --ok-tint: rgba(43, 128, 88, 0.14);
+    --warn: #c23f2d;
+    --warn-tint: rgba(194, 63, 45, 0.12);
+    --shadow: 0 1px 2px rgba(20, 23, 28, 0.06), 0 8px 24px rgba(20, 23, 28, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button, input {
+    font-family: inherit;
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+  }
+
+  button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .app {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 16px 16px 96px;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px 18px;
+    flex-wrap: wrap;
+  }
+
+  .title-block { flex: 1 1 auto; min-width: 180px; }
+
+  .eyebrow {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  h1 {
+    font-size: 19px;
+    margin: 0;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  .progress-chip {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 12px;
+    white-space: nowrap;
+  }
+
+  .menu-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 999px;
+  }
+
+  .stage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  .song-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .band-chip {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--accent-tint);
+    color: var(--accent-strong);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .song-meta h2 {
+    font-size: 18px;
+    margin: 0;
+    text-wrap: balance;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+
+  .idx-note {
+    font-size: 12px;
+    color: var(--ink-dim);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
+
+  .player-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .player-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .timeline { margin-top: 14px; }
+
+  .timeline-track {
+    position: relative;
+    height: 12px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .timeline-range {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    background: var(--accent);
+    opacity: 0.55;
+    border-radius: 999px;
+  }
+
+  .timeline-cursor {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    left: 0;
+    background: var(--ink);
+    opacity: 0.7;
+  }
+
+  .timeline-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    color: var(--ink-dim);
+  }
+
+  .deck {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .deck-group {
+    background: var(--ground);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .deck-group label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    font-weight: 700;
+  }
+
+  .deck-group input {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+  }
+
+  .deck-btn {
+    padding: 8px 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 8px;
+  }
+
+  .deck-btn.accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #1b1e24;
+  }
+
+  .deck-btn.ghost {
+    grid-column: 1 / -1;
+    background: transparent;
+  }
+
+  .duration-chip {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  .duration-chip.neutral {
+    background: var(--surface-2);
+    color: var(--ink-dim);
+  }
+
+  .duration-chip.ok {
+    background: var(--ok-tint);
+    color: var(--ok);
+  }
+
+  .duration-chip.warn {
+    background: var(--warn-tint);
+    color: var(--warn);
+  }
+
+  .bottombar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+
+  .bottombar > * { flex: 0 0 auto; }
+
+  .nav-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+
+  #counter {
+    flex: 1 1 auto;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+
+  .export-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #1b1e24;
+  }
+
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 12, 15, 0.45);
+    z-index: 20;
+  }
+
+  .drawer {
+    position: fixed;
+    z-index: 21;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(320px, 86vw);
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    flex-direction: column;
+  }
+
+  .drawer:not([hidden]) {
+    display: flex;
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .drawer-header h3 { margin: 0; font-size: 15px; }
+
+  .drawer-header button {
+    padding: 4px 9px;
+    border-radius: 6px;
+  }
+
+  .drawer-list { overflow-y: auto; padding: 8px; }
+
+  .drawer-band {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    font-weight: 700;
+    padding: 10px 8px 4px;
+  }
+
+  .drawer-item {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .drawer-item:hover { background: var(--ground); }
+  .drawer-item.active { background: var(--accent-tint); }
+
+  .drawer-item .dot {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--border);
+  }
+
+  .drawer-item.done .dot { background: var(--ok); }
+
+  .drawer-item .label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 76px;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--ground);
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    z-index: 30;
+    box-shadow: var(--shadow);
+    max-width: 90vw;
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    .deck { grid-template-columns: 1fr; }
+    .deck-btn.ghost { grid-column: auto; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="title-block">
+      <span class="eyebrow">GEMS-9 파일럿 · 대표구간 지정</span>
+      <h1>구간 설정 툴</h1>
+    </div>
+    <div class="progress-chip" id="progressChip">0 / 35 완료</div>
+    <button class="menu-btn" id="menuBtn" type="button">곡 목록 ▾</button>
+  </header>
+
+  <main class="stage">
+    <div class="song-meta">
+      <span class="band-chip" id="bandChip">-</span>
+      <h2 id="songTitle">-</h2>
+      <span class="idx-note" id="idxNote">-</span>
+    </div>
+
+    <div class="player-wrap">
+      <div id="ytPlayer"></div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-track" id="timelineTrack">
+        <div class="timeline-range" id="timelineRange"></div>
+        <div class="timeline-cursor" id="timelineCursor"></div>
+      </div>
+      <div class="timeline-labels">
+        <span id="timeCurrent">0:00</span>
+        <span id="timeDuration">0:00</span>
+      </div>
+    </div>
+
+    <div class="deck">
+      <div class="deck-group">
+        <label for="startInput">IN (시작점)</label>
+        <input id="startInput" placeholder="0:00" autocomplete="off" />
+        <button class="deck-btn accent" id="setStartBtn" type="button">현재 위치로 설정</button>
+      </div>
+      <div class="deck-group">
+        <label for="endInput">OUT (끝점)</label>
+        <input id="endInput" placeholder="0:00" autocomplete="off" />
+        <button class="deck-btn accent" id="setEndBtn" type="button">현재 위치로 설정</button>
+      </div>
+      <button class="deck-btn ghost" id="introBtn" type="button">인트로 구간 (0:00–0:30)</button>
+      <div class="duration-chip neutral" id="durationChip">구간 미설정</div>
+    </div>
+  </main>
+</div>
+
+<nav class="bottombar">
+  <button class="nav-btn" id="prevBtn" type="button">◀ 이전</button>
+  <span id="counter">1 / 35</span>
+  <button class="nav-btn" id="nextBtn" type="button">다음 ▶</button>
+  <button class="export-btn" id="exportBtn" type="button">CSV 내보내기</button>
+</nav>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawer-header">
+    <h3>곡 목록 (35)</h3>
+    <button id="closeDrawerBtn" type="button">✕</button>
+  </div>
+  <div class="drawer-list" id="drawerList"></div>
+</aside>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  var SONGS = JSON.parse(document.getElementById('songs-data').textContent);
+  var STORAGE_KEY = 'gems9_segment_tool_round2_v1';
+
+  var el = {
+    progressChip: document.getElementById('progressChip'),
+    menuBtn: document.getElementById('menuBtn'),
+    bandChip: document.getElementById('bandChip'),
+    songTitle: document.getElementById('songTitle'),
+    idxNote: document.getElementById('idxNote'),
+    timelineTrack: document.getElementById('timelineTrack'),
+    timelineRange: document.getElementById('timelineRange'),
+    timelineCursor: document.getElementById('timelineCursor'),
+    timeCurrent: document.getElementById('timeCurrent'),
+    timeDuration: document.getElementById('timeDuration'),
+    startInput: document.getElementById('startInput'),
+    endInput: document.getElementById('endInput'),
+    setStartBtn: document.getElementById('setStartBtn'),
+    setEndBtn: document.getElementById('setEndBtn'),
+    introBtn: document.getElementById('introBtn'),
+    durationChip: document.getElementById('durationChip'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    counter: document.getElementById('counter'),
+    exportBtn: document.getElementById('exportBtn'),
+    scrim: document.getElementById('scrim'),
+    drawer: document.getElementById('drawer'),
+    drawerList: document.getElementById('drawerList'),
+    closeDrawerBtn: document.getElementById('closeDrawerBtn'),
+    toast: document.getElementById('toast')
+  };
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { currentIndex: 0, songs: {} };
+      var parsed = JSON.parse(raw);
+      return { currentIndex: parsed.currentIndex || 0, songs: parsed.songs || {} };
+    } catch (e) {
+      return { currentIndex: 0, songs: {} };
+    }
+  }
+
+  var state = loadState();
+  var duration = 0;
+  var player = null;
+  var pollTimer = null;
+  var toastTimer = null;
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function currentSong() {
+    return SONGS[state.currentIndex];
+  }
+
+  function currentSeg() {
+    var song = currentSong();
+    if (!song) return {};
+    return state.songs[song.idx] || {};
+  }
+
+  function setSeg(patch) {
+    var song = currentSong();
+    var seg = state.songs[song.idx] || {};
+    Object.assign(seg, patch);
+    state.songs[song.idx] = seg;
+    saveState();
+    refreshDeck();
+    refreshProgress();
+  }
+
+  function parseTime(str) {
+    if (str == null) return null;
+    str = String(str).trim();
+    if (str === '') return null;
+    if (str.indexOf(':') !== -1) {
+      var parts = str.split(':');
+      for (var i = 0; i < parts.length; i++) {
+        if (parts[i].trim() === '' || isNaN(Number(parts[i]))) return null;
+      }
+      var sec = 0;
+      for (var j = 0; j < parts.length; j++) sec = sec * 60 + Number(parts[j]);
+      return sec;
+    }
+    var n = Number(str);
+    return isNaN(n) ? null : n;
+  }
+
+  function formatTime(sec) {
+    if (sec == null || isNaN(sec)) return '';
+    sec = Math.max(0, Math.round(sec));
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function isDone(idx) {
+    var seg = state.songs[idx];
+    return !!(seg && seg.start != null && seg.end != null && seg.end > seg.start);
+  }
+
+  function refreshProgress() {
+    var done = 0;
+    for (var i = 0; i < SONGS.length; i++) if (isDone(SONGS[i].idx)) done++;
+    el.progressChip.textContent = done + ' / ' + SONGS.length + ' 완료';
+  }
+
+  function refreshMeta() {
+    var song = currentSong();
+    el.bandChip.textContent = song.band;
+    el.songTitle.textContent = song.song;
+    el.idxNote.textContent = 'idx ' + song.idx + ' · energy_full ' + song.energyFull.toFixed(2) +
+      ' · ' + (state.currentIndex + 1) + '/' + SONGS.length;
+    el.counter.textContent = (state.currentIndex + 1) + ' / ' + SONGS.length;
+    el.prevBtn.disabled = state.currentIndex === 0;
+    el.nextBtn.disabled = state.currentIndex === SONGS.length - 1;
+  }
+
+  function refreshDeck() {
+    var seg = currentSeg();
+    el.startInput.value = seg.start != null ? formatTime(seg.start) : '';
+    el.endInput.value = seg.end != null ? formatTime(seg.end) : '';
+    updateDurationChip(seg);
+    updateTimelineRange(seg);
+  }
+
+  function updateDurationChip(seg) {
+    seg = seg || currentSeg();
+    var chip = el.durationChip;
+    if (seg.start == null || seg.end == null) {
+      chip.textContent = '구간 미설정';
+      chip.className = 'duration-chip neutral';
+      return;
+    }
+    var dur = seg.end - seg.start;
+    if (dur <= 0) {
+      chip.textContent = '오류 · 끝점이 시작점보다 앞섬';
+      chip.className = 'duration-chip warn';
+      return;
+    }
+    if (dur < 15 || dur > 45) {
+      chip.textContent = Math.round(dur) + '초 · 권장범위(15–45초) 벗어남';
+      chip.className = 'duration-chip warn';
+      return;
+    }
+    chip.textContent = Math.round(dur) + '초 · 적정 구간';
+    chip.className = 'duration-chip ok';
+  }
+
+  function updateTimelineRange(seg) {
+    seg = seg || currentSeg();
+    if (!duration || duration <= 0 || seg.start == null || seg.end == null) {
+      el.timelineRange.style.left = '0%';
+      el.timelineRange.style.width = '0%';
+      return;
+    }
+    var left = Math.max(0, Math.min(100, (seg.start / duration) * 100));
+    var right = Math.max(0, Math.min(100, (seg.end / duration) * 100));
+    el.timelineRange.style.left = left + '%';
+    el.timelineRange.style.width = Math.max(0, right - left) + '%';
+  }
+
+  function updateCursor(t) {
+    if (!duration || duration <= 0) return;
+    var pct = Math.max(0, Math.min(100, (t / duration) * 100));
+    el.timelineCursor.style.left = pct + '%';
+    el.timeCurrent.textContent = formatTime(t);
+  }
+
+  function toast(msg) {
+    el.toast.textContent = msg;
+    el.toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.toast.hidden = true; }, 3200);
+  }
+
+  // --- YouTube player ---
+  var tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.body.appendChild(tag);
+
+  window.onYouTubeIframeAPIReady = function () {
+    player = new YT.Player('ytPlayer', {
+      videoId: currentSong().videoId,
+      playerVars: { rel: 0, modestbranding: 1 },
+      events: {
+        onReady: function () { pollDuration(); startPolling(); }
+      }
+    });
+  };
+
+  function pollDuration() {
+    var tries = 0;
+    var iv = setInterval(function () {
+      tries++;
+      var d = player.getDuration ? player.getDuration() : 0;
+      if (d && d > 0) {
+        duration = d;
+        el.timeDuration.textContent = formatTime(d);
+        updateTimelineRange();
+        clearInterval(iv);
+      } else if (tries > 40) {
+        clearInterval(iv);
+      }
+    }, 250);
+  }
+
+  function startPolling() {
+    clearInterval(pollTimer);
+    pollTimer = setInterval(function () {
+      if (player && player.getCurrentTime) {
+        updateCursor(player.getCurrentTime());
+      }
+    }, 200);
+  }
+
+  function loadSong(index) {
+    state.currentIndex = index;
+    saveState();
+    duration = 0;
+    el.timeDuration.textContent = '0:00';
+    el.timeCurrent.textContent = '0:00';
+    el.timelineCursor.style.left = '0%';
+    refreshMeta();
+    refreshDeck();
+    if (player && player.loadVideoById) {
+      player.loadVideoById(currentSong().videoId);
+      pollDuration();
+    }
+    renderDrawerList();
+  }
+
+  // --- controls ---
+  el.setStartBtn.addEventListener('click', function () {
+    if (!player || !player.getCurrentTime) return;
+    setSeg({ start: player.getCurrentTime() });
+  });
+
+  el.setEndBtn.addEventListener('click', function () {
+    if (!player || !player.getCurrentTime) return;
+    setSeg({ end: player.getCurrentTime() });
+  });
+
+  el.introBtn.addEventListener('click', function () {
+    setSeg({ start: 0, end: 30 });
+  });
+
+  el.startInput.addEventListener('change', function () {
+    var v = parseTime(el.startInput.value);
+    setSeg({ start: v });
+  });
+
+  el.endInput.addEventListener('change', function () {
+    var v = parseTime(el.endInput.value);
+    setSeg({ end: v });
+  });
+
+  el.timelineTrack.addEventListener('click', function (ev) {
+    if (!duration || duration <= 0 || !player || !player.seekTo) return;
+    var rect = el.timelineTrack.getBoundingClientRect();
+    var pct = (ev.clientX - rect.left) / rect.width;
+    pct = Math.max(0, Math.min(1, pct));
+    player.seekTo(pct * duration, true);
+  });
+
+  el.prevBtn.addEventListener('click', function () {
+    if (state.currentIndex > 0) loadSong(state.currentIndex - 1);
+  });
+
+  el.nextBtn.addEventListener('click', function () {
+    if (state.currentIndex < SONGS.length - 1) loadSong(state.currentIndex + 1);
+  });
+
+  el.menuBtn.addEventListener('click', openDrawer);
+  el.closeDrawerBtn.addEventListener('click', closeDrawer);
+  el.scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape') closeDrawer();
+  });
+
+  function openDrawer() {
+    renderDrawerList();
+    el.scrim.hidden = false;
+    el.drawer.hidden = false;
+  }
+  function closeDrawer() {
+    el.scrim.hidden = true;
+    el.drawer.hidden = true;
+  }
+
+  function renderDrawerList() {
+    var html = '';
+    var lastBand = null;
+    for (var i = 0; i < SONGS.length; i++) {
+      var s = SONGS[i];
+      if (s.band !== lastBand) {
+        html += '<div class="drawer-band">' + s.band + '</div>';
+        lastBand = s.band;
+      }
+      var done = isDone(s.idx);
+      var active = i === state.currentIndex;
+      html += '<button class="drawer-item' + (done ? ' done' : '') + (active ? ' active' : '') +
+        '" data-index="' + i + '" type="button">' +
+        '<span class="dot"></span><span class="label">' + escapeHtml(s.song) + '</span></button>';
+    }
+    el.drawerList.innerHTML = html;
+    var items = el.drawerList.querySelectorAll('.drawer-item');
+    for (var k = 0; k < items.length; k++) {
+      items[k].addEventListener('click', function () {
+        loadSong(Number(this.getAttribute('data-index')));
+        closeDrawer();
+      });
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // --- export ---
+  function csvEscape(v) {
+    v = v == null ? '' : String(v);
+    if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+    return v;
+  }
+
+  function buildCsv() {
+    var header = ['idx', 'band', 'song', 'url', 'energy_full', 'excerpt_start_sec', 'excerpt_end_sec',
+      'wonder', 'transcendence', 'tenderness', 'nostalgia', 'peacefulness', 'power',
+      'joyful_activation', 'tension', 'sadness', 'rater_note'];
+    var lines = [header.join(',')];
+    for (var i = 0; i < SONGS.length; i++) {
+      var s = SONGS[i];
+      var seg = state.songs[s.idx] || {};
+      var url = 'https://youtu.be/' + s.videoId;
+      var row = [s.idx, s.band, s.song, url, s.energyFull,
+        seg.start != null ? seg.start : '', seg.end != null ? seg.end : '',
+        '', '', '', '', '', '', '', '', '', ''];
+      lines.push(row.map(csvEscape).join(','));
+    }
+    return lines.join('\n');
+  }
+
+  function downloadLocal(csv) {
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'gems9_round2_highlight_segments.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast('저장 완료 — gems9_round2_highlight_segments.csv');
+  }
+
+  el.exportBtn.addEventListener('click', function () {
+    var csv = buildCsv();
+    if (!window.claude || !window.claude.downloads) {
+      // 로컬(file://, localhost 등)에서는 확장자 제한 없이 바로 .csv로 내려받는다.
+      downloadLocal(csv);
+      return;
+    }
+    window.claude.downloads.save({ filename: 'gems9_round2_highlight_segments.txt', data: csv })
+      .then(function () {
+        toast('저장 완료 — 확장자를 .txt에서 .csv로 바꿔 기존 파일을 덮어써 주세요.');
+      })
+      .catch(function (err) {
+        if (err && err.code === 'declined') return;
+        toast('저장 실패: ' + ((err && err.message) || (err && err.code) || '알 수 없는 오류'));
+      });
+  });
+
+  // --- init ---
+  refreshMeta();
+  refreshDeck();
+  refreshProgress();
+  renderDrawerList();
+})();
+</script>

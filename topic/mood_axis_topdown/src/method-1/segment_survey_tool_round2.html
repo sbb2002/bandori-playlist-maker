@@ -1,0 +1,716 @@
+<title>GEMS-9 설문 응답 툴</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<script type="application/json" id="songs-data">
+[
+  {
+    "idx": 68,
+    "band": "afterglow",
+    "song": "Don't say “lazy” (Cover)",
+    "videoId": "PThqwHLyPpU",
+    "energyFull": 0.953292,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 61,
+    "band": "afterglow",
+    "song": "Redo (Cover)",
+    "videoId": "Q5ld_AEJAWw",
+    "energyFull": 0.493874,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 31,
+    "band": "afterglow",
+    "song": "青い栞",
+    "videoId": "bzJW33heiqw",
+    "energyFull": 0.062021,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 91,
+    "band": "ave_mujica",
+    "song": "in your blue eyes",
+    "videoId": "kVMuEQ3uXWc",
+    "energyFull": 0.003828,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 157,
+    "band": "hello_happy_world",
+    "song": "強風オールバック (Cover)",
+    "videoId": "EGxEKCHDAFE",
+    "energyFull": 0.997703,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 179,
+    "band": "millsage",
+    "song": "起死開戦",
+    "videoId": "bzPxdHmMW3s",
+    "energyFull": 0.163859,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 189,
+    "band": "morfonica",
+    "song": "Sweet Cheers!",
+    "videoId": "e8IQBZMVIGw",
+    "energyFull": 0.045176,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 245,
+    "band": "mugendai_mutype",
+    "song": "テレパシー",
+    "videoId": "mKiBvYqfBfk",
+    "energyFull": 0.065084,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 339,
+    "band": "pastel_palettes",
+    "song": "everyday flower",
+    "videoId": "zEHPkLXcX1I",
+    "energyFull": 0.121746,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 560,
+    "band": "raise_a_suilen",
+    "song": "Just Awake (Cover)",
+    "videoId": "nyn9h6BraQ4",
+    "energyFull": 0.590352,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 654,
+    "band": "roselia",
+    "song": "Paradisus‐Paradoxum (Cover)",
+    "videoId": "A12CMqrBFSw",
+    "energyFull": 0.43415,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  },
+  {
+    "idx": 580,
+    "band": "roselia",
+    "song": "軌跡",
+    "videoId": "P2BT98BC1N8",
+    "energyFull": 0.042113,
+    "start": 0,
+    "end": 30,
+    "isFallback": true
+  }
+]
+</script>
+
+<style>
+  :root {
+    --ground: #f1f2f4;
+    --surface: #ffffff;
+    --surface-2: #e4e6ea;
+    --border: #d4d7dd;
+    --ink: #1b1e24;
+    --ink-dim: #666e7c;
+    --accent: #b8720f;
+    --accent-strong: #935c0c;
+    --accent-tint: rgba(184, 114, 15, 0.14);
+    --ok: #2b8058;
+    --ok-tint: rgba(43, 128, 88, 0.14);
+    --warn: #c23f2d;
+    --warn-tint: rgba(194, 63, 45, 0.12);
+    --shadow: 0 1px 2px rgba(20, 23, 28, 0.06), 0 8px 24px rgba(20, 23, 28, 0.08);
+
+    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
+      "Malgun Gothic", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Roboto Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #14171c;
+      --surface: #1c2027;
+      --surface-2: #262b33;
+      --border: #343a44;
+      --ink: #edeef0;
+      --ink-dim: #8b93a1;
+      --accent: #e4a64a;
+      --accent-strong: #f2bb6c;
+      --accent-tint: rgba(228, 166, 74, 0.16);
+      --ok: #3fa772;
+      --ok-tint: rgba(63, 167, 114, 0.16);
+      --warn: #e0604d;
+      --warn-tint: rgba(224, 96, 77, 0.16);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #14171c; --surface: #1c2027; --surface-2: #262b33; --border: #343a44;
+    --ink: #edeef0; --ink-dim: #8b93a1; --accent: #e4a64a; --accent-strong: #f2bb6c;
+    --accent-tint: rgba(228, 166, 74, 0.16); --ok: #3fa772; --ok-tint: rgba(63, 167, 114, 0.16);
+    --warn: #e0604d; --warn-tint: rgba(224, 96, 77, 0.16);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px rgba(0, 0, 0, 0.4);
+  }
+
+  :root[data-theme="light"] {
+    --ground: #f1f2f4; --surface: #ffffff; --surface-2: #e4e6ea; --border: #d4d7dd;
+    --ink: #1b1e24; --ink-dim: #666e7c; --accent: #b8720f; --accent-strong: #935c0c;
+    --accent-tint: rgba(184, 114, 15, 0.14); --ok: #2b8058; --ok-tint: rgba(43, 128, 88, 0.14);
+    --warn: #c23f2d; --warn-tint: rgba(194, 63, 45, 0.12);
+    --shadow: 0 1px 2px rgba(20, 23, 28, 0.06), 0 8px 24px rgba(20, 23, 28, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button, input, textarea { font-family: inherit; color: inherit; }
+
+  button {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+  }
+
+  button:disabled { opacity: 0.4; cursor: default; }
+
+  button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .app { max-width: 760px; margin: 0 auto; padding: 16px 16px 96px; min-height: 100vh; }
+
+  .topbar { display: flex; align-items: center; gap: 10px; padding: 10px 4px 18px; flex-wrap: wrap; }
+  .title-block { flex: 1 1 auto; min-width: 180px; }
+  .eyebrow {
+    display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin-bottom: 2px;
+  }
+  h1 { font-size: 19px; margin: 0; font-weight: 700; text-wrap: balance; }
+
+  .progress-chip {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 13px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    padding: 6px 12px; white-space: nowrap;
+  }
+
+  .menu-btn { padding: 8px 14px; font-size: 13px; font-weight: 600; border-radius: 999px; }
+
+  .stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 18px; box-shadow: var(--shadow);
+  }
+
+  .song-meta { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .band-chip {
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; background: var(--accent-tint);
+    color: var(--accent-strong); border-radius: 999px; padding: 4px 10px; font-weight: 700; white-space: nowrap;
+  }
+  .song-meta h2 { font-size: 18px; margin: 0; text-wrap: balance; flex: 1 1 auto; min-width: 0; overflow-wrap: break-word; }
+  .idx-note { font-size: 12px; color: var(--ink-dim); font-family: var(--font-mono); white-space: nowrap; }
+
+  .fallback-badge {
+    display: inline-block; font-size: 11px; font-weight: 700; background: var(--warn-tint);
+    color: var(--warn); border-radius: 999px; padding: 3px 9px; margin-bottom: 10px;
+  }
+
+  .player-wrap {
+    position: relative; width: 100%; padding-bottom: 56.25%; background: #000;
+    border-radius: 10px; overflow: hidden;
+  }
+  .player-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+
+  .transport { margin-top: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .transport-btn { padding: 9px 16px; font-size: 13px; font-weight: 700; border-radius: 999px; }
+  .transport-btn.accent { background: var(--accent); border-color: var(--accent); color: #1b1e24; }
+  .transport-progress {
+    flex: 1 1 140px; height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden;
+    min-width: 100px;
+  }
+  .transport-progress-fill { height: 100%; width: 0%; background: var(--accent); }
+  .transport-time {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink-dim);
+    white-space: nowrap;
+  }
+
+  .legend {
+    margin-top: 18px; display: flex; justify-content: space-between; font-size: 11px;
+    color: var(--ink-dim); padding: 0 2px;
+  }
+
+  .likert-list { margin-top: 6px; display: flex; flex-direction: column; gap: 8px; }
+  .likert-row {
+    display: flex; align-items: center; gap: 10px; background: var(--ground);
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
+  }
+  .likert-label { flex: 0 0 92px; }
+  .likert-kr { display: block; font-size: 13px; font-weight: 700; }
+  .likert-en { display: block; font-size: 10.5px; color: var(--ink-dim); font-family: var(--font-mono); }
+  .likert-scale { display: flex; gap: 6px; flex: 1 1 auto; justify-content: flex-end; }
+  .likert-btn {
+    width: 34px; height: 34px; border-radius: 8px; font-size: 13px; font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  .likert-btn.selected { background: var(--accent); border-color: var(--accent); color: #1b1e24; }
+
+  .note-field { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .note-field label {
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); font-weight: 700;
+  }
+  .note-field textarea {
+    resize: vertical; border: 1px solid var(--border); background: var(--surface);
+    border-radius: 8px; padding: 8px 10px; font-size: 13px;
+  }
+
+  .bottombar {
+    position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .bottombar > * { flex: 0 0 auto; }
+  .nav-btn { padding: 10px 14px; font-size: 13px; font-weight: 600; }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+  #counter { flex: 1 1 auto; text-align: center; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--ink-dim); }
+  .export-btn { padding: 10px 16px; font-size: 13px; font-weight: 700; background: var(--accent); border-color: var(--accent); color: #1b1e24; }
+
+  .scrim { position: fixed; inset: 0; background: rgba(10, 12, 15, 0.45); z-index: 20; }
+  .drawer {
+    position: fixed; z-index: 21; top: 0; right: 0; bottom: 0; width: min(320px, 86vw);
+    background: var(--surface); border-left: 1px solid var(--border); flex-direction: column;
+  }
+  .drawer:not([hidden]) { display: flex; }
+  .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .drawer-header h3 { margin: 0; font-size: 15px; }
+  .drawer-header button { padding: 4px 9px; border-radius: 6px; }
+  .drawer-list { overflow-y: auto; padding: 8px; }
+  .drawer-band { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); font-weight: 700; padding: 10px 8px 4px; }
+  .drawer-item { width: 100%; text-align: left; display: flex; align-items: center; gap: 8px; padding: 8px; border: none; background: transparent; border-radius: 8px; font-size: 13px; }
+  .drawer-item:hover { background: var(--ground); }
+  .drawer-item.active { background: var(--accent-tint); }
+  .drawer-item .dot { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 999px; background: var(--border); }
+  .drawer-item.done .dot { background: var(--ok); }
+  .drawer-item .label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 76px; transform: translateX(-50%); background: var(--ink);
+    color: var(--ground); padding: 10px 16px; border-radius: 999px; font-size: 13px; z-index: 30;
+    box-shadow: var(--shadow); max-width: 90vw; text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    .likert-label { flex-basis: 74px; }
+    .likert-btn { width: 30px; height: 30px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="title-block">
+      <span class="eyebrow">GEMS-9 파일럿 · 설문 응답</span>
+      <h1>설문 응답 툴</h1>
+    </div>
+    <div class="progress-chip" id="progressChip">0 / 0 완료</div>
+    <button class="menu-btn" id="menuBtn" type="button">곡 목록 ▾</button>
+  </header>
+
+  <main class="stage">
+    <div class="song-meta">
+      <span class="band-chip" id="bandChip">-</span>
+      <h2 id="songTitle">-</h2>
+      <span class="idx-note" id="idxNote">-</span>
+    </div>
+    <span class="fallback-badge" id="fallbackBadge" hidden>구간 임시값(미확정) — 인트로 0:00~0:30</span>
+
+    <div class="player-wrap">
+      <div id="ytPlayer"></div>
+    </div>
+
+    <div class="transport">
+      <button class="transport-btn accent" id="playBtn" type="button">▶ 재생</button>
+      <button class="transport-btn" id="stopBtn" type="button" disabled>■ 정지</button>
+      <div class="transport-progress"><div class="transport-progress-fill" id="progressFill"></div></div>
+      <span class="transport-time" id="transportTime">0:00 / 0:00</span>
+    </div>
+
+    <div class="legend"><span>1 전혀 못 느낌</span><span>3 보통</span><span>5 매우 강하게</span></div>
+
+    <div class="likert-list" id="likertList"></div>
+
+    <div class="note-field">
+      <label for="noteInput">인상 메모(선택)</label>
+      <textarea id="noteInput" rows="2" placeholder="짧은 인상 메모"></textarea>
+    </div>
+  </main>
+</div>
+
+<nav class="bottombar">
+  <button class="nav-btn" id="prevBtn" type="button">◀ 이전</button>
+  <span id="counter">1 / 0</span>
+  <button class="nav-btn" id="nextBtn" type="button">다음 ▶</button>
+  <button class="export-btn" id="exportBtn" type="button">CSV 내보내기</button>
+</nav>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawer-header">
+    <h3 id="drawerTitle">곡 목록</h3>
+    <button id="closeDrawerBtn" type="button">✕</button>
+  </div>
+  <div class="drawer-list" id="drawerList"></div>
+</aside>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  var SONGS = JSON.parse(document.getElementById('songs-data').textContent);
+  var STORAGE_KEY = 'gems9_survey_tool_round2_v1';
+
+  var ITEMS = [
+    { key: 'wonder', kr: '경이' },
+    { key: 'transcendence', kr: '초월' },
+    { key: 'tenderness', kr: '다정함' },
+    { key: 'nostalgia', kr: '향수' },
+    { key: 'peacefulness', kr: '평온함' },
+    { key: 'power', kr: '웅장함' },
+    { key: 'joyful_activation', kr: '활기' },
+    { key: 'tension', kr: '긴장' },
+    { key: 'sadness', kr: '슬픔' }
+  ];
+
+  var el = {
+    progressChip: document.getElementById('progressChip'),
+    menuBtn: document.getElementById('menuBtn'),
+    bandChip: document.getElementById('bandChip'),
+    songTitle: document.getElementById('songTitle'),
+    idxNote: document.getElementById('idxNote'),
+    fallbackBadge: document.getElementById('fallbackBadge'),
+    playBtn: document.getElementById('playBtn'),
+    stopBtn: document.getElementById('stopBtn'),
+    progressFill: document.getElementById('progressFill'),
+    transportTime: document.getElementById('transportTime'),
+    likertList: document.getElementById('likertList'),
+    noteInput: document.getElementById('noteInput'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    counter: document.getElementById('counter'),
+    exportBtn: document.getElementById('exportBtn'),
+    scrim: document.getElementById('scrim'),
+    drawer: document.getElementById('drawer'),
+    drawerTitle: document.getElementById('drawerTitle'),
+    drawerList: document.getElementById('drawerList'),
+    closeDrawerBtn: document.getElementById('closeDrawerBtn'),
+    toast: document.getElementById('toast')
+  };
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { currentIndex: 0, songs: {} };
+      var parsed = JSON.parse(raw);
+      return { currentIndex: parsed.currentIndex || 0, songs: parsed.songs || {} };
+    } catch (e) { return { currentIndex: 0, songs: {} }; }
+  }
+
+  var state = loadState();
+  var player = null;
+  var pollTimer = null;
+  var isPlaying = false;
+  var toastTimer = null;
+
+  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  function currentSong() { return SONGS[state.currentIndex]; }
+
+  function currentEntry() {
+    var song = currentSong();
+    if (!song) return { scores: {}, note: '' };
+    if (!state.songs[song.idx]) state.songs[song.idx] = { scores: {}, note: '' };
+    return state.songs[song.idx];
+  }
+
+  function setScore(itemKey, score) {
+    var entry = currentEntry();
+    entry.scores[itemKey] = score;
+    saveState();
+    refreshLikert();
+    refreshProgress();
+  }
+
+  function setNote(v) {
+    var entry = currentEntry();
+    entry.note = v;
+    saveState();
+  }
+
+  function formatTime(sec) {
+    if (sec == null || isNaN(sec)) return '0:00';
+    sec = Math.max(0, Math.round(sec));
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function isDone(idx) {
+    var entry = state.songs[idx];
+    if (!entry) return false;
+    for (var i = 0; i < ITEMS.length; i++) {
+      if (!entry.scores || !entry.scores[ITEMS[i].key]) return false;
+    }
+    return true;
+  }
+
+  function refreshProgress() {
+    var done = 0;
+    for (var i = 0; i < SONGS.length; i++) if (isDone(SONGS[i].idx)) done++;
+    el.progressChip.textContent = done + ' / ' + SONGS.length + ' 완료';
+  }
+
+  function refreshMeta() {
+    var song = currentSong();
+    if (!song) return;
+    el.bandChip.textContent = song.band;
+    el.songTitle.textContent = song.song;
+    el.idxNote.textContent = 'idx ' + song.idx + ' · ' + (state.currentIndex + 1) + '/' + SONGS.length;
+    el.counter.textContent = (state.currentIndex + 1) + ' / ' + SONGS.length;
+    el.prevBtn.disabled = state.currentIndex === 0;
+    el.nextBtn.disabled = state.currentIndex === SONGS.length - 1;
+    el.fallbackBadge.hidden = !song.isFallback;
+    el.noteInput.value = currentEntry().note || '';
+    el.transportTime.textContent = '0:00 / ' + formatTime(song.end - song.start);
+    el.progressFill.style.width = '0%';
+  }
+
+  function renderLikert() {
+    var html = '';
+    for (var i = 0; i < ITEMS.length; i++) {
+      var it = ITEMS[i];
+      html += '<div class="likert-row" data-item="' + it.key + '">' +
+        '<div class="likert-label"><span class="likert-kr">' + it.kr + '</span>' +
+        '<span class="likert-en">' + it.key + '</span></div>' +
+        '<div class="likert-scale">';
+      for (var s = 1; s <= 5; s++) {
+        html += '<button class="likert-btn" data-item="' + it.key + '" data-score="' + s + '" type="button">' + s + '</button>';
+      }
+      html += '</div></div>';
+    }
+    el.likertList.innerHTML = html;
+    var btns = el.likertList.querySelectorAll('.likert-btn');
+    for (var k = 0; k < btns.length; k++) {
+      btns[k].addEventListener('click', function () {
+        setScore(this.getAttribute('data-item'), Number(this.getAttribute('data-score')));
+      });
+    }
+    refreshLikert();
+  }
+
+  function refreshLikert() {
+    var entry = currentEntry();
+    var btns = el.likertList.querySelectorAll('.likert-btn');
+    for (var i = 0; i < btns.length; i++) {
+      var b = btns[i];
+      var item = b.getAttribute('data-item');
+      var score = Number(b.getAttribute('data-score'));
+      b.classList.toggle('selected', entry.scores[item] === score);
+    }
+  }
+
+  function toast(msg) {
+    el.toast.textContent = msg;
+    el.toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.toast.hidden = true; }, 3200);
+  }
+
+  // --- YouTube player (재생/정지 버튼으로만 제어, 영상 자체는 클릭 불가) ---
+  var tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.body.appendChild(tag);
+
+  window.onYouTubeIframeAPIReady = function () {
+    var song = currentSong();
+    player = new YT.Player('ytPlayer', {
+      videoId: song ? song.videoId : undefined,
+      playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, rel: 0, iv_load_policy: 3 },
+      events: { onReady: function () { player.seekTo(song.start, true); player.pauseVideo(); } }
+    });
+  };
+
+  function stopExcerpt() {
+    clearInterval(pollTimer);
+    isPlaying = false;
+    el.playBtn.disabled = false;
+    el.stopBtn.disabled = true;
+    if (player && player.pauseVideo) {
+      player.pauseVideo();
+      player.seekTo(currentSong().start, true);
+    }
+    el.progressFill.style.width = '0%';
+    var song = currentSong();
+    el.transportTime.textContent = '0:00 / ' + formatTime(song.end - song.start);
+  }
+
+  function playExcerpt() {
+    if (!player || !player.seekTo) return;
+    var song = currentSong();
+    player.seekTo(song.start, true);
+    player.playVideo();
+    isPlaying = true;
+    el.playBtn.disabled = true;
+    el.stopBtn.disabled = false;
+    clearInterval(pollTimer);
+    pollTimer = setInterval(function () {
+      if (!player || !player.getCurrentTime) return;
+      var t = player.getCurrentTime();
+      var elapsed = Math.max(0, t - song.start);
+      var total = song.end - song.start;
+      el.progressFill.style.width = Math.max(0, Math.min(100, (elapsed / total) * 100)) + '%';
+      el.transportTime.textContent = formatTime(elapsed) + ' / ' + formatTime(total);
+      if (t >= song.end) stopExcerpt();
+    }, 150);
+  }
+
+  el.playBtn.addEventListener('click', playExcerpt);
+  el.stopBtn.addEventListener('click', stopExcerpt);
+  el.noteInput.addEventListener('change', function () { setNote(el.noteInput.value); });
+
+  function loadSong(index) {
+    stopExcerpt();
+    state.currentIndex = index;
+    saveState();
+    refreshMeta();
+    refreshLikert();
+    if (player && player.cueVideoById) {
+      var song = currentSong();
+      player.cueVideoById({ videoId: song.videoId, startSeconds: song.start });
+    }
+    renderDrawerList();
+  }
+
+  el.prevBtn.addEventListener('click', function () { if (state.currentIndex > 0) loadSong(state.currentIndex - 1); });
+  el.nextBtn.addEventListener('click', function () { if (state.currentIndex < SONGS.length - 1) loadSong(state.currentIndex + 1); });
+
+  el.menuBtn.addEventListener('click', openDrawer);
+  el.closeDrawerBtn.addEventListener('click', closeDrawer);
+  el.scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeDrawer(); });
+
+  function openDrawer() { renderDrawerList(); el.scrim.hidden = false; el.drawer.hidden = false; }
+  function closeDrawer() { el.scrim.hidden = true; el.drawer.hidden = true; }
+
+  function renderDrawerList() {
+    el.drawerTitle.textContent = '곡 목록 (' + SONGS.length + ')';
+    var html = '';
+    var lastBand = null;
+    for (var i = 0; i < SONGS.length; i++) {
+      var s = SONGS[i];
+      if (s.band !== lastBand) { html += '<div class="drawer-band">' + s.band + '</div>'; lastBand = s.band; }
+      var done = isDone(s.idx);
+      var active = i === state.currentIndex;
+      html += '<button class="drawer-item' + (done ? ' done' : '') + (active ? ' active' : '') +
+        '" data-index="' + i + '" type="button"><span class="dot"></span><span class="label">' +
+        escapeHtml(s.song) + '</span></button>';
+    }
+    el.drawerList.innerHTML = html;
+    var items = el.drawerList.querySelectorAll('.drawer-item');
+    for (var k = 0; k < items.length; k++) {
+      items[k].addEventListener('click', function () {
+        loadSong(Number(this.getAttribute('data-index')));
+        closeDrawer();
+      });
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // --- export ---
+  function csvEscape(v) {
+    v = v == null ? '' : String(v);
+    if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+    return v;
+  }
+
+  function buildCsv() {
+    var header = ['idx', 'band', 'song', 'url', 'energy_full', 'excerpt_start_sec', 'excerpt_end_sec',
+      'wonder', 'transcendence', 'tenderness', 'nostalgia', 'peacefulness', 'power',
+      'joyful_activation', 'tension', 'sadness', 'rater_note'];
+    var lines = [header.join(',')];
+    for (var i = 0; i < SONGS.length; i++) {
+      var s = SONGS[i];
+      var entry = state.songs[s.idx] || { scores: {}, note: '' };
+      var url = 'https://youtu.be/' + s.videoId;
+      var row = [s.idx, s.band, s.song, url, s.energyFull, s.start, s.end];
+      for (var j = 0; j < ITEMS.length; j++) row.push(entry.scores[ITEMS[j].key] != null ? entry.scores[ITEMS[j].key] : '');
+      row.push(entry.note || '');
+      lines.push(row.map(csvEscape).join(','));
+    }
+    return lines.join('\n');
+  }
+
+  function downloadLocal(csv) {
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'gems9_round2_highlight_responses.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast('저장 완료 — gems9_round2_highlight_responses.csv');
+  }
+
+  el.exportBtn.addEventListener('click', function () {
+    var csv = buildCsv();
+    if (!window.claude || !window.claude.downloads) {
+      downloadLocal(csv);
+      return;
+    }
+    window.claude.downloads.save({ filename: 'gems9_round2_highlight_responses.txt', data: csv })
+      .then(function () { toast('저장 완료 — 확장자를 .txt에서 .csv로 바꿔주세요.'); })
+      .catch(function (err) {
+        if (err && err.code === 'declined') return;
+        toast('저장 실패: ' + ((err && err.message) || (err && err.code) || '알 수 없는 오류'));
+      });
+  });
+
+  // --- init ---
+  renderLikert();
+  refreshMeta();
+  refreshProgress();
+  renderDrawerList();
+})();
+</script>
