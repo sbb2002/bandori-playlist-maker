@@ -65,3 +65,14 @@ python build_gems9_pilot_candidates.py
 두 도구 모두 유튜브 IFrame API를 쓰므로 `file://`로 직접 열지 말고 로컬 서버로 실행할 것
 (각 가이드 문서 참조). claude.ai 아티팩트로 열면 iframe이 동작하지 않을 수 있어 로컬 실행이
 기본 경로다.
+
+## n≥20 확대 라운드용 — 구글폼 자동 생성 (2026-07-22)
+
+Tool 2(커스텀 HTML)는 n=1 파일럿용. n≥20 다중 응답자 라운드는 응답 자동 집계(구글시트)가
+가능한 **구글폼**으로 전환한다 — 단 구간 끝점 자동정지는 지원 안 되고 문구로 권고만 함
+(트레이드오프, 사용설명서 참조).
+
+- **`gems9_google_form.gs`**: Google Apps Script(`script.google.com`)에 붙여넣어 실행하면
+  35곡짜리 폼을 한 번에 생성. 사용법은 `gems9_google_form_guide.md`.
+- `build_gems9_survey_data.py`가 이 파일의 `SONGS` 배열도 함께 갱신한다(HTML과 동일한
+  재생성 흐름) — Tool 1로 구간 확정 후 이 스크립트만 다시 돌리면 됨.
