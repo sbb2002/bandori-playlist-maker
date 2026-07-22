@@ -117,6 +117,60 @@ R01~R24(`selection_pipeline/DESIGN_v3.md`), T1~T3(`vector_embedding/report/01·0
 생성 스크립트: `src/method-1/build_valence_candidates.py`, `build_pathos_candidates.py`
 (둘 다 재실행 시 CSV를 덮어쓴다 — 이미 채점을 시작했다면 재실행 전 백업할 것).
 
+> **⚠️ 2026-07-22 갱신 — 아래 §2e로 측정 방식 전환.** valence·pathos를 각각 단일 0~10
+> 척도로 채점하는 위 방식은 **보류(파기 아님)**한다. 사용자가 학술적으로 검증된 GEMS
+> (Geneva Emotional Music Scale) 도구로 처음부터 다시 시작하기로 결정했다 — 이유는
+> 단일 척도가 `mood_warmth`에서 이미 걸렸던 함정(드라마틱함과 애절함이 한 척도에 뒤섞임)을
+> 반복할 위험이 있고, GEMS-9는 그 함정을 항목을 쪼개는 것으로 구조적으로 피하기 때문.
+> `valence_candidates.csv`/`pathos_candidates.csv`는 미래에 재사용할 수 있어 남겨두되,
+> 현재 활성 트랙은 §2e다.
+
+### 2e. GEMS-9 파일럿 설계 (2026-07-22 방법론 전환)
+
+**측정 도구**: 사용자가 정리한 `notes/gems_methodology.md`(GEMS, Zentner et al. 2008 기반)를
+그대로 따른다. 9개 항목(wonder·transcendence·tenderness·nostalgia·peacefulness·power·
+joyful_activation·tension·sadness) 각각을 5점 리커트로 개별 채점 — 단일 valence/pathos
+척도를 이 9항목 체크리스트로 대체한다. 3개 상위요인(Sublimity=wonder·transcendence·
+tenderness·nostalgia·peacefulness, Vitality=power·joyful_activation, Unease=tension·
+sadness)은 사후 분석(§3)에서 참고하되 미리 전제하지 않는다.
+
+**표본 계획(gems_methodology.md §2)**: 1단계 n=1(사용자 본인) 파일럿 — 통계적 유효성은
+없고 질적 방향 확인 용도. 유효하다고 판단되면 2단계로 n≥20 확대(최소 통계 기준).
+
+**자극곡 선정(밴드 편중 방지)**: `src/method-1/build_gems9_pilot_candidates.py`가 밴드당
+최대 3곡을 뽑되, **밴드 내 `energy_full`(이미 검증된 강도축) 최저/중간/최고**로 선정해
+n=1 파일럿에서도 그 밴드의 감정 폭이 최대한 드러나게 한다(무작위 선정이 아님). 20곡 이상
+표본인 10개 실제 밴드는 3곡씩, 5곡 이하 소규모 카테고리(various_artists 등)는 있는 만큼만
+— 총 35곡(`out/gems9_pilot_candidates.csv`).
+
+**대표구간 선정(gems_methodology.md §3.2)**: 대중가요/록 장르 기준 코러스(후렴구) 30초
+내외(15~45초). **선정 주체는 사용자** — CSV의 `excerpt_start_sec`/`excerpt_end_sec`는
+빈 칸으로 준비돼 있고, 사용자가 직접 듣고 채운다.
+
+**설문 안 한 나머지 곡(661−35곡)의 처리 — 중요, §3과 연결**: 이 파일럿은 GEMS 점수를 661곡
+전체에 직접 부여하지 않는다. 표본 35곡의 GEMS 점수를 **정답(ground truth)** 삼아 §3에서
+기존 오디오 피쳐(energy_full·mfcc_*·mode_score 등, 이미 661곡 전체 계산됨)와 항목별로
+대조하고, 예측력이 확인된 피쳐가 있으면 그 피쳐→GEMS점수 매핑을 나머지 626곡에 적용해
+전체 커버리지를 얻는다. **어떤 피쳐도 특정 항목을 못 맞히면, 그 항목은 표본 35곡 안에서만
+값이 존재하고 661곡 전체로 확장 불가** — 이 경우 그 항목은 시나리오 A(§4 참조)에서 탈락한다.
+즉 이 파일럿의 실질 목적은 "GEMS 항목별 사람 인상 자체"보다 **"그 인상을 오디오로 예측
+가능한지"**를 가리기 위한 정답지 생성이다.
+
+**시나리오 결정(사용자 지시, 2026-07-22)**: 두 가지 활용 시나리오 중 **A를 먼저 시도**한다.
+- **시나리오 A(우선)**: GEMS-9에서 유효성이 확인된 항목(들)로 `energy` 하드필터를
+  **대체**한다. 기존에 검토했던 "계층적 구조(intensity 하드필터 유지 + 새 축은 소프트
+  정렬)" 권고는 이번 라운드에선 보류한다 — 사용자 판단: 이전에 실패한 축(mode_score,
+  가사 late-fusion)은 학술적 근거 없는 임시 지표였던 반면 GEMS는 검증된 척도라 같은
+  전례로 취급하는 건 비약이라는 입장.
+- **시나리오 B(대안)**: A가 §3에서 입증되지 못하면(어떤 GEMS 항목도 오디오 피쳐로 661곡에
+  확장 불가), 에너지와 병행(부분/전체 결합)하는 구조로 재검토한다. 이때는 §4a의 계층 구조
+  권고(하드필터+소프트정렬, 가중합 금지 — `report/04`의 late-fusion 실패 참조)를 다시
+  적용한다.
+- **항목별 개별 판정**: 9개 항목을 뭉뚱그려 "GEMS가 유효한가"로 판정하지 않는다. §3c 기준
+  으로 항목마다 따로 통과/기각하고, 통과한 항목만 A로 승격한다.
+
+생성 스크립트: `src/method-1/build_gems9_pilot_candidates.py`.
+
 ## 3. 후보 신호 전수 스크리닝
 
 ### 3a. 용어 정리
@@ -151,17 +205,24 @@ R01~R24(`selection_pipeline/DESIGN_v3.md`), T1~T3(`vector_embedding/report/01·0
 ## 4. 파이프라인 연결 및 실사용 검증
 
 ### 4a. 실험 방법
-1. 3단계를 통과한 신호만 `llm_param_control_separate/report/02`의 설계(Stage C→A 순서 반전
-   등)에 연결한다 — `mode_score` 직결 금지, 가사가 검증된 하드필터를 뒤집지 못하게 하는 기존
-   제약을 그대로 유지한다.
-2. 통과한 신호가 없는 축(현재로선 valence가 유력 후보)은 두 가지 중 하나를 택한다:
+
+**GEMS-9 트랙(§2e)은 시나리오 A/B 결정을 따른다(사용자 지시, 2026-07-22 — §2e 참조)**:
+1. §3에서 항목별로 통과한 GEMS 축이 하나 이상이면 **시나리오 A**부터 시도 — `energy`
+   하드필터를 그 축(들)으로 대체해 `build_setlist()`에 연결.
+2. §4b 실사용 검증(아래)에서 시나리오 A가 현재 배포판(에너지 단독) 대비 개선되지 않거나
+   악화되면, **시나리오 B**(계층 구조: intensity 하드필터 유지 + GEMS 축은 소프트 정렬)로
+   전환 — 이때는 `llm_param_control_separate/report/02`의 Stage C→A 순서 반전 설계를
+   재사용하고, 가중합(linear combination) 방식은 쓰지 않는다(`vector_embedding/report/04`의
+   late-fusion 실패 — 미검증 축이 검증된 축의 신호를 덮어씀 — 재발 방지).
+3. §3에서 어떤 GEMS 항목도 통과하지 못하면(661곡 전체로 확장 불가, §2e), 시나리오 A·B 둘 다
+   보류하고 두 대안을 검토한다:
    - **(a) 구조적 회피**: 그 축에 대한 사용자 요청은 LLM이 명시적으로 "정확한 매칭 불가"를
      인지하고, 다른 검증된 축(intensity 등)으로만 제약을 걸고 그 안에서 무작위/가사 소프트
      정렬에 맡긴다 — 거짓으로 맞는 척하지 않는다.
    - **(b) 신규 데이터 확보**: 오디오 피쳐가 아니라 완전히 다른 소스(상업 음성감정분석 API,
      추가 사람 라벨링 확대)를 검토한다. 이 폴더의 새 피쳐 개발이 아니라 별도 하위 트랙으로
      분리한다.
-3. 연결된 파라미터로 실제 `build_setlist()` 프로덕션 코드에 다시 얹어 `selection_pipeline`
+4. 연결된 파라미터로 실제 `build_setlist()` 프로덕션 코드에 다시 얹어 `selection_pipeline`
    방식(v1~v3 스냅샷·블라인드 A/B)으로 검증한다. v3가 이미 확인한 검정력 부족 문제
    (arm당 n=24는 부족, 82~85 필요)를 반복하지 않도록 처음부터 표본 크기를 검정력 계산으로
    정한다.
@@ -172,6 +233,9 @@ R01~R24(`selection_pipeline/DESIGN_v3.md`), T1~T3(`vector_embedding/report/01·0
 재사용한다 — 새 판정 기준을 발명하지 않는다.
 
 ## 레퍼런스
+- `notes/gems_methodology.md`(사용자 작성, GEMS 실험·설문 설계 표준 — §2e 근거)
+- Zentner, Grandjean & Scherer (2008), "Emotions evoked by the sound of music: characterization,
+  classification, and measurement", *Emotion* — GEMS-9/25/45 원 논문
 - `audio_feats_analysis/report/10-key-detection-research-wrapup.md` §4 (탑다운 전환 문제제기 원문)
 - `vector_embedding/report/02-acoustic_feature_audit.md` (스크리닝 방법론의 원형)
 - `vector_embedding/report/03-lyrics_acoustic_association.md`, `report/04-lyrics_acoustic_fusion.md`

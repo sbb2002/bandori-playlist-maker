@@ -63,20 +63,28 @@
 - `party` 라벨이 `intensity`의 하위집합임을 확인 → 별도 축 승격 안 함(`framework.md` §2a).
 - `valence`·`pathos` 청취 후보곡 CSV 준비 완료(§2d) — 청취·채점만 남음.
 
+## 방법론 전환 (2026-07-22) — GEMS-9
+
+단일 0~10 척도로 valence·pathos를 채점하던 위 §2d 계획은 **보류**(파기 아님)하고, 학술적으로
+검증된 GEMS(Geneva Emotional Music Scale) 9항목 체크리스트로 다시 설계했다
+(`notes/gems_methodology.md`, 사용자 작성). 상세는 `framework.md` §2e.
+
 ## 다음 세션 인수인계 (다른 로컬에서 이어하기)
 
-**할 일**: 아래 두 CSV를 열어 청취하며 빈 칸을 채운다. 오디오 파일은 필요 없고 `url`
-컬럼의 유튜브 링크로 들으면 된다.
+**할 일**: `out/gems9_pilot_candidates.csv`(35곡, 밴드당 대표 3곡 + 소규모 카테고리)를 연다.
+오디오 파일은 필요 없고 `url`의 유튜브 링크로 들으면 된다.
 
-1. `out/valence_candidates.csv`(33곡) — `valence_rating_1to10` 채점(0=매우 슬픔/처연,
-   10=매우 밝음/기쁨).
-2. `out/pathos_candidates.csv`(29곡) — `pathos_rating_0to10` 채점("애절하나 위로되는가",
-   0=전혀 위로 안 됨, 10=애절하며 위로됨). `prior_*` 컬럼(예전 esora 유사도 채점)은 참고만
-   하고 그대로 베끼지 않는다.
+1. `excerpt_start_sec`/`excerpt_end_sec` — 각 곡의 대표구간(코러스 기준 30초 내외) 시작·
+   종료초를 직접 정해 입력(`notes/gems_methodology.md` §3.2, 사용자가 직접 선정).
+2. 9개 GEMS 항목(`wonder`·`transcendence`·`tenderness`·`nostalgia`·`peacefulness`·
+   `power`·`joyful_activation`·`tension`·`sadness`)을 5점 리커트로 각각 채점.
+3. `rater_note`에 인상 메모(선택).
 
-각 CSV의 컬럼 의미·생성 방법은 `src/method-1/README.md` 참조. 채점이 끝나면 §3(후보 신호
-전수 스크리닝, `framework.md`)으로 이어간다 — 이 단계도 청취 불필요, 이미 계산된
-`audio_feats.csv`·`mood_warmth/vocal_features*.csv` 등을 새 라벨과 대조만 하면 된다.
+컬럼 의미·항목 정의·생성 방법은 `src/method-1/README.md` 참조. 이번 라운드는 n=1(사용자
+본인) 파일럿 — 통계적 유효성은 없고 질적 방향 확인용(`notes/gems_methodology.md` §2). 채점이
+끝나면 §3(후보 신호 전수 스크리닝, `framework.md`)으로 이어간다 — 이 단계도 청취 불필요,
+이미 계산된 `audio_feats.csv` 등을 새 라벨과 대조만 하면 된다. 유효성이 확인되면 다음은
+n≥20 확대 라운드(§2e).
 
 ## 폴더 구조
 
