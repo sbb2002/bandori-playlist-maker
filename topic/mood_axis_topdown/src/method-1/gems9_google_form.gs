@@ -19,9 +19,9 @@ var SONGS = [
     "song": "青い栞",
     "videoId": "bzJW33heiqw",
     "energyFull": 0.062021,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 157.57552203433227,
+    "end": 187.3377019103546,
+    "isFallback": false
   },
   {
     "idx": 61,
@@ -29,9 +29,9 @@ var SONGS = [
     "song": "Redo (Cover)",
     "videoId": "Q5ld_AEJAWw",
     "energyFull": 0.493874,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 68,
@@ -39,9 +39,9 @@ var SONGS = [
     "song": "Don't say “lazy” (Cover)",
     "videoId": "PThqwHLyPpU",
     "energyFull": 0.953292,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 91,
@@ -49,9 +49,9 @@ var SONGS = [
     "song": "in your blue eyes",
     "videoId": "kVMuEQ3uXWc",
     "energyFull": 0.003828,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 94,
@@ -59,9 +59,9 @@ var SONGS = [
     "song": "DIVINE",
     "videoId": "6bA-vjvi9oI",
     "energyFull": 0.1049,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 84,
@@ -69,9 +69,9 @@ var SONGS = [
     "song": "Ave Mujica",
     "videoId": "QDsd0nyzwz0",
     "energyFull": 0.993109,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 131,
@@ -79,9 +79,9 @@ var SONGS = [
     "song": "ひまわりの約束",
     "videoId": "WC3paFpeKTo",
     "energyFull": 0.132466,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 135,
@@ -89,9 +89,9 @@ var SONGS = [
     "song": "コレカラ",
     "videoId": "9DpyAgb_DO8",
     "energyFull": 0.771057,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 157,
@@ -99,9 +99,9 @@ var SONGS = [
     "song": "強風オールバック (Cover)",
     "videoId": "EGxEKCHDAFE",
     "energyFull": 0.997703,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 178,
@@ -109,9 +109,9 @@ var SONGS = [
     "song": "ホーミー・タイッ！！",
     "videoId": "BSP-xypGSak",
     "energyFull": 0.689127,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 143.6408519485016,
+    "end": 173.41212595803833,
+    "isFallback": false
   },
   {
     "idx": 179,
@@ -119,9 +119,9 @@ var SONGS = [
     "song": "起死開戦",
     "videoId": "bzPxdHmMW3s",
     "energyFull": 0.163859,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 189,
@@ -129,9 +129,9 @@ var SONGS = [
     "song": "Sweet Cheers!",
     "videoId": "e8IQBZMVIGw",
     "energyFull": 0.045176,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 185,
@@ -139,9 +139,9 @@ var SONGS = [
     "song": "fly with the night",
     "videoId": "DpnFf8UINbs",
     "energyFull": 0.232006,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 207,
@@ -149,9 +149,9 @@ var SONGS = [
     "song": "わたしまちがいさがし",
     "videoId": "UgP_YbdsoB8",
     "energyFull": 0.959418,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 245,
@@ -159,9 +159,9 @@ var SONGS = [
     "song": "テレパシー",
     "videoId": "mKiBvYqfBfk",
     "energyFull": 0.065084,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 239,
@@ -169,9 +169,9 @@ var SONGS = [
     "song": "みゅーたんとミュータント",
     "videoId": "qnHJDWgLkvw",
     "energyFull": 0.826187,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 257,
@@ -179,9 +179,9 @@ var SONGS = [
     "song": "やわやわNERD 超FreQuency",
     "videoId": "xzkEK0GF7fw",
     "energyFull": 0.99464,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 278,
@@ -189,9 +189,9 @@ var SONGS = [
     "song": "処救生",
     "videoId": "Z2OLVzWFaY0",
     "energyFull": 0.000766,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 298,
@@ -199,9 +199,9 @@ var SONGS = [
     "song": "swim (Cover)",
     "videoId": "YcBvpV_CzuU",
     "energyFull": 0.048239,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 300,
@@ -209,9 +209,9 @@ var SONGS = [
     "song": "春日影",
     "videoId": "wRwQUk0Dl30",
     "energyFull": 0.74196,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 339,
@@ -219,9 +219,9 @@ var SONGS = [
     "song": "everyday flower",
     "videoId": "zEHPkLXcX1I",
     "energyFull": 0.121746,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 341,
@@ -229,9 +229,9 @@ var SONGS = [
     "song": "フレっとパレットFight Song!!",
     "videoId": "ZvK22__1ECE",
     "energyFull": 0.709801,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 368,
@@ -239,9 +239,9 @@ var SONGS = [
     "song": "ハッピーシンセサイザ (Cover)",
     "videoId": "AD3WCMhAGVs",
     "energyFull": 0.999234,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 415,
@@ -249,9 +249,9 @@ var SONGS = [
     "song": "キミにもらったもの",
     "videoId": "gu85qKfXfj8",
     "energyFull": 0.066616,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 396,
@@ -259,9 +259,9 @@ var SONGS = [
     "song": "STAR BEAT!～ホシノコドウ～ ～Popipa Acoustic Ver.～",
     "videoId": "kj5orLd_XnA",
     "energyFull": 0.535222,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 414,
@@ -269,9 +269,9 @@ var SONGS = [
     "song": "夏のドーン！",
     "videoId": "xtgdECulbbw",
     "energyFull": 0.979326,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 148.44275121743775,
+    "end": 177.80656303051757,
+    "isFallback": false
   },
   {
     "idx": 536,
@@ -279,9 +279,9 @@ var SONGS = [
     "song": "Drown Out the Noise and Push Through the Trash",
     "videoId": "EELGtL1U1vw",
     "energyFull": 0.039051,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 560,
@@ -289,9 +289,9 @@ var SONGS = [
     "song": "Just Awake (Cover)",
     "videoId": "nyn9h6BraQ4",
     "energyFull": 0.590352,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 491,
@@ -299,9 +299,9 @@ var SONGS = [
     "song": "A DECLARATION OF ×××",
     "videoId": "9iOltuunbvs",
     "energyFull": 0.996172,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 580,
@@ -309,9 +309,9 @@ var SONGS = [
     "song": "軌跡",
     "videoId": "P2BT98BC1N8",
     "energyFull": 0.042113,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 654,
@@ -319,9 +319,9 @@ var SONGS = [
     "song": "Paradisus‐Paradoxum (Cover)",
     "videoId": "A12CMqrBFSw",
     "energyFull": 0.43415,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 656,
@@ -329,9 +329,9 @@ var SONGS = [
     "song": "Preserved Roses (Cover)",
     "videoId": "rB5eL98q6f8",
     "energyFull": 0.977795,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 101,
@@ -339,9 +339,9 @@ var SONGS = [
     "song": "Don't be afraid!",
     "videoId": "hPnvMOyGgzc",
     "energyFull": 0.454824,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 103,
@@ -349,9 +349,9 @@ var SONGS = [
     "song": "Be shine, shining!",
     "videoId": "tv1Pf0FE6iw",
     "energyFull": 0.594181,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   },
   {
     "idx": 104,
@@ -359,9 +359,9 @@ var SONGS = [
     "song": "Here, the world",
     "videoId": "LuwRRghPD1A",
     "energyFull": 0.673813,
-    "start": 0,
-    "end": 30,
-    "isFallback": true
+    "start": 0.0,
+    "end": 30.0,
+    "isFallback": false
   }
 ];
 
