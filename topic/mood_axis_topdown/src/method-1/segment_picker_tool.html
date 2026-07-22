@@ -435,8 +435,11 @@
     width: min(320px, 86vw);
     background: var(--surface);
     border-left: 1px solid var(--border);
-    display: flex;
     flex-direction: column;
+  }
+
+  .drawer:not([hidden]) {
+    display: flex;
   }
 
   .drawer-header {
@@ -938,10 +941,24 @@
     return lines.join('\n');
   }
 
+  function downloadLocal(csv) {
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'gems9_pilot_candidates_segments.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast('저장 완료 — gems9_pilot_candidates_segments.csv');
+  }
+
   el.exportBtn.addEventListener('click', function () {
     var csv = buildCsv();
     if (!window.claude || !window.claude.downloads) {
-      toast('이 화면에서는 파일 저장을 지원하지 않습니다.');
+      // 로컬(file://, localhost 등)에서는 확장자 제한 없이 바로 .csv로 내려받는다.
+      downloadLocal(csv);
       return;
     }
     window.claude.downloads.save({ filename: 'gems9_pilot_candidates_segments.txt', data: csv })
