@@ -69,25 +69,31 @@
 검증된 GEMS(Geneva Emotional Music Scale) 9항목 체크리스트로 다시 설계했다
 (`notes/gems_methodology.md`, 사용자 작성). 상세는 `framework.md` §2e.
 
-## 다음 세션 인수인계 (다른 로컬에서 이어하기)
+## 다음 세션 인수인계 (다른 로컬·다른 세션에서 이어하기, 2026-07-22 기준)
 
-**할 일**: `out/gems9_pilot_candidates.csv`(35곡, 밴드당 대표 3곡 + 소규모 카테고리)를 연다.
-오디오 파일은 필요 없고 `url`의 유튜브 링크로 들으면 된다.
+**도구는 다 준비됨 — 남은 건 실제 청취·채점·디버깅**(다른 메인 로컬 세션에서 진행 예정).
 
-1. `excerpt_start_sec`/`excerpt_end_sec` — 각 곡의 대표구간(코러스 기준 30초 내외) 시작·
-   종료초를 직접 정해 입력(`notes/gems_methodology.md` §3.2, 사용자가 직접 선정).
-2. 9개 GEMS 항목(`wonder`·`transcendence`·`tenderness`·`nostalgia`·`peacefulness`·
-   `power`·`joyful_activation`·`tension`·`sadness`)을 5점 리커트로 각각 채점.
-3. `rater_note`에 인상 메모(선택).
+1. **구간 설정**(청취 필요): `src/method-1/segment_picker_tool.html`을 로컬 서버로 실행
+   (`segment_picker_tool_guide.md` 참조)해 35곡의 `excerpt_start_sec`/`excerpt_end_sec`을
+   직접 듣고 지정 → CSV 내보내기 → `out/gems9_pilot_candidates.csv` 갱신.
+2. **n=1 파일럿 채점**(청취 필요): `src/method-1/segment_survey_tool.html`(로컬 서버 실행,
+   `segment_survey_tool_guide.md` 참조)로 GEMS-9 9항목 채점. 구간이 아직 안 끝났어도 폴백
+   (인트로 0:00~0:30)으로 바로 진행 가능 — 나중에 1번이 끝나면
+   `python build_gems9_survey_data.py` 한 번만 재실행하면 이 툴도 자동으로 정식 구간을 씀.
+3. **채점 완료 후**: §3(후보 신호 전수 스크리닝, `framework.md`)로 진행 — 청취 불필요,
+   `audio_feats.csv` 등 기존 산출물과 새 GEMS-9 라벨을 대조만 하면 됨.
+4. **n≥20 확대 라운드**(§2e, n=1 결과가 유효하다고 판단되면 착수): `src/method-1/
+   gems9_google_form.gs`를 Apps Script에서 실행해 구글폼 생성(`gems9_google_form_guide.md`
+   참조) — 구간 끝점 자동정지는 미지원, 문구 권고로 대체(사용자 결정, 시나리오 A 우선
+   원칙은 유지).
 
-컬럼 의미·항목 정의·생성 방법은 `src/method-1/README.md` 참조. 이번 라운드는 n=1(사용자
-본인) 파일럿 — 통계적 유효성은 없고 질적 방향 확인용(`notes/gems_methodology.md` §2). 채점이
-끝나면 §3(후보 신호 전수 스크리닝, `framework.md`)으로 이어간다 — 이 단계도 청취 불필요,
-이미 계산된 `audio_feats.csv` 등을 새 라벨과 대조만 하면 된다. 유효성이 확인되면 다음은
-n≥20 확대 라운드(§2e).
+각 도구·스크립트의 상세 사용법은 `src/method-1/README.md`에 전부 정리돼 있다 — 이 파일이
+다음 세션의 실질적 인수인계 문서다.
 
 ## 폴더 구조
 
-표준 구조(`src/`, `fig/`, `report/`, `ref/`, `paper.md`, 루트 `README.md` 참조)를 따르되,
-현재는 실행 전 단계라 `framework.md`(방법론 설계 문서)만 존재한다. 실행이 시작되면
-`src/method-1/`(스크리닝 스크립트), `report/01-*.md`(스크리닝 결과)가 추가된다.
+표준 구조(`src/`, `fig/`, `report/`, `ref/`, `paper.md`, 루트 `README.md` 참조)를 따른다.
+현재 `src/method-1/`에 청취 준비용 스크립트 3개(`check_party_intensity_overlap.py`,
+`build_valence_candidates.py`/`build_pathos_candidates.py`(보류), `build_gems9_pilot_candidates.py`)
+와 청취용 도구 3종(구간 설정 툴·n=1 설문 툴·구글폼 생성 스크립트, 각각 사용설명서 포함)이
+있다. 채점이 끝나 §3 스크리닝을 실행하면 `report/01-*.md`가 추가될 예정.
