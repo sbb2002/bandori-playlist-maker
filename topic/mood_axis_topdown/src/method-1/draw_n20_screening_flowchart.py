@@ -11,55 +11,80 @@ from PIL import Image
 
 FIG_DIR = Path(__file__).resolve().parent.parent.parent / "fig"
 
-FIG_W, FIG_H = 11, 15.4
+FIG_W = 11
+CX = 3.1        # 중앙(메인 흐름) 컬럼 x좌표
+SX = 8.6        # 우측(분기) 컬럼 x좌표
+TOP_Y = 12.6    # 최상단 박스 중심 y
+GAP = 0.85      # 박스 사이 세로 간격(edge-to-edge) — 모든 구간에 동일하게 적용
 
 TITLE_KO = "최종 선정: 본표본 $N=70$ + 홀드아웃(봉인) $N=25$  =  총 $N=95$곡 (모집단 654곡 중)"
 TITLE_EN = "Final selection: main sample $N=70$ + sealed holdout $N=25$  =  total $N=95$ songs (of 654 eligible)"
 
 # 2026-07-23: 본표본(654->70) 구간에 걸린 두 제외/분기 사유(홀드아웃 확보, 미선정)를 한
-# 박스에 몰아넣었더니 "칸 하나에 두 사유"라는 지적을 받아 각각 별도 박스로 분리했다.
-# 그만큼 세로 공간이 더 필요해 본표본 이하 박스를 전부 아래로 밀어 배치했다(왼쪽 메인
-# 흐름도 같이 내려감 — 오른쪽만 늘리고 왼쪽을 그대로 두면 분기 화살표가 어긋난다).
+# 박스에 몰아넣었더니 "칸 하나에 두 사유"라는 지적을 받아 각각 별도 박스로 분리했고,
+# 왼쪽 메인 흐름에도 "584곡 잔여" 박스를 끼워 넣었다. 그 뒤로 박스마다 높이가 달라
+# 구간별 간격이 들쭉날쭉해졌다는 지적을 받아, y좌표를 손으로 맞추는 대신 아래
+# layout_centers()로 "높이가 달라도 박스 사이 간격(GAP)은 항상 동일"하게 계산한다.
 
-CENTER_BOXES_KO = [
-    (3.1, 12.6, 4.6, 1.1, "오디오 분석 파이프라인 자격 검증곡\n($N = 661$)", False),
-    (3.1, 10.6, 4.6, 1.1, "정규 밴드 모집단 (10개 밴드)\n($N = 654$)", False),
-    (3.1, 8.7, 4.6, 1.0, "본표본($N{=}70$) 제외 나머지\n($N = 584$)", False),
-    (3.1, 7.3, 4.6, 1.3, "밴드당 동일 N($7$곡 $\\times$ $10$밴드) x PC1 삼분위\n균형표집\n본표본\n($N = 70$)", False),
-    (3.1, 5.2, 4.6, 1.2, "불완전블록 배정\n$n{\\geq}20$명이 곡당 최소 5명씩 GEMS-9 채점", False),
-    (3.1, 3.3, 4.6, 1.2, "고정효과(rater) + 랜덤절편(song) 혼합모형\n→ 곡별 조정점수(BLUP)", False),
-    (3.1, 1.2, 4.6, 1.3, "대표 피쳐 17종 × 가중 Spearman\n+ 부트스트랩 CI + BH-FDR\n($|\\rho|{\\geq}0.4$, $q{<}0.05$) → 통과 후보", False),
-    (3.1, -0.8, 4.6, 1.1, "홀드아웃 확증 통과\n확정 필터 후보 피쳐", True),
+# (width, height, text, bold) — y는 layout_centers()가 GAP 기준으로 자동 계산.
+CENTER_SPECS_KO = [
+    (4.6, 1.1, "오디오 분석 파이프라인 자격 검증곡\n($N = 661$)", False),
+    (4.6, 1.1, "정규 밴드 모집단 (10개 밴드)\n($N = 654$)", False),
+    (4.6, 1.0, "본표본($N{=}70$) 제외 나머지\n($N = 584$)", False),
+    (4.6, 1.3, "밴드당 동일 N($7$곡 $\\times$ $10$밴드) x PC1 삼분위\n균형표집\n본표본\n($N = 70$)", False),
+    (4.6, 1.2, "불완전블록 배정\n$n{\\geq}20$명이 곡당 최소 5명씩 GEMS-9 채점", False),
+    (4.6, 1.2, "고정효과(rater) + 랜덤절편(song) 혼합모형\n→ 곡별 조정점수(BLUP)", False),
+    (4.6, 1.3, "대표 피쳐 17종 × 가중 Spearman\n+ 부트스트랩 CI + BH-FDR\n($|\\rho|{\\geq}0.4$, $q{<}0.05$) → 통과 후보", False),
+    (4.6, 1.1, "홀드아웃 확증 통과\n확정 필터 후보 피쳐", True),
 ]
 
-SIDE_BOXES_KO = [
-    (8.6, 11.6, 4.2, 1.1,
-     "밴드 규모 미달($<$15곡) 또는\n$various\\_artists$ 제외\n($N = 7$)", 11.6),
-    (8.6, 9.6, 4.2, 1.0,
-     "동일 시드 절차로 disjoint\n홀드아웃 확보·봉인 ($N = 25$)", 9.6),
-    (8.6, 8.08, 4.4, 1.3,
-     "밴드×PC1 삼분위 셀에서 무작위\n미추첨: 응답자 부담상 654곡\n전수조사 불가 ($N = 559$)", 8.08),
+# (after_gap_index, width, height, text) — after_gap_index=0은 박스0-박스1 사이 간격에 분기.
+SIDE_SPECS_KO = [
+    (0, 4.2, 1.1, "밴드 규모 미달($<$15곡) 또는\n$various\\_artists$ 제외\n($N = 7$)"),
+    (1, 4.2, 1.0, "동일 시드 절차로 disjoint\n홀드아웃 확보·봉인 ($N = 25$)"),
+    (2, 4.4, 1.3, "밴드×PC1 삼분위 셀에서 무작위\n미추첨: 응답자 부담상 654곡\n전수조사 불가 ($N = 559$)"),
 ]
 
-CENTER_BOXES_EN = [
-    (3.1, 12.6, 4.6, 1.1, "Eligible songs from audio-analysis pipeline\n($N = 661$)", False),
-    (3.1, 10.6, 4.6, 1.1, "Regular-band population (10 bands)\n($N = 654$)", False),
-    (3.1, 8.7, 4.6, 1.0, "Remainder after main sample ($N=70$)\n($N = 584$)", False),
-    (3.1, 7.3, 4.6, 1.3, "Equal N per band ($7\\times10$ bands) x PC1-tertile\nbalanced sampling\nMain sample\n($N = 70$)", False),
-    (3.1, 5.2, 4.6, 1.2, "Incomplete-block assignment\n$n{\\geq}20$ raters, $\\geq$5 raters/song, GEMS-9 scoring", False),
-    (3.1, 3.3, 4.6, 1.2, "Mixed model: fixed effect (rater) + random intercept (song)\n→ per-song adjusted score (BLUP)", False),
-    (3.1, 1.2, 4.6, 1.3, "17 representative features $\\times$ weighted Spearman\n+ bootstrap CI + BH-FDR\n($|\\rho|{\\geq}0.4$, $q{<}0.05$) → candidate features", False),
-    (3.1, -0.8, 4.6, 1.1, "Passed holdout confirmation\nFinal filter candidate features", True),
+CENTER_SPECS_EN = [
+    (4.6, 1.1, "Eligible songs from audio-analysis pipeline\n($N = 661$)", False),
+    (4.6, 1.1, "Regular-band population (10 bands)\n($N = 654$)", False),
+    (4.6, 1.0, "Remainder after main sample ($N=70$)\n($N = 584$)", False),
+    (4.6, 1.3, "Equal N per band ($7\\times10$ bands) x PC1-tertile\nbalanced sampling\nMain sample\n($N = 70$)", False),
+    (4.6, 1.2, "Incomplete-block assignment\n$n{\\geq}20$ raters, $\\geq$5 raters/song, GEMS-9 scoring", False),
+    (4.6, 1.2, "Mixed model: fixed effect (rater) + random intercept (song)\n→ per-song adjusted score (BLUP)", False),
+    (4.6, 1.3, "17 representative features $\\times$ weighted Spearman\n+ bootstrap CI + BH-FDR\n($|\\rho|{\\geq}0.4$, $q{<}0.05$) → candidate features", False),
+    (4.6, 1.1, "Passed holdout confirmation\nFinal filter candidate features", True),
 ]
 
-SIDE_BOXES_EN = [
-    (8.6, 11.6, 4.2, 1.1,
-     "Excluded: band size $<$15 songs, or\n$various\\_artists$\n($N = 7$)", 11.6),
-    (8.6, 9.6, 4.2, 1.0,
-     "Disjoint holdout drawn from same\nseed sequence, sealed ($N = 25$)", 9.6),
-    (8.6, 8.08, 4.4, 1.3,
-     "Not drawn within band $\\times$ tertile cells:\nsurveying all 654 songs is infeasible\ngiven rater burden ($N = 559$)", 8.08),
+SIDE_SPECS_EN = [
+    (0, 4.2, 1.1, "Excluded: band size $<$15 songs, or\n$various\\_artists$\n($N = 7$)"),
+    (1, 4.2, 1.0, "Disjoint holdout drawn from same\nseed sequence, sealed ($N = 25$)"),
+    (2, 4.4, 1.3, "Not drawn within band $\\times$ tertile cells:\nsurveying all 654 songs is infeasible\ngiven rater burden ($N = 559$)"),
 ]
+
+
+def layout_centers(specs, top_y, gap, x):
+    """높이가 제각각이어도 박스 사이 간격이 항상 gap이 되도록 y를 위->아래로 계산."""
+    boxes = []
+    gap_midpoints = []
+    cur_top = top_y + specs[0][1] / 2  # 첫 박스의 top edge
+    for i, (w, h, text, bold) in enumerate(specs):
+        y = cur_top - h / 2
+        boxes.append((x, y, w, h, text, bold))
+        bottom = y - h / 2
+        if i < len(specs) - 1:
+            next_top = bottom - gap
+            gap_midpoints.append((bottom + next_top) / 2)
+            cur_top = next_top
+    return boxes, gap_midpoints
+
+
+def layout_sides(side_specs, gap_midpoints, sx):
+    boxes = []
+    for after_idx, w, h, text in side_specs:
+        y = gap_midpoints[after_idx]
+        boxes.append((sx, y, w, h, text, y))
+    return boxes
 
 
 def draw_box(ax, x, y, w, h, text, bold=False):
@@ -77,12 +102,16 @@ def draw_arrow(ax, xy_from, xy_to):
 
 
 def render(center_boxes, side_boxes, font_family, out_path, title):
+    y_top = max(y + h / 2 for _, y, _, h, _, _ in center_boxes)
+    y_bottom = min(y - h / 2 for _, y, _, h, _, _ in center_boxes)
+    fig_h = FIG_W * ((y_top - y_bottom) + 2.2) / 11.2  # 종횡비 유지하며 실제 박스 범위에 맞춤
+
     plt.rcParams["font.family"] = font_family
-    fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
+    fig, ax = plt.subplots(figsize=(FIG_W, fig_h))
     ax.set_xlim(0, 11.2)
-    ax.set_ylim(-1.5, 14.1)
+    ax.set_ylim(y_bottom - 0.3, y_top + 1.5)
     ax.axis("off")
-    ax.text(5.6, 13.85, title, ha="center", va="center", fontsize=12.5, fontweight="bold")
+    ax.text(5.6, y_top + 1.25, title, ha="center", va="center", fontsize=12.5, fontweight="bold")
 
     for x, y, w, h, text, bold in center_boxes:
         draw_box(ax, x, y, w, h, text, bold)
@@ -111,9 +140,15 @@ def render(center_boxes, side_boxes, font_family, out_path, title):
 
 def main():
     FIG_DIR.mkdir(parents=True, exist_ok=True)
-    render(CENTER_BOXES_KO, SIDE_BOXES_KO, "Batang",
+
+    centers_ko, gaps_ko = layout_centers(CENTER_SPECS_KO, TOP_Y, GAP, CX)
+    sides_ko = layout_sides(SIDE_SPECS_KO, gaps_ko, SX)
+    render(centers_ko, sides_ko, "Batang",
            FIG_DIR / "n20-screening-flowchart.webp", TITLE_KO)
-    render(CENTER_BOXES_EN, SIDE_BOXES_EN, "Times New Roman",
+
+    centers_en, gaps_en = layout_centers(CENTER_SPECS_EN, TOP_Y, GAP, CX)
+    sides_en = layout_sides(SIDE_SPECS_EN, gaps_en, SX)
+    render(centers_en, sides_en, "Times New Roman",
            FIG_DIR / "n20-screening-flowchart-en.webp", TITLE_EN)
 
 
