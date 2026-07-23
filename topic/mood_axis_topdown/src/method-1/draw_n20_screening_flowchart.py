@@ -11,7 +11,10 @@ from PIL import Image
 
 FIG_DIR = Path(__file__).resolve().parent.parent.parent / "fig"
 
-FIG_W, FIG_H = 11, 13.5
+FIG_W, FIG_H = 11, 14.2
+
+TITLE_KO = "최종 선정: 본표본 $N=70$ + 홀드아웃(봉인) $N=25$  =  총 $N=95$곡 (모집단 654곡 중)"
+TITLE_EN = "Final selection: main sample $N=70$ + sealed holdout $N=25$  =  total $N=95$ songs (of 654 eligible)"
 
 CENTER_BOXES_KO = [
     (3.1, 12.6, 4.6, 1.1, "오디오 분석 파이프라인 자격 검증곡\n($N = 661$)", False),
@@ -70,12 +73,13 @@ def draw_arrow(ax, xy_from, xy_to):
     ax.add_patch(arrow)
 
 
-def render(center_boxes, side_boxes, font_family, out_path):
+def render(center_boxes, side_boxes, font_family, out_path, title):
     plt.rcParams["font.family"] = font_family
     fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
     ax.set_xlim(0, 11.2)
-    ax.set_ylim(-0.3, 13.4)
+    ax.set_ylim(-0.3, 14.1)
     ax.axis("off")
+    ax.text(5.6, 13.85, title, ha="center", va="center", fontsize=12.5, fontweight="bold")
 
     for x, y, w, h, text, bold in center_boxes:
         draw_box(ax, x, y, w, h, text, bold)
@@ -104,8 +108,10 @@ def render(center_boxes, side_boxes, font_family, out_path):
 
 def main():
     FIG_DIR.mkdir(parents=True, exist_ok=True)
-    render(CENTER_BOXES_KO, SIDE_BOXES_KO, "Batang", FIG_DIR / "n20-screening-flowchart.webp")
-    render(CENTER_BOXES_EN, SIDE_BOXES_EN, "Times New Roman", FIG_DIR / "n20-screening-flowchart-en.webp")
+    render(CENTER_BOXES_KO, SIDE_BOXES_KO, "Batang",
+           FIG_DIR / "n20-screening-flowchart.webp", TITLE_KO)
+    render(CENTER_BOXES_EN, SIDE_BOXES_EN, "Times New Roman",
+           FIG_DIR / "n20-screening-flowchart-en.webp", TITLE_EN)
 
 
 if __name__ == "__main__":
