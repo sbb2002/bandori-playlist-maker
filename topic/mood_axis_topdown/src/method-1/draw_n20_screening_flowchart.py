@@ -24,6 +24,7 @@ TITLE_EN = "Final selection: main sample $N=70$ + sealed holdout $N=25$  =  tota
 CENTER_BOXES_KO = [
     (3.1, 12.6, 4.6, 1.1, "오디오 분석 파이프라인 자격 검증곡\n($N = 661$)", False),
     (3.1, 10.6, 4.6, 1.1, "정규 밴드 모집단 (10개 밴드)\n($N = 654$)", False),
+    (3.1, 8.7, 4.6, 1.0, "본표본($N{=}70$) 제외 나머지\n($N = 584$)", False),
     (3.1, 7.3, 4.6, 1.3, "밴드당 동일 N($7$곡 $\\times$ $10$밴드) x PC1 삼분위\n균형표집\n본표본\n($N = 70$)", False),
     (3.1, 5.2, 4.6, 1.2, "불완전블록 배정\n$n{\\geq}20$명이 곡당 최소 5명씩 GEMS-9 채점", False),
     (3.1, 3.3, 4.6, 1.2, "고정효과(rater) + 랜덤절편(song) 혼합모형\n→ 곡별 조정점수(BLUP)", False),
@@ -34,15 +35,16 @@ CENTER_BOXES_KO = [
 SIDE_BOXES_KO = [
     (8.6, 11.6, 4.2, 1.1,
      "밴드 규모 미달($<$15곡) 또는\n$various\\_artists$ 제외\n($N = 7$)", 11.6),
-    (8.6, 9.4, 4.2, 1.0,
-     "동일 시드 절차로 disjoint\n홀드아웃 확보·봉인 ($N = 25$)", 9.4),
-    (8.6, 8.05, 4.4, 1.3,
-     "밴드×PC1 삼분위 셀에서 무작위\n미추첨: 응답자 부담상 654곡\n전수조사 불가 ($N = 559$)", 8.05),
+    (8.6, 9.6, 4.2, 1.0,
+     "동일 시드 절차로 disjoint\n홀드아웃 확보·봉인 ($N = 25$)", 9.6),
+    (8.6, 8.08, 4.4, 1.3,
+     "밴드×PC1 삼분위 셀에서 무작위\n미추첨: 응답자 부담상 654곡\n전수조사 불가 ($N = 559$)", 8.08),
 ]
 
 CENTER_BOXES_EN = [
     (3.1, 12.6, 4.6, 1.1, "Eligible songs from audio-analysis pipeline\n($N = 661$)", False),
     (3.1, 10.6, 4.6, 1.1, "Regular-band population (10 bands)\n($N = 654$)", False),
+    (3.1, 8.7, 4.6, 1.0, "Remainder after main sample ($N=70$)\n($N = 584$)", False),
     (3.1, 7.3, 4.6, 1.3, "Equal N per band ($7\\times10$ bands) x PC1-tertile\nbalanced sampling\nMain sample\n($N = 70$)", False),
     (3.1, 5.2, 4.6, 1.2, "Incomplete-block assignment\n$n{\\geq}20$ raters, $\\geq$5 raters/song, GEMS-9 scoring", False),
     (3.1, 3.3, 4.6, 1.2, "Mixed model: fixed effect (rater) + random intercept (song)\n→ per-song adjusted score (BLUP)", False),
@@ -53,10 +55,10 @@ CENTER_BOXES_EN = [
 SIDE_BOXES_EN = [
     (8.6, 11.6, 4.2, 1.1,
      "Excluded: band size $<$15 songs, or\n$various\\_artists$\n($N = 7$)", 11.6),
-    (8.6, 9.4, 4.2, 1.0,
-     "Disjoint holdout drawn from same\nseed sequence, sealed ($N = 25$)", 9.4),
-    (8.6, 8.05, 4.4, 1.3,
-     "Not drawn within band $\\times$ tertile cells:\nsurveying all 654 songs is infeasible\ngiven rater burden ($N = 559$)", 8.05),
+    (8.6, 9.6, 4.2, 1.0,
+     "Disjoint holdout drawn from same\nseed sequence, sealed ($N = 25$)", 9.6),
+    (8.6, 8.08, 4.4, 1.3,
+     "Not drawn within band $\\times$ tertile cells:\nsurveying all 654 songs is infeasible\ngiven rater burden ($N = 559$)", 8.08),
 ]
 
 
