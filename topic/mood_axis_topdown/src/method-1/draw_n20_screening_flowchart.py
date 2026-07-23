@@ -1,4 +1,4 @@
-"""n>=20 라운드 곡 스크리닝 절차 플로차트 렌더링.
+"""n>=20 라운드 곡 스크리닝 절차 플로차트 렌더링 (한글판 + 영문판).
 
 notes/Flowchart-of-screening-process.webp(PRISMA 스타일 참고 이미지)와 같은 양식으로 그린다:
 serif 폰트, 직사각형 박스, 중앙 세로 흐름 + 우측 분기 박스(제외/병렬 처리), 마지막 박스만 굵게.
@@ -9,14 +9,11 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, Rectangle
 from PIL import Image
 
-OUT_PATH = Path(__file__).resolve().parent.parent.parent / "notes" / "n20-screening-flowchart.webp"
-
-plt.rcParams["font.family"] = "Batang"
+FIG_DIR = Path(__file__).resolve().parent.parent.parent / "fig"
 
 FIG_W, FIG_H = 11, 13.5
 
-# 중앙 박스 (top -> bottom), (x_center, y_center, width, height, text, bold)
-CENTER_BOXES = [
+CENTER_BOXES_KO = [
     (3.1, 12.6, 4.6, 1.1, "오디오 분석 파이프라인 자격 검증곡\n($N = 661$)", False),
     (3.1, 10.6, 4.6, 1.1, "정규 밴드 모집단 (10개 밴드)\n($N = 654$)", False),
     (3.1, 8.6, 4.6, 1.1, "밴드×PC1 삼분위 균형표집\n본표본\n($N = 70$)", False),
@@ -26,16 +23,36 @@ CENTER_BOXES = [
     (3.1, 0.5, 4.6, 1.1, "홀드아웃 확증 통과\n확정 필터 후보 피쳐", True),
 ]
 
-# 우측 분기 박스: (x_center, y_center, width, height, text, arrow_from_center_y)
-SIDE_BOXES = [
+SIDE_BOXES_KO = [
     (8.6, 11.6, 4.2, 1.1,
-     "밴드 규모 미달($<$15곡) 또는\n$various\\_artists$ 제외\n($N = 7$)", 12.6),
+     "밴드 규모 미달($<$15곡) 또는\n$various\\_artists$ 제외\n($N = 7$)", 11.6),
     (8.6, 9.6, 4.2, 1.1,
-     "밴드×PC1 삼분위 셀에서\n미선정 ($N = 559$)", 10.6),
-    (8.6, 7.7, 4.2, 1.1,
-     "동일 시드 절차로 disjoint\n홀드아웃 확보·봉인 ($N = 25$)", 8.6),
-    (8.6, 1.5, 4.2, 1.2,
-     "홀드아웃 확증 미달\n(부호 불일치 / CI 비겹침 /\n$|\\rho|{<}0.3$)", 2.5),
+     "밴드×PC1 삼분위 셀에서\n미선정 ($N = 559$)", 9.6),
+    (8.6, 7.6, 4.2, 1.1,
+     "동일 시드 절차로 disjoint\n홀드아웃 확보·봉인 ($N = 25$)", 7.6),
+    (8.6, 1.45, 4.2, 1.2,
+     "홀드아웃 확증 미달\n(부호 불일치 / CI 비겹침 /\n$|\\rho|{<}0.3$)", 1.45),
+]
+
+CENTER_BOXES_EN = [
+    (3.1, 12.6, 4.6, 1.1, "Eligible songs from audio-analysis pipeline\n($N = 661$)", False),
+    (3.1, 10.6, 4.6, 1.1, "Regular-band population (10 bands)\n($N = 654$)", False),
+    (3.1, 8.6, 4.6, 1.1, "Band $\\times$ PC1-tertile balanced sampling\nMain sample\n($N = 70$)", False),
+    (3.1, 6.5, 4.6, 1.2, "Incomplete-block assignment\n$n{\\geq}20$ raters, $\\geq$5 raters/song, GEMS-9 scoring", False),
+    (3.1, 4.6, 4.6, 1.2, "Mixed model: fixed effect (rater) + random intercept (song)\n→ per-song adjusted score (BLUP)", False),
+    (3.1, 2.5, 4.6, 1.3, "17 representative features $\\times$ weighted Spearman\n+ bootstrap CI + BH-FDR\n($|\\rho|{\\geq}0.4$, $q{<}0.05$) → candidate features", False),
+    (3.1, 0.5, 4.6, 1.1, "Passed holdout confirmation\nFinal filter candidate features", True),
+]
+
+SIDE_BOXES_EN = [
+    (8.6, 11.6, 4.2, 1.1,
+     "Excluded: band size $<$15 songs, or\n$various\\_artists$\n($N = 7$)", 11.6),
+    (8.6, 9.6, 4.2, 1.1,
+     "Not selected within\nband $\\times$ tertile cells ($N = 559$)", 9.6),
+    (8.6, 7.6, 4.2, 1.1,
+     "Disjoint holdout drawn from same\nseed sequence, sealed ($N = 25$)", 7.6),
+    (8.6, 1.45, 4.2, 1.2,
+     "Failed holdout confirmation\n(sign mismatch / CI non-overlap /\n$|\\rho|{<}0.3$)", 1.45),
 ]
 
 
@@ -53,34 +70,42 @@ def draw_arrow(ax, xy_from, xy_to):
     ax.add_patch(arrow)
 
 
-def main():
+def render(center_boxes, side_boxes, font_family, out_path):
+    plt.rcParams["font.family"] = font_family
     fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
     ax.set_xlim(0, 11.2)
     ax.set_ylim(-0.3, 13.4)
     ax.axis("off")
 
-    for x, y, w, h, text, bold in CENTER_BOXES:
+    for x, y, w, h, text, bold in center_boxes:
         draw_box(ax, x, y, w, h, text, bold)
 
-    # 중앙 흐름 화살표(위->아래, 박스 사이)
-    for i in range(len(CENTER_BOXES) - 1):
-        x1, y1, w1, h1, _, _ = CENTER_BOXES[i]
-        x2, y2, w2, h2, _, _ = CENTER_BOXES[i + 1]
+    for i in range(len(center_boxes) - 1):
+        x1, y1, w1, h1, _, _ = center_boxes[i]
+        x2, y2, w2, h2, _, _ = center_boxes[i + 1]
         draw_arrow(ax, (x1, y1 - h1 / 2), (x2, y2 + h2 / 2))
 
-    for x, y, w, h, text, from_y in SIDE_BOXES:
+    # 제외/분기 화살표: 메인 세로 화살표 중간 지점(branch point)에서 가로로 갈라져 나가는
+    # T자 모양으로 그린다(대각선 금지) — 참고 이미지(PRISMA 스타일)와 동일한 표현.
+    cx = center_boxes[0][0]
+    for x, y, w, h, text, branch_y in side_boxes:
         draw_box(ax, x, y, w, h, text, bold=False)
-        cx, cw = CENTER_BOXES[0][0], CENTER_BOXES[0][2]
-        draw_arrow(ax, (cx + cw / 2, from_y), (x - w / 2, y))
+        draw_arrow(ax, (cx, branch_y), (x - w / 2, branch_y))
 
     plt.tight_layout()
-    png_path = OUT_PATH.with_suffix(".png")
+    png_path = out_path.with_suffix(".png")
     fig.savefig(png_path, dpi=180, facecolor="white")
     plt.close(fig)
 
-    Image.open(png_path).convert("RGB").save(OUT_PATH, "WEBP", quality=92)
+    Image.open(png_path).convert("RGB").save(out_path, "WEBP", quality=92)
     png_path.unlink()
-    print(f"-> {OUT_PATH}")
+    print(f"-> {out_path}")
+
+
+def main():
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    render(CENTER_BOXES_KO, SIDE_BOXES_KO, "Batang", FIG_DIR / "n20-screening-flowchart.webp")
+    render(CENTER_BOXES_EN, SIDE_BOXES_EN, "Times New Roman", FIG_DIR / "n20-screening-flowchart-en.webp")
 
 
 if __name__ == "__main__":

@@ -102,7 +102,7 @@ n=1 파일럿(`build_gems9_pilot_candidates.py`)은 밴드당 3곡을 `energy_fu
     후보"로 승격 — 홀드아웃에서 "재유의(q<0.05)"를 요구하지 않는다(저검정력 홀드아웃에서
     무의미하므로).
 
-절차를 도식화한 플로차트: `notes/n20-screening-flowchart.webp`.
+절차를 도식화한 플로차트: `fig/n20-screening-flowchart.webp`(한글판), `fig/n20-screening-flowchart-en.webp`(영문판).
 
 ## 4. 명시할 잔여 한계
 
@@ -127,4 +127,4 @@ n=1 파일럿(`build_gems9_pilot_candidates.py`)은 밴드당 3곡을 `energy_fu
 - `src/method-1/analyze_gems9_n20.py` — 혼합모형·가중Spearman·부트스트랩CI·BH-FDR·확증판정
   전체 파이프라인(실제 응답 없으면 합성데이터 스모크테스트로 배선만 검증).
 - `notes/n20_prereg.md` — 분석 스펙 사전등록 문서.
-- `notes/n20-screening-flowchart.webp` — 전체 절차 플로차트.
+- `fig/n20-screening-flowchart.webp`, `fig/n20-screening-flowchart-en.webp` — 전체 절차 플로차트(한/영).
