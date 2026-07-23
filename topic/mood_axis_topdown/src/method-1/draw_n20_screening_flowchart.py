@@ -19,7 +19,7 @@ TITLE_EN = "Final selection: main sample $N=70$ + sealed holdout $N=25$  =  tota
 CENTER_BOXES_KO = [
     (3.1, 12.6, 4.6, 1.1, "오디오 분석 파이프라인 자격 검증곡\n($N = 661$)", False),
     (3.1, 10.6, 4.6, 1.1, "정규 밴드 모집단 (10개 밴드)\n($N = 654$)", False),
-    (3.1, 8.6, 4.6, 1.1, "밴드×PC1 삼분위 균형표집\n본표본\n($N = 70$)", False),
+    (3.1, 8.6, 4.6, 1.3, "밴드당 동일 N($7$곡 $\\times$ $10$밴드) x PC1 삼분위\n균형표집\n본표본\n($N = 70$)", False),
     (3.1, 6.5, 4.6, 1.2, "불완전블록 배정\n$n{\\geq}20$명이 곡당 최소 5명씩 GEMS-9 채점", False),
     (3.1, 4.6, 4.6, 1.2, "고정효과(rater) + 랜덤절편(song) 혼합모형\n→ 곡별 조정점수(BLUP)", False),
     (3.1, 2.5, 4.6, 1.3, "대표 피쳐 17종 × 가중 Spearman\n+ 부트스트랩 CI + BH-FDR\n($|\\rho|{\\geq}0.4$, $q{<}0.05$) → 통과 후보", False),
@@ -40,7 +40,7 @@ SIDE_BOXES_KO = [
 CENTER_BOXES_EN = [
     (3.1, 12.6, 4.6, 1.1, "Eligible songs from audio-analysis pipeline\n($N = 661$)", False),
     (3.1, 10.6, 4.6, 1.1, "Regular-band population (10 bands)\n($N = 654$)", False),
-    (3.1, 8.6, 4.6, 1.1, "Band $\\times$ PC1-tertile balanced sampling\nMain sample\n($N = 70$)", False),
+    (3.1, 8.6, 4.6, 1.3, "Equal N per band ($7\\times10$ bands) x PC1-tertile\nbalanced sampling\nMain sample\n($N = 70$)", False),
     (3.1, 6.5, 4.6, 1.2, "Incomplete-block assignment\n$n{\\geq}20$ raters, $\\geq$5 raters/song, GEMS-9 scoring", False),
     (3.1, 4.6, 4.6, 1.2, "Mixed model: fixed effect (rater) + random intercept (song)\n→ per-song adjusted score (BLUP)", False),
     (3.1, 2.5, 4.6, 1.3, "17 representative features $\\times$ weighted Spearman\n+ bootstrap CI + BH-FDR\n($|\\rho|{\\geq}0.4$, $q{<}0.05$) → candidate features", False),
