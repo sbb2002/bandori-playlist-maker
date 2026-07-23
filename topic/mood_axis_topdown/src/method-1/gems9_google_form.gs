@@ -2,14 +2,20 @@
  * GEMS-9 설문 구글폼 자동 생성 스크립트 (script.google.com에서 실행)
  *
  * SONGS는 build_gems9_survey_data.py가 out/gems9_pilot_candidates.csv에서 자동 생성한다.
- * 구간(start/end)이 비어있던 곡은 폴백(인트로 0~30초)이 들어있고 isFallback=true로 표시됨 —
- * Tool 1(segment_picker_tool.html)로 구간을 확정한 CSV로 갱신한 뒤 파이썬 스크립트를
- * 다시 돌리면 이 배열도 함께 갱신되고, buildForm()을 다시 실행하면 새 폼이 그 값으로
- * 생성된다(기존 폼을 고치는 게 아니라 매번 새 폼을 만든다 — 여러 응답자에게 이미 링크가
- * 나간 뒤라면 재실행하지 말 것).
+ * buildForm()을 실행할 때마다 새 폼을 만든다(기존 폼을 고치는 게 아님 — 여러 응답자에게
+ * 이미 링크가 나간 뒤라면 재실행하지 말 것).
  *
- * 구간 강제(자동 정지)는 보장 안 됨 — setVideoUrl의 ?start= 파라미터가 Forms 임베드에서
- * 실제로 반영되는지 미검증. 대신 각 영상 문항 도움말에 권장 구간을 문구로 명시해 둔다.
+ * 구간 지정을 포기하고 전곡을 재생한다(2026-07-23 결정). 이유 둘:
+ * 1. Forms의 VideoItem.setVideoUrl은 공식 문서에 없는 URL(youtu.be?start=, embed?start&end
+ *    등)을 넣으면 쿼리스트링을 파싱하지 않고 영상 ID에 그대로 이어붙여 영상 자체가 깨진다
+ *    (검은 화면, 재생 불가 — 실제 테스트로 확인). 지원되는 형식은 영상 ID 단독뿐이라 애초에
+ *    start/end를 기술적으로 강제할 방법이 없다.
+ * 2. report/02(라운드2 confound 체크)에서 인트로 구간과 하이라이트 구간으로 바꿔 재채점해도
+ *    GEMS-9 9항목 전부 유의한 차이가 없었다(전부 p>0.2) — 구간 선택이 점수에 큰 영향을 주지
+ *    않는다는 근거가 이미 있어, 구간을 기술적으로 강제 못 하는 손실이 작다고 판단했다.
+ *
+ * SONGS의 start/end/isFallback 필드는 build_gems9_survey_data.py 출력 형식과의 호환을 위해
+ * 남아있지만 buildForm()에서는 사용하지 않는다.
  */
 
 var SONGS = [
@@ -377,20 +383,13 @@ var ITEMS = [
   { key: 'sadness', kr: '슬픔', desc: '슬프고 처연한 느낌' }
 ];
 
-function formatTime(sec) {
-  sec = Math.round(sec);
-  var m = Math.floor(sec / 60);
-  var s = sec % 60;
-  return m + ':' + (s < 10 ? '0' : '') + s;
-}
-
 function buildForm() {
   var form = FormApp.create('GEMS-9 음악 감정 설문 (BanG Dream)');
   form.setDescription(
     '아래 순서대로 곡을 들으며 각 항목을 1~5점으로 채점해주세요.\n' +
     '1=전혀 못 느낌, 3=보통, 5=매우 강하게 느껴짐.\n' +
     '가사 내용이 아니라 곡 전체 느낌(멜로디·연주·분위기)으로 채점해주세요. 정답은 없습니다.\n' +
-    '각 곡마다 안내되는 구간만 들어주세요(자동으로 그 구간만 재생되지 않을 수 있습니다).'
+    '전곡을 자유롭게 들으며 채점해주세요 — 원하시면 일부만 듣고 채점하셔도 괜찮습니다.'
   );
   form.setProgressBar(true);
   form.setCollectEmail(false);
@@ -403,18 +402,12 @@ function buildForm() {
   for (var i = 0; i < SONGS.length; i++) {
     var s = SONGS[i];
     var pageTitle = (i + 1) + '/' + SONGS.length + ' · ' + s.band + ' · ' + s.song;
-    var timeLabel = formatTime(s.start) + '~' + formatTime(s.end);
-    var fallbackNote = s.isFallback ? ' (구간 임시값 — 확정 아님)' : '';
 
     form.addPageBreakItem().setTitle(pageTitle);
 
     var video = form.addVideoItem();
-    video.setVideoUrl('https://youtu.be/' + s.videoId + '?start=' + Math.floor(s.start));
+    video.setVideoUrl(s.videoId);
     video.setTitle(pageTitle);
-    video.setHelpText(
-      '권장 구간: ' + timeLabel + fallbackNote +
-      ' — 이 구간만 들어주세요(자동으로 정확히 멈추지 않을 수 있습니다).'
-    );
 
     var grid = form.addGridItem();
     grid.setTitle(s.band + ' · ' + s.song + ' — 9개 항목 채점 [idx' + s.idx + ']');
