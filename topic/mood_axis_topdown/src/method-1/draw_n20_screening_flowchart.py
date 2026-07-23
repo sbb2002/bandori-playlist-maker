@@ -29,8 +29,12 @@ CENTER_BOXES_KO = [
 SIDE_BOXES_KO = [
     (8.6, 11.6, 4.2, 1.1,
      "밴드 규모 미달($<$15곡) 또는\n$various\\_artists$ 제외\n($N = 7$)", 11.6),
-    (8.6, 9.6, 4.2, 1.5,
-     "본표본 70곡을 제외한 나머지 584곡\n— 홀드아웃 확보·봉인 ($N = 25$)\n— 미선정, 사용 안 함 ($N = 559$)", 9.6),
+    (8.6, 9.6, 4.4, 1.9,
+     "본표본 70곡을 제외한 나머지 584곡\n"
+     "— 홀드아웃 확보·봉인 ($N = 25$)\n"
+     "— 밴드×PC1 삼분위 셀에서 무작위\n"
+     "  미추첨: 응답자 부담상 654곡\n"
+     "  전수조사 불가 ($N = 559$)", 9.6),
 ]
 
 CENTER_BOXES_EN = [
@@ -46,10 +50,12 @@ CENTER_BOXES_EN = [
 SIDE_BOXES_EN = [
     (8.6, 11.6, 4.2, 1.1,
      "Excluded: band size $<$15 songs, or\n$various\\_artists$\n($N = 7$)", 11.6),
-    (8.6, 9.6, 4.2, 1.5,
+    (8.6, 9.6, 4.4, 1.9,
      "584 songs not in the main sample\n"
      "$-$ sealed as holdout ($N = 25$)\n"
-     "$-$ not selected, unused ($N = 559$)", 9.6),
+     "$-$ not drawn within band $\\times$ tertile\n"
+     "  cells: surveying all 654 songs is\n"
+     "  infeasible given rater burden ($N = 559$)", 9.6),
 ]
 
 
