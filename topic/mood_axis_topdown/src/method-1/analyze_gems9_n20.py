@@ -123,7 +123,11 @@ def song_adjusted_scores(responses, item):
     return pd.Series(song_scores, name=item)
 
 
-def bootstrap_rho_ci(responses, candidates, item, feature_cols, n_boot=N_BOOTSTRAP, seed=SEED):
+def bootstrap_rho_ci(responses, candidates, item, feature_cols, n_boot=N_BOOTSTRAP, seed=SEED,
+                      use_weight=True):
+    """use_weight=False -> 비가중(균등가중) 부트스트랩. 2026-07-23 밴드당 동일 N 전환 이후
+    비가중이 주분석(장르균등대표), 가중은 '카탈로그 비례였다면'을 보는 보조체크로 역할이
+    바뀌었다(report/04 §3-2)."""
     rng = np.random.default_rng(seed)
     raters = responses["rater_id"].unique()
     boot_rhos = {f: [] for f in feature_cols}
@@ -140,8 +144,9 @@ def bootstrap_rho_ci(responses, candidates, item, feature_cols, n_boot=N_BOOTSTR
         merged = candidates.set_index("idx").join(scores, how="inner")
         if len(merged) < 10:
             continue
+        w = merged["weight"] if use_weight else pd.Series(1.0, index=merged.index)
         for feat in feature_cols:
-            rho = weighted_spearman(merged[feat], merged[item], merged["weight"])
+            rho = weighted_spearman(merged[feat], merged[item], w)
             boot_rhos[feat].append(rho)
 
     ci = {}
@@ -152,6 +157,14 @@ def bootstrap_rho_ci(responses, candidates, item, feature_cols, n_boot=N_BOOTSTR
         else:
             ci[feat] = (np.percentile(vals, 2.5), np.percentile(vals, 97.5))
     return ci
+
+
+def kish_design_effect(weights):
+    """가중치 불균등으로 인한 유효표본 손실(Kish deff). eff_n = n/deff."""
+    w = np.asarray(weights, dtype=float)
+    n = len(w)
+    deff = n * np.sum(w ** 2) / (np.sum(w) ** 2)
+    return deff, n / deff
 
 
 BAND_ETA2_MIN = 0.0  # 참고용(§6 태깅), 판정에는 안 씀
@@ -185,10 +198,14 @@ def band_eta_squared(feature_values, band):
 
 
 def band_bias_diagnostics(merged, item, feat, top_bands):
-    """notes/n20_prereg.md §8: 밴드 통제 편상관 + 최대밴드 제외 재계산 + 개별 플래그 판정."""
+    """notes/n20_prereg.md §8: 밴드 통제 편상관 + 최대밴드 제외 재계산 + 개별 플래그 판정.
+
+    2026-07-23 밴드당 동일 N 전환 이후 주분석이 비가중이므로, 여기서도 비가중(균등가중)을
+    써서 run_main_analysis의 주 rho와 같은 기준으로 비교한다(가중 쓰면 서로 다른 기준을
+    비교하는 셈이라 sign_flip 판정이 왜곡될 수 있음)."""
     x = merged[feat].to_numpy(dtype=float)
     y = merged[item].to_numpy(dtype=float)
-    w = merged["weight"].to_numpy(dtype=float)
+    w = np.ones(len(merged))
     band = merged["band"].to_numpy()
 
     marginal_rho = weighted_spearman(x, y, w)
@@ -249,18 +266,27 @@ def load_candidates_with_features():
 
 
 def run_main_analysis(responses):
+    """2026-07-23 밴드당 동일 N 전환 이후 주분석은 '비가중'(장르균등대표, EQUAL_N_PER_BAND과
+    일치)이다. 가중(포함확률 역수) 버전은 '이 결과가 카탈로그 비례 표본이었다면 어땠을까'를
+    보는 보조체크로만 병기한다(rho/ci/pass는 비가중 기준, *_weighted 컬럼은 참고용)."""
     candidates, feature_cols = load_candidates_with_features()
     results = []
     for item in GEMS_ITEMS:
         scores = song_adjusted_scores(responses, item)
         merged = candidates.set_index("idx").join(scores, how="inner").reset_index()
-        ci = bootstrap_rho_ci(responses, candidates, item, feature_cols, n_boot=N_BOOTSTRAP)
+        ci_unw = bootstrap_rho_ci(responses, candidates, item, feature_cols,
+                                   n_boot=N_BOOTSTRAP, use_weight=False)
+        ci_w = bootstrap_rho_ci(responses, candidates, item, feature_cols,
+                                 n_boot=N_BOOTSTRAP, use_weight=True)
 
         pvals = []
         rows_this_item = []
+        unit_w = pd.Series(1.0, index=merged.index)
         for feat in feature_cols:
-            rho = weighted_spearman(merged[feat], merged[item], merged["weight"])
-            lo, hi = ci[feat]
+            rho = weighted_spearman(merged[feat], merged[item], unit_w)  # 주분석: 비가중
+            rho_weighted = weighted_spearman(merged[feat], merged[item], merged["weight"])
+            lo, hi = ci_unw[feat]
+            lo_w, hi_w = ci_w[feat]
             # 부트스트랩 CI로부터 근사 p값(정규근사, 참고용 — 주 판정은 CI 자체로 함)
             se = (hi - lo) / (2 * 1.96) if hi == hi and lo == lo else float("nan")
             z = rho / se if se and se == se and se > 0 else float("nan")
@@ -268,11 +294,19 @@ def run_main_analysis(responses):
             rows_this_item.append({
                 "gems_item": item, "feature": feat, "n": len(merged),
                 "rho": rho, "ci_lo": lo, "ci_hi": hi, "p_approx": p,
+                "rho_weighted": rho_weighted, "ci_lo_weighted": lo_w, "ci_hi_weighted": hi_w,
             })
             pvals.append(p)
 
         qs = bh_fdr([r["p_approx"] for r in rows_this_item])
-        top_bands = candidates["band"].value_counts().nlargest(TOP_N_BANDS_EXCLUDE).index.tolist()
+        # 2026-07-23 밴드당 동일 N 전환 이후: 표본 곡수는 전 밴드 동률(예: 7곡)이라
+        # value_counts()로는 더 이상 "영향력 큰 밴드"를 못 고른다. 가중치(=포함확률 역수,
+        # 곧 밴드 모집단 크기에 비례)가 가장 큰 2개 밴드를 대신 고른다 -> 여전히
+        # poppin_party/roselia처럼 카탈로그 비중이 큰 밴드를 가리킨다.
+        top_bands = (
+            candidates.groupby("band")["weight"].mean()
+            .nlargest(TOP_N_BANDS_EXCLUDE).index.tolist()
+        )
         for r, q in zip(rows_this_item, qs):
             r["q_bh"] = q
             r["pass"] = bool(
@@ -314,6 +348,11 @@ def make_synthetic_responses(candidates, n_raters=22, seed=SEED):
 
 def main():
     global N_BOOTSTRAP
+    candidates, _ = load_candidates_with_features()
+    deff, eff_n = kish_design_effect(candidates["weight"])
+    print(f"[가중치 설계효과] Kish deff={deff:.3f}, 가중(카탈로그 보조체크) 유효표본"
+          f" ≈ {eff_n:.1f}/{len(candidates)} — 주분석(비가중)의 유효표본은 이 손실과 무관\n")
+
     if RESPONSES_PATH.exists():
         responses = pd.read_csv(RESPONSES_PATH, encoding="utf-8-sig")
         print(f"실제 응답 로드: {RESPONSES_PATH} ({len(responses)}행)")
@@ -323,7 +362,6 @@ def main():
         print("이 결과는 진짜 GEMS-피쳐 관계가 아닙니다 — 배선(코드 동작) 확인용입니다.")
         print("(스모크테스트는 부트스트랩 반복수를 20으로 줄여 빠르게 돕니다. 실제 분석 시엔")
         print(f" 응답 CSV를 {RESPONSES_PATH}에 두면 N_BOOTSTRAP={N_BOOTSTRAP}로 정식 실행됩니다.)\n")
-        candidates, _ = load_candidates_with_features()
         responses = make_synthetic_responses(candidates)
         synthetic = True
         N_BOOTSTRAP = 20
@@ -344,9 +382,9 @@ def main():
     rec = band_redesign_recommendation(results)
     print(f"\n[밴드 편중 판정] 통과 {rec['n_passed']}건 중 {rec['n_flagged']}건 밴드의존 플래그")
     if rec["majority_flagged"]:
-        print("-> 과반수 플래그됨: notes/n20_prereg.md §8에 따라 밴드당 동일 N으로 재설계 권고")
+        print("-> 과반수 플래그됨: 밴드당 동일 N으로도 특정 밴드 의존성이 강함 — 원인 추가 조사 필요")
     else:
-        print("-> 과반수 미만: 현재 비례배분 설계 유지, 플래그된 피쳐만 한계로 명시")
+        print("-> 과반수 미만: 현재 밴드당 동일 N 설계 유지, 플래그된 피쳐만 한계로 명시")
 
     if synthetic:
         print("\n[스모크테스트] 파이프라인이 에러 없이 끝까지 돌았는지만 확인하십시오.")
