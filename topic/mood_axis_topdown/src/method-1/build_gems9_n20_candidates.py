@@ -2,9 +2,6 @@
 
 통계 자문(report/04-n20_sampling_consult.md) 결과를 그대로 구현한다. 요약:
 - 모집단: eligible_band==True 중 15곡 미만 밴드 및 various_artists 제외 (10개 밴드).
-- 추정대상: 카탈로그 전체(모집단) 대상 주변부(marginal) 상관 — within/between 어느 한쪽이
-  아니라 "이 카탈로그에서 필터로 쓸 만한가"가 목적이므로, 밴드 크기 비례 배분(+최소하한)을
-  쓴다.
 - 균형표집: 예전 energy_full 극단추출(범위왜곡)과 달리, 전체 모집단에서 뽑은 대표축(PC1)의
   분포를 각 밴드 내부에서 삼분위로 층화한 뒤 그 안에서 무작위 추출 — 표본의 피쳐 분포가
   모집단을 따라가게 해서 범위왜곡 없이 정밀도만 올린다.
@@ -13,6 +10,14 @@
 - 홀드아웃(확증용) 20~30곡은 본표본과 "같은 시드 절차에서 연속으로" 뽑아 disjoint 확보 —
   1차 분석 결과를 보고 나중에 뽑지 않는다(사전등록 원칙, notes/n20_prereg.md).
 - 포함확률(inclusion probability)을 셀 단위로 기록해 분석 단계의 사후층화 가중치 계산에 쓴다.
+
+**밴드 배분 방식 (2026-07-23 변경)**: 원래는 "카탈로그 전체 marginal 상관"을 추정대상으로
+삼아 밴드 크기 비례 배분(+최소하한)을 썼다. 그런데 poppin_party(115곡) 12곡 vs
+ave_mujica/mugendai_mutype(각 23~29곡) 4곡처럼, 장르적으로 이질적인 밴드 간 대표성
+편차가 크다는 지적이 나왔다. 사용자 판단으로 **실제 GEMS 데이터로 편중 여부를 확인하는
+절차(notes/n20_prereg.md §8, band_bias_diagnostics)를 기다리지 않고, 지금 밴드당 동일
+N(EQUAL_N_PER_BAND)으로 선제 전환**한다 — 추정대상이 "카탈로그 전체 대표"에서 "밴드(장르)
+간 균등 대표"로 바뀐다는 뜻이며, 이 트레이드오프는 report/04 §3-2에 기록한다.
 
 재현성: RNG 시드는 아래 SEED 상수 하나로 고정. 한 번 뽑은 뒤 결과가 마음에 안 든다고
 재실행하지 않는다 — 재실행이 필요한 유일한 사유는 assign_rater_blocks.py 쪽의 "연결성/
@@ -48,8 +53,9 @@ TIER2 = ["mode_score", "tempo_bpm"]
 FEATURE_COLS = TIER1 + TIER2
 
 MAIN_TOTAL_TARGET = 70
-MAIN_FLOOR_PER_BAND = 4
 HOLDOUT_TOTAL_TARGET = 25
+EQUAL_N_PER_BAND = True  # True = 밴드당 동일 N(장르 균등 대표), False = 밴드 크기 비례(+floor)
+MAIN_FLOOR_PER_BAND = 4
 HOLDOUT_FLOOR_PER_BAND = 2
 
 CLUSTER_DISTANCE_THRESHOLD = 0.3  # 1-|rho| 기준. |rho|>0.7인 피쳐끼리 같은 클러스터.
@@ -139,6 +145,17 @@ def largest_remainder_allocation(sizes, total, floor):
     return dict(zip(bands, base.tolist()))
 
 
+def equal_allocation(bands, total):
+    """밴드당 동일 N — 나머지는 largest remainder로 배분(예: 25/10곡 -> 5곡 3, 5곡 2)."""
+    n = len(bands)
+    base_n = total // n
+    remainder = total - base_n * n
+    alloc = {b: base_n for b in bands}
+    for b in list(bands)[:remainder]:
+        alloc[b] += 1
+    return alloc
+
+
 def allocate_within_band_tertiles(band_df, n_band, rng):
     """밴드 내 N을 3개 삼분위 셀 크기 비례로 배분(largest remainder)."""
     cell_sizes = band_df["pc1_tertile"].value_counts().to_dict()
@@ -210,16 +227,23 @@ def main():
     rng = np.random.default_rng(SEED)  # 본표본 + 홀드아웃을 하나의 시드 절차로 연속 추첨
 
     band_sizes = df["band"].value_counts().to_dict()
-    main_alloc = largest_remainder_allocation(band_sizes, MAIN_TOTAL_TARGET, MAIN_FLOOR_PER_BAND)
-    print(f"\n본표본 밴드별 배분(목표 {MAIN_TOTAL_TARGET}): {main_alloc}")
+    if EQUAL_N_PER_BAND:
+        main_alloc = equal_allocation(sorted(band_sizes), MAIN_TOTAL_TARGET)
+        print(f"\n[밴드당 동일 N 배분] 본표본 밴드별 배분(목표 {MAIN_TOTAL_TARGET}): {main_alloc}")
+    else:
+        main_alloc = largest_remainder_allocation(band_sizes, MAIN_TOTAL_TARGET, MAIN_FLOOR_PER_BAND)
+        print(f"\n[밴드 크기 비례 배분] 본표본 밴드별 배분(목표 {MAIN_TOTAL_TARGET}): {main_alloc}")
 
     main_sample, remaining = draw_sample(df, main_alloc, rng)
     print(f"본표본 실제 추출: {len(main_sample)}곡")
 
     remaining_sizes = remaining["band"].value_counts().to_dict()
-    holdout_alloc = largest_remainder_allocation(
-        remaining_sizes, HOLDOUT_TOTAL_TARGET, HOLDOUT_FLOOR_PER_BAND
-    )
+    if EQUAL_N_PER_BAND:
+        holdout_alloc = equal_allocation(sorted(remaining_sizes), HOLDOUT_TOTAL_TARGET)
+    else:
+        holdout_alloc = largest_remainder_allocation(
+            remaining_sizes, HOLDOUT_TOTAL_TARGET, HOLDOUT_FLOOR_PER_BAND
+        )
     print(f"홀드아웃 밴드별 배분(목표 {HOLDOUT_TOTAL_TARGET}): {holdout_alloc}")
 
     holdout_sample, _ = draw_sample(remaining, holdout_alloc, rng)
