@@ -76,3 +76,30 @@ Tool 2(커스텀 HTML)는 n=1 파일럿용. n≥20 다중 응답자 라운드는
   35곡짜리 폼을 한 번에 생성. 사용법은 `gems9_google_form_guide.md`.
 - `build_gems9_survey_data.py`가 이 파일의 `SONGS` 배열도 함께 갱신한다(HTML과 동일한
   재생성 흐름) — Tool 1로 구간 확정 후 이 스크립트만 다시 돌리면 됨.
+
+## n≥20 라운드 곡 샘플링 재설계 (2026-07-23, 통계 자문 반영)
+
+기존 에너지 극단추출 방식의 confound 문제가 제기되어, 통계학자 페르소나 서브에이전트와
+3라운드 검증을 거쳐 곡 샘플링을 처음부터 다시 설계했다. 전체 대화와 최종 절차는
+`report/04-n20_sampling_consult.md`, 분석 스펙 동결본은 `notes/n20_prereg.md`, 절차
+플로차트는 `notes/n20-screening-flowchart.webp` 참고.
+
+- **`build_gems9_n20_candidates.py`**: 모집단 필터(밴드 15곡 미만·`various_artists` 제외)
+  → 전체카탈로그 피쳐 차원축소(상관 클러스터링, 19→17개 대표 피쳐) → PC1 기준 밴드×삼분위
+  균형표집으로 본표본 70곡 + 동일 시드로 disjoint 홀드아웃 25곡(봉인) 추출.
+  `out/gems9_n20_candidates.csv`, `out/gems9_n20_holdout_sealed.csv`,
+  `out/gems9_n20_representative_features.csv` 생성.
+- **`assign_rater_blocks.py`**: 본표본 70곡을 겹치는 블록 5개(30곡씩)로 나누고 응답자
+  ~22명을 블록에 배정 — 곡별 최소 응답자 수·연결성 사후 검증.
+  `out/gems9_n20_rater_block_assignment.csv`, `out/gems9_n20_block_definitions.csv` 생성.
+- **`analyze_gems9_n20.py`**: (실제 응답 수집 후) 혼합모형(고정효과 rater+랜덤절편 song)으로
+  평정자 효과 제거 → 가중 Spearman + 부트스트랩 CI + BH-FDR → 홀드아웃 확증(부호일치·
+  CI겹침·|rho|≥0.3). 실제 응답 CSV(`out/gems9_n20_responses.csv`)가 없으면 합성데이터로
+  파이프라인 배선만 검증하는 스모크테스트가 돈다.
+- **`draw_n20_screening_flowchart.py`**: 위 절차 전체를 `notes/n20-screening-flowchart.webp`로
+  시각화(PRISMA 스타일).
+
+**다음 단계(미완)**: 불완전블록 설계라 `gems9_google_form.gs`처럼 폼 하나에 전곡을 넣는
+방식이 안 맞는다 — 블록 5개 각각에 대해 별도 구글폼을 생성하도록
+`build_gems9_survey_data.py`/`gems9_google_form.gs`를 확장해야 응답자에게 배정된 블록
+링크를 보낼 수 있다. 아직 구현 안 됨.
