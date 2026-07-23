@@ -29,12 +29,8 @@ CENTER_BOXES_KO = [
 SIDE_BOXES_KO = [
     (8.6, 11.6, 4.2, 1.1,
      "밴드 규모 미달($<$15곡) 또는\n$various\\_artists$ 제외\n($N = 7$)", 11.6),
-    (8.6, 9.6, 4.2, 1.1,
-     "밴드×PC1 삼분위 셀에서\n미선정 ($N = 559$)", 9.6),
-    (8.6, 7.6, 4.2, 1.1,
-     "동일 시드 절차로 disjoint\n홀드아웃 확보·봉인 ($N = 25$)", 7.6),
-    (8.6, 1.45, 4.2, 1.2,
-     "홀드아웃 확증 미달\n(부호 불일치 / CI 비겹침 /\n$|\\rho|{<}0.3$)", 1.45),
+    (8.6, 9.6, 4.2, 1.5,
+     "본표본 70곡을 제외한 나머지 584곡\n— 홀드아웃 확보·봉인 ($N = 25$)\n— 미선정, 사용 안 함 ($N = 559$)", 9.6),
 ]
 
 CENTER_BOXES_EN = [
@@ -50,12 +46,10 @@ CENTER_BOXES_EN = [
 SIDE_BOXES_EN = [
     (8.6, 11.6, 4.2, 1.1,
      "Excluded: band size $<$15 songs, or\n$various\\_artists$\n($N = 7$)", 11.6),
-    (8.6, 9.6, 4.2, 1.1,
-     "Not selected within\nband $\\times$ tertile cells ($N = 559$)", 9.6),
-    (8.6, 7.6, 4.2, 1.1,
-     "Disjoint holdout drawn from same\nseed sequence, sealed ($N = 25$)", 7.6),
-    (8.6, 1.45, 4.2, 1.2,
-     "Failed holdout confirmation\n(sign mismatch / CI non-overlap /\n$|\\rho|{<}0.3$)", 1.45),
+    (8.6, 9.6, 4.2, 1.5,
+     "584 songs not in the main sample\n"
+     "$-$ sealed as holdout ($N = 25$)\n"
+     "$-$ not selected, unused ($N = 559$)", 9.6),
 ]
 
 
