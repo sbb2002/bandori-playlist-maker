@@ -154,6 +154,71 @@ def bootstrap_rho_ci(responses, candidates, item, feature_cols, n_boot=N_BOOTSTR
     return ci
 
 
+BAND_ETA2_MIN = 0.0  # 참고용(§6 태깅), 판정에는 안 씀
+PARTIAL_RHO_MIN = 0.2       # notes/n20_prereg.md §8
+LEAVEOUT_RHO_MIN = CONFIRM_RHO  # 0.3, 2단계 확증과 동일 기준 재사용
+TOP_N_BANDS_EXCLUDE = 2
+
+
+def weighted_ols_residual(y, band, w):
+    """y ~ C(band) 가중회귀 잔차 -> 밴드 평균차를 제거한 값(밴드 내 편차만 남음)."""
+    y = np.asarray(y, dtype=float)
+    w = np.asarray(w, dtype=float)
+    dummies = pd.get_dummies(pd.Series(band), drop_first=False).to_numpy(dtype=float)
+    sw = np.sqrt(w)
+    X = dummies * sw[:, None]
+    Y = y * sw
+    beta, *_ = np.linalg.lstsq(X, Y, rcond=None)
+    fitted = dummies @ beta
+    return y - fitted
+
+
+def band_eta_squared(feature_values, band):
+    """피쳐 분산 중 밴드로 설명되는 비율(R^2 of feature ~ C(band))."""
+    y = np.asarray(feature_values, dtype=float)
+    dummies = pd.get_dummies(pd.Series(band), drop_first=False).to_numpy(dtype=float)
+    beta, *_ = np.linalg.lstsq(dummies, y, rcond=None)
+    fitted = dummies @ beta
+    ss_res = np.sum((y - fitted) ** 2)
+    ss_tot = np.sum((y - y.mean()) ** 2)
+    return 1 - ss_res / ss_tot if ss_tot > 0 else float("nan")
+
+
+def band_bias_diagnostics(merged, item, feat, top_bands):
+    """notes/n20_prereg.md §8: 밴드 통제 편상관 + 최대밴드 제외 재계산 + 개별 플래그 판정."""
+    x = merged[feat].to_numpy(dtype=float)
+    y = merged[item].to_numpy(dtype=float)
+    w = merged["weight"].to_numpy(dtype=float)
+    band = merged["band"].to_numpy()
+
+    marginal_rho = weighted_spearman(x, y, w)
+
+    resid_x = weighted_ols_residual(x, band, w)
+    resid_y = weighted_ols_residual(y, band, w)
+    partial_rho = weighted_pearson(resid_x, resid_y, w)
+
+    keep = ~np.isin(band, top_bands)
+    if keep.sum() >= 10:
+        leaveout_rho = weighted_spearman(x[keep], y[keep], w[keep])
+    else:
+        leaveout_rho = float("nan")
+
+    eta2 = band_eta_squared(x, band)
+
+    sign_flip_partial = (partial_rho == partial_rho) and (marginal_rho * partial_rho < 0)
+    weak_partial = (partial_rho == partial_rho) and (abs(partial_rho) < PARTIAL_RHO_MIN)
+    sign_flip_leaveout = (leaveout_rho == leaveout_rho) and (marginal_rho * leaveout_rho < 0)
+    weak_leaveout = (leaveout_rho == leaveout_rho) and (abs(leaveout_rho) < LEAVEOUT_RHO_MIN)
+
+    flagged = sign_flip_partial or weak_partial or sign_flip_leaveout or weak_leaveout
+    return {
+        "band_eta2": eta2,
+        "partial_rho_band_controlled": partial_rho,
+        "leaveout_rho_top2bands_excluded": leaveout_rho,
+        "band_dependent_flag": bool(flagged),
+    }
+
+
 def confirmatory_check(main_rho, main_ci, holdout_rho, holdout_ci, threshold=CONFIRM_RHO):
     """자문위원 지적 반영: '재유의'가 아니라 부호일치 + CI 겹침 + 실용효과크기 유지로 판정."""
     if any(v != v for v in (main_rho, holdout_rho, *main_ci, *holdout_ci)):
@@ -207,13 +272,27 @@ def run_main_analysis(responses):
             pvals.append(p)
 
         qs = bh_fdr([r["p_approx"] for r in rows_this_item])
+        top_bands = candidates["band"].value_counts().nlargest(TOP_N_BANDS_EXCLUDE).index.tolist()
         for r, q in zip(rows_this_item, qs):
             r["q_bh"] = q
             r["pass"] = bool(
                 r["rho"] == r["rho"] and abs(r["rho"]) >= PASS_RHO and q == q and q < PASS_Q
             )
+            diag = band_bias_diagnostics(merged, item, r["feature"], top_bands)
+            r.update(diag)
             results.append(r)
     return pd.DataFrame(results)
+
+
+def band_redesign_recommendation(results):
+    """notes/n20_prereg.md §8: 1차 통과 피쳐 중 과반수가 밴드 의존적으로 플래그되면
+    밴드당 동일 N으로 재설계할 것을 권고."""
+    passed = results[results["pass"]]
+    if len(passed) == 0:
+        return {"n_passed": 0, "n_flagged": 0, "majority_flagged": False}
+    n_flagged = int(passed["band_dependent_flag"].sum())
+    majority = n_flagged / len(passed) > 0.5
+    return {"n_passed": len(passed), "n_flagged": n_flagged, "majority_flagged": majority}
 
 
 def make_synthetic_responses(candidates, n_raters=22, seed=SEED):
@@ -258,8 +337,16 @@ def main():
     passed = results[results["pass"]]
     print(f"\n통과(|rho|>={PASS_RHO}, q<{PASS_Q}): {len(passed)}건")
     for _, r in passed.iterrows():
+        flag = " [밴드의존 플래그]" if r["band_dependent_flag"] else ""
         print(f"  {r['gems_item']:20s} x {r['feature']:16s} rho={r['rho']:+.3f} "
-              f"CI=[{r['ci_lo']:.3f},{r['ci_hi']:.3f}] q={r['q_bh']:.3f}")
+              f"CI=[{r['ci_lo']:.3f},{r['ci_hi']:.3f}] q={r['q_bh']:.3f}{flag}")
+
+    rec = band_redesign_recommendation(results)
+    print(f"\n[밴드 편중 판정] 통과 {rec['n_passed']}건 중 {rec['n_flagged']}건 밴드의존 플래그")
+    if rec["majority_flagged"]:
+        print("-> 과반수 플래그됨: notes/n20_prereg.md §8에 따라 밴드당 동일 N으로 재설계 권고")
+    else:
+        print("-> 과반수 미만: 현재 비례배분 설계 유지, 플래그된 피쳐만 한계로 명시")
 
     if synthetic:
         print("\n[스모크테스트] 파이프라인이 에러 없이 끝까지 돌았는지만 확인하십시오.")
