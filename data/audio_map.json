@@ -6064,6 +6064,70 @@
             "x": 11.77,
             "y": 15.72,
             "bpm": 107.7
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "唱",
+            "url": "https://youtu.be/zVdR0urFjnc",
+            "x": 3.03,
+            "y": 10.6,
+            "bpm": 129.2
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "インキャのキャキャキャ",
+            "url": "https://youtu.be/_jU3f42nbGs",
+            "x": 22.41,
+            "y": -17.06,
+            "bpm": 117.5
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "デビルじゃないもん",
+            "url": "https://youtu.be/y-kKg3F7-TA",
+            "x": 4.52,
+            "y": -13.33,
+            "bpm": 152.0
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "エイリアンエイリアン",
+            "url": "https://youtu.be/QmYpqqTvVHc",
+            "x": 19.88,
+            "y": -11.11,
+            "bpm": 143.6
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "ぼくたちいつでも しゅわっしゅわ！",
+            "url": "https://youtu.be/dvmoFIxT6D4",
+            "x": -27.02,
+            "y": -7.76,
+            "bpm": 129.2
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "回レ!雪月花",
+            "url": "https://youtu.be/Nq2Sl4Ba44M",
+            "x": 7.89,
+            "y": -28.07,
+            "bpm": 107.7
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "ビッグマウス feat.りむる",
+            "url": "https://youtu.be/i7vyrp_3an0",
+            "x": 65.39,
+            "y": 17.3,
+            "bpm": 143.6
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "KiLLKiSS",
+            "url": "https://youtu.be/n4AUKXIjNeo",
+            "x": -6.5,
+            "y": -32.36,
+            "bpm": 136.0
         }
     ],
     "centroids": [
@@ -6105,9 +6169,9 @@
         },
         {
             "band": "mugendai_mutype",
-            "n": 23,
-            "x": 20.69,
-            "y": 6.39
+            "n": 31,
+            "x": 18.24,
+            "y": 2.11
         },
         {
             "band": "mygo",
@@ -6151,7 +6215,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 665,
+        "n": 673,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
