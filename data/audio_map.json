@@ -6128,6 +6128,134 @@
             "x": -6.5,
             "y": -32.36,
             "bpm": 136.0
+        },
+        {
+            "band": "mygo",
+            "song": "二息歩行 (Reloaded)",
+            "url": "https://youtu.be/q7lbzmTw8RM",
+            "x": -16.28,
+            "y": 33.21,
+            "bpm": 117.5
+        },
+        {
+            "band": "mygo",
+            "song": "社会距離",
+            "url": "https://youtu.be/Y5qJcXd0two",
+            "x": -26.42,
+            "y": -19.29,
+            "bpm": 129.2
+        },
+        {
+            "band": "mygo",
+            "song": "君の神様になりたい。",
+            "url": "https://youtu.be/HwLbvP99ypk",
+            "x": -13.51,
+            "y": 19.99,
+            "bpm": 99.4
+        },
+        {
+            "band": "mygo",
+            "song": "Henceforth",
+            "url": "https://youtu.be/Lr-bMZ2hNH0",
+            "x": -67.12,
+            "y": 25.84,
+            "bpm": 161.5
+        },
+        {
+            "band": "mygo",
+            "song": "ティアドロップス",
+            "url": "https://youtu.be/3KVLbAMPwzs",
+            "x": 3.8,
+            "y": -16.98,
+            "bpm": 129.2
+        },
+        {
+            "band": "mygo",
+            "song": "遠心力",
+            "url": "https://youtu.be/9RNcp7rLecQ",
+            "x": 3.93,
+            "y": -8.18,
+            "bpm": 136.0
+        },
+        {
+            "band": "mygo",
+            "song": "ないばいたりてぃ",
+            "url": "https://youtu.be/tAZGnS1FKRE",
+            "x": -53.05,
+            "y": 10.79,
+            "bpm": 99.4
+        },
+        {
+            "band": "mygo",
+            "song": "キリトリセン",
+            "url": "https://youtu.be/3fBftYWm8gY",
+            "x": -44.21,
+            "y": 11.44,
+            "bpm": 161.5
+        },
+        {
+            "band": "mygo",
+            "song": "もしも命が描けたら",
+            "url": "https://youtu.be/uVGIGeTPQVM",
+            "x": -37.02,
+            "y": 33.35,
+            "bpm": 99.4
+        },
+        {
+            "band": "mygo",
+            "song": "TEENAGE RIOT",
+            "url": "https://youtu.be/Hm90Otiz8u8",
+            "x": -44.38,
+            "y": -43.08,
+            "bpm": 129.2
+        },
+        {
+            "band": "mygo",
+            "song": "パメラ",
+            "url": "https://youtu.be/wbbcQokPgLM",
+            "x": -6.39,
+            "y": -1.24,
+            "bpm": 99.4
+        },
+        {
+            "band": "mygo",
+            "song": "栞",
+            "url": "https://youtu.be/3ye4lnEsJRY",
+            "x": -17.43,
+            "y": 40.86,
+            "bpm": 99.4
+        },
+        {
+            "band": "mygo",
+            "song": "シンデレラボーイ",
+            "url": "https://youtu.be/SKyIh9ddvck",
+            "x": -34.77,
+            "y": 47.76,
+            "bpm": 107.7
+        },
+        {
+            "band": "mygo",
+            "song": "少女レイ",
+            "url": "https://youtu.be/DEXX5zBkRjQ",
+            "x": -18.21,
+            "y": 27.4,
+            "bpm": 152.0
+        },
+        {
+            "band": "mygo",
+            "song": "正しくなれない",
+            "url": "https://youtu.be/azECAVAWRxI",
+            "x": -41.11,
+            "y": 29.56,
+            "bpm": 117.5
+        },
+        {
+            "band": "mygo",
+            "song": "恋してる自分すら愛せるんだ",
+            "url": "https://youtu.be/swsu_JBv6Ug",
+            "x": -50.32,
+            "y": 28.29,
+            "bpm": 129.2
         }
     ],
     "centroids": [
@@ -6175,9 +6303,9 @@
         },
         {
             "band": "mygo",
-            "n": 44,
-            "x": 7.82,
-            "y": 17.31
+            "n": 60,
+            "x": -1.98,
+            "y": 16.36
         },
         {
             "band": "pastel_palettes",
@@ -6215,7 +6343,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 673,
+        "n": 689,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
