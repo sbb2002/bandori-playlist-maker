@@ -265,6 +265,30 @@ button.ghost {
 .badge.non_harmonic { color: var(--warn); }
 .badge.seed { color: var(--accent-2); }
 
+.badge[data-tooltip] { cursor: help; }
+
+/* 커스텀 툴팁(테마 일치, 하모닉 배지 전용) — JS가 badge.getBoundingClientRect()로 뷰포트
+   안에 들어오도록 매 오픈마다 위치를 계산해 이 고정(fixed) 엘리먼트에 반영한다. 화면
+   가장자리에서 잘리지 않도록 좌우로 클램프하고, 화살표는 배지 중심을 계속 가리키도록
+   별도로 이동한다(showTooltip/positionTooltip, app.js). */
+.badge-tooltip {
+  position: fixed; z-index: 40;
+  max-width: 240px; width: max-content; text-align: left; white-space: normal;
+  background: var(--card); color: var(--text); border: 1px solid var(--card-2);
+  padding: 8px 10px; border-radius: 8px; font-size: 0.72rem; line-height: 1.45;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  transform: translateY(4px);
+}
+.badge-tooltip.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.badge-tooltip .arrow {
+  position: absolute; width: 10px; height: 10px; background: var(--card);
+  transform: rotate(45deg);
+}
+.badge-tooltip.above .arrow { bottom: -5px; }
+.badge-tooltip.below .arrow { top: -5px; }
+
 /* 트랙 편집 액션 — 우측 이동 핸들·제거. 행 호버 시 은은히 나타나는 고스트 아이콘(테마 조화). */
 .track { user-select: none; -webkit-user-select: none; } /* 곡 텍스트 드래그 선택 방지 */
 .track-actions {

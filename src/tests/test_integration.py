@@ -76,19 +76,48 @@ def test_genuinely_quiet_songs_rate_low():
 
 
 def test_boundary_tension_continuity_is_smooth():
-    """곡 경계 텐션 연속성(사용자 §종합): 이전 아웃트로↔다음 인트로 평균 급차이가 작아야 한다."""
+    """곡 경계 텐션 연속성(사용자 §종합): 실제 시퀀싱이 무작위 순서보다 유의미하게 매끄러워야 한다.
+
+    절대 임계값(과거 0.44)은 `song_repo._percentile_ranker()`가 energy를 eligible 풀
+    **전체 분포 기준**으로 계산하는 구조 때문에 스냅샷이 바뀔 때마다(오토로더 신곡 반영 등)
+    모든 곡의 energy가 미세 재계산되어 흔들린다 — 2026-07-13에 곡 2개 제거만으로 0.40→0.437로
+    급변한 적이 있고, 2026-07-24 재검증에서도 무작위 2곡 제거만으로 gap이 최대 +0.16(베이스라인
+    대비 60%+) 이동함을 확인했다(원인 규명: document-archive 브랜치
+    archive/last-papers/research/2026-07-14-boundary-tension-rng-sensitivity-verified.md).
+
+    그래서 절대값 대신, **같은 스냅샷·같은 곡 구성 안에서** "실제 시퀀싱 결과"를 "그 곡들을
+    무작위로 배열했을 때의 기대 gap"과 비교하는 상대 지표로 판정한다 — 스냅샷이 바뀌어도 두
+    값이 같은 방향으로 움직여 비율은 안정적이다. 실측(2026-07-24, 정상 스냅샷 + 무작위 2~5곡
+    제거 80회 시뮬레이션): 비율은 항상 0.28~0.72, 반면 시퀀싱이 고장 나 무작위 순서와 다름없어지면
+    비율이 ~1.0 이상으로 뛴다 — 0.80을 통과 기준으로 삼으면 두 상황을 안정적으로 구분한다.
+    """
     import statistics
+
+    def mean_gap(by_idx, order):
+        return statistics.mean(
+            abs(by_idx[a.idx].outro_energy - by_idx[b.idx].intro_energy)
+            for a, b in zip(order, order[1:])
+        )
+
     songs = load_songs()
     by_idx = {s.idx: s for s in songs}
     sl = build_setlist(songs, _quiet_params(), target_seconds=60 * 60, rng=random.Random(0))
-    gaps = [
-        abs(by_idx[a.idx].outro_energy - by_idx[b.idx].intro_energy)
-        for a, b in zip(sl.picks, sl.picks[1:])
-    ]
-    # 베이스라인(연속성 미적용) ~0.56 → 개선. 2026-07-13 중복 업로드 2곡
-    # (idx 525, 588) 제거로 후보 풀이 바뀌며 seed=0 실측치가 0.437로 소폭
-    # 상승해 임계값을 0.44로 재조정(여전히 베이스라인 대비 크게 개선된 수준).
-    assert statistics.mean(gaps) < 0.44
+    actual_gap = mean_gap(by_idx, sl.picks)
+
+    # 같은 곡 구성을 무작위로 배열했을 때의 기대 gap(몬테카를로 베이스라인, 고정 시드로 결정론적).
+    baseline_rng = random.Random(12345)
+    shuffled = list(sl.picks)
+    baseline_gaps = []
+    for _ in range(200):
+        baseline_rng.shuffle(shuffled)
+        baseline_gaps.append(mean_gap(by_idx, shuffled))
+    baseline_gap = statistics.mean(baseline_gaps)
+
+    ratio = actual_gap / baseline_gap
+    assert ratio <= 0.80, (
+        f"actual={actual_gap:.4f} random_baseline={baseline_gap:.4f} ratio={ratio:.4f} "
+        f"(>0.80 — 무작위 순서 대비 개선폭이 부족함)"
+    )
 
 
 def _rising_params() -> MoodParameters:
