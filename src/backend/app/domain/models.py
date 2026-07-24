@@ -98,6 +98,9 @@ class PickReason:
     prev_camelot: str | None
     brightness_fit: float      # 0.0~1.0 (1=밝기 목표와 완전 일치)
     text: str
+    # 후보 풀 부족으로 허용창(_TOL) 밖 곡이 불가피하게 선택됐는지(hotfix: 4-5단계 사이 완충 노드).
+    # True면 이 곡의 energy가 stage_energy_target에서 _TOL을 넘겨 벗어났다는 뜻.
+    degraded: bool = False
 
 
 @dataclass(frozen=True)

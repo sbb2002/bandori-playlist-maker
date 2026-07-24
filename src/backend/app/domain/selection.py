@@ -39,6 +39,10 @@ DEFAULT_AVG_SONG_SECONDS = 213
 
 # 2단계 엔진 파라미터(R&D §4.2 권장 기본값). 파일럿 후 실사용 피드백으로 튜닝.
 _TOL = 0.08              # Stage A 강도 허용창(목표에서 이 이내만 후보)
+# 완충 노드(4-5단계 사이, hotfix/boundary-tension 논의): 허용창 밖으로 폴백된 픽 중에서도
+# 이탈이 이 이상이면 억지로 채우지 않고 슬롯을 건너뛴다(자동 축소) — 밴드 필터 등으로 풀이
+# 좁을 때 "조용 요청인데 안 조용한 곡"이 섞이는 걸 막는다. 이 값 이하는 채우되 degraded로 표시.
+_HARD_TOL = 2 * _TOL
 _BRIGHTNESS_BUCKET = 0.25  # Stage A 밝기 근접 버킷 폭(같은 버킷 내에선 rng 변주)
 # Stage B 시퀀싱: 경계갭 + 하모닉 + 강도순서이탈을 다목적 비용으로 최소화. (검증 하네스로 튜닝 — R&D §8.)
 _RANDOM_SLACK = 0.05     # 최소 비용 대비 이 범위 내 후보는 랜덤(곡 선택 변주는 Stage A가 담당)
@@ -188,6 +192,7 @@ def _make_reason(
     prev: Song | None,
     harmonic: str,
     stage_index: int,
+    degraded: bool = False,
 ) -> PickReason:
     brightness_fit = round(1.0 - abs(picked_brightness - brightness_target) / 2.0, 3)
     if harmonic == "seed":
@@ -202,6 +207,8 @@ def _make_reason(
         f"{stage_index + 1}단계 강도 목표 {energy_target:.2f}에 부합"
         f"(곡 강도 {picked.energy:.2f}). {harmonic_text}"
     )
+    if degraded:
+        text += " (후보 풀 부족으로 목표 강도에서 다소 벗어난 곡)"
     return PickReason(
         stage_energy_target=round(energy_target, 4),
         matched_energy=round(picked.energy, 4),
@@ -209,6 +216,7 @@ def _make_reason(
         prev_camelot=(prev.camelot if prev is not None else None),
         brightness_fit=brightness_fit,
         text=text,
+        degraded=degraded,
     )
 
 
@@ -282,6 +290,7 @@ def build_setlist(
     slot_targets = continuous_slot_targets(targets, counts)
     remaining = {s.idx: s for s in pool}
     stage_members: list[list[Song]] = []
+    degraded_idx: set[int] = set()  # 허용창 밖이지만 채택된 픽(완충 노드가 표시만 하는 케이스)
     slot = 0
     for count in counts:
         chosen: list[Song] = []
@@ -298,7 +307,14 @@ def build_setlist(
                 window.sort(key=lambda s: round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET))
                 pick = window[0]
             else:
-                pick = cand[0]  # 후보 부족 → 강도 근접 우선(변주 없음)
+                # 완충 노드: 허용창 밖 최근접 후보. 이탈이 _HARD_TOL을 넘으면 억지로 채우지
+                # 않고 이 슬롯을 건너뛴다 — 목표 곡 수가 풀 크기에 맞게 자동으로 줄어든다
+                # (좁은 밴드 필터 등으로 "조용 요청인데 시끄러운 곡 섞임" 방지).
+                closest = cand[0]
+                if abs(closest.energy - slot_target) > _HARD_TOL:
+                    continue
+                pick = closest
+                degraded_idx.add(pick.idx)
             del remaining[pick.idx]
             chosen.append(pick)
         stage_members.append(chosen)
@@ -321,7 +337,8 @@ def build_setlist(
         for s in seq:
             harmonic = harmonic_label(None if prev is None else prev.camelot, s.camelot)
             reason = _make_reason(
-                target, s, brightness[s.idx], params.brightness, prev, harmonic, stage_index
+                target, s, brightness[s.idx], params.brightness, prev, harmonic, stage_index,
+                degraded=s.idx in degraded_idx,
             )
             picks.append(
                 Pick(

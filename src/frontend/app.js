@@ -728,9 +728,9 @@ function renderTracklist(list) {
     const badges = document.createElement("div");
     badges.className = "badges";
     const h = p.reason ? p.reason.harmonic : "";
-    badges.appendChild(makeBadge(h, harmonicLabelKo(h)));
+    badges.appendChild(makeBadge(h, harmonicLabelKo(h), harmonicTooltipKo(h)));
     badges.appendChild(makeBadge("", `에너지 ${fmtNum(p.energy)}`));
-    badges.appendChild(makeBadge("", p.camelot));
+    badges.appendChild(makeBadge("key", keyLabel(p.camelot)));
 
     bodyEl.append(title, band, reason, badges);
     attachTrackLongPress(bodyEl, i); // 우클릭·길게누름 → "다음 곡 추가"/"현재 곡 제거" 메뉴
@@ -858,10 +858,47 @@ function makeInserter(atIndex) {
   return zone;
 }
 
-function makeBadge(kind, label) {
+// 모바일은 호버가 없어 배지 툴팁을 탭으로 열고 닫는다(데스크톱은 :hover/:focus-visible로 계속 동작).
+let openTooltipBadge = null;
+
+function closeOpenTooltip() {
+  if (openTooltipBadge) {
+    openTooltipBadge.classList.remove("tooltip-open");
+    openTooltipBadge = null;
+  }
+}
+
+// 툴팁이 열려 있을 때는 화면 어디를 클릭하든(다른 배지 포함) 그 클릭은 툴팁만 닫고
+// 원래 하려던 동작(곡 재생 등)으로 이어지지 않는다 — capture 단계에서 가로채 전파를 끊는다.
+document.addEventListener(
+  "click",
+  (e) => {
+    if (openTooltipBadge) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeOpenTooltip();
+    }
+  },
+  true,
+);
+
+function makeBadge(kind, label, tooltip) {
   const b = document.createElement("span");
   b.className = "badge" + (kind ? " " + kind : "");
   b.textContent = label;
+  if (tooltip) {
+    b.dataset.tooltip = tooltip;
+    b.tabIndex = 0; // 키보드 포커스로도 툴팁 확인 가능(:focus-visible)
+    b.addEventListener("click", (e) => {
+      e.stopPropagation(); // 태그 클릭이 트랙 재생(행 클릭)으로 전파되지 않도록
+      const willOpen = openTooltipBadge !== b;
+      closeOpenTooltip();
+      if (willOpen) {
+        b.classList.add("tooltip-open");
+        openTooltipBadge = b;
+      }
+    });
+  }
   return b;
 }
 
@@ -1449,7 +1486,7 @@ function renderPickerSongs() {
     const info = elDiv("picker-song-info");
     const t = elDiv("picker-song-title"); t.textContent = s.song;
     const meta = elDiv("picker-song-band");
-    meta.textContent = `${prettyBand(s.band)} · ${s.camelot} · 에너지 ${fmtNum(s.energy)}`;
+    meta.textContent = `${prettyBand(s.band)} · ${keyLabel(s.camelot)} · 에너지 ${fmtNum(s.energy)}`;
     info.append(t, meta);
     const addBtn = document.createElement("button");
     addBtn.type = "button"; addBtn.className = "picker-add"; addBtn.textContent = "추가";
@@ -2043,8 +2080,36 @@ $("playbar-info").addEventListener("click", () => {
 function prettyBand(band) {
   return String(band).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
+// Camelot 코드 → 화성 코드(음이름 + 장/단조) 표기. src/scripts/data/camelot.py의
+// KEY_TO_CAMELOT을 역매핑한 표(사용자에게 생소한 Camelot 대신 익숙한 조성명으로 노출).
+const CAMELOT_TO_KEY_LABEL = {
+  "1B": "B", "1A": "G♯m",
+  "2B": "F♯", "2A": "D♯m",
+  "3B": "C♯", "3A": "A♯m",
+  "4B": "G♯", "4A": "Fm",
+  "5B": "D♯", "5A": "Cm",
+  "6B": "A♯", "6A": "Gm",
+  "7B": "F", "7A": "Dm",
+  "8B": "C", "8A": "Am",
+  "9B": "G", "9A": "Em",
+  "10B": "D", "10A": "Bm",
+  "11B": "A", "11A": "F♯m",
+  "12B": "E", "12A": "C♯m",
+};
+function keyLabel(camelot) {
+  return CAMELOT_TO_KEY_LABEL[camelot] || camelot;
+}
 function harmonicLabelKo(h) {
   return { seed: "시작곡", same: "동일조성", adjacent: "하모닉인접", non_harmonic: "조성전환", added: "추가한 곡" }[h] || h;
+}
+function harmonicTooltipKo(h) {
+  return {
+    seed: "세트리스트의 첫 곡이라 직전 곡과 비교할 조성이 없어요.",
+    same: "직전 곡과 조성이 완전히 같아요. 조옮김 없이 그대로 이어져 가장 매끄러운 전환이에요.",
+    adjacent: "직전 곡과 Camelot Wheel 기준으로 인접한 조성이에요(관계조 또는 5도 이웃). 공통음이 많아 자연스럽게 넘어가요.",
+    non_harmonic: "직전 곡과 조성이 같지도, 인접하지도 않아요. 곡 경계에서 조성이 크게 바뀌는 전환이에요.",
+    added: "직접 추가한 곡이라 하모닉 배치 로직이 적용되지 않았어요.",
+  }[h] || "";
 }
 function fmtNum(v) { return (typeof v === "number" ? v : 0).toFixed(2); }
 function fmtSigned(v) { const n = typeof v === "number" ? v : 0; return (n >= 0 ? "+" : "") + n.toFixed(2); }

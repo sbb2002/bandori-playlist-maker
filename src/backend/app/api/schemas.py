@@ -83,6 +83,7 @@ def serialize_setlist(setlist: Setlist) -> dict:
                     "prev_camelot": p.reason.prev_camelot,
                     "brightness_fit": p.reason.brightness_fit,
                     "text": p.reason.text,
+                    "degraded": p.reason.degraded,
                 },
             }
             for p in setlist.picks

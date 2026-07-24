@@ -265,6 +265,31 @@ button.ghost {
 .badge.non_harmonic { color: var(--warn); }
 .badge.seed { color: var(--accent-2); }
 
+/* 커스텀 툴팁(테마 일치) — 네이티브 title 대신 data-tooltip으로 뜻을 설명(하모닉 배지 전용). */
+.badge[data-tooltip] { position: relative; cursor: help; }
+.badge[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px);
+  width: max-content; max-width: 240px; text-align: left; white-space: normal;
+  background: var(--card); color: var(--text); border: 1px solid var(--card-2);
+  padding: 8px 10px; border-radius: 8px; font-size: 0.72rem; line-height: 1.45;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 30;
+}
+.badge[data-tooltip]::before {
+  content: ""; position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%) translateY(4px);
+  border: 5px solid transparent; border-top-color: var(--card);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 30;
+}
+.badge[data-tooltip]:hover::after, .badge[data-tooltip]:focus-visible::after, .badge[data-tooltip].tooltip-open::after,
+.badge[data-tooltip]:hover::before, .badge[data-tooltip]:focus-visible::before, .badge[data-tooltip].tooltip-open::before {
+  opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+}
+
 /* 트랙 편집 액션 — 우측 이동 핸들·제거. 행 호버 시 은은히 나타나는 고스트 아이콘(테마 조화). */
 .track { user-select: none; -webkit-user-select: none; } /* 곡 텍스트 드래그 선택 방지 */
 .track-actions {
