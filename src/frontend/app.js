@@ -858,15 +858,80 @@ function makeInserter(atIndex) {
   return zone;
 }
 
-// 모바일은 호버가 없어 배지 툴팁을 탭으로 열고 닫는다(데스크톱은 :hover/:focus-visible로 계속 동작).
+// 모바일은 호버가 없어 배지 툴팁을 탭으로 열고 닫는다(호버 가능한 기기는 mouseenter로도 열림).
+// 툴팁 본체는 고정(fixed) 위치의 재사용 엘리먼트 1개 — 열 때마다 배지 위치를 재서
+// 화면 가장자리에 잘리지 않게 좌우/상하로 클램프한다(창 크기·기기 방향에 맞춰 적응).
 let openTooltipBadge = null;
+let tooltipBox = null;
+let tooltipText = null;
+let tooltipArrow = null;
+const TOOLTIP_MARGIN = 8;
+const supportsHoverTooltip =
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+function ensureTooltipEl() {
+  if (!tooltipBox) {
+    tooltipBox = document.createElement("div");
+    tooltipBox.className = "badge-tooltip";
+    tooltipText = document.createElement("span");
+    tooltipArrow = document.createElement("div");
+    tooltipArrow.className = "arrow";
+    tooltipBox.append(tooltipText, tooltipArrow);
+    document.body.appendChild(tooltipBox);
+  }
+  return tooltipBox;
+}
+
+function positionTooltip(badgeEl) {
+  const box = ensureTooltipEl();
+  const rect = badgeEl.getBoundingClientRect();
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const boxW = box.offsetWidth;
+  const boxH = box.offsetHeight;
+
+  let placeBelow = false;
+  let top = rect.top - boxH - TOOLTIP_MARGIN;
+  if (top < TOOLTIP_MARGIN) {
+    placeBelow = true;
+    top = rect.bottom + TOOLTIP_MARGIN;
+  }
+  top = Math.min(Math.max(top, TOOLTIP_MARGIN), Math.max(TOOLTIP_MARGIN, vh - boxH - TOOLTIP_MARGIN));
+
+  const badgeCenterX = rect.left + rect.width / 2;
+  let left = badgeCenterX - boxW / 2;
+  left = Math.min(Math.max(left, TOOLTIP_MARGIN), vw - boxW - TOOLTIP_MARGIN);
+
+  box.style.left = `${left}px`;
+  box.style.top = `${top}px`;
+  box.classList.toggle("above", !placeBelow);
+  box.classList.toggle("below", placeBelow);
+
+  // 화살표는 박스가 가장자리에서 밀려도 배지 중심을 계속 가리키도록 별도 보정.
+  const arrowLeft = Math.min(Math.max(badgeCenterX - left, 12), boxW - 12);
+  tooltipArrow.style.left = `${arrowLeft}px`;
+}
+
+function showTooltip(badgeEl, text) {
+  const box = ensureTooltipEl();
+  tooltipText.textContent = text;
+  box.classList.add("visible");
+  positionTooltip(badgeEl); // visible 처리 후 측정해야 offsetWidth/Height가 정확함
+}
+
+function hideTooltipBox() {
+  if (tooltipBox) tooltipBox.classList.remove("visible");
+}
 
 function closeOpenTooltip() {
-  if (openTooltipBadge) {
-    openTooltipBadge.classList.remove("tooltip-open");
-    openTooltipBadge = null;
-  }
+  openTooltipBadge = null;
+  hideTooltipBox();
 }
+
+window.addEventListener("resize", () => {
+  if (openTooltipBadge) positionTooltip(openTooltipBadge);
+});
 
 // 툴팁이 열려 있을 때는 화면 어디를 클릭하든(다른 배지 포함) 그 클릭은 툴팁만 닫고
 // 원래 하려던 동작(곡 재생 등)으로 이어지지 않는다 — capture 단계에서 가로채 전파를 끊는다.
@@ -888,15 +953,25 @@ function makeBadge(kind, label, tooltip) {
   b.textContent = label;
   if (tooltip) {
     b.dataset.tooltip = tooltip;
-    b.tabIndex = 0; // 키보드 포커스로도 툴팁 확인 가능(:focus-visible)
+    b.tabIndex = 0; // 키보드 포커스로도 툴팁 확인 가능
     b.addEventListener("click", (e) => {
       e.stopPropagation(); // 태그 클릭이 트랙 재생(행 클릭)으로 전파되지 않도록
       const willOpen = openTooltipBadge !== b;
       closeOpenTooltip();
       if (willOpen) {
-        b.classList.add("tooltip-open");
+        showTooltip(b, tooltip);
         openTooltipBadge = b;
       }
+    });
+    if (supportsHoverTooltip) {
+      b.addEventListener("mouseenter", () => showTooltip(b, tooltip));
+      b.addEventListener("mouseleave", () => {
+        if (openTooltipBadge !== b) hideTooltipBox();
+      });
+    }
+    b.addEventListener("focus", () => showTooltip(b, tooltip));
+    b.addEventListener("blur", () => {
+      if (openTooltipBadge !== b) hideTooltipBox();
     });
   }
   return b;
