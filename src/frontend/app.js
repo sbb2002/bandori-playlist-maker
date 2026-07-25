@@ -6,6 +6,14 @@
 const API_BASE = (window.SETLIST_API_BASE || "http://localhost:8000").replace(/\/$/, "");
 const AVG_SONG_SECONDS = 213; // duration 미확보 시 폴백(백엔드와 동일 가정).
 
+// ALL/Original/Cover 필터 알약 — bandori-song-sorter의 티어 필터 알약(06-filter-pills.js) 참고.
+// 곡 추가 팝업(picker-type-filter)과 세부 설정(settings-type-filter) 양쪽에서 공유.
+const PICKER_TYPE_OPTIONS = [
+  { key: "all", label: "ALL" },
+  { key: "original", label: "Original" },
+  { key: "cover", label: "Cover" },
+];
+
 // ── DOM ──────────────────────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
 const form = $("request-form");
@@ -28,6 +36,11 @@ let estimatedTotal = 0;
 let playedSeconds = 0;
 let halfFired = false;
 let errorSkips = 0; // 재생불가 영상 연속 스킵 가드(무한 루프 방지)
+// 플레이바 곡 이름(#playbar-info) 클릭 → 트랙리스트 쪽으로 스크롤했고, 그 뒤로 사용자가
+// 화면을 직접 움직이거나 유튜브 영상에 포커스를 두지 않았다면 true. true인 동안에만
+// 다음 곡 자동 전환 시 화면이 그 곡 위치로 따라간다(수동 클릭/이전·다음 버튼은 원래도
+// 항상 스크롤되므로 이 플래그의 영향을 받지 않음 — highlight()의 autoAdvance 인자 참고).
+let followTracklist = false;
 let loadedVideoId = null; // 플레이어에 로드/큐된 영상 id — 편집 후 재생 정합에 사용
 let playbackStarted = false; // 첫 PLAYING 이후 true — 편집 시 cue(정지) vs load(자동재생) 선택
 // 통합 되돌리기 스택(Ctrl+Z): {kind:'edit', picks, current} | {kind:'preset-delete', preset, index}.
@@ -79,10 +92,9 @@ form.addEventListener("submit", async (e) => {
   if (bands.length) body.bands = bands;
   const customStages = collectStages();
   if (customStages) body.stages = customStages;
-  // 커버/오리지널은 사용자가 직접 체크박스를 건드렸을 때만 전송(아니면 LLM이 판단).
+  // 커버/오리지널은 사용자가 직접 버튼을 건드렸을 때만 전송(아니면 LLM이 판단).
   if (coverTouched) {
-    body.include_original = $("inc-original").checked;
-    body.include_cover = $("inc-cover").checked;
+    Object.assign(body, typeToFlags(settingsType));
   }
 
   showLoading(true);
@@ -166,6 +178,7 @@ let stageTouched = false; // 사용자가 그래프를 조정했는지 — 조�
 // 응답 후 그 값을 UI에 '반영'만 한다(다음 요청에 강제되지 않게 — 밴드 필터 패턴과 동일).
 let minutesTouched = false;
 let coverTouched = false;
+let settingsType = "all"; // "all" | "original" | "cover" — 세 개 중 항상 정확히 하나만 켜짐(토글 버튼)
 
 // 사용자가 '직접' 체크한 밴드만 요청 간 지속한다. 프롬프트 자동감지 밴드는 매 요청 일회성이어야
 // 하므로(자연어 요청 = 매번 새 의도), 체크박스의 시각 상태와 분리해 별도 집합으로 추적한다.
@@ -253,9 +266,36 @@ minutesEl.addEventListener("input", () => {
     renderStageGraph();
   }
 });
-// 커버/오리지널 체크박스를 사용자가 직접 토글하면 override 대상(이후 요청에 지속).
-$("inc-original").addEventListener("change", () => { coverTouched = true; });
-$("inc-cover").addEventListener("change", () => { coverTouched = true; });
+// 곡 종류(ALL/Original/Cover) — 셋 중 항상 하나만 켜지는 토글 버튼. ALL이 꺼지는 유일한 경로는
+// Original/Cover를 켤 때뿐이고, 그 반대(Original·Cover가 둘 다 꺼짐)는 항상 ALL로 귀결시킨다.
+function typeToFlags(type) {
+  if (type === "original") return { include_original: true, include_cover: false };
+  if (type === "cover") return { include_original: false, include_cover: true };
+  return { include_original: true, include_cover: true }; // all
+}
+function flagsToType(incOriginal, incCover) {
+  if (incOriginal && !incCover) return "original";
+  if (!incOriginal && incCover) return "cover";
+  return "all"; // 둘 다 켜짐 = ALL, 둘 다 꺼짐(있어선 안 되는 상태)도 안전하게 ALL로 귀결
+}
+function renderSettingsTypeFilter() {
+  const el = $("settings-type-filter");
+  el.replaceChildren();
+  for (const { key, label } of PICKER_TYPE_OPTIONS) {
+    const pill = document.createElement("button");
+    pill.type = "button";
+    pill.className = "picker-type-pill" + (settingsType === key ? " active" : "");
+    pill.textContent = label;
+    pill.addEventListener("click", () => {
+      if (settingsType === key) return; // 켜진 버튼을 다시 누르면 무시 — 항상 하나는 켜져 있어야 함
+      coverTouched = true;
+      settingsType = key;
+      renderSettingsTypeFilter();
+    });
+    el.appendChild(pill);
+  }
+}
+renderSettingsTypeFilter();
 
 function initStageModel(n = DEFAULT_STAGE_COUNT) {
   const count = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, n));
@@ -653,8 +693,8 @@ function reflectSettings(data) {
     if (stageModel) { stageModel.totalMinutes = p.target_minutes; }
   }
   if (!coverTouched) {
-    $("inc-original").checked = data.include_original !== false;
-    $("inc-cover").checked = data.include_cover === true;
+    settingsType = flagsToType(data.include_original !== false, data.include_cover === true);
+    renderSettingsTypeFilter();
   }
 }
 
@@ -729,7 +769,7 @@ function renderTracklist(list) {
     badges.className = "badges";
     const h = p.reason ? p.reason.harmonic : "";
     badges.appendChild(makeBadge(h, harmonicLabelKo(h), harmonicTooltipKo(h)));
-    badges.appendChild(makeBadge("", `에너지 ${fmtNum(p.energy)}`));
+    badges.appendChild(makeEnergyBadge(p.energy));
     badges.appendChild(makeBadge("key", keyLabel(p.camelot)));
 
     bodyEl.append(title, band, reason, badges);
@@ -947,6 +987,23 @@ document.addEventListener(
   true,
 );
 
+// 에너지 배지 — 미니 가로 바 + 숫자(디자인 검토 아티팩트 "A안" 채택분).
+function makeEnergyBadge(energy) {
+  const b = document.createElement("span");
+  b.className = "badge badge-energy";
+  const track = document.createElement("span");
+  track.className = "bar-track";
+  const fill = document.createElement("span");
+  fill.className = "bar-fill";
+  fill.style.width = `${Math.round(clamp01(energy) * 100)}%`;
+  track.appendChild(fill);
+  const num = document.createElement("span");
+  num.className = "num";
+  num.textContent = fmtNum(energy);
+  b.append(track, num);
+  return b;
+}
+
 function makeBadge(kind, label, tooltip) {
   const b = document.createElement("span");
   b.className = "badge" + (kind ? " " + kind : "");
@@ -1041,11 +1098,13 @@ function onPlayerStateChange(e) {
     setPlaybarPlaying(false);
     playedSeconds += safeDuration();
     maybeFireHalf();
-    if (repeatOne) {
+    if (repeatMode === "one") {
       player.seekTo(0, true);
       player.playVideo();
     } else if (current + 1 < picks.length) {
       playSong(current + 1, true);
+    } else if (repeatMode === "all") {
+      playSong(0, true); // 마지막 곡까지 다 돌았으면 처음으로
     }
   }
 }
@@ -1071,7 +1130,7 @@ function playSong(index, auto) {
   current = index;
   const p = picks[index];
   loadedVideoId = p.video_id;
-  highlight(index);
+  highlight(index, auto);
   updateNowPlaying(p);
   // 사용자 클릭/자동 전환 — 상호작용 이후이므로 loadVideoById(자동재생) 사용.
   if (player && typeof player.loadVideoById === "function") player.loadVideoById(p.video_id);
@@ -1513,13 +1572,6 @@ async function openSongPickerAt(atIndex) {
   }
 }
 
-// ALL/Original/Cover 필터 알약 — bandori-song-sorter의 티어 필터 알약(06-filter-pills.js) 참고.
-const PICKER_TYPE_OPTIONS = [
-  { key: "all", label: "ALL" },
-  { key: "original", label: "Original" },
-  { key: "cover", label: "Cover" },
-];
-
 function renderPickerTypeFilter() {
   const el = $("picker-type-filter");
   el.replaceChildren();
@@ -1911,10 +1963,18 @@ function syncBandChecks(bands) {
   });
 }
 
-function highlight(index) {
+// autoAdvance=true(자동 다음곡 전환)일 때만 followTracklist 게이트를 적용한다.
+// 수동 조작(트랙 클릭·이전/다음 버튼·편집 후 재정합)은 인자를 생략해 항상 스크롤.
+function highlight(index, autoAdvance) {
   [...tracklistEl.children].forEach((li, i) => li.classList.toggle("active", i === index));
   const active = tracklistEl.children[index];
-  if (active) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  if (!active) return;
+  if (autoAdvance && !followTracklist) return;
+  // 자동 다음곡 "따라가기"는 이동 거리가 짧으면 nearest가 거의 움직이지 않아 순간이동처럼
+  // 보인다. center로 항상 뚜렷하게 움직이게 한다. 수동 조작(트랙 클릭 등)은 사용자가 이미
+  // 보던 위치를 존중해 최소한만 보정하는 nearest 그대로 둔다.
+  const block = autoAdvance ? "center" : "nearest";
+  active.scrollIntoView({ block, behavior: "smooth" });
 }
 
 function updateNowPlaying(p) {
@@ -1948,7 +2008,9 @@ const playbarTimeEl = $("playbar-time");
 const playbarCountEl = $("playbar-count");
 const playbarPlayBtn = $("playbar-play");
 const playbarRepeatBtn = $("playbar-repeat");
-let repeatOne = false;
+// "off" → "one"(현재 곡만 반복) → "all"(끝까지 가면 처음부터) → "off" 순환.
+const REPEAT_MODES = ["off", "one", "all"];
+let repeatMode = "off";
 let playbarProgressTimer = null;
 
 // 재생/일시정지 아이콘 — 나머지 컨트롤과 동일한 currentColor 인라인 SVG(이모지 혼용 방지).
@@ -2155,12 +2217,29 @@ playbarPlayBtn.addEventListener("click", () => {
   else player.playVideo();
 });
 playbarRepeatBtn.addEventListener("click", () => {
-  repeatOne = !repeatOne;
-  playbarRepeatBtn.classList.toggle("active", repeatOne);
-  playbarRepeatBtn.setAttribute("aria-pressed", repeatOne ? "true" : "false");
-  playbarRepeatBtn.setAttribute("aria-label", repeatOne ? "한 곡 반복 끄기" : "한 곡 반복 켜기");
-  playbarRepeatBtn.title = repeatOne ? "한 곡 반복 (켜짐)" : "한 곡 반복 (꺼짐)";
+  repeatMode = REPEAT_MODES[(REPEAT_MODES.indexOf(repeatMode) + 1) % REPEAT_MODES.length];
+  applyRepeatButtonState();
 });
+// 배지 글자(data-repeat-label)·aria-label(다음 클릭 시 어떻게 되는지)·title(현재 상태)을
+// repeatMode에 맞춰 반영. off일 땐 .active가 빠지므로 CSS ::after 배지 자체가 안 보인다.
+function applyRepeatButtonState() {
+  const active = repeatMode !== "off";
+  playbarRepeatBtn.classList.toggle("active", active);
+  playbarRepeatBtn.setAttribute("aria-pressed", active ? "true" : "false");
+  if (repeatMode === "off") {
+    playbarRepeatBtn.dataset.repeatLabel = "";
+    playbarRepeatBtn.setAttribute("aria-label", "한 곡 반복 켜기");
+    playbarRepeatBtn.title = "반복 (꺼짐)";
+  } else if (repeatMode === "one") {
+    playbarRepeatBtn.dataset.repeatLabel = "1";
+    playbarRepeatBtn.setAttribute("aria-label", "전체 반복으로 전환");
+    playbarRepeatBtn.title = "한 곡 반복 (켜짐)";
+  } else {
+    playbarRepeatBtn.dataset.repeatLabel = "A";
+    playbarRepeatBtn.setAttribute("aria-label", "반복 끄기");
+    playbarRepeatBtn.title = "전체 반복 (켜짐)";
+  }
+}
 // 뷰포트 중심과 엘리먼트 중심 사이의 거리(px). 값이 작을수록 "지금 그 엘리먼트를 보고 있다"에 가깝다.
 function getViewportCenterDistance(el) {
   const rect = el.getBoundingClientRect();
@@ -2181,9 +2260,23 @@ $("playbar-info").addEventListener("click", () => {
     const target =
       getViewportCenterDistance(playerEl) <= getViewportCenterDistance(trackEl) ? trackEl : playerEl;
     target.scrollIntoView({ behavior: "smooth", block: "center" });
+    // 트랙리스트 쪽으로 이동했다면 "따라가기" 켬. 플레이어 쪽으로 이동했다면(=영상을
+    // 보러 감) 꺼서, 다음 곡 자동 전환 때 화면을 다시 끌어오지 않는다.
+    followTracklist = target === trackEl;
   } else if (playerEl) {
     playerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    followTracklist = false;
   }
+});
+
+// 사용자가 직접 화면을 움직이면(휠·터치 스크롤) "따라가기"를 끈다. scrollIntoView 같은
+// 프로그램적 스크롤은 wheel/touchmove를 발생시키지 않으므로 오작동하지 않는다.
+window.addEventListener("wheel", () => { followTracklist = false; }, { passive: true });
+window.addEventListener("touchmove", () => { followTracklist = false; }, { passive: true });
+
+// 유튜브 iframe에 포커스가 가면(=영상을 보고/조작하고 있음) "따라가기"를 끈다.
+document.addEventListener("focusin", (e) => {
+  if (e.target instanceof HTMLIFrameElement) followTracklist = false;
 });
 
 function prettyBand(band) {

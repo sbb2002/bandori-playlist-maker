@@ -91,10 +91,6 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
   font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums;
 }
 
-.type-filter { display: flex; gap: 18px; }
-.chk { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; }
-.chk input { width: 16px; height: 16px; }
-
 /* 시간×에너지 텐션 그래프 편집기 */
 .stage-editor { margin-top: 12px; }
 .plot-row { display: flex; gap: 6px; }
@@ -242,7 +238,7 @@ button.ghost {
   padding: 12px 14px; margin-bottom: 14px;
   background: var(--card); border: 1px solid rgba(255,255,255,0.06);
   border-radius: 12px; cursor: pointer;
-  transition: border-color 0.15s, transform 0.05s;
+  transition: border-color 0.15s, background-color 0.25s, transform 0.05s;
 }
 .track:hover { border-color: rgba(124,108,255,0.5); }
 .track.active { border-color: var(--accent); background: var(--card-2); }
@@ -250,6 +246,7 @@ button.ghost {
   flex: 0 0 auto; width: 28px; height: 28px; border-radius: 8px;
   display: grid; place-items: center; font-size: 0.85rem; font-weight: 700;
   background: var(--card-2); color: var(--muted);
+  transition: background-color 0.25s, color 0.25s;
 }
 .track.active .pos { background: var(--accent); color: #fff; }
 .track .body { flex: 1 1 auto; min-width: 0; }
@@ -264,6 +261,27 @@ button.ghost {
 .badge.same, .badge.adjacent { color: var(--ok); }
 .badge.non_harmonic { color: var(--warn); }
 .badge.seed { color: var(--accent-2); }
+
+/* 에너지 배지 — 숫자만이던 "에너지 0.73"을 미니 바 + 숫자로. 값은 트랙 폭(46px)
+   기준 그라디언트를 잘라서 보여주는 방식이라 값마다 새로 그리지 않고 항상 같은
+   렌더링이 나온다(짧은 값도 두께가 흔들리지 않음 — 채워진 막대 자체엔 반경을
+   주지 않고, 캡 모양은 트랙의 overflow:hidden + border-radius로만 만든다).
+   보라(accent, 낮은 에너지) → 진한 골드(#d9962b, 높은 에너지) 웜/쿨 대비.
+   골드는 --warn과 같은 색조지만 "경고" 의미가 섞이지 않도록 전역 토큰 대신
+   톤다운한 값을 이 배지에서만 사용한다. */
+.badge-energy { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px 3px 8px; }
+.badge-energy .bar-track {
+  display: inline-block; vertical-align: middle;
+  width: 46px; height: 6px;
+  border-radius: 999px; overflow: hidden; position: relative;
+  background: rgba(124,108,255,0.09);
+}
+.badge-energy .bar-fill {
+  display: block; height: 100%; border-radius: 0;
+  background: linear-gradient(90deg, var(--accent), #d9962b);
+  background-size: 46px 100%;
+}
+.badge-energy .num { font-variant-numeric: tabular-nums; color: var(--text); font-weight: 600; font-size: 0.72rem; }
 
 .badge[data-tooltip] { cursor: help; }
 
@@ -688,7 +706,9 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 .play-wave-b { fill: url(#playWaveFlowB); fill-opacity: .4; }
 .play-wave-stop-pink { stop-color: var(--accent-2); }
 .play-wave-stop-purple { stop-color: var(--accent); }
-/* 반복 ON — 강조색 + 테두리 + 하단 점으로 토글 상태를 분명히 드러낸다. */
+/* 반복 OFF/1/ALL 3단 토글 — 강조색 + 테두리 + 우하단 배지(숫자 "1"/알파벳 "A")로
+   두 반복 모드를 구분한다. 배지 글자는 data-repeat-label(app.js가 설정)을 그대로
+   찍는다 — off일 땐 .active가 안 붙으므로 ::after 자체가 안 그려진다. */
 .playbar-repeat.active {
   color: var(--accent-2);
   background: rgba(255,108,196,0.16);
@@ -696,8 +716,13 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 }
 .playbar-repeat.active:hover { background: rgba(255,108,196,0.24); border-color: rgba(255,108,196,0.7); }
 .playbar-repeat.active::after {
-  content: ""; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
-  width: 4px; height: 4px; border-radius: 50%; background: currentColor;
+  content: attr(data-repeat-label);
+  position: absolute; bottom: -1px; right: -1px;
+  min-width: 12px; height: 12px; padding: 0 1px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent-2); color: var(--bg);
+  font-size: 8px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--card);
 }
 /* 현재곡/전체곡 — 알약 배지. 현재 번호만 흰색으로 키워 가시성 확보. */
 .playbar-count {
