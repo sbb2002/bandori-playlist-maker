@@ -36,6 +36,11 @@ let estimatedTotal = 0;
 let playedSeconds = 0;
 let halfFired = false;
 let errorSkips = 0; // 재생불가 영상 연속 스킵 가드(무한 루프 방지)
+// 플레이바 곡 이름(#playbar-info) 클릭 → 트랙리스트 쪽으로 스크롤했고, 그 뒤로 사용자가
+// 화면을 직접 움직이거나 유튜브 영상에 포커스를 두지 않았다면 true. true인 동안에만
+// 다음 곡 자동 전환 시 화면이 그 곡 위치로 따라간다(수동 클릭/이전·다음 버튼은 원래도
+// 항상 스크롤되므로 이 플래그의 영향을 받지 않음 — highlight()의 autoAdvance 인자 참고).
+let followTracklist = false;
 let loadedVideoId = null; // 플레이어에 로드/큐된 영상 id — 편집 후 재생 정합에 사용
 let playbackStarted = false; // 첫 PLAYING 이후 true — 편집 시 cue(정지) vs load(자동재생) 선택
 // 통합 되돌리기 스택(Ctrl+Z): {kind:'edit', picks, current} | {kind:'preset-delete', preset, index}.
@@ -764,7 +769,7 @@ function renderTracklist(list) {
     badges.className = "badges";
     const h = p.reason ? p.reason.harmonic : "";
     badges.appendChild(makeBadge(h, harmonicLabelKo(h), harmonicTooltipKo(h)));
-    badges.appendChild(makeBadge("", `에너지 ${fmtNum(p.energy)}`));
+    badges.appendChild(makeEnergyBadge(p.energy));
     badges.appendChild(makeBadge("key", keyLabel(p.camelot)));
 
     bodyEl.append(title, band, reason, badges);
@@ -982,6 +987,23 @@ document.addEventListener(
   true,
 );
 
+// 에너지 배지 — 미니 가로 바 + 숫자(디자인 검토 아티팩트 "A안" 채택분).
+function makeEnergyBadge(energy) {
+  const b = document.createElement("span");
+  b.className = "badge badge-energy";
+  const track = document.createElement("span");
+  track.className = "bar-track";
+  const fill = document.createElement("span");
+  fill.className = "bar-fill";
+  fill.style.width = `${Math.round(clamp01(energy) * 100)}%`;
+  track.appendChild(fill);
+  const num = document.createElement("span");
+  num.className = "num";
+  num.textContent = fmtNum(energy);
+  b.append(track, num);
+  return b;
+}
+
 function makeBadge(kind, label, tooltip) {
   const b = document.createElement("span");
   b.className = "badge" + (kind ? " " + kind : "");
@@ -1106,7 +1128,7 @@ function playSong(index, auto) {
   current = index;
   const p = picks[index];
   loadedVideoId = p.video_id;
-  highlight(index);
+  highlight(index, auto);
   updateNowPlaying(p);
   // 사용자 클릭/자동 전환 — 상호작용 이후이므로 loadVideoById(자동재생) 사용.
   if (player && typeof player.loadVideoById === "function") player.loadVideoById(p.video_id);
@@ -1939,10 +1961,14 @@ function syncBandChecks(bands) {
   });
 }
 
-function highlight(index) {
+// autoAdvance=true(자동 다음곡 전환)일 때만 followTracklist 게이트를 적용한다.
+// 수동 조작(트랙 클릭·이전/다음 버튼·편집 후 재정합)은 인자를 생략해 항상 스크롤.
+function highlight(index, autoAdvance) {
   [...tracklistEl.children].forEach((li, i) => li.classList.toggle("active", i === index));
   const active = tracklistEl.children[index];
-  if (active) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  if (!active) return;
+  if (autoAdvance && !followTracklist) return;
+  active.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 
 function updateNowPlaying(p) {
@@ -2209,9 +2235,23 @@ $("playbar-info").addEventListener("click", () => {
     const target =
       getViewportCenterDistance(playerEl) <= getViewportCenterDistance(trackEl) ? trackEl : playerEl;
     target.scrollIntoView({ behavior: "smooth", block: "center" });
+    // 트랙리스트 쪽으로 이동했다면 "따라가기" 켬. 플레이어 쪽으로 이동했다면(=영상을
+    // 보러 감) 꺼서, 다음 곡 자동 전환 때 화면을 다시 끌어오지 않는다.
+    followTracklist = target === trackEl;
   } else if (playerEl) {
     playerEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    followTracklist = false;
   }
+});
+
+// 사용자가 직접 화면을 움직이면(휠·터치 스크롤) "따라가기"를 끈다. scrollIntoView 같은
+// 프로그램적 스크롤은 wheel/touchmove를 발생시키지 않으므로 오작동하지 않는다.
+window.addEventListener("wheel", () => { followTracklist = false; }, { passive: true });
+window.addEventListener("touchmove", () => { followTracklist = false; }, { passive: true });
+
+// 유튜브 iframe에 포커스가 가면(=영상을 보고/조작하고 있음) "따라가기"를 끈다.
+document.addEventListener("focusin", (e) => {
+  if (e.target instanceof HTMLIFrameElement) followTracklist = false;
 });
 
 function prettyBand(band) {
