@@ -1968,7 +1968,11 @@ function highlight(index, autoAdvance) {
   const active = tracklistEl.children[index];
   if (!active) return;
   if (autoAdvance && !followTracklist) return;
-  active.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  // 자동 다음곡 "따라가기"는 이동 거리가 짧으면 nearest가 거의 움직이지 않아 순간이동처럼
+  // 보인다. center로 항상 뚜렷하게 움직이게 한다. 수동 조작(트랙 클릭 등)은 사용자가 이미
+  // 보던 위치를 존중해 최소한만 보정하는 nearest 그대로 둔다.
+  const block = autoAdvance ? "center" : "nearest";
+  active.scrollIntoView({ block, behavior: "smooth" });
 }
 
 function updateNowPlaying(p) {
