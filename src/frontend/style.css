@@ -371,14 +371,6 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 .picker-type-pill.active {
   background: rgba(124,108,255,0.15); border-color: var(--accent); color: var(--text); font-weight: 600;
 }
-/* 세부 설정의 곡 종류 토글(체크박스) — 팝업 필터 알약과 동일한 모양, 다중 선택(독립 on/off) */
-label.picker-type-pill { display: inline-flex; align-items: center; }
-label.picker-type-pill input {
-  position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none;
-}
-label.picker-type-pill:has(input:checked) {
-  background: rgba(124,108,255,0.15); border-color: var(--accent); color: var(--text); font-weight: 600;
-}
 .picker-body { display: grid; grid-template-columns: 168px 1fr; gap: 12px; min-height: 0; flex: 1 1 auto; }
 /* overscroll-behavior: contain — 리스트 끝에서 스크롤이 메인 화면으로 전파되지 않음 */
 .picker-bands { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }

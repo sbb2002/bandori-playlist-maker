@@ -6,6 +6,14 @@
 const API_BASE = (window.SETLIST_API_BASE || "http://localhost:8000").replace(/\/$/, "");
 const AVG_SONG_SECONDS = 213; // duration 미확보 시 폴백(백엔드와 동일 가정).
 
+// ALL/Original/Cover 필터 알약 — bandori-song-sorter의 티어 필터 알약(06-filter-pills.js) 참고.
+// 곡 추가 팝업(picker-type-filter)과 세부 설정(settings-type-filter) 양쪽에서 공유.
+const PICKER_TYPE_OPTIONS = [
+  { key: "all", label: "ALL" },
+  { key: "original", label: "Original" },
+  { key: "cover", label: "Cover" },
+];
+
 // ── DOM ──────────────────────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
 const form = $("request-form");
@@ -79,10 +87,9 @@ form.addEventListener("submit", async (e) => {
   if (bands.length) body.bands = bands;
   const customStages = collectStages();
   if (customStages) body.stages = customStages;
-  // 커버/오리지널은 사용자가 직접 체크박스를 건드렸을 때만 전송(아니면 LLM이 판단).
+  // 커버/오리지널은 사용자가 직접 버튼을 건드렸을 때만 전송(아니면 LLM이 판단).
   if (coverTouched) {
-    body.include_original = $("inc-original").checked;
-    body.include_cover = $("inc-cover").checked;
+    Object.assign(body, typeToFlags(settingsType));
   }
 
   showLoading(true);
@@ -166,6 +173,7 @@ let stageTouched = false; // 사용자가 그래프를 조정했는지 — 조�
 // 응답 후 그 값을 UI에 '반영'만 한다(다음 요청에 강제되지 않게 — 밴드 필터 패턴과 동일).
 let minutesTouched = false;
 let coverTouched = false;
+let settingsType = "all"; // "all" | "original" | "cover" — 세 개 중 항상 정확히 하나만 켜짐(토글 버튼)
 
 // 사용자가 '직접' 체크한 밴드만 요청 간 지속한다. 프롬프트 자동감지 밴드는 매 요청 일회성이어야
 // 하므로(자연어 요청 = 매번 새 의도), 체크박스의 시각 상태와 분리해 별도 집합으로 추적한다.
@@ -253,9 +261,36 @@ minutesEl.addEventListener("input", () => {
     renderStageGraph();
   }
 });
-// 커버/오리지널 체크박스를 사용자가 직접 토글하면 override 대상(이후 요청에 지속).
-$("inc-original").addEventListener("change", () => { coverTouched = true; });
-$("inc-cover").addEventListener("change", () => { coverTouched = true; });
+// 곡 종류(ALL/Original/Cover) — 셋 중 항상 하나만 켜지는 토글 버튼. ALL이 꺼지는 유일한 경로는
+// Original/Cover를 켤 때뿐이고, 그 반대(Original·Cover가 둘 다 꺼짐)는 항상 ALL로 귀결시킨다.
+function typeToFlags(type) {
+  if (type === "original") return { include_original: true, include_cover: false };
+  if (type === "cover") return { include_original: false, include_cover: true };
+  return { include_original: true, include_cover: true }; // all
+}
+function flagsToType(incOriginal, incCover) {
+  if (incOriginal && !incCover) return "original";
+  if (!incOriginal && incCover) return "cover";
+  return "all"; // 둘 다 켜짐 = ALL, 둘 다 꺼짐(있어선 안 되는 상태)도 안전하게 ALL로 귀결
+}
+function renderSettingsTypeFilter() {
+  const el = $("settings-type-filter");
+  el.replaceChildren();
+  for (const { key, label } of PICKER_TYPE_OPTIONS) {
+    const pill = document.createElement("button");
+    pill.type = "button";
+    pill.className = "picker-type-pill" + (settingsType === key ? " active" : "");
+    pill.textContent = label;
+    pill.addEventListener("click", () => {
+      if (settingsType === key) return; // 켜진 버튼을 다시 누르면 무시 — 항상 하나는 켜져 있어야 함
+      coverTouched = true;
+      settingsType = key;
+      renderSettingsTypeFilter();
+    });
+    el.appendChild(pill);
+  }
+}
+renderSettingsTypeFilter();
 
 function initStageModel(n = DEFAULT_STAGE_COUNT) {
   const count = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, n));
@@ -653,8 +688,8 @@ function reflectSettings(data) {
     if (stageModel) { stageModel.totalMinutes = p.target_minutes; }
   }
   if (!coverTouched) {
-    $("inc-original").checked = data.include_original !== false;
-    $("inc-cover").checked = data.include_cover === true;
+    settingsType = flagsToType(data.include_original !== false, data.include_cover === true);
+    renderSettingsTypeFilter();
   }
 }
 
@@ -1512,13 +1547,6 @@ async function openSongPickerAt(atIndex) {
     pickerSongsEl.textContent = "곡 목록을 불러오지 못했어요 (백엔드가 켜져 있는지 확인).";
   }
 }
-
-// ALL/Original/Cover 필터 알약 — bandori-song-sorter의 티어 필터 알약(06-filter-pills.js) 참고.
-const PICKER_TYPE_OPTIONS = [
-  { key: "all", label: "ALL" },
-  { key: "original", label: "Original" },
-  { key: "cover", label: "Cover" },
-];
 
 function renderPickerTypeFilter() {
   const el = $("picker-type-filter");
