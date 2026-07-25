@@ -1435,6 +1435,12 @@ const pickerWhereEl = $("picker-where");
 let allSongs = null;      // /api/songs 캐시(첫 열람 시 로드)
 let insertAtIndex = 0;    // 삽입점(+)이 가리키는 picks 배열 위치
 let pickerBand = null;    // 선택된 밴드(null=전체)
+let pickerType = "all";   // "all" | "original" | "cover" — 곡 종류 필터
+
+// 커버곡 판정 — 제목의 '(Cover)' 표기 기준(데이터 관례). 백엔드 routes.py의 _is_cover와 동일 규칙.
+function isCoverSong(song) {
+  return song.song.toLowerCase().includes("(cover)");
+}
 
 // bandori-song-sorter와 동일한 밴드 나열 순서 + 아이콘 애셋(assets/bands/<band>.png, 미포함은 뒤).
 const BAND_ORDER = [
@@ -1488,6 +1494,7 @@ async function ensureSongs() {
 async function openSongPickerAt(atIndex) {
   insertAtIndex = atIndex;
   pickerBand = null;
+  pickerType = "all";
   pickerSearchEl.value = "";
   pickerWhereEl.textContent = atIndex <= 0 ? "맨 앞에 삽입" : `${atIndex}번 다음에 삽입`;
   show(pickerEl);
@@ -1495,6 +1502,7 @@ async function openSongPickerAt(atIndex) {
   pickerBandsEl.replaceChildren();
   pickerSongsEl.replaceChildren();
   pickerSongsEl.textContent = "곡 목록 불러오는 중…";
+  renderPickerTypeFilter();
   try {
     await ensureSongs();
     renderPickerBands();
@@ -1502,6 +1510,31 @@ async function openSongPickerAt(atIndex) {
     pickerSearchEl.focus();
   } catch (_) {
     pickerSongsEl.textContent = "곡 목록을 불러오지 못했어요 (백엔드가 켜져 있는지 확인).";
+  }
+}
+
+// ALL/Original/Cover 필터 알약 — bandori-song-sorter의 티어 필터 알약(06-filter-pills.js) 참고.
+const PICKER_TYPE_OPTIONS = [
+  { key: "all", label: "ALL" },
+  { key: "original", label: "Original" },
+  { key: "cover", label: "Cover" },
+];
+
+function renderPickerTypeFilter() {
+  const el = $("picker-type-filter");
+  el.replaceChildren();
+  for (const { key, label } of PICKER_TYPE_OPTIONS) {
+    const pill = document.createElement("button");
+    pill.type = "button";
+    pill.className = "picker-type-pill" + (pickerType === key ? " active" : "");
+    pill.textContent = label;
+    pill.addEventListener("click", () => {
+      if (pickerType === key) return;
+      pickerType = key;
+      renderPickerTypeFilter();
+      renderPickerSongs();
+    });
+    el.appendChild(pill);
   }
 }
 
@@ -1541,6 +1574,7 @@ function renderPickerSongs() {
   const q = pickerSearchEl.value.trim().toLowerCase();
   const list = allSongs.filter((s) => {
     if (pickerBand && s.band !== pickerBand) return false;
+    if (pickerType !== "all" && isCoverSong(s) !== (pickerType === "cover")) return false;
     if (!q) return true;
     return s.song.toLowerCase().includes(q)
       || prettyBand(s.band).toLowerCase().includes(q)
