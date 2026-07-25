@@ -9,6 +9,27 @@
 
 ---
 
+## v1.11.4 — 2026-07-25
+
+세부 설정 3-way 토글(ALL/Original/Cover), 에너지 바 디자인, 플레이바 팔로우 스크롤, 반복 버튼 3단화 등 UX 패치.
+
+- 기준 커밋: `26f61f6`
+- 관련 PR: [#58](https://github.com/sbb2002/bandori-playlist-maker/pull/58)
+
+## v1.11.3 — 2026-07-25
+
+배지 툴팁을 화면 크기에 맞게 적응형으로 재배치(가장자리 잘림 수정).
+
+- 기준 커밋: `46a5e40`
+- 관련 PR: [#56](https://github.com/sbb2002/bandori-playlist-maker/pull/56)
+
+## v1.11.2 — 2026-07-25
+
+boundary_tension 회귀가드를 상대 개선폭 기준으로 전환, Stage A-B 완충 노드·하모닉 배지 툴팁 추가.
+
+- 기준 커밋: `05d7ea9`
+- 관련 PR: [#56](https://github.com/sbb2002/bandori-playlist-maker/pull/56)
+
 ## v1.11.1 — 2026-07-20
 
 장음(ー) 포함 제목의 한글 검색 실패 수정. 원문 음차·한국식 관용 표기 변형을 자동 병기.
