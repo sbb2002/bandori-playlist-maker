@@ -366,6 +366,15 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   background: var(--card-2); color: var(--text);
   border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; font-size: 0.95rem;
 }
+.picker-type-filter { display: flex; gap: 6px; margin-bottom: 12px; }
+.picker-type-pill {
+  padding: 5px 12px; border-radius: 999px; cursor: pointer;
+  background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--muted); font-size: 0.82rem;
+}
+.picker-type-pill:hover { background: var(--card-2); color: var(--text); }
+.picker-type-pill.active {
+  background: rgba(124,108,255,0.15); border-color: var(--accent); color: var(--text); font-weight: 600;
+}
 .picker-body { display: grid; grid-template-columns: 168px 1fr; gap: 12px; min-height: 0; flex: 1 1 auto; }
 /* overscroll-behavior: contain — 리스트 끝에서 스크롤이 메인 화면으로 전파되지 않음 */
 .picker-bands { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
