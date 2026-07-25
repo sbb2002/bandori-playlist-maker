@@ -1098,11 +1098,13 @@ function onPlayerStateChange(e) {
     setPlaybarPlaying(false);
     playedSeconds += safeDuration();
     maybeFireHalf();
-    if (repeatOne) {
+    if (repeatMode === "one") {
       player.seekTo(0, true);
       player.playVideo();
     } else if (current + 1 < picks.length) {
       playSong(current + 1, true);
+    } else if (repeatMode === "all") {
+      playSong(0, true); // 마지막 곡까지 다 돌았으면 처음으로
     }
   }
 }
@@ -2006,7 +2008,9 @@ const playbarTimeEl = $("playbar-time");
 const playbarCountEl = $("playbar-count");
 const playbarPlayBtn = $("playbar-play");
 const playbarRepeatBtn = $("playbar-repeat");
-let repeatOne = false;
+// "off" → "one"(현재 곡만 반복) → "all"(끝까지 가면 처음부터) → "off" 순환.
+const REPEAT_MODES = ["off", "one", "all"];
+let repeatMode = "off";
 let playbarProgressTimer = null;
 
 // 재생/일시정지 아이콘 — 나머지 컨트롤과 동일한 currentColor 인라인 SVG(이모지 혼용 방지).
@@ -2213,12 +2217,29 @@ playbarPlayBtn.addEventListener("click", () => {
   else player.playVideo();
 });
 playbarRepeatBtn.addEventListener("click", () => {
-  repeatOne = !repeatOne;
-  playbarRepeatBtn.classList.toggle("active", repeatOne);
-  playbarRepeatBtn.setAttribute("aria-pressed", repeatOne ? "true" : "false");
-  playbarRepeatBtn.setAttribute("aria-label", repeatOne ? "한 곡 반복 끄기" : "한 곡 반복 켜기");
-  playbarRepeatBtn.title = repeatOne ? "한 곡 반복 (켜짐)" : "한 곡 반복 (꺼짐)";
+  repeatMode = REPEAT_MODES[(REPEAT_MODES.indexOf(repeatMode) + 1) % REPEAT_MODES.length];
+  applyRepeatButtonState();
 });
+// 배지 글자(data-repeat-label)·aria-label(다음 클릭 시 어떻게 되는지)·title(현재 상태)을
+// repeatMode에 맞춰 반영. off일 땐 .active가 빠지므로 CSS ::after 배지 자체가 안 보인다.
+function applyRepeatButtonState() {
+  const active = repeatMode !== "off";
+  playbarRepeatBtn.classList.toggle("active", active);
+  playbarRepeatBtn.setAttribute("aria-pressed", active ? "true" : "false");
+  if (repeatMode === "off") {
+    playbarRepeatBtn.dataset.repeatLabel = "";
+    playbarRepeatBtn.setAttribute("aria-label", "한 곡 반복 켜기");
+    playbarRepeatBtn.title = "반복 (꺼짐)";
+  } else if (repeatMode === "one") {
+    playbarRepeatBtn.dataset.repeatLabel = "1";
+    playbarRepeatBtn.setAttribute("aria-label", "전체 반복으로 전환");
+    playbarRepeatBtn.title = "한 곡 반복 (켜짐)";
+  } else {
+    playbarRepeatBtn.dataset.repeatLabel = "A";
+    playbarRepeatBtn.setAttribute("aria-label", "반복 끄기");
+    playbarRepeatBtn.title = "전체 반복 (켜짐)";
+  }
+}
 // 뷰포트 중심과 엘리먼트 중심 사이의 거리(px). 값이 작을수록 "지금 그 엘리먼트를 보고 있다"에 가깝다.
 function getViewportCenterDistance(el) {
   const rect = el.getBoundingClientRect();
