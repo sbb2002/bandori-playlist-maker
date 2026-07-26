@@ -9,6 +9,13 @@
 
 ---
 
+## v1.12.0 — 2026-07-26
+
+트랙리스트에 세트리스트 조성 흐름을 Camelot Wheel로 시각화하는 접이식 패널 추가.
+
+- 기준 커밋: `11b9748`
+- 관련 PR: [#60](https://github.com/sbb2002/bandori-playlist-maker/pull/60)
+
 ## v1.11.4 — 2026-07-25
 
 세부 설정 3-way 토글(ALL/Original/Cover), 에너지 바 디자인, 플레이바 팔로우 스크롤, 반복 버튼 3단화 등 UX 패치.
