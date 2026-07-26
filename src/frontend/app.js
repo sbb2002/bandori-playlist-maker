@@ -787,6 +787,9 @@ function renderTracklist(list) {
 let wheelLabelMode = "camelot"; // "camelot" | "key"
 let wheelRingLabelEls = null;
 let wheelNodeEls = [];
+let wheelEdgeEls = []; // { el, from, to } — 거리 기반 투명도 계산용
+let wheelTrackCount = 0;
+const WHEEL_MIN_OPACITY = 0.1;
 const WHEEL_CX = 210, WHEEL_CY = 210;
 const WHEEL_R_OUTER = 170, WHEEL_R_INNER = 118;
 const WHEEL_R_MAJOR_DOT = (WHEEL_R_OUTER + WHEEL_R_INNER) / 2 + 20;
@@ -836,6 +839,8 @@ function renderCamelotWheel(list) {
     return isFinite(num) ? wheelPoint(wheelRadiusFor(letter), num) : null;
   });
 
+  wheelEdgeEls = [];
+  wheelTrackCount = list.length;
   for (let i = 1; i < list.length; i++) {
     if (!pathPts[i - 1] || !pathPts[i]) continue;
     const [x1, y1] = pathPts[i - 1];
@@ -843,8 +848,11 @@ function renderCamelotWheel(list) {
     const h = list[i].reason ? list[i].reason.harmonic : "";
     const cls = (h === "same" || h === "adjacent") ? "ok-edge" : "warn-edge";
     const d = `M${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)}`;
-    wheelSvgEl.appendChild(svgEl("path", { d, class: "path-line " + cls }));
+    const seg = svgEl("path", { d, class: "path-line " + cls });
+    wheelSvgEl.appendChild(seg);
+    wheelEdgeEls.push({ el: seg, from: i - 1, to: i });
   }
+  updateWheelEdgeOpacity(current);
 
   wheelNodeEls = [];
   list.forEach((p, i) => {
@@ -869,6 +877,17 @@ function updateWheelRingLabels() {
     wheelRingLabelEls.major[n].textContent = wheelLabelMode === "camelot" ? bCode : keyLabel(bCode);
     wheelRingLabelEls.minor[n].textContent = wheelLabelMode === "camelot" ? aCode : keyLabel(aCode);
   }
+}
+
+// 현재 재생 곡에서 멀어질수록(트랙 순서 기준) 선을 점점 투명하게 — 최소 WHEEL_MIN_OPACITY까지.
+function updateWheelEdgeOpacity(currentIdx) {
+  if (currentIdx == null || currentIdx < 0) currentIdx = 0;
+  const maxDist = Math.max(1, wheelTrackCount - 1);
+  wheelEdgeEls.forEach(({ el, from, to }) => {
+    const dist = Math.min(Math.abs(from - currentIdx), Math.abs(to - currentIdx));
+    const t = Math.min(1, dist / maxDist);
+    el.style.opacity = (1 - t * (1 - WHEEL_MIN_OPACITY)).toFixed(3);
+  });
 }
 
 wheelModeToggleEl.addEventListener("click", (e) => {
@@ -2067,6 +2086,7 @@ function syncBandChecks(bands) {
 function highlight(index, autoAdvance) {
   [...tracklistEl.children].forEach((li, i) => li.classList.toggle("active", i === index));
   wheelNodeEls.forEach((g, i) => g.classList.toggle("active", i === index));
+  updateWheelEdgeOpacity(index);
   const active = tracklistEl.children[index];
   if (!active) return;
   if (autoAdvance && !followTracklist) return;
