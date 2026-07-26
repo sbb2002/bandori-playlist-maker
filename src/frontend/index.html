@@ -115,6 +115,20 @@
         </div>
       </div>
 
+      <details class="options wheel-panel">
+        <summary>조성 궤적 보기 (Camelot Wheel)</summary>
+        <div class="wheel-head">
+          <p class="wheel-caption">선은 재생 순서. <span style="color:var(--ok)">초록 실선</span>=하모닉 인접, <span style="color:var(--warn)">주황 점선</span>=조성전환.</p>
+          <div class="mode-toggle" id="wheel-mode-toggle">
+            <button type="button" data-mode="camelot" class="on">Camelot</button>
+            <button type="button" data-mode="key">음이름</button>
+          </div>
+        </div>
+        <div class="wheel-stage">
+          <svg id="camelot-wheel" viewBox="0 0 420 420"></svg>
+        </div>
+      </details>
+
       <ol id="tracklist" class="tracklist"></ol>
     </section>
 

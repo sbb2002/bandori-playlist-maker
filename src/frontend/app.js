@@ -28,6 +28,8 @@ const resultEl = $("result");
 const summaryEl = $("summary");
 const tracklistEl = $("tracklist");
 const nowPlayingEl = $("now-playing");
+const wheelSvgEl = $("camelot-wheel");
+const wheelModeToggleEl = $("wheel-mode-toggle");
 
 // ── 재생 상태 ─────────────────────────────────────────────────────────────────
 let picks = [];
@@ -670,6 +672,7 @@ function renderResult(data) {
 
   renderSummary(data);
   renderTracklist(picks);
+  renderCamelotWheel(picks);
   syncBandChecks(data.applied_bands); // 적용된 밴드(프롬프트 자동감지 포함)를 체크박스에 반영
   syncGraphToParams(data.params, data.stages); // 그래프에 이번 해석 아크 반영(미조정 시, stages 우선)
   reflectSettings(data); // 재생시간·단계 수·커버 필터를 세부 설정 UI에 반영(미조정 시)
@@ -779,6 +782,102 @@ function renderTracklist(list) {
     tracklistEl.appendChild(li);
   });
 }
+
+// ── Camelot Wheel 궤적 시각화 ─────────────────────────────────────────────
+let wheelLabelMode = "camelot"; // "camelot" | "key"
+let wheelRingLabelEls = null;
+let wheelNodeEls = [];
+const WHEEL_CX = 210, WHEEL_CY = 210;
+const WHEEL_R_OUTER = 170, WHEEL_R_INNER = 118;
+const WHEEL_R_MAJOR_DOT = (WHEEL_R_OUTER + WHEEL_R_INNER) / 2 + 20;
+const WHEEL_R_MINOR_DOT = WHEEL_R_INNER - 20;
+
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function wheelAngle(num) { return (num / 12) * 2 * Math.PI - Math.PI / 2; }
+function wheelPoint(radius, num) {
+  const a = wheelAngle(num);
+  return [WHEEL_CX + radius * Math.cos(a), WHEEL_CY + radius * Math.sin(a)];
+}
+function wheelRadiusFor(letter) { return letter === "B" ? WHEEL_R_MAJOR_DOT : WHEEL_R_MINOR_DOT; }
+
+function renderCamelotWheel(list) {
+  wheelSvgEl.replaceChildren();
+  if (!list.length) return;
+
+  wheelSvgEl.appendChild(svgEl("circle", { cx: WHEEL_CX, cy: WHEEL_CY, r: WHEEL_R_OUTER, class: "ring-major" }));
+  wheelSvgEl.appendChild(svgEl("circle", { cx: WHEEL_CX, cy: WHEEL_CY, r: WHEEL_R_INNER, class: "ring-minor" }));
+  wheelSvgEl.appendChild(svgEl("circle", { cx: WHEEL_CX, cy: WHEEL_CY, r: WHEEL_R_INNER - 40, class: "ring-minor" }));
+
+  const majorLabelEls = {};
+  const minorLabelEls = {};
+  for (let n = 1; n <= 12; n++) {
+    const [mx, my] = wheelPoint(WHEEL_R_MAJOR_DOT, n);
+    const [ix, iy] = wheelPoint(WHEEL_R_MINOR_DOT, n);
+    wheelSvgEl.appendChild(svgEl("circle", { cx: mx, cy: my, r: 15, class: "slot-major" }));
+    wheelSvgEl.appendChild(svgEl("circle", { cx: ix, cy: iy, r: 13, class: "slot-minor" }));
+    const lm = svgEl("text", { x: mx, y: my, class: "ring-label", "text-anchor": "middle", "dominant-baseline": "central" });
+    wheelSvgEl.appendChild(lm);
+    majorLabelEls[n] = lm;
+    const li = svgEl("text", { x: ix, y: iy, class: "ring-label", "text-anchor": "middle", "dominant-baseline": "central" });
+    wheelSvgEl.appendChild(li);
+    minorLabelEls[n] = li;
+  }
+  wheelRingLabelEls = { major: majorLabelEls, minor: minorLabelEls };
+  updateWheelRingLabels();
+
+  const pathPts = list.map((p) => {
+    const c = p.camelot || "";
+    const letter = c.slice(-1);
+    const num = parseInt(c, 10);
+    return isFinite(num) ? wheelPoint(wheelRadiusFor(letter), num) : null;
+  });
+
+  for (let i = 1; i < list.length; i++) {
+    if (!pathPts[i - 1] || !pathPts[i]) continue;
+    const [x1, y1] = pathPts[i - 1];
+    const [x2, y2] = pathPts[i];
+    const h = list[i].reason ? list[i].reason.harmonic : "";
+    const cls = (h === "same" || h === "adjacent") ? "ok-edge" : "warn-edge";
+    const d = `M${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)}`;
+    wheelSvgEl.appendChild(svgEl("path", { d, class: "path-line " + cls }));
+  }
+
+  wheelNodeEls = [];
+  list.forEach((p, i) => {
+    if (!pathPts[i]) return;
+    const [x, y] = pathPts[i];
+    const g = svgEl("g", { class: "wnode" });
+    g.appendChild(svgEl("circle", { cx: x, cy: y, r: 13, class: "whalo" }));
+    g.appendChild(svgEl("circle", { cx: x, cy: y, r: 9, class: "wdot" }));
+    const t = svgEl("text", { x, y, class: "wn" });
+    t.textContent = i + 1;
+    g.appendChild(t);
+    g.addEventListener("click", () => playSong(i, false));
+    wheelSvgEl.appendChild(g);
+    wheelNodeEls.push(g);
+  });
+}
+
+function updateWheelRingLabels() {
+  if (!wheelRingLabelEls) return;
+  for (let n = 1; n <= 12; n++) {
+    const bCode = n + "B", aCode = n + "A";
+    wheelRingLabelEls.major[n].textContent = wheelLabelMode === "camelot" ? bCode : keyLabel(bCode);
+    wheelRingLabelEls.minor[n].textContent = wheelLabelMode === "camelot" ? aCode : keyLabel(aCode);
+  }
+}
+
+wheelModeToggleEl.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-mode]");
+  if (!btn) return;
+  wheelLabelMode = btn.dataset.mode;
+  wheelModeToggleEl.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === btn));
+  updateWheelRingLabels();
+});
 
 // ── 트랙 우클릭·길게누름 메뉴("다음 곡 추가"/"현재 곡 제거") ─────────────────────
 // attachGraphMenu(그래프 구간 메뉴)와 동일한 구조: pointerdown 시 타이머 예약 → 10px 초과
@@ -1967,6 +2066,7 @@ function syncBandChecks(bands) {
 // 수동 조작(트랙 클릭·이전/다음 버튼·편집 후 재정합)은 인자를 생략해 항상 스크롤.
 function highlight(index, autoAdvance) {
   [...tracklistEl.children].forEach((li, i) => li.classList.toggle("active", i === index));
+  wheelNodeEls.forEach((g, i) => g.classList.toggle("active", i === index));
   const active = tracklistEl.children[index];
   if (!active) return;
   if (autoAdvance && !followTracklist) return;
