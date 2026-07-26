@@ -778,7 +778,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 .slot-minor { fill: var(--card); stroke: rgba(255,255,255,0.06); }
 
 .path-line {
-  fill: none; stroke-width: 2.4;
+  fill: none; stroke-width: 1.4;
   stroke-linecap: round; stroke-linejoin: round;
 }
 .path-line.ok-edge { stroke: var(--ok); }
