@@ -206,15 +206,20 @@ def _backfill_provisional(repo_root: Path, audio_dir: Path, med, mad,
     print(f"provisional i_* 백필 대상 {len(reg)}곡 시도…")
     updates: dict[int, dict[str, str]] = {}
     for idx, meta in reg.items():
-        wav = audio_dir / f"{meta['band']}__{int(idx):03d}.wav"
+        # wav 캐시 파일명은 형제 저장소 idx 기준(fetch_new.wav_path 규약) — master
+        # idx(레지스트리 키)와 다를 수 있으므로 반드시 sibling_idx를 따로 써야 한다.
+        # 옛 레지스트리(이 필드 도입 전)는 sibling_idx가 없으니 idx로 폴백(당시엔
+        # 실제로 둘이 같았던 시절 기록이라 안전).
+        sib_idx = int(meta.get("sibling_idx", idx))
+        wav = audio_dir / f"{meta['band']}__{sib_idx:03d}.wav"
         if not wav.exists():
             m = by_idx.get(int(idx))
             if m is None:
                 print(f"  ✗ idx={idx}: master에 없음(비정상) — 스킵, 레지스트리 유지")
                 continue
-            print(f"  [dl] idx={idx} wav 없음 — 재다운로드 시도")
+            print(f"  [dl] idx={idx}(형제 idx={sib_idx}) wav 없음 — 재다운로드 시도")
             got = fetch_new.download_one(
-                {"band": meta["band"], "idx": idx, "url": m["url"]}, audio_dir)
+                {"band": meta["band"], "idx": sib_idx, "url": m["url"]}, audio_dir)
             if got is None:
                 print(f"  ✗ idx={idx}: 재다운로드 실패 — 다음 실행에 재시도")
                 continue
@@ -307,7 +312,7 @@ def _commit_and_push_data(repo_root: Path, landed: list[dict]) -> None:
         return
     titles = ", ".join(f"{s['cand']['band']}·{s['cand']['song']}" for s in landed[:5])
     body = "\n".join(f"- {s['cand']['band']} / {s['cand']['song']} "
-                     f"(idx={s['cand']['idx']}, {s['cand']['video_id']})" for s in landed)
+                     f"(idx={s['master_idx']}, {s['cand']['video_id']})" for s in landed)
     g("commit", "-m", f"data: 신곡 자동 반영 {len(landed)}곡 — {titles} [auto]\n\n{body}")
     g("push", "-u", "origin", "data")
     print("data 브랜치 커밋·푸시 완료(PR 없음).")
@@ -407,27 +412,34 @@ def main(argv=None) -> int:
     # ⑥ 반영
     if a.dry:
         print("--dry: data/ 미변경. 산출 예정 행:")
+        preview_idx = max((int(m["idx"]) for m in master_rows), default=-1) + 1
         for s in landed:
             row = merge_data.assemble_master_row(
-                s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
+                preview_idx, s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
                 s["energy_full"], s["intensity"],
                 True, s["shape"])  # dry에서는 eligible 근사 표기(실반영 시 재계산)
+            preview_idx += 1
             prov = " [provisional i_*]" if s.get("provisional") else ""
             print(f"  {row}{prov}")
         return 0
 
     sf_bytes = sources.read_main_bytes(sources.SORTER_SONGS_FULL, sorter)
     am_bytes = sources.read_main_bytes(sources.SORTER_AUDIO_MAP, sorter)
-    merge_data.merge(repo_root, landed, sf_bytes, am_bytes)
+    merge_data.merge(repo_root, landed, sf_bytes, am_bytes)  # landed[i]["master_idx"]를 채워 넣음
     print(f"data/ 반영 완료: master {len(master_rows)} → {len(master_rows) + len(landed)}행")
 
     provisional_landed = [s for s in landed if s.get("provisional")]
     if provisional_landed:
         reg = _load_provisional(repo_root)
         for s in provisional_landed:
-            reg[int(s["cand"]["idx"])] = {"band": s["cand"]["band"],
-                                          "song": s["cand"]["song"],
-                                          "recorded_at": time.strftime("%Y-%m-%d")}
+            # 레지스트리 키는 master 자체 idx(patch_intensity_rows가 이 idx로
+            # master.csv를 찾음). sibling_idx는 형제 저장소 wav 캐시 파일명
+            # 재구성용으로 별도 보관(master_idx와 값이 다를 수 있음, 둘을
+            # 혼동하면 재다운로드 시 엉뚱한 파일명을 찾게 된다).
+            reg[int(s["master_idx"])] = {"band": s["cand"]["band"],
+                                         "song": s["cand"]["song"],
+                                         "sibling_idx": s["cand"]["idx"],
+                                         "recorded_at": time.strftime("%Y-%m-%d")}
         _save_provisional(repo_root, reg)
         print(f"⚠️ provisional i_* {len(provisional_landed)}곡 기록 — "
               f"{PROVISIONAL_JSON_REL}. intensity_norm 준비되는 run에서 자동 백필됨.")
