@@ -47,12 +47,16 @@ def _landed(idx: int, band: str = "mygo", vid: str = "NEWVID00000") -> dict:
 
 
 class AssembleRowTest(unittest.TestCase):
+    """master_idx(첫 인자)는 이 저장소 master.csv 자체의 idx — cand["idx"](형제
+    songs_full.csv 쪽 idx)와 고의로 다른 값(661)을 써서 두 idx가 실제로
+    분리돼 있음을 검증한다(둘을 혼동하는 회귀 방지)."""
+
     def test_row_shape_and_format(self):
         s = _landed(660)
         row = merge_data.assemble_master_row(
-            s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
+            661, s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
             s["energy_full"], s["intensity"], True, s["shape"])
-        self.assertEqual(row["idx"], 660)
+        self.assertEqual(row["idx"], 661)                  # master_idx가 쓰임(cand=660 아님)
         self.assertEqual(row["key"], "Amaj")
         self.assertTrue(row["camelot"])                    # camelot.py 매핑 성공
         self.assertEqual(row["energy_full"], "0.750000")   # %.6f
@@ -63,7 +67,7 @@ class AssembleRowTest(unittest.TestCase):
     def test_column_set_matches_master_header(self):
         s = _landed(660)
         row = merge_data.assemble_master_row(
-            s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
+            661, s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
             s["energy_full"], s["intensity"], False, s["shape"])
         self.assertEqual(set(row), set(MASTER_HEADER.split(",")))
 
@@ -73,7 +77,7 @@ class AssembleRowTest(unittest.TestCase):
         s = _landed(660)
         s["audio_entry"] = {"band": "mygo", "song": "신곡660", "bpm": 120.0}
         row = merge_data.assemble_master_row(
-            s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
+            661, s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
             s["energy_full"], s["intensity"], True, s["shape"])
         self.assertEqual(row["energy"], "")
         self.assertEqual(row["bpm"], 120.0)
@@ -150,6 +154,21 @@ class MergeTest(unittest.TestCase):
         self.assertEqual(rows[-1]["video_id"], "NEWVID00000")
         self.assertEqual(rows[-1]["eligible_band"], "True")
         self.assertEqual(self._read("data/songs_full.csv"), self.sf_bytes)  # mirror
+
+    def test_sibling_idx_reuse_does_not_collide_with_master(self):
+        """회귀 테스트: 형제 songs_full.csv가 전면 재정렬돼 cand["idx"]가 master의
+        기존(과거에 부여된) idx와 숫자만 우연히 겹치는 경우(2026-07-26 mutype 38곡
+        백필로 실제 발생) — master는 자신만의 idx를 새로 채번하므로 충돌 없이
+        반영돼야 한다."""
+        s = _landed(0)   # 형제쪽 idx=0 — master에 이미 idx=0(old0)이 존재
+        merge_data.merge(self.root, [s], self.sf_bytes, self.am_bytes)
+        self.assertEqual(s["master_idx"], 2)   # 기존 최대(1)+1로 새로 채번됨
+        rows = list(csv.DictReader(
+            (self.root / "data/songs_master.csv").open(encoding="utf-8", newline="")))
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(rows[0]["idx"], "0")       # 기존 old0 불변
+        self.assertEqual(rows[-1]["idx"], "2")      # 신곡은 새 idx(형제쪽 0이 아님)
+        self.assertEqual(rows[-1]["video_id"], "NEWVID00000")
 
     def test_duplicate_video_id_rolls_back_everything(self):
         snapshots = {rel: self._read(rel) for rel in merge_data.ALL_TARGETS}

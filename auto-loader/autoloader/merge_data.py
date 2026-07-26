@@ -50,7 +50,7 @@ def band_eligibility(songs_full_rows: list[dict]) -> dict[str, bool]:
     return {band: (n >= _MIN_BAND_SAMPLE) for band, n in counts.items()}
 
 
-def assemble_master_row(cand: dict, excerpt: dict, proxies: dict,
+def assemble_master_row(master_idx: int, cand: dict, excerpt: dict, proxies: dict,
                         audio_entry: dict, energy_full: float,
                         intensity: dict, eligible: bool, shape: str) -> dict:
     """songs_master.csv 1행(23컬럼) 조립. 포맷은 기존 빌드 스크립트들과 동일:
@@ -58,11 +58,16 @@ def assemble_master_row(cand: dict, excerpt: dict, proxies: dict,
 
     shape는 상류(norms.compute_shape)가 우리 발췌 특징에서 직접 계산한 값을 받는다
     — 형제 audio_map의 신곡 엔트리에는 shape 키가 없어(2026-07-15 확인) audio_entry에
-    더 이상 의존하지 않는다. energy(레거시, song_repo 비소비)는 있으면 쓰고 없으면 공란."""
+    더 이상 의존하지 않는다. energy(레거시, song_repo 비소비)는 있으면 쓰고 없으면 공란.
+
+    master_idx는 **이 저장소 songs_master.csv 자체의 idx**로, `cand["idx"]`(형제
+    songs_full.csv의 idx)와 별개다(merge()가 master 기존 최대값+1로 새로 부여 —
+    "형제 idx = master idx" 가정이 깨지는 배경은 merge() 독스트링 참조). cand["idx"]는
+    wav 캐시 파일명·형제 audio_map 조회 등 형제 저장소 쪽 참조에만 계속 쓰인다."""
     key = excerpt["key"]
     camelot = to_camelot(key)   # 매핑 누락 시 ValueError → 상위에서 롤백
     row = {
-        "idx": cand["idx"],
+        "idx": master_idx,
         "band": cand["band"],
         "song": cand["song"],
         "url": cand["url"],
@@ -122,12 +127,32 @@ def merge(repo_root: Path, landed: list[dict],
       cand(idx/band/song/url/video_id), excerpt(원시), proxies, full_feats(원시+extract_sec),
       audio_entry(bpm, +구형식이면 energy), shape(str, norms.compute_shape 산출),
       energy_full(float), intensity(i_* 문자열), eligible(bool)
+
+    ⚠️ **cand["idx"]는 형제 songs_full.csv의 idx이지 이 저장소 songs_master.csv의
+    idx가 아니다.** 예전에는 둘을 동일시해 cand["idx"]를 master에 그대로 썼는데,
+    이는 형제 저장소가 "매번 끝에만 append"하는 한에서만 우연히 안전했다. 형제 측
+    build_manifest.py는 곡 추가 시 yaml 파일명 알파벳순으로 songs_full.csv 전체를
+    재정렬(전역 idx 재부여)하므로, 밴드 yaml 중간에 대량으로 곡이 삽입되면(예:
+    2026-07-26 mutype 38곡 백필) 그 뒤에 오는 밴드들의 idx가 통째로 밀린다 — 그
+    "새" idx가 master에 이미 존재하는 완전히 다른 곡의(과거에 부여된) idx와
+    숫자만 우연히 겹칠 수 있다(실제 충돌 사례 확인됨). 그래서 이 함수는 master에
+    쓸 idx를 **master 자신의 기존 최대값+1로 독립적으로 새로 부여**한다 — 형제
+    쪽 idx가 앞으로 몇 번을 재정렬되든 master의 idx 공간은 영향받지 않는다.
+    cand["idx"](형제 idx)는 wav 캐시 파일명·형제 audio_map 조회 등 형제 저장소
+    참조에는 계속 그대로 쓰인다(그쪽은 원래도 위치 기반이라 손댈 필요 없음).
     """
     paths = {rel: repo_root / rel for rel in ALL_TARGETS}
     snapshot = {p: p.read_bytes() for p in paths.values() if p.exists()}
 
     try:
         master_before = _read_rows(paths[REL_MASTER])
+
+        # master 자체 idx를 독립 부여(형제 idx와 무관, landed 순서대로 순차 채번)
+        next_idx = max((int(m["idx"]) for m in master_before), default=-1) + 1
+        for s in landed:
+            s["master_idx"] = next_idx
+            next_idx += 1
+
         _pre_checks(master_before, landed)
 
         # ① mirror: 형제 origin/main 바이트 그대로
@@ -144,21 +169,21 @@ def merge(repo_root: Path, landed: list[dict],
                     f"기존 행 eligible_band 변동 감지(band={m['band']}) — "
                     "정책 검토 필요, 자동 반영 중단")
 
-        # ③ append 4종
+        # ③ append 4종(idx는 전부 master_idx로 통일 — 네 파일이 idx로 조인되므로)
         _append_rows(paths[REL_FEATURES], [
-            {"band": s["cand"]["band"], "idx": s["cand"]["idx"],
+            {"band": s["cand"]["band"], "idx": s["master_idx"],
              "song": s["cand"]["song"], **s["excerpt"], **s["proxies"]}
             for s in landed])
         _append_rows(paths[REL_FULL_FEATS], [
-            {"idx": s["cand"]["idx"], "band": s["cand"]["band"],
+            {"idx": s["master_idx"], "band": s["cand"]["band"],
              "song": s["cand"]["song"], "error": "", **s["full_feats"]}
             for s in landed])
         _append_rows(paths[REL_TEMPORAL], [
-            {"idx": s["cand"]["idx"], "band": s["cand"]["band"],
+            {"idx": s["master_idx"], "band": s["cand"]["band"],
              "song": s["cand"]["song"], **s["intensity"]}
             for s in landed])
         _append_rows(paths[REL_MASTER], [
-            assemble_master_row(s["cand"], s["excerpt"], s["proxies"],
+            assemble_master_row(s["master_idx"], s["cand"], s["excerpt"], s["proxies"],
                                 s["audio_entry"], s["energy_full"],
                                 s["intensity"], elig[s["cand"]["band"]],
                                 s["shape"])
@@ -227,6 +252,7 @@ def _pre_checks(master_before: list[dict], landed: list[dict]) -> None:
     known_vid = {(m.get("video_id") or "").strip() for m in master_before}
     known_idx = {int(m["idx"]) for m in master_before}
     seen_vid: set[str] = set()
+    seen_idx: set[int] = set()
     for s in landed:
         c = s["cand"]
         vid = c["video_id"]
@@ -234,9 +260,13 @@ def _pre_checks(master_before: list[dict], landed: list[dict]) -> None:
             raise AssertionError(f"video_id 11자 아님: {c}")
         if vid in known_vid or vid in seen_vid:
             raise AssertionError(f"video_id 중복(이미 반영됨?): {c}")
-        if int(c["idx"]) in known_idx:
-            raise AssertionError(f"idx 충돌: {c}")
+        midx = s["master_idx"]
+        if midx in known_idx or midx in seen_idx:
+            # master_idx는 merge()가 기존 최대값+1로 새로 채번하므로 이론상 불가능한
+            # 경로다 — 도달하면 merge() 호출 전에 landed가 변조됐다는 뜻(진짜 버그).
+            raise AssertionError(f"master_idx 충돌(내부 채번 버그 의심): {c}, master_idx={midx}")
         seen_vid.add(vid)
+        seen_idx.add(midx)
 
 
 def _post_checks(paths: dict[str, Path], snapshot: dict[Path, bytes],
@@ -266,7 +296,7 @@ def _post_checks(paths: dict[str, Path], snapshot: dict[Path, bytes],
     # 신규 행이 song_repo가 요구하는 타입으로 파싱되는지(엔진 소비 계약)
     new_by_idx = {int(r["idx"]): r for r in master_after[len(master_before):]}
     for s in landed:
-        r = new_by_idx[int(s["cand"]["idx"])]
+        r = new_by_idx[int(s["master_idx"])]
         float(r["mode_score"]); float(r["acousticness_proxy"])
         float(r["energy_full"])
         for col in ("i_mean", "i_std", "i_max", "i_min", "i_start", "i_end"):
