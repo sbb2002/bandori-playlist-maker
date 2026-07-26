@@ -115,6 +115,27 @@
         </div>
       </div>
 
+      <details class="options card wheel-panel">
+        <summary>조성 궤적 보기 (Camelot Wheel)</summary>
+        <div class="wheel-head">
+          <p class="wheel-caption">선은 재생 순서를 따라가요.</p>
+          <div class="mode-toggle" id="wheel-mode-toggle">
+            <button type="button" data-mode="camelot" class="on">Camelot</button>
+            <button type="button" data-mode="key">음이름</button>
+          </div>
+        </div>
+        <div class="wheel-stage">
+          <svg id="camelot-wheel" viewBox="0 0 420 420"></svg>
+        </div>
+        <ul class="wheel-guide">
+          <li>점 하나가 곡 한 곡, 점 위 숫자는 재생 순서예요.</li>
+          <li><span style="color:var(--ok)">초록 실선</span>은 자연스럽게 이어지는 구간, <span style="color:var(--warn)">주황 점선</span>은 분위기가 훅 바뀌는 구간이에요.</li>
+          <li>점을 클릭하면 그 곡으로 바로 이동해요.</li>
+          <li>점들이 원 안에서 좁게 모여 있을수록 통일된 분위기, 넓게 퍼져 있을수록 다채로운 분위기의 플레이리스트예요.</li>
+          <li>실선이 많을수록 쭉 이어 듣기 좋은 흐름, 점선이 많을수록 곡마다 분위기가 확확 바뀌는 구성이에요.</li>
+        </ul>
+      </details>
+
       <ol id="tracklist" class="tracklist"></ol>
     </section>
 
