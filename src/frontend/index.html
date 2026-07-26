@@ -115,10 +115,10 @@
         </div>
       </div>
 
-      <details class="options wheel-panel">
+      <details class="options card wheel-panel">
         <summary>조성 궤적 보기 (Camelot Wheel)</summary>
         <div class="wheel-head">
-          <p class="wheel-caption">선은 재생 순서. <span style="color:var(--ok)">초록 실선</span>=하모닉 인접, <span style="color:var(--warn)">주황 점선</span>=조성전환.</p>
+          <p class="wheel-caption">선은 재생 순서를 따라가요.</p>
           <div class="mode-toggle" id="wheel-mode-toggle">
             <button type="button" data-mode="camelot" class="on">Camelot</button>
             <button type="button" data-mode="key">음이름</button>
@@ -127,6 +127,14 @@
         <div class="wheel-stage">
           <svg id="camelot-wheel" viewBox="0 0 420 420"></svg>
         </div>
+        <ul class="wheel-guide">
+          <li>점 하나가 곡 한 곡, 점 위 숫자는 재생 순서예요.</li>
+          <li>바깥쪽 링은 장조, 안쪽 링은 단조 곡이 놓여요.</li>
+          <li><span style="color:var(--ok)">초록 실선</span>은 하모닉 인접(자연스러운 조성 전환), <span style="color:var(--warn)">주황 점선</span>은 조성전환(에너지가 우선이라 조성이 크게 바뀐 구간)이에요.</li>
+          <li>지금 재생 중인 곡에 가까운 구간일수록 선이 진하게 보여요.</li>
+          <li>점을 클릭하면 그 곡으로 바로 이동해요.</li>
+          <li>우측 상단 토글로 Camelot 코드 ↔ 실제 음이름 표기를 바꿀 수 있어요.</li>
+        </ul>
       </details>
 
       <ol id="tracklist" class="tracklist"></ol>

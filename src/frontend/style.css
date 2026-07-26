@@ -759,7 +759,6 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 }
 
 /* ── Camelot Wheel 궤적 시각화(접이식, 트랙리스트 위) ───────────────────────────────────── */
-.wheel-panel { margin-bottom: 14px; }
 .wheel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 10px 0; flex-wrap: wrap; }
 .wheel-caption { font-size: 0.78rem; color: var(--muted); margin: 0; flex: 1 1 200px; }
 .mode-toggle { display: inline-flex; background: var(--card-2); border-radius: 999px; padding: 3px; gap: 2px; flex: none; }
@@ -794,3 +793,11 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   fill: #0f1017; font-size: 10px; font-weight: 700; text-anchor: middle; dominant-baseline: central;
   font-family: ui-monospace, Menlo, Consolas, monospace; pointer-events: none;
 }
+
+.wheel-guide {
+  margin: 16px 0 0; padding: 12px 14px 12px 30px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  color: var(--muted); font-size: 0.76rem; line-height: 1.6;
+}
+.wheel-guide li { margin-bottom: 4px; }
+.wheel-guide li:last-child { margin-bottom: 0; }
