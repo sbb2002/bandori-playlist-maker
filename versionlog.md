@@ -21,6 +21,109 @@
 
 ## Log
 
+### v1.0.5 — 2026-07-26 16:50 (Patch)
+
+오토로더 신곡 자동 반영 43곡(커밋 `c0e0249`). 이번 반영 직전, 두 가지 파이프라인
+버그를 발견·수정했다(상세는 `BACKFILL_STATUS.md` 참고):
+(1) 형제 `bandori-song-sorter`의 `audio_map.json` 배열 위치-idx 정합성 붕괴
+(해당 저장소 PR #11로 수정), (2) 이 저장소 `merge_data.py`가 master idx를
+형제 idx에서 그대로 복사해 쓰던 설계 결함(형제측 idx 전역 재정렬 시 기존 곡과
+충돌 가능 — `tools` 브랜치 PR #59로 master 자체 채번 방식으로 수정). 두 수정
+모두 머지 후 이번 반영이 43/43 성공했다.
+
+- 현재 총 곡 수: **730곡** (`data/songs_master.csv`, 이전 687곡)
+- 추가 41곡은 2026-07-26 세션의 수동 백필 재검증 결과(비mutype 3+mutype 38,
+  `BACKFILL_STATUS.md` 참고), 나머지 2곡(raise_a_suilen·roselia)은 형제
+  저장소의 별도 자동감지로 동시에 잡힌 신곡.
+- 추가 곡 목록(band·song·idx·video_id):
+  - morfonica / 深海少女 (Cover) (idx=689, 8McGbxeGqdY)
+  - mugendai_mutype / 等身大あんりみてっど (idx=690, XbqG3T4MGJE)
+  - mugendai_mutype / 好きになっちゃえ！ (idx=691, mhmXN1uZTzE)
+  - mugendai_mutype / YoU kNOw the overture (idx=692, UWHzX6SpizM)
+  - mugendai_mutype / 君が飛び降りるのならば (Cover) (idx=693, BI71vana4VI)
+  - mugendai_mutype / 地球最後の告白を (Cover) (idx=694, 7R1DMU0qa00)
+  - mugendai_mutype / パラレルラルラ (Cover) (idx=695, ZcY2a1DyVAo)
+  - mugendai_mutype / 夜もすがら君想ふ (Cover) (idx=696, OsJPJo4uKBc)
+  - mugendai_mutype / ジレンマ (Cover) (idx=697, 3M5YaHlpMjY)
+  - mugendai_mutype / glow (Cover) (idx=698, WS4flpVYkLg)
+  - mugendai_mutype / メンタルチェンソー (Cover) (idx=699, eI-BW0Bcq4g)
+  - mugendai_mutype / ホシアイ (Cover) (idx=700, d6n4WHEtAgE)
+  - mugendai_mutype / フォニイ (Cover) (idx=701, 0makuFTnChs)
+  - mugendai_mutype / ELECT (Cover) (idx=702, uaAIGOd9Qv0)
+  - mugendai_mutype / ユキトキ (Cover) (idx=703, LXYyBjnbQys)
+  - mugendai_mutype / スイートマジック (Cover) (idx=704, PsPtBzaevyA)
+  - mugendai_mutype / 少年よ我に帰れ (Cover) (idx=705, 2TtYsm1HDx8)
+  - mugendai_mutype / One Last Kiss (Cover) (idx=706, fyc4aGZ9C18)
+  - mugendai_mutype / ミルククラウン・オン・ソーネチカ (Cover) (idx=707, yHMLvqxh2PQ)
+  - mugendai_mutype / 決戦スピリット (Cover) (idx=708, i-cgqBosaDw)
+  - mugendai_mutype / ティアドロップス (Cover) (idx=709, gZe2UGwld2E)
+  - mugendai_mutype / ロウワー (Cover) (idx=710, FhaynKrmQro)
+  - mugendai_mutype / ハイドアンド・シーク (Cover) (idx=711, FvLSUJ35qmE)
+  - mugendai_mutype / 不可解 (Cover) (idx=712, YHfBJMxWSec)
+  - mugendai_mutype / GURU (Cover) (idx=713, D7M1eAnroZE)
+  - mugendai_mutype / 経験値上昇中☆ (Cover) (idx=714, e15grxDKfF8)
+  - mugendai_mutype / 翼をください (Cover) (idx=715, RGByUSGhQgE)
+  - mugendai_mutype / 元気を出して (Cover) (idx=716, RzgsdgCkFjU)
+  - mugendai_mutype / ハッピー☆マテリアル (Cover) (idx=717, yLj0VCQC8qE)
+  - mugendai_mutype / 時をかける少女 (Cover) (idx=718, XEzZRDCZBSc)
+  - mugendai_mutype / TOMORROW (Cover) (idx=719, _WXK_IB4cck)
+  - mugendai_mutype / PARTY☆NIGHT（D-POP version） (Cover) (idx=720, tdZgnk1nEG4)
+  - mugendai_mutype / CH4NGE (Cover) (idx=721, ivfYQxQBiXQ)
+  - mugendai_mutype / 絶え間なく藍色 (Cover) (idx=722, bLIW2klD4Ms)
+  - mugendai_mutype / 撫でんな (Cover) (idx=723, tZzToEEZjgo)
+  - mugendai_mutype / なにやってもうまくいかない (Cover) (idx=724, 9Ba8G_i4dAg)
+  - mugendai_mutype / マーシャル・マキシマイザー (Cover) (idx=725, Gc7vzpnIYSU)
+  - mugendai_mutype / ZEAL of proud (Cover) (idx=726, 4MPXhnbf29o)
+  - mugendai_mutype / 繰り返し一粒 (Cover) (idx=727, xjGwcPHPAo8)
+  - poppin_party / 乙女はサイコパス (Cover) (idx=728, pFNrfao3dXg)
+  - raise_a_suilen / R・I・O・T (idx=729, NTkFFLOLuCc)
+  - roselia / Neo-Aspect (idx=730, Izq3AAix1Os)
+  - roselia / 擬態ごっこ (Cover) (idx=731, -3HDhazL-FA)
+
+### v1.0.4 — 2026-07-25 (Patch, 소급 기록)
+
+오토로더 신곡 자동 반영 16곡(커밋 `954b2ae`) — mygo 개인 멤버 솔로 커버.
+이 로그가 당시 갱신되지 않아 소급 기록한다.
+
+- 현재 총 곡 수: **687곡**
+- 추가 곡 목록(band·song·idx·video_id):
+  - mygo / 二息歩行 (Reloaded) (idx=673, q7lbzmTw8RM)
+  - mygo / 社会距離 (idx=674, Y5qJcXd0two)
+  - mygo / 君の神様になりたい。 (idx=675, HwLbvP99ypk)
+  - mygo / Henceforth (idx=676, Lr-bMZ2hNH0)
+  - mygo / ティアドロップス (idx=677, 3KVLbAMPwzs)
+  - mygo / 遠心力 (idx=678, 9RNcp7rLecQ)
+  - mygo / ないばいたりてぃ (idx=679, tAZGnS1FKRE)
+  - mygo / キリトリセン (idx=680, 3fBftYWm8gY)
+  - mygo / もしも命が描けたら (idx=681, uVGIGeTPQVM)
+  - mygo / TEENAGE RIOT (idx=682, Hm90Otiz8u8)
+  - mygo / パメラ (idx=683, wbbcQokPgLM)
+  - mygo / 栞 (idx=684, 3ye4lnEsJRY)
+  - mygo / シンデレラボーイ (idx=685, SKyIh9ddvck)
+  - mygo / 少女レイ (idx=686, DEXX5zBkRjQ)
+  - mygo / 正しくなれない (idx=687, azECAVAWRxI)
+  - mygo / 恋してる自分すら愛せるんだ (idx=688, swsu_JBv6Ug)
+
+부수: 이후 커밋 `ea1038d`(mutype·mygo 24곡)·`4dd9374`(Roselia·Pastel·Afterglow·
+Poppin'Party 25곡)에서 `(Cover)` 접미사 누락 버그를 수정(신곡 추가 아니라 기존
+행 텍스트 정정이라 곡 수 변동 없음 — 687곡 유지, 별도 버전 번호 부여 안 함).
+
+### v1.0.3 — 2026-07-25 (Patch, 소급 기록)
+
+오토로더 신곡 자동 반영 8곡(커밋 `d4dac7c`) — 무겐다이 뮤타입 밴드 합동 커버.
+이 로그가 당시 갱신되지 않아 소급 기록한다.
+
+- 현재 총 곡 수: **671곡**
+- 추가 곡 목록(band·song·idx·video_id):
+  - mugendai_mutype / 唱 (idx=665, zVdR0urFjnc)
+  - mugendai_mutype / インキャのキャキャキャ (idx=666, _jU3f42nbGs)
+  - mugendai_mutype / デビルじゃないもん (idx=667, y-kKg3F7-TA)
+  - mugendai_mutype / エイリアンエイリアン (idx=668, QmYpqqTvVHc)
+  - mugendai_mutype / ぼくたちいつでも しゅわっしゅわ！ (idx=669, dvmoFIxT6D4)
+  - mugendai_mutype / 回レ!雪月花 (idx=670, Nq2Sl4Ba44M)
+  - mugendai_mutype / ビッグマウス feat.りむる (idx=671, i7vyrp_3an0)
+  - mugendai_mutype / KiLLKiSS (idx=672, n4AUKXIjNeo)
+
 ### v1.0.2 — 2026-07-20 12:05 (Patch)
 
 오토로더 신곡 1곡 반영(커밋 `4945309`, 서브 로컬 `--soft` 실행 — 단, `intensity_norm.json`
