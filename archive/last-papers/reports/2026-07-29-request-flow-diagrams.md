@@ -42,6 +42,15 @@ flowchart TD
     I --> J["uvicorn: lifespan 진입<br/>(2번 백그라운드 루프 시작) → 요청 서빙 개시"]
 ```
 
+**주의할 점 2가지**:
+- `_build_interpreter()`(F)는 `GROQ_API_KEY`가 **존재하는지만** 보고 인스턴스를 만든다 — 그
+  키가 실제로 유효한지는 검증하지 않는다. 유효성은 **첫 실제 요청이 Groq API를 때릴 때**
+  비로소 확인된다(키가 틀렸으면 그때 502로 드러남). 즉 기동이 성공했다고 LLM 연동까지
+  보장되는 건 아니다.
+- `_load_dotenv()`(B)는 **이미 `os.environ`에 설정된 키는 덮어쓰지 않는다**(`main.py:83`
+  `if key and key not in os.environ`). Render 대시보드에 설정한 실제 환경변수가 `.env`
+  파일 값보다 항상 우선한다 — 로컬 `.env`는 그 환경변수가 없을 때만 쓰이는 폴백.
+
 ---
 
 ## 2. 백그라운드 주기 루프 (`_refresh_loop`, 요청과 무관)
@@ -60,6 +69,11 @@ flowchart TD
     R --> W
     K --> W
 ```
+
+Render 무료 티어는 유휴 시 슬립하므로, 슬립 중에는 이 루프도 함께 멈춘다(프로세스 자체가
+안 살아있음). 슬립 후 첫 요청이 콜드부팅을 유발하면 `create_app()`이 처음부터 다시 실행돼
+1번(기동 시) 로직으로 최신 데이터를 한 번 더 받아오므로, 리프레시가 밀린 채로 오래
+서빙되는 상황은 실질적으로 생기지 않는다(`CLAUDE.md` "cold-start/sleep accepted" 참고).
 
 ---
 
@@ -132,6 +146,15 @@ sequenceDiagram
     CORS-->>C: 200 JSON (헤더 부착)
 ```
 
+**"R->>Groq" 안에 숨어있는 또 하나의 레이트리밋**: `GROQ_RATE_PER_MIN`(기본 25)이 설정돼
+있으면 `interpret()`은 실제 HTTP POST 전에 `TokenBucketLimiter.acquire()`를 거친다
+(`groq_adapter.py:107`, `adapters/rate_limiter.py`). 이건 **4a의 Inflight와 성격이
+다르다** — Inflight는 상한 초과 시 대기 없이 즉시 거절(fail-fast)이지만, 이 리미터는
+토큰이 없으면 **최대 20초(`rate_max_wait`)까지 실제로 대기**했다가 그래도 없으면 그때
+`LLMRateLimitError`(429)를 던진다(대기열 자체도 `rate_max_waiters`=100으로 상한).
+즉 서버 동시처리 상한(Inflight, 즉시거절)과 벤더 RPM 준수용 페이싱(리미터, 짧게 대기 후
+거절) 두 단이 독립적으로 존재한다.
+
 ---
 
 ## 4. 조건부 / 이벤트 트리거
@@ -146,6 +169,23 @@ flowchart TD
     D --> E["_reject()<br/>raw ASGI send로 503 JSON 직접 전송<br/>(FastAPI 핸들러 자체를 거치지 않음)"]
 ```
 
+**대기 없이 즉시 거절이 맞다** — `InflightLimitMiddleware.__call__`(`main.py:242-254`)에
+큐잉·대기 로직이 전혀 없다:
+
+```python
+if self.count >= self.limit:
+    self._alert_overload(scope)
+    await self._reject(send)   # 즉시 503, asyncio.sleep 등으로 자리 기다리지 않음
+    return
+```
+`count >= limit`이면 그 자리에서 바로 503을 보내고 끝난다. 클래스 이름·docstring이
+"REQUEST_QUEUE_MAX"·"동시 처리 수 상한"이라고 표현해서 큐잉을 연상시키지만, 실제 동작은
+**대기열이 아니라 카운터 기반 즉시 거절(fail-fast) 게이트**다. `CLAUDE.md`의 "Open
+questions"가 "request queuing is still TBD"라고 명시한 그대로 — 진짜 큐잉은 아직
+미구현이고, 상한 초과 시 우선 튕겨내는 임시 방편만 있는 상태. `/api/setlist` prefix에만
+적용되며(3a의 읽기전용 GET은 이 카운트와 무관), 3b의 프로액티브 레이트리밋(대기 후
+거절)과는 대비된다.
+
 ### 4b. 에러 발생 시 알림 (`_alert`, 3b의 예외 경로와 연결)
 
 ```mermaid
@@ -157,6 +197,14 @@ flowchart TD
     C -- "아니오" --> F["알림 없이 바로 JSONResponse 반환"]
     B --> G["JSONResponse 반환<br/>(알림 여부와 무관하게 클라이언트에는 항상 응답)"]
 ```
+
+**429/422/409는 알림 대상이 아니다** — `LLMRateLimitError`(429)·`MoodInterpretationError`
+(422)·`NoSetlistError`(409)의 예외 핸들러는 `_alert()`를 호출하지 않는다(`main.py:360-372`).
+개발자 알림은 **500(INTERNAL)·502(LLM_UPSTREAM_FAILED)** 두 경우에만 발송된다
+(`main.py:365-378`) — "사용자 요청이 잘못됐거나 일시적으로 붐빈 상황"(기대되는 오류)과
+"운영자가 봐야 하는 실패"(예상 밖 500, 벤더 장애 502)를 구분해 알림 스팸을 줄이는
+설계다. 같은 title은 5분 스로틀(`TelegramNotifier`, `telegram_notifier.py:36`)도 걸려
+있어 같은 유형 오류가 연속 발생해도 알림 폭주는 없다.
 
 ### 4c. 관리자 강제 리프레시 — `POST /api/admin/refresh-data`
 
