@@ -222,6 +222,46 @@ flowchart TD
 즉시 HTTP 호출**이라는 점이 다르다 — push 직후 최대 30분(`DATA_REFRESH_INTERVAL_SEC`)을
 기다리지 않게 하려는 용도(`main.py:19-20` 주석).
 
+**4c의 폴백은 2번이다 — 우연한 중복이 아니라 오토로더 코드가 명시한 설계.** `tools`
+브랜치의 호출부(`auto-loader/autoloader/run_autoloader.py:321-338`
+`_trigger_backend_refresh()`)를 보면:
+
+```python
+def _trigger_backend_refresh() -> None:
+    """... BACKEND_REFRESH_URL·DATA_REFRESH_TOKEN 둘 다 미설정이면(로컬/테스트
+    기본) 조용히 스킵한다. 실패해도 data 브랜치 push는 이미 끝났으므로 경고만 남기고 넘어간다.
+    """
+    url = os.environ.get("BACKEND_REFRESH_URL", "").strip()
+    token = os.environ.get("DATA_REFRESH_TOKEN", "").strip()
+    if not url or not token:
+        return
+    try:
+        resp = httpx.post(url, headers={"X-Refresh-Token": token}, timeout=60.0)
+        resp.raise_for_status()
+    except Exception as exc:
+        print(f"⚠️ 백엔드 리프레시 트리거 실패(무시, 30분 주기가 대신 처리): {exc!r}")
+```
+
+"30분 주기가 대신 처리"라는 주석이 곧 2번을 폴백으로 지목한 것. 오토로더가 정상 동작하는
+한 4c가 항상 2번보다 먼저 반영하지만, 2번이 실제로 나서게 되는 경우는:
+
+1. 오토로더 로컬 `.env`에 `BACKEND_REFRESH_URL`/`DATA_REFRESH_TOKEN` 중 하나라도 비어
+   있음 → 트리거 자체를 스킵(push는 되고 알림 시도는 안 나감).
+2. HTTP 호출이 실패(네트워크·Render 일시 장애·토큰 불일치·타임아웃) → `except`로 삼키고
+   경고만 남김.
+3. `DATA_REFRESH_TOKEN`이 Render 쪽에 아예 설정 안 돼 있음 → `render.yaml:53`이
+   `sync: false`라 실제 값은 대시보드에서만 확인 가능하고, **이 리포만 봐서는 설정
+   여부를 알 수 없다**. 미설정이면 `/api/admin/refresh-data`는 항상 403이라(`routes.py:207`)
+   4c는 시도조차 성공할 수 없고 2번이 유일한 갱신 경로가 된다.
+4. 오토로더가 아닌 다른 경로로 `data` 브랜치가 바뀌는 경우(수동 편집, 장래의 다른
+   자동화) — 애초에 이 트리거 호출 자체가 없으므로 2번만 믿어야 한다.
+
+> **미확인 사항(2026-07-29 기준)**: 위 1~4 시나리오가 라이브 환경에서 실제로 한 번이라도
+> 발생했는지는 세션 시점 기준 확인된 바 없다("4번이 fail한 적이 없어서 잘 모르겠다" —
+> 저장소 소유자). 즉 `DATA_REFRESH_TOKEN`이 Render에 설정돼 있는지, 오토로더 로컬 `.env`가
+> 항상 맞게 잡혀 있는지는 **코드로는 검증 불가능한 운영 사실**이며, 이 문서는 설계상
+> 가능성만 정리한 것이지 실제 발생 빈도를 보증하지 않는다.
+
 ---
 
 ## 관련
@@ -230,6 +270,7 @@ flowchart TD
 - 코드 위치: `src/backend/app/main.py`, `src/backend/app/api/routes.py`,
   `src/backend/app/repo/remote_source.py`, `src/backend/app/repo/song_repo.py`,
   `src/backend/app/adapters/groq_adapter.py`, `src/backend/app/adapters/telegram_notifier.py`,
-  `src/backend/app/domain/selection.py`.
+  `src/backend/app/domain/selection.py`, `render.yaml`, `src/backend/.env.example`,
+  `tools` 브랜치 `auto-loader/autoloader/run_autoloader.py`(`_trigger_backend_refresh`).
 - 관련 기존 문서: `archive/last-papers/reports/2026-07-15-remote-data-serving-design.md`
   (원격 데이터 서빙 설계 — 위 2번·4c 다이어그램이 구현된 결과).
