@@ -9,6 +9,7 @@ import httpx
 import pytest
 
 from app.adapters.groq_multistage_adapter import GroqMultistageMoodInterpreter, _ro_particle
+from app.domain.models import MoodParameters
 from app.ports.mood_port import LLMRateLimitError, LLMUpstreamError, MoodInterpretationError
 
 
@@ -71,6 +72,82 @@ def test_success_assembles_mood_parameters():
     assert 2 <= len(params.tags) <= 5
     assert params.interpretation_summary == _STAGE4_OK  # 4차 LLM 응답을 그대로 사용
     assert len(client.calls) == 4
+
+
+def test_stage0_all_unchanged_reuses_previous_params_without_further_calls():
+    stage0_response = "미세한 표현만 다름\n===ANSWER===\nminutes:false\nstages:false\nenergies:false"
+    interp, client = _make([_chat(stage0_response)])
+    previous = MoodParameters(
+        brightness=0.0, start_energy=0.20, end_energy=0.35, stage_count=3,
+        target_minutes=40, interpretation_summary=_STAGE4_OK,
+        stage_energies=[0.20, 0.75, 0.35], stage_moods=["잔잔한", "고조되는", "여운"],
+        tags=["잔잔한", "고조되는"], song_type="all",
+    )
+    params = interp.interpret(
+        "주말 드라이브 40분 부탁해", previous_prompt="주말 드라이브 40분",
+        previous_params=previous,
+    )
+
+    assert len(client.calls) == 1  # 0차 호출만, 1~4차는 스킵됨
+    assert params.target_minutes == 40
+    assert params.stage_moods == ["잔잔한", "고조되는", "여운"]
+    assert params.stage_energies == [0.20, 0.75, 0.35]
+    assert params.interpretation_summary == _STAGE4_OK
+    assert params.same_as_previous is True
+
+
+def test_stage0_stages_changed_forces_energy_recompute():
+    stage0_response = "구간 늘려달라 함\n===ANSWER===\nminutes:false\nstages:true\nenergies:false"
+    interp, client = _make([
+        _chat(stage0_response),
+        _chat(_STAGE2_OK),
+        _chat(_STAGE3_OK),
+        _chat(_STAGE4_OK),
+    ])
+    previous = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=2,
+        target_minutes=40, interpretation_summary="이전 요약",
+        stage_energies=[0.5, 0.5], stage_moods=["평온", "평온"],
+        tags=["평온"], song_type="all",
+    )
+    params = interp.interpret(
+        "주말 드라이브 40분, 구간 좀 더 나눠줘", previous_prompt="주말 드라이브 40분",
+        previous_params=previous,
+    )
+
+    assert len(client.calls) == 4  # 0·2·3·4차 (1차만 스킵)
+    assert params.target_minutes == 40  # 1차 스킵 → previous_params 값 유지
+    assert params.stage_count == 3  # 2차 재계산 결과(_STAGE2_OK 기준)
+    assert params.stage_energies == pytest.approx([0.20, 0.75, 0.35])
+    assert params.same_as_previous is False
+
+
+def test_stage0_unparseable_falls_back_to_full_recompute():
+    interp, client = _make(
+        [_chat("판정 불가"), _chat(_STAGE1_OK), _chat(_STAGE2_OK), _chat(_STAGE3_OK), _chat(_STAGE4_OK)],
+        stage_retries=0,
+    )
+    previous = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=2,
+        target_minutes=99, interpretation_summary="이전 요약",
+        stage_energies=[0.5, 0.5], stage_moods=["평온", "평온"],
+        tags=["평온"], song_type="all",
+    )
+    params = interp.interpret(
+        "완전히 다른 요청", previous_prompt="이전 요청", previous_params=previous,
+    )
+
+    assert len(client.calls) == 5  # 0차(실패) + 1~4차 전부
+    assert params.target_minutes == 40  # 1차가 재실행돼 _STAGE1_OK(40)로 덮어씀
+    assert params.same_as_previous is False
+
+
+def test_previous_prompt_without_previous_params_runs_full_flow_like_first_round():
+    interp, client = _make([_chat(_STAGE1_OK), _chat(_STAGE2_OK), _chat(_STAGE3_OK), _chat(_STAGE4_OK)])
+    params = interp.interpret("주말 드라이브 40분", previous_prompt="이전 요청")
+
+    assert len(client.calls) == 4  # 0차 호출 없음(previous_params 없으므로 1회차 플로우로 폴백)
+    assert params.same_as_previous is None
 
 
 def test_stage1_clamps_out_of_range_minutes():

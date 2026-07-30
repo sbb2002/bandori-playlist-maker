@@ -79,8 +79,9 @@ class StubMoodInterpreter:
 
     def interpret(
         self, prompt: str, previous_prompt: str | None = None,
-        energy_stats: dict | None = None,
+        energy_stats: dict | None = None, previous_params: MoodParameters | None = None,
     ) -> MoodParameters:
+        # previous_params: 포트 시그니처 호환용(스킵 로직은 groq_multistage_adapter 전용, 이 어댑터는 사용 안 함).
         text = prompt.lower()
 
         # 밝기: 밝음/어두움 키워드 카운트 차이를 -1~1로 스케일.

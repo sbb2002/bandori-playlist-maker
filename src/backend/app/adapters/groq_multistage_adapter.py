@@ -5,18 +5,24 @@
 LLM에 물어 JSON을 조립한다 — LLM 응답은 매번 숫자/짧은 텍스트뿐이라 관용 JSON 파서가 필요
 없다("json 조립은 직접 파싱하기").
 
-4단계 호출:
+5단계 호출(2회차+ 요청에서만 0차 발동):
+    0차 — (previous_prompt·previous_params가 둘 다 주어진 2회차+ 요청에서만) 직전 요청 대비
+          재생시간/구간구성/에너지 중 뭐가 바뀌는지 판정. 안 바뀐 항목은 이후 단계를 스킵하고
+          previous_params의 값을 그대로 재사용한다(구간구성이 바뀌면 에너지도 강제 재계산 —
+          무드 개수가 달라지므로). 1회차이거나 previous_params가 없으면 0차 없이 아래 4단계를
+          무조건 전부 실행한다.
     1차 — 전체 재생시간(분, 정수).
     2차 — 구간 수(2~5)와 구간별 (길이(분), 감정 키워드).
     3차 — 구간별 감정 키워드를 보고 구간별 에너지(0.00~1.00).
     4차 — 위 결과(재생시간·구간별 무드·에너지)를 보고 요약 카드 한 문장(interpretation_summary).
           원래 의도가 이 필드도 LLM이 쓰게 하는 것이었어서(결정론적 조립 대신) 4차로 추가함.
+          0차 판정상 1~3차 모두 안 바뀌었으면 4차도 스킵하고 직전 요약을 재사용한다.
 
 스코프 결정(배경 문서에 없는 필드는 이 실험에서 다루지 않음, 확장은 별도 라운드):
     - brightness: 이 파이프라인엔 밝기 축 질문이 없다 → 중립값 0.0 고정.
-    - song_type / same_as_previous: 배경 문서 미언급 → 기본값(all / None). same_as_previous가
-      항상 None이므로 라우트의 `honor`는 이 인터프리터에서는 항상 False로 평가된다(세부설정
-      override가 회차 간 유지되지 않음 — 실험 범위 밖의 알려진 제약).
+    - song_type: 배경 문서 미언급 → 기본값 "all" 고정.
+    - same_as_previous: 0차 판정 결과(재생시간·구간구성·에너지 모두 불변)를 그대로 반영해
+      채운다(previous_prompt·previous_params가 없는 1회차는 여전히 None).
     - tags: 4차에서 받은 것이 아니라 2차 감정 키워드를 그대로 재사용(ensure_min_tags로 최소
       2개 보장) — 별도 LLM 호출 없이 충분히 자연스러워 추가 비용을 들이지 않기로 함.
     - 2차에서 받은 구간별 '길이(분)'는 3차 프롬프트의 맥락으로만 쓰고, 최종 target_minutes는
@@ -193,6 +199,49 @@ class GroqMultistageMoodInterpreter:
     # 재추출한다(첫 숫자가 아니라 "마지막" 숫자/줄 — 결론이 보통 끝에 오므로).
     _ANSWER_MARKER = "===ANSWER==="
 
+    # ── 0차: 2회차 요청 변경 판정(재생시간/구간구성/에너지 중 뭐가 바뀌는지) ─────────────
+    _STAGE0_SYSTEM = (
+        "너는 뱅드림 세트리스트 요청이 직전 요청과 비교해 무엇이 바뀌었는지 판정하는 보조자다. "
+        "직전 요청과 현재 요청을 보고, 다음 세 가지를 각각 바꿔야 하는지(true) 그대로 둬도 되는지"
+        "(false) 판정해라.\n"
+        "- minutes: 전체 재생시간(분)을 다시 정해야 하는가.\n"
+        "- stages: 구간 구성(구간 수·구간별 분위기)을 다시 정해야 하는가.\n"
+        "- energies: 구간별 에너지(강도)를 다시 정해야 하는가.\n"
+        "표현만 다르고 본질적으로 같은 요청이면 전부 false, 조금이라도 의도가 바뀌었으면 "
+        "관련된 항목만 true로 표시해라(확신이 안 서면 true를 선택해 안전하게 다시 계산하게 하라).\n"
+        f"생각 과정은 자유롭게 적어도 좋지만, 맨 마지막에 반드시 정확히 '{_ANSWER_MARKER}' 줄을 "
+        "쓰고 그 다음 세 줄에 각각 'minutes:true' 또는 'minutes:false' 형식으로 순서대로 적어라"
+        "(minutes, stages, energies 순, 그 뒤엔 아무것도 쓰지 마라).\n"
+        f"예:\n{_ANSWER_MARKER}\nminutes:false\nstages:true\nenergies:true"
+    )
+
+    def _stage0_decide(self, previous_prompt: str, prompt: str) -> tuple[bool, bool, bool]:
+        """previous_prompt→prompt 사이 (재생시간/구간구성/에너지) 중 뭐가 바뀌는지 판정.
+
+        파싱에 실패하면(마커 뒤 3줄을 못 찾음 등) 안전한 쪽(전부 True = 기존처럼 4단계 전부
+        재실행)으로 폴백한다 — 판정 불가 시 "새로 다 하라"가 잘못된 재사용보다 안전하다.
+        """
+        def parse() -> tuple[bool, bool, bool]:
+            user_prompt = f"[직전 요청]\n{previous_prompt}\n\n[현재 요청]\n{prompt}"
+            content = self._chat(self._STAGE0_SYSTEM, user_prompt)
+            tail = _after_marker(content, self._ANSWER_MARKER)
+            flags: dict[str, bool | None] = {"minutes": None, "stages": None, "energies": None}
+            for line in tail.splitlines():
+                line = line.strip().lower()
+                for key in flags:
+                    if line.startswith(f"{key}:"):
+                        flags[key] = "true" in line.split(":", 1)[1]
+            if any(v is None for v in flags.values()):
+                raise MoodInterpretationError(
+                    f"0차 응답에서 minutes/stages/energies 플래그를 모두 찾지 못함: {content[:150]!r}"
+                )
+            return flags["minutes"], flags["stages"], flags["energies"]  # type: ignore[return-value]
+
+        try:
+            return self._call_with_stage_retry("0차/변경판정", parse)  # type: ignore[return-value]
+        except MoodInterpretationError:
+            return True, True, True
+
     # ── 1차: 전체 재생시간(분) ──────────────────────────────────────────────
     _STAGE1_SYSTEM = (
         "너는 뱅드림(BanG Dream!) 세트리스트의 전체 재생시간을 정하는 보조자다. "
@@ -350,15 +399,42 @@ class GroqMultistageMoodInterpreter:
 
     def interpret(
         self, prompt: str, previous_prompt: str | None = None,
-        energy_stats: dict | None = None,
+        energy_stats: dict | None = None, previous_params: MoodParameters | None = None,
     ) -> MoodParameters:
-        target_minutes = self._stage1_minutes(prompt)
-        stages = self._stage2_stages(prompt, target_minutes)
-        moods = [m for _length, m in stages]
-        energies = self._stage3_energies(moods, energy_stats)
-        summary = self._stage4_summary(prompt, moods, energies, target_minutes)
+        if previous_prompt and previous_params is not None:
+            minutes_changed, stages_changed, energies_changed = self._stage0_decide(previous_prompt, prompt)
+            if stages_changed:
+                energies_changed = True  # 2차가 재실행되면 무드 개수가 바뀌므로 3차도 강제 재실행
 
-        stage_count = len(stages)
+            target_minutes = (
+                self._stage1_minutes(prompt) if minutes_changed else previous_params.target_minutes
+            )
+            if stages_changed:
+                stages = self._stage2_stages(prompt, target_minutes)
+                moods = [m for _length, m in stages]
+            else:
+                moods = previous_params.stage_moods or []
+
+            energies = (
+                self._stage3_energies(moods, energy_stats) if energies_changed
+                else (previous_params.stage_energies or [])
+            )
+
+            if minutes_changed or stages_changed or energies_changed:
+                summary = self._stage4_summary(prompt, moods, energies, target_minutes)
+            else:
+                summary = previous_params.interpretation_summary
+
+            same_as_previous = not (minutes_changed or stages_changed or energies_changed)
+        else:
+            target_minutes = self._stage1_minutes(prompt)
+            stages = self._stage2_stages(prompt, target_minutes)
+            moods = [m for _length, m in stages]
+            energies = self._stage3_energies(moods, energy_stats)
+            summary = self._stage4_summary(prompt, moods, energies, target_minutes)
+            same_as_previous = None
+
+        stage_count = len(moods)
         start_energy = energies[0]
         end_energy = energies[-1]
         tags = ensure_min_tags(list(dict.fromkeys(moods))[:5], 0.0, start_energy, end_energy, target_minutes)
@@ -371,7 +447,8 @@ class GroqMultistageMoodInterpreter:
             target_minutes=target_minutes,
             interpretation_summary=summary[:120],
             stage_energies=energies,
+            stage_moods=moods,
             tags=tags,
             song_type="all",
-            same_as_previous=None,
+            same_as_previous=same_as_previous,
         )

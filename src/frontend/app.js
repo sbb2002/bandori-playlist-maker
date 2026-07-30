@@ -85,6 +85,8 @@ form.addEventListener("submit", async (e) => {
   // 직전 회차 요청을 함께 보내 백엔드가 '의도 동일성'을 판정하게 한다(핫픽스). 의도가 같으면 아래
   // 사용자 override를 존중하고, 프롬프트를 새 내용으로 바꾸면 백엔드가 override를 무시하고 자동 해석한다.
   if (previousPrompt) body.previous_prompt = previousPrompt;
+  // 직전 응답 params 스냅샷도 함께 왕복(멀티스테이지 어댑터의 2회차 스킵 판정용 — 다른 어댑터는 무시).
+  if (previousPrompt) body.previous_params = lastParams;
   if (minutesTouched) {
     const minutes = parseInt($("target-minutes").value, 10);
     if (!Number.isNaN(minutes)) body.target_minutes = minutes;

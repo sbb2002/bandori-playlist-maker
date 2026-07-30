@@ -127,7 +127,25 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     else:
         energy_stats = None
 
-    params: MoodParameters = interpreter.interpret(payload.prompt, payload.previous_prompt, energy_stats=energy_stats)
+    previous_params = None
+    if payload.previous_params is not None:
+        pp = payload.previous_params
+        previous_params = MoodParameters(
+            brightness=0.0,
+            start_energy=(pp.stage_energies[0] if pp.stage_energies else 0.5),
+            end_energy=(pp.stage_energies[-1] if pp.stage_energies else 0.5),
+            stage_count=len(pp.stage_moods) if pp.stage_moods else (len(pp.stage_energies) if pp.stage_energies else 2),
+            target_minutes=pp.target_minutes,
+            interpretation_summary=pp.interpretation_summary,
+            stage_energies=pp.stage_energies,
+            stage_moods=pp.stage_moods,
+            tags=pp.tags,
+            song_type=pp.song_type,
+        )
+
+    params: MoodParameters = interpreter.interpret(
+        payload.prompt, payload.previous_prompt, energy_stats=energy_stats, previous_params=previous_params,
+    )
 
     # 핫픽스(세부설정 우선순위): 'honor'는 **재생 형태 설정**(에너지 아크·단계 수·재생시간)에만 적용.
     # 직전 요청과 의도가 본질적으로 같을 때만 사용자가 건드린 이 값들을 존중하고, 1회차이거나 의도가

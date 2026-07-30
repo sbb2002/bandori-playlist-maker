@@ -24,6 +24,18 @@ class StageInput(BaseModel):
         return self
 
 
+class PreviousParamsInput(BaseModel):
+    """직전 회차 응답의 MoodParameters 스냅샷(클라이언트 왕복). 멀티스테이지 어댑터가 2회차+
+    요청에서 변경 없는 파라미터를 재사용(LLM 호출 스킵)하는 데 쓴다 — 다른 어댑터는 무시."""
+
+    target_minutes: int | None = None
+    stage_moods: list[str] | None = None
+    stage_energies: list[float] | None = None
+    interpretation_summary: str = ""
+    tags: list[str] | None = None
+    song_type: str = "all"
+
+
 class SetlistRequest(BaseModel):
     """POST /api/setlist 요청 바디."""
 
@@ -31,6 +43,9 @@ class SetlistRequest(BaseModel):
     # 직전 회차 요청(2회차+). 주어지면 백엔드가 LLM에 함께 넘겨 '의도가 같은지'를 판정하고,
     # 같을 때만 아래 사용자 override(target_minutes·stage_count·stages·bands·cover)를 적용한다.
     previous_prompt: str | None = Field(default=None, max_length=500, description="직전 회차 요청(의도 동일성 판정용)")
+    # previous_prompt와 세트로만 의미 있음 — 멀티스테이지 어댑터가 불변 파라미터의 LLM 재계산을
+    # 스킵하는 데 사용(다른 어댑터는 무시).
+    previous_params: "PreviousParamsInput | None" = Field(default=None, description="직전 회차 MoodParameters 스냅샷(재사용용)")
     target_minutes: int | None = Field(default=None, ge=10, le=180, description="목표 재생시간(분)")
     stage_count: int | None = Field(default=None, ge=2, le=11, description="에너지 단계 수 N")
     bands: list[str] | None = Field(default=None, max_length=50, description="밴드 필터(빈 목록/미지정=ALL)")
@@ -61,6 +76,10 @@ def serialize_setlist(setlist: Setlist) -> dict:
             "interpretation_summary": setlist.params.interpretation_summary,
             "tags": setlist.params.tags or [],
             "song_type": setlist.params.song_type,
+            # 멀티스테이지 어댑터의 2회차+ 스킵 로직용 라운드트립 필드 — 클라이언트가 다음 요청의
+            # previous_params로 그대로 왕복시킨다(다른 어댑터 응답에선 항상 빈 배열).
+            "stage_moods": setlist.params.stage_moods or [],
+            "stage_energies": setlist.params.stage_energies or [],
         },
         "stages": [
             {"index": s.index, "energy_target": s.energy_target} for s in setlist.stages

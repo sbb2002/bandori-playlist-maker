@@ -63,6 +63,9 @@ class MoodParameters:
     # 존중하고, False/None이면(1회차 또는 의도가 바뀜) 모델이 전 파라미터를 새로 제어한다.
     # 라우트가 이 값(과 previous_prompt 존재 여부)으로 override 적용 여부를 가른다.
     same_as_previous: bool | None = None
+    # 2차(구간분할)의 원본 구간별 무드 키워드(길이=stage_count). tags는 이걸 중복제거+5개로
+    # 축약한 파생값이라 역산 불가 — 2회차 스킵 판단 시 이 원본이 필요해 별도 보존한다.
+    stage_moods: list[str] | None = None
 
 
 @dataclass(frozen=True)

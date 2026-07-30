@@ -73,8 +73,9 @@ class OpenRouterMoodInterpreter:
 
     def interpret(
         self, prompt: str, previous_prompt: str | None = None,
-        energy_stats: dict | None = None,
+        energy_stats: dict | None = None, previous_params: MoodParameters | None = None,
     ) -> MoodParameters:
+        # previous_params: 포트 시그니처 호환용(스킵 로직은 groq_multistage_adapter 전용, 이 어댑터는 사용 안 함).
         payload = {
             "model": self._model,
             "messages": prompt_mod.build_messages(prompt, previous_prompt),
