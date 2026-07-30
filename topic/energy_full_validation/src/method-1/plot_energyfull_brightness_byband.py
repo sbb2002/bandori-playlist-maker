@@ -67,7 +67,7 @@ for idx, band in enumerate(band_order):
     br = np.array([r["brightness"] for r in items])
     grid, _, _ = np.histogram2d(ef, br, bins=[e_edges, b_edges])
     pct = grid / n * 100
-    im = ax.imshow(pct, origin="lower", cmap="viridis", aspect="auto", extent=[-1, 1, 0, 1], vmin=0, vmax=PCT_MAX)
+    im = ax.imshow(pct, origin="lower", cmap="inferno", aspect="auto", extent=[-1, 1, 0, 1], vmin=0, vmax=PCT_MAX)
     label = band.replace("_", " ").title()
     ax.set_title(f"{label} (n={n})", fontsize=11, fontweight="bold")
     ax.set_xlabel("brightness", fontsize=9)
@@ -82,7 +82,7 @@ for idx, band in enumerate(band_order):
                 continue
             cx = -1 + (j + 0.5) * (2 / B_BINS)
             cy = (i + 0.5) * (1 / E_BINS)
-            color = "black" if pct[i, j] / PCT_MAX > 0.55 else "white"  # viridis: 고빈도=밝은 노랑→검정 글씨
+            color = "black" if pct[i, j] / PCT_MAX > 0.55 else "white"  # inferno: 고빈도=밝은 노랑→검정 글씨
             ax.text(cx, cy, f"{int(v)}", ha="center", va="center", fontsize=7.5, color=color)
     last_im = im
 

@@ -54,7 +54,7 @@ def build_grid(items):
     grid, _, _ = np.histogram2d(energies, brightness, bins=[e_edges, b_edges])
     return grid  # grid[energy_row, brightness_col]
 
-CMAP = "viridis"  # 어두운 보라(적음)→밝은 노랑(많음), 저빈도/고빈도 대비가 커서 시인성 좋음
+CMAP = "inferno"  # 검정(적음)→보라/빨강/노랑(많음), viridis보다 극적인 대비
 
 def draw_heatmap(ax, grid, title, annotate_pct=False, n=None, vmax=None):
     data = grid / n * 100 if annotate_pct else grid
@@ -76,7 +76,7 @@ def draw_heatmap(ax, grid, title, annotate_pct=False, n=None, vmax=None):
             cx = -1 + (j + 0.5) * (2 / B_BINS)
             cy = (i + 0.5) * (1 / E_BINS)
             frac = data[i, j] / vmax_eff
-            color = "black" if frac > 0.55 else "white"  # viridis: 고빈도=밝은 노랑→검정 글씨
+            color = "black" if frac > 0.55 else "white"  # inferno: 고빈도=밝은 노랑→검정 글씨
             label = f"{int(v)}" if not annotate_pct else f"{int(v)}"
             ax.text(cx, cy, label, ha="center", va="center", fontsize=7.5, color=color)
     return im
