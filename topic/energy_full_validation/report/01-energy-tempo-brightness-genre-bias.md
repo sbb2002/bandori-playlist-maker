@@ -79,14 +79,33 @@ min/max/mean/median/std와 10구간 히스토그램을 직접 계산한다.
 
 ### 2.5 밴드별 `energy_full` 분포 + ave_mujica 이상치 원인 추적
 
+**용어 정리**: `build_energy_full.py`의 실제 최종 합성식(코드 확인, 부장 확정 2026-07-11) —
+
+```
+FINAL_FEATS = [perc_mean, onset_mean, zcr_mean, cen_mean, flat_mean, rms_p90]
+FINAL_W     = [    1,         1,        1,       1,        1,          2   ]
+
+# 1) 피처별 robust z-score(eligible 풀 기준, 중앙값·MAD)
+z = (value - median) / (MAD × 1.4826)
+
+# 2) 방향(orientation) 자동 결정: GT_LOUD 평균 z ≥ GT_QUIET 평균 z 이면 +1, 아니면 -1
+# 3) 가중 합성
+composite = Σ(w_i × orientation_i × z_i) / Σw_i
+
+# 4) energy_full = eligible 풀 안에서 composite의 백분위 순위(0~1)
+```
+`rms_p90`(피크 라우드니스)만 가중치 2배 — 코드 주석: "FIRE BIRD(다이나믹 빌드업 곡) 오판을
+구제하려고 부장이 나중에 추가."
+
 **실험 방법**
 1. 밴드별 `energy_full` 평균/표준편차를 계산해 정렬한다.
-2. ave_mujica(n=29)의 원시 서브피처(zcr/perc/onset/cen/rms/contrast) 평균을 전체 모집단
-   (n=730) 분포 안에서 백분위로 환산한다(`bisect`로 정렬된 모집단 배열에서의 위치).
+2. 위 산출 공식을 그대로 재구현해(같은 GT_QUIET/GT_LOUD idx, 같은 z-score·orientation·가중치
+   식) 6개 피처 각각의 `orientation` 부호와, ave_mujica(n=29) 각 피처의 oriented z-score
+   평균을 직접 계산한다.
 
-**평가 방법**: ave_mujica가 어떤 서브피처에서 상대적으로 낮은/높은 백분위에 있는지를 보고,
-"실제로 조용해서 낮은 것"인지 "조합 공식이 특정 서브피처군만 반영해서 낮게 나온 것"인지를
-구분한다.
+**평가 방법**: 각 피처의 orientation이 상식(예: rms_p90↑=더 시끄러움)과 일치하는지 확인하고,
+ave_mujica의 낮은 energy_full이 (a) 해당 피처들의 실제 낮은 값 때문인지, (b) 방향 결정
+로직 자체의 부작용 때문인지를 가중 기여도(`weight × oriented_z`)로 분해해 구분한다.
 
 ## 3. 결과
 
@@ -143,7 +162,7 @@ Bonfire!(rank 254/730)·**処救生(rank 1/730, 전체 최하위)**는 실패. �
 바꾸지 않는다 → **brightness가 중심에 몰려 보이는 건 원본 피처의 실제 성질이며 정규화
 인공물이 아니다.**
 
-### 3.5 ave_mujica — 낮은 energy_full의 원인은 "장르적 강도 표현 방식" 편향
+### 3.5 ave_mujica — 낮은 energy_full의 진짜 원인은 "rms_p90 방향 반전" 버그
 
 밴드별 energy_full 평균(발췌):
 
@@ -155,21 +174,45 @@ Bonfire!(rank 254/730)·**処救生(rank 1/730, 전체 최하위)**는 실패. �
 | mugendai_mutype | 69 | 0.729 |
 
 같은 "하드한 이미지" 밴드인 raise_a_suilen은 정상적으로 높은데 ave_mujica만 유독 낮다.
-ave_mujica(n=29) 서브피처의 전체 모집단(n=730) 대비 백분위:
 
-| 서브피처 | 전체 평균 | AM 평균 | AM의 백분위 |
+**공식을 그대로 재구현해 6개 피처의 orientation을 직접 계산하면:**
+
+| 피처 | orientation | 근거 |
+|---|---|---|
+| perc_mean | **+1** | GT_LOUD 평균 z ≥ GT_QUIET 평균 z (상식과 일치) |
+| onset_mean | **+1** | 〃 |
+| zcr_mean | **+1** | 〃 |
+| cen_mean | **+1** | 〃 |
+| flat_mean | **+1** | 〃 |
+| **rms_p90** | **-1** | GT_LOUD 14곡의 raw rms_p90 z-score 평균이 GT_QUIET 14곡보다 **낮게** 나와 방향이 반전됨(라우드니스 정규화 때문 — `extract_full_energy.py`가 이미 "rms 절대값은 무용"이라 경고한 바로 그 문제) |
+
+즉 `rms_p90`은 배제된 게 아니라 **가중치 2배(6피처 중 최대)로 포함돼 있는데, 소규모
+GT셋(각 14곡)에서 우연히 방향이 거꾸로 학습됐다.**
+
+ave_mujica(n=29) 각 피처의 oriented z-score 평균(양수=시끄러운 방향으로 기여):
+
+| 피처 | oriented z 평균 | 가중치 | 기여도(가중×z) |
 |---|---|---|---|
-| zcr_mean | 0.128 | 0.112 | 21%ile |
-| perc_mean | 0.246 | 0.213 | 23%ile |
-| onset_mean | 1.230 | 1.149 | 22%ile |
-| cen_mean | 2677 | 2419 | **16%ile** |
-| **rms_mean** | 0.167 | **0.190** | **81%ile** |
-| contrast_mean | 22.06 | 22.07 | 56%ile(평균 수준) |
+| perc_mean | -0.767 | 1 | -0.767 |
+| onset_mean | -0.687 | 1 | -0.687 |
+| zcr_mean | -0.773 | 1 | -0.773 |
+| cen_mean | **-1.073** | 1 | -1.073 |
+| flat_mean | +0.082 | 1 | +0.082 |
+| **rms_p90** | **-1.015** | **2** | **-2.030** |
+| **합계 / Σw** | | 7 | **-5.248 / 7 ≈ -0.750** |
 
-**ave_mujica는 실제로 크게(라우드니스 상위 19%) 연주하지만, 거칠기·타악비중·어택밀도·음색밝기
-같은 "시끄러움" 대리지표에서는 전부 하위 20%대다.** 심포닉/고딕 계열답게 왜곡음·타격감이
-아니라 음량·음압으로 무거움을 표현하는 스타일로 보이는데, `build_energy_full.py`는 정확히
-그 rms(음량) 축을 조합에서 사실상 배제하고 zcr/percussive/spectral centroid 위주로 구성했다.
+`rms_p90`의 raw(방향 반전 전) z-score는 **양수**다(ave_mujica는 실제로 피크 음압이 큼 —
+`rms_mean` 기준 전체 730곡 중 81%ile). 그런데 orientation이 -1로 뒤집혀 있어서 이 항목
+하나가 **-2.03**을 기여하며, 이는 전체 가중합(-5.248)의 **약 39%**로 6개 피처 중 가장 큰
+단일 기여도다. 나머지 5개(perc/onset/zcr/cen/flat)는 방향은 정상이지만 ave_mujica가 원래
+그 값 자체가 낮아서(심포닉/고딕 계열답게 거칠기·타악비중·어택밀도·음색밝기가 낮음) 추가로
+음의 방향에 기여한다.
+
+**결론적으로 ave_mujica의 낮은 energy_full은 두 가지가 겹친 결과다**: (a) 실제로 거칠기·
+타악·어택·음색밝기가 낮은 장르적 특성(방향은 정상, 값 자체가 낮음) + (b) 가장 큰 가중치를
+가진 `rms_p90`이 소규모 GT셋에서 우연히 방향이 반전돼, ave_mujica의 진짜 강점(높은 피크
+음압)이 오히려 "조용함"의 증거로 잘못 쓰이는 것(b가 전체 음의 기여의 약 39%를 차지 — 단순
+장르 편향보다 이쪽이 더 큰 비중).
 
 ## 4. 결론
 
@@ -178,17 +221,13 @@ ave_mujica(n=29) 서브피처의 전체 모집단(n=730) 대비 백분위:
 - **`mode_score`/brightness의 중심 집중 분포**: 정규화 인공물 아님, 원본 피처의 실제 성질로
   확인됨. 추가 조치 불필요.
 - **`energy_full`은 현재 형태로 프로덕션 채택 불가.** 근거 둘:
-  1. 이 컬럼을 만든 핵심 목적(GT_MISJUDGED, 조용한 인트로+시끄러운 후렴 오판 교정)이 절반만
-     성공했고, 그중 최우선 사례(処救生)는 완전히 실패(전체 최하위).
-  2. **장르 편향**: 조합 공식이 rms(음량)를 배제하고 zcr/percussive/spectral brightness
-     위주로 구성돼 있어, "펑크/하드록처럼 거칠고 타격감 있는" 강도 표현은 잘 잡지만
-     "심포닉/고딕처럼 크고 두껍지만 매끄러운" 강도 표현(ave_mujica)은 체계적으로
-     과소평가한다.
-- **다음 단계(채택 전 필요 작업)**: `build_energy_full.py`의 후보 서브피처 조합에 신뢰 가능한
-  라우드니스 신호를 재도입하거나 가중치를 재검토해야 한다(현재는 "라우드니스 정규화 때문에
-  rms 절대값이 무용하다"는 이유로 배제돼 있으나, 상대적 순위/z-score 형태로는 유의미할 수
-  있음 — 미검증). **사용자 결정에 따라, 이 편향이 해소되기 전까지 `energy_full`을 실사용하는
-  후속 feature 작업은 머지 보류.**
+  1. GT_MISJUDGED(핵심 검증 대상) 절반 실패, 그중 処救生은 완전 실패(전체 최하위).
+  2. **`rms_p90`(가중치 2배, 최대) 방향 반전 버그**: 소규모 GT셋(14/14곡)에서 우연히
+     orientation이 -1로 학습돼, 실제로 피크 음압이 큰 ave_mujica가 "조용함"으로 오분류됨.
+     전체 음의 기여도의 약 39%를 이 항목 하나가 차지 — 단순 장르 편향이 아니라 자동
+     orientation 로직의 구조적 결함.
+- **수정 방향**: `rms_p90` orientation을 자동 결정 대신 고정(+1)하거나, GT셋을 늘려 재학습.
+  **사용자 결정: 해소 전까지 `energy_full` 사용 feature는 머지 보류.**
 
 ## 5. 레퍼런스
 - `src/scripts/data/extract_full_energy.py`, `src/scripts/data/build_energy_full.py`(main
