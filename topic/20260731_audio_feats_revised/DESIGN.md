@@ -62,6 +62,21 @@
 | 11 | **speechiness** | 통계적(1차 후보) | Scheirer-Slaney(1997) 4Hz 변조 에너지를 **보컬 스템**(보유)에 적용: modulation_energy = bandpass(envelope_spectrum, 3–4Hz) 에너지 비. **풀믹스 적용 금지** — 4분음표 주기가 180BPM=3Hz, 240BPM=4Hz로 드럼 리듬이 탐지 대역과 정면 교락하며, 이 카탈로그는 고속곡이 많아 풀믹스에선 사실상 템포를 측정하게 됨 | 아님 — 개념 자체를 겨냥한 고전 공식(단 스템 분리 품질에 의존) |
 | | | ML 교차검증 | **inaSpeechSegmenter**(INA, 사전학습 음성/음악/잡음 분류기) 또는 **pyannote** VAD — 프레임별 speech 확률의 트랙 평균 | **Proxy** — 이진 speech/non-speech만 주고, 랩·팟캐스트류 세분화(원 정의)는 없음 |
 
+### 왜 연속 회귀는 energy·valence에만 쓰나
+
+- **연속 평정 데이터셋이 존재하는 축이 valence·arousal뿐이다.** emoMusic/DEAM은 사람이 곡을
+  들으며 valence·arousal을 연속 척도로 평정한 데이터셋이고, 그걸로 학습된 회귀 모델이
+  공개돼 있다. danceability·acousticness 등은 그런 연속 평정 데이터셋이 없어 오픈 자원이
+  이진 분류기뿐 — "회귀로 안 바꾼" 게 아니라 바꿀 대상이 없다.
+- **분류기 확률의 0/1 포화는 연속 변별이 필요한 축에서만 결함이다.** energy·valence는 선곡
+  엔진의 핵심 타깃이라 촘촘한 연속 변별이 필요하지만, acousticness·instrumentalness·
+  liveness는 이 카탈로그에서 정답 자체가 거의 이진(비어쿠스틱·보컬곡·스튜디오)이라 포화된
+  출력이 오히려 현실과 일치한다. Spotify 원 정의도 acousticness는 "confidence measure"라
+  분류기 확률이 원 개념 그대로다.
+- danceability의 1차 후보는 애초에 분류기가 아니라 DFA 지수(결정론적 연속 통계량)다.
+- 용어 주의: "연속 회귀"의 연속은 **출력값의 성질**(확률 vs 연속 점수)이지 시간 축이 아니다.
+  시계열/윈도우 산출은 별개 축으로, 분류기든 회귀든 전 피처에 공통 적용된다(공통 규약 참조).
+
 ## 산출 공통 규약
 
 - **전곡 오디오** 기준, 45초 발췌 금지. 시작/끝 무음 트리밍 정책(임계 dBFS)을 사전 고정하고
