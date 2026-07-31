@@ -6654,6 +6654,22 @@
             "y": -14.61,
             "bpm": 129.2,
             "energy": 0.165
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "Face The Next",
+            "url": "https://youtu.be/6PpzqcesklA",
+            "x": 35.62,
+            "y": 2.97,
+            "bpm": 103.4
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "TearJerker",
+            "url": "https://youtu.be/T8ynAJWmPtM",
+            "x": 33.5,
+            "y": -10.87,
+            "bpm": 143.6
         }
     ],
     "centroids": [
@@ -6695,9 +6711,9 @@
         },
         {
             "band": "mugendai_mutype",
-            "n": 31,
-            "x": 18.24,
-            "y": 2.11
+            "n": 71,
+            "x": 3.75,
+            "y": 7.75
         },
         {
             "band": "mygo",
@@ -6741,7 +6757,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 689,
+        "n": 732,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
