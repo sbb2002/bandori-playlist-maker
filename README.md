@@ -24,6 +24,7 @@
 | [`topic/20260722_mood_axis_topdown/`](topic/20260722_mood_axis_topdown/README.md) | 감성언어 축을 먼저 정의 → ground truth 확장 → 기존 신호 전수 스크리닝 → 통과분만 파이프라인 연결(탑다운 전환) | 진행 중 — n=1 파일럿·라운드2 진행 중, n≥20 확대 라운드 미착수 |
 | [`topic/20260723_lyric_gate_ordering/`](topic/20260723_lyric_gate_ordering/README.md) | 가사 기반 후보추림을 에너지 필터 앞/뒤 어디에 둘지 순서 재검증 | 진행 중 — Phase 0(정성 디버깅) 착수 전 |
 | [`topic/20260730_energy_full_validation/`](topic/20260730_energy_full_validation/README.md) | `energy`/`energy_full`과 tempo·brightness·원시 오디오 피처(zcr/spectral/HPSS 등)의 관계, GT_MISJUDGED 재검증 | **보류** — GT_MISJUDGED(처救生) 미해결 + ave_mujica 장르 편향 확인, 해소 전까지 후속 feature 머지 보류 |
+| [`topic/20260731_audio_feats_revised/`](topic/20260731_audio_feats_revised/README.md) | `energy`/`valence` 산출 파이프라인 전면 재설계 — 기존 프록시·`energy_full`·`mode_score`는 반면교사로만 취급, 코드·공식 재참조 없이 처음부터 재산출 | 진행 중 — 방법론 설계 착수 전 |
 
 각 폴더의 배경·방법·결과는 폴더 안의 `README.md`를 참조.
 
