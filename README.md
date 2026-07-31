@@ -8,13 +8,22 @@
 
 ## 폴더 구성
 
-| 폴더 | 주제 | 상태 |
+폴더명은 `<연구시작일 YYYYMMDD>_<연구명>` 형식이다(2026-07-31 전체 재정렬 — 시작일은 해당
+폴더를 최초로 추가한 커밋 날짜 기준).
+
+| 폴더 | 주제 | 연구 종결 여부 |
 |---|---|---|
-| [`topic/mfcc_analysis/`](topic/mfcc_analysis/README.md) | MFCC/CQT 음색·화성·멜로디 정성 탐색, 가사·음향 임베딩 결합 아이디어 | 진행 중(정량 결론 전) |
-| [`topic/mood_warmth/`](topic/mood_warmth/README.md) | 보컬 발성 feature(jitter/shimmer/HNR/F0 등)로 "가련/애절(pathos)" 지각 검증 | 1차 검증 완료(채택 0, 시사적 1) |
-| [`topic/vector_embedding/`](topic/vector_embedding/README.md) | LLM 문맥 확장 + 가사·음원 피처 벡터 임베딩 검색 + 에너지 매칭 파이프라인 가설 검증 | 가설 수립(검토 완료, 검증 미착수) |
-| [`topic/mood_axis_topdown/`](topic/mood_axis_topdown/README.md) | 감성언어 축을 먼저 정의 → ground truth 확장 → 기존 신호 전수 스크리닝 → 통과분만 파이프라인 연결(탑다운 전환) | 방법론 설계 완료, 실행 미착수 |
-| [`topic/energy_full_validation/`](topic/energy_full_validation/README.md) | `energy`/`energy_full`과 tempo·brightness·원시 오디오 피처(zcr/spectral/HPSS 등)의 관계, GT_MISJUDGED 재검증 | **채택 보류** — GT_MISJUDGED(처救生) 미해결 + ave_mujica 장르 편향 확인, 해소 전까지 후속 feature 머지 보류 |
+| [`topic/20260716_mfcc_analysis/`](topic/20260716_mfcc_analysis/README.md) | MFCC/CQT 음색·화성·멜로디 정성 탐색, 가사·음향 임베딩 결합 아이디어 | **종결** — 정성 탐색 종료, 화성 축 아이디어는 [`20260718_chord_progression`](topic/20260718_chord_progression/README.md)으로 분리 승격 |
+| [`topic/20260716_mood_warmth/`](topic/20260716_mood_warmth/README.md) | 보컬 발성 feature(jitter/shimmer/HNR/F0 등)로 "가련/애절(pathos)" 지각 검증 | **종결(2026-07-18)** — "계산 가능한 valence 축이 사실상 없다"로 결론, 2라운드는 실행 없이 닫음 |
+| [`topic/20260718_chord_progression/`](topic/20260718_chord_progression/README.md) | 화성학적 코드진행 기반 밝음/어두움(valence) 대리축 파일럿 | 진행 중 — 파이프라인(01~04) 실행 완료·자동판정 NO-GO, 필수 청취 스팟체크 미수행(인수인계 대기) |
+| [`topic/20260718_selection_pipeline/`](topic/20260718_selection_pipeline/README.md) | 선곡 파이프라인 3-way(v1~v3) 비교 실험 — Stage 순서/구성 변경 효과 검증 | **종결(2026-07-18)** — v1~v3 전부 유의한 차이 없음 |
+| [`topic/20260719_energy_selection/`](topic/20260719_energy_selection/README.md) | LLM 에너지 파라미터 해석 프롬프트 튜닝(A/B/C/D 후보 비교) | **종결** — `candidate_AB` 채택 권고까지 완료(배포 미반영, 제안 단계) |
+| [`topic/20260720_audio_feats_analysis/`](topic/20260720_audio_feats_analysis/README.md) | 조성(key)·템포 검출 정확도 조사, `KS_PROFILES` 버그 수정 + Essentia 교차검증 | **종결** — 자동 알고리즘 조사는 여기서 종료, 원인불명 50곡만 사람 청취 확인으로 인계 |
+| [`topic/20260720_llm_param_control_separate/`](topic/20260720_llm_param_control_separate/README.md) | 3~4단계 순차 LLM 파라미터 제어 파일럿 + 무드/가사 축 확장 설계 검토 | 진행 중 — 설계 제안 단계에서 멈추고 상위 트랙 [`20260722_mood_axis_topdown`](topic/20260722_mood_axis_topdown/README.md)이 후속 승계 |
+| [`topic/20260720_vector_embedding/`](topic/20260720_vector_embedding/README.md) | 가사·음원 피처 벡터 임베딩 검색 + 가사-음향 직교성/에너지 분포 검증(Phase 1·2) | **종결** — Phase 1·2 완료(report 01~05), 결론은 이후 트랙들의 근거로 재사용 중 |
+| [`topic/20260722_mood_axis_topdown/`](topic/20260722_mood_axis_topdown/README.md) | 감성언어 축을 먼저 정의 → ground truth 확장 → 기존 신호 전수 스크리닝 → 통과분만 파이프라인 연결(탑다운 전환) | 진행 중 — n=1 파일럿·라운드2 진행 중, n≥20 확대 라운드 미착수 |
+| [`topic/20260723_lyric_gate_ordering/`](topic/20260723_lyric_gate_ordering/README.md) | 가사 기반 후보추림을 에너지 필터 앞/뒤 어디에 둘지 순서 재검증 | 진행 중 — Phase 0(정성 디버깅) 착수 전 |
+| [`topic/20260730_energy_full_validation/`](topic/20260730_energy_full_validation/README.md) | `energy`/`energy_full`과 tempo·brightness·원시 오디오 피처(zcr/spectral/HPSS 등)의 관계, GT_MISJUDGED 재검증 | **보류** — GT_MISJUDGED(처救生) 미해결 + ave_mujica 장르 편향 확인, 해소 전까지 후속 feature 머지 보류 |
 
 각 폴더의 배경·방법·결과는 폴더 안의 `README.md`를 참조.
 
