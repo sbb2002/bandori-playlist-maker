@@ -8,7 +8,7 @@
 
 ## 산출물
 
-`out/loudness_raw.csv`:
+`out/csv/loudness_raw.csv`:
 ```
 idx, band, song, duration_sec,
 lufs_integrated,           # 통합 라우드니스(대표값), pyloudnorm Meter.integrated_loudness

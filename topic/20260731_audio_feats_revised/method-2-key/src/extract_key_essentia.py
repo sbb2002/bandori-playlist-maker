@@ -73,7 +73,7 @@ AUDIO_FULL_DIR = (
 )
 
 OUT_DIR = _METHOD_DIR / "out"
-OUT_CSV = OUT_DIR / "key_raw.csv"
+OUT_CSV = OUT_DIR / "csv" / "key_raw.csv"
 
 # 추출 파라미터
 SR = 22050
@@ -173,6 +173,7 @@ def _worker(task: tuple[int, str, str, str]) -> dict:
         key_ess, mode_ess = extract_essentia_key(Path(path))
         return {
             "idx": idx,
+            "band": band,
             "key_essentia": key_ess or "",
             "mode_essentia": mode_ess or "",
             "error": "",
@@ -180,6 +181,7 @@ def _worker(task: tuple[int, str, str, str]) -> dict:
     except Exception as exc:
         return {
             "idx": idx,
+            "band": band,
             "key_essentia": "",
             "mode_essentia": "",
             "error": repr(exc),
@@ -198,7 +200,8 @@ def _build_tasks(
         if only_idx is not None and idx not in only_idx:
             continue
         band = r["band"]
-        path = _audio_path(band, idx)
+        file_idx = int(r.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
+        path = _audio_path(band, file_idx)
         if not path.exists():
             print(f"  [WARN] 오디오 없음 idx={idx} {path.name} — 건너뜀", flush=True)
             continue
@@ -209,7 +212,7 @@ def _build_tasks(
 
 
 def merge_essentia_results(
-    csv_path: Path, essentia_results: dict[int, dict]
+    csv_path: Path, essentia_results: dict[tuple[str, int], dict]
 ) -> None:
     """기존 key_raw.csv를 읽고 essentia 컬럼을 병합해서 덮어쓴다."""
     rows = []
@@ -218,10 +221,13 @@ def merge_essentia_results(
         rows = list(reader)
 
     # essentia 결과 병합 및 비교
+    # ⚠️ idx는 band 간에 유일하지 않을 수 있어(2026-08-01 확인) (band, idx) 복합키로
+    # 매칭해야 서로 다른 band의 동일 idx 곡에 잘못된 값이 섞이는 사고를 막는다.
     for row in rows:
         idx = int(row["idx"])
-        if idx in essentia_results:
-            ess_res = essentia_results[idx]
+        key = (row["band"], idx)
+        if key in essentia_results:
+            ess_res = essentia_results[key]
             row["key_essentia"] = ess_res.get("key_essentia", "")
             row["mode_essentia"] = ess_res.get("mode_essentia", "")
 
@@ -316,7 +322,7 @@ def main() -> None:
 
         for i, res in enumerate(it, 1):
             idx = res["idx"]
-            essentia_results[idx] = res
+            essentia_results[(res["band"], idx)] = res
 
             if res.get("error"):
                 n_err += 1

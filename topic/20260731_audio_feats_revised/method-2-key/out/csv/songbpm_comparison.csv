@@ -1,0 +1,45 @@
+idx,band,song,key_ks,mode_ks,key_essentia,mode_essentia,songbpm_key,songbpm_mode,key_match_ks,mode_match_ks,both_match_ks,key_match_essentia,mode_match_essentia,both_match_essentia,songbpm_url
+11,afterglow,Scarlet Sky,A,major,A,major,A,major,True,True,True,True,True,True,https://songbpm.com/@afterglow/scarlet-sky-tu5UDcitxg
+37,afterglow,ペトリコール・オベーション,F,major,F,major,F,major,True,True,True,True,True,True,https://songbpm.com/@afterglow/44oa44oi44oq44kz44o844or44o744kq44oz44o844k344on44oz-i2f1a
+51,afterglow,ロキ (Cover),E,minor,E,minor,B,minor,False,True,False,False,True,False,https://songbpm.com/@afterglow/44ot44kt-wrkmc
+21,afterglow,極彩色,D,major,G,major,C,major,False,True,False,False,True,False,https://songbpm.com/@afterglow/5qw15b2p6imy-dvve5
+632,roselia,Sing Alive,A#,major,F,major,F,minor,False,False,False,True,False,False,https://songbpm.com/@roselia/sing-alive-8ZPvFo4iDe
+625,roselia,VIOLET LINE,A,major,A,major,F#,minor,False,False,False,False,False,False,https://songbpm.com/@roselia/violet-line-PfPtBBhuqS
+571,roselia,BLACK SHOUT,E,minor,E,minor,C,major,False,False,False,False,False,False,https://songbpm.com/@roselia/black-shout
+593,roselia,Sage der Rosen,D,minor,D,minor,D,minor,True,True,True,True,True,True,https://songbpm.com/@roselia/sage-der-rosen-yge7n
+575,roselia,Re:birth day,D,major,G,major,G,major,False,True,False,True,True,True,https://songbpm.com/@roselia/re-birth-day
+180,morfonica,Daylight -デイライト-,G,minor,G,minor,G,major,True,False,False,True,False,False,https://songbpm.com/@morfonica/daylight--deiraito-vmMnYJAG9m
+227,morfonica,ALIVE (Cover),G#,minor,B,major,G#/Ab,minor,True,True,True,False,False,False,https://songbpm.com/@morfonica/alive-cover-d3sv3
+182,morfonica,flame of hope,A,minor,A,minor,E,minor,False,True,False,False,True,False,https://songbpm.com/@morfonica/flame-of-hope-fhrzSJnGaA
+405,poppin_party,Returns,C,major,C,major,C,major,True,True,True,True,True,True,https://songbpm.com/@poppin-party/returns
+511,raise_a_suilen,THE WAY OF LIFE,G,minor,G,minor,G,minor,True,True,True,True,True,True,https://songbpm.com/@raise-a-suilen/the-way-of-life-J9n6hV7lnj
+540,raise_a_suilen,WELCOME TO PANDEMONIUM,F#,minor,F#,minor,B,minor,False,True,False,False,True,False,https://songbpm.com/@raise-a-suilen/welcome-to-pandemonium-wzc1t
+545,raise_a_suilen,Embrace of light,A,major,A,minor,D,major,False,True,False,False,False,False,https://songbpm.com/@raise-a-suilen/embrace-of-light-5MASrv1dkG
+496,raise_a_suilen,Takin' my Heart,G,minor,G,minor,G,minor,True,True,True,True,True,True,https://songbpm.com/@raise-a-suilen/takin-my-heart
+494,raise_a_suilen,HELL! or HELL?,E,minor,E,minor,E,minor,True,True,True,True,True,True,https://songbpm.com/@raise-a-suilen/hell-or-hell
+498,raise_a_suilen,!NVADE SHOW!,C#,major,C#,minor,C#/Db,minor,True,False,False,True,True,True,https://songbpm.com/@raise-a-suilen/nvade-show
+85,ave_mujica,Symbol I : △,F#,minor,B,minor,G,major,False,False,False,False,False,False,https://songbpm.com/@ave-mujica/symbol-i-sbz8k
+89,ave_mujica,Ether,G#,minor,E,major,C#/Db,minor,False,True,False,False,False,False,https://songbpm.com/@ave-mujica/ether-hm0dg
+93,ave_mujica,Angles,B,major,Ab,minor,G#/Ab,minor,False,False,False,True,True,True,https://songbpm.com/@ave-mujica/angles-XDws5ZOjxh
+72,ave_mujica,KiLLKiSS,E,minor,E,minor,E,minor,True,True,True,True,True,True,https://songbpm.com/@ave-mujica/killkiss-f77od
+74,ave_mujica,Imprisoned XII,C,major,C,major,C,major,True,True,True,True,True,True,https://songbpm.com/@ave-mujica/imprisoned-xii-rttva
+73,ave_mujica,"Georgette Me, Georgette You",C#,minor,C#,minor,C#/Db,minor,True,True,True,True,True,True,https://songbpm.com/@ave-mujica/georgette-me-georgette-you-be8fg
+288,mygo,エガクミライ,G#,major,Ab,major,G#/Ab,major,True,True,True,True,True,True,https://songbpm.com/@mygo/44ko44ks44kv44of44op44kk-fj560
+270,mygo,無路矢,B,minor,E,minor,E,minor,False,True,False,True,True,True,https://songbpm.com/@mygo/54sh6lev55i-gce4f
+283,mygo,砂寸奏,C#,minor,A,major,A,major,False,False,False,True,True,True,https://songbpm.com/@mygo/56cc5a45awp-tv7mg
+262,mygo,碧天伴走,C#,major,C#,major,C#/Db,major,True,True,True,True,True,True,https://songbpm.com/@mygo/56kn5asp5ly06lww-csm8e
+268,mygo,詩超絆,C,major,F,major,F,major,False,True,False,True,True,True,https://songbpm.com/@mygo/shi-chao-ban-IkMZ4w3TXw
+260,mygo,迷星叫,G#,major,Ab,major,G#/Ab,major,True,True,True,True,True,True,https://songbpm.com/@mygo/6l35pif5yr-utlln
+261,mygo,壱雫空,C#,major,F#,major,C#/Db,major,True,True,True,False,True,False,https://songbpm.com/@mygo/yi-na-kong-mqKDWPZhAF
+276,mygo,霧周途,D,minor,F,major,A#/Bb,major,False,False,False,False,True,False,https://songbpm.com/@mygo/6zyn5zgo6ycu-uo16l
+269,mygo,迷路日々,E,minor,D,major,B,minor,False,True,False,False,False,False,https://songbpm.com/@mygo/mi-lu-ri-9eEn1IDR4N
+359,pastel_palettes,アイドル (Cover),A,minor,A,minor,F#/Gb,minor,False,True,False,False,True,False,https://songbpm.com/@pastel-palettes/aidoru---cover-Z78NjVM3LV
+322,pastel_palettes,あこがれacross,A,major,A,major,F#/Gb,minor,False,False,False,False,False,False,https://songbpm.com/@pastel-palettes/akogareacross-HrsLuXIjUI
+363,pastel_palettes,Baby Sweet Berry Love (Cover),E,major,A,major,A,major,False,True,False,True,True,True,https://songbpm.com/@pastel-palettes/baby-sweet-berry-love-MbdZnSof-e
+321,pastel_palettes,Brand new Pastel Road!,A#,major,Bb,major,A#/Bb,major,True,True,True,True,True,True,https://songbpm.com/@pastel-palettes/brand-new-pastel-road-pJWZ62iujx
+122,hello_happy_world,ふわふわ☆ゆめいろサンドイッチ,F,major,F,major,F,major,True,True,True,True,True,True,https://songbpm.com/@hello-happy-world/fuwa-fuwa-dreamy-sandwich
+128,hello_happy_world,ハピネスっ！ハピィーマジカルっ♪,A,major,A,major,A,major,True,True,True,True,True,True,https://songbpm.com/@hello-happy-world/happiness-happy-magical
+107,hello_happy_world,ハイファイブ∞あどべんちゃっ,D#,major,Eb,major,D#/Eb,major,True,True,True,True,True,True,https://songbpm.com/@hello-happy-world/high-five-adventure
+115,hello_happy_world,えがおのオーケストラっ！,A#,major,Bb,major,A#/Bb,major,True,True,True,True,True,True,https://songbpm.com/@hello-happy-world/orchestra-of-smiles
+109,hello_happy_world,えがお･シング･あ･ソング,E,major,E,major,E,major,True,True,True,True,True,True,https://songbpm.com/@hello-happy-world/smiling-singing-a-song
+125,hello_happy_world,わちゃ・もちゃ・ぺったん行進曲,D#,major,Eb,major,G#/Ab,major,False,True,False,False,True,False,https://songbpm.com/@hello-happy-world/wacha-mocha-pettan-march

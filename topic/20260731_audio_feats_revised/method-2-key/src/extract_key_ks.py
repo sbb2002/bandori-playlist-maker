@@ -55,7 +55,7 @@ AUDIO_FULL_DIR = (
 OUT_DIR = _METHOD_DIR / "out"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-OUT_CSV = OUT_DIR / "key_raw.csv"
+OUT_CSV = OUT_DIR / "csv" / "key_raw.csv"
 TIMESERIES_DIR = OUT_DIR / "timeseries"
 TIMESERIES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -267,7 +267,7 @@ def _worker(task: tuple[int, str, str, str, float]) -> dict:
         windows = feats.pop("windows")  # 별도 처리
 
         # 윈도우 결과 저장
-        _save_windows_csv(idx, windows)
+        _save_windows_csv(idx, windows, band=band)
 
         return {
             "idx": idx,
@@ -298,9 +298,13 @@ def _worker(task: tuple[int, str, str, str, float]) -> dict:
         }
 
 
-def _save_windows_csv(idx: int, windows: list[dict]) -> None:
-    """윈도우별 원시 결과를 CSV로 저장."""
-    csv_path = TIMESERIES_DIR / f"{idx}_key_windows.csv"
+def _save_windows_csv(idx: int, windows: list[dict], band: str = "") -> None:
+    """윈도우별 원시 결과를 CSV로 저장.
+
+    ⚠️ idx는 band 간에 유일하지 않을 수 있어(2026-08-01 확인) 파일명에 band를 포함해
+    서로 다른 band의 동일 idx 곡이 timeseries 파일을 덮어쓰는 사고를 막는다."""
+    prefix = f"{band}__{idx}" if band else str(idx)
+    csv_path = TIMESERIES_DIR / f"{prefix}_key_windows.csv"
     with csv_path.open("w", encoding="utf-8", newline="") as f:
         if windows:
             writer = csv.DictWriter(
@@ -352,7 +356,8 @@ def _build_tasks(
         if only_idx is None and idx in done:
             continue
         band = r["band"]
-        path = _audio_path(band, idx)
+        file_idx = int(r.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
+        path = _audio_path(band, file_idx)
         if not path.exists():
             print(f"  [WARN] 오디오 없음 idx={idx} {path.name} — 건너뜀", flush=True)
             continue

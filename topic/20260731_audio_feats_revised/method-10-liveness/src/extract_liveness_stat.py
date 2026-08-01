@@ -63,7 +63,7 @@ AUDIO_FULL_DIR = (
     _MYPROJECTS_ROOT / "bandori-song-sorter" / "src" / "content" / "cluster" / "audio_full"
 )
 
-OUT_CSV = _METHOD_DIR / "out" / "liveness_raw.csv"
+OUT_CSV = _METHOD_DIR / "out" / "csv" / "liveness_raw.csv"
 
 # 파라미터
 SR = 22050  # 일반적인 분석용 SR
@@ -209,7 +209,8 @@ def _build_tasks(
         if only_idx is not None and idx not in only_idx:
             continue
         band = r["band"]
-        path = _audio_path(band, idx)
+        file_idx = int(r.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
+        path = _audio_path(band, file_idx)
         if not path.exists():
             print(f"  [WARN] 오디오 없음 idx={idx} {path.name} — 건너뜀", flush=True)
             continue

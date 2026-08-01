@@ -26,8 +26,8 @@ def _setup_paths():
     # method-2-key와 method-3-mode는 같은 TOPIC_DIR 아래의 형제 디렉터리
     KEY_RAW_CSV = TOPIC_DIR / "method-2-key" / "out" / "key_raw.csv"
     MODE_OUT_DIR = METHOD_DIR / "out"
-    MODE_RAW_CSV = MODE_OUT_DIR / "mode_raw.csv"
-    MODE_REPORT_MD = MODE_OUT_DIR / "mode_report.md"
+    MODE_RAW_CSV = MODE_OUT_DIR / "csv" / "mode_raw.csv"
+    MODE_REPORT_MD = MODE_OUT_DIR / "report" / "mode_report.md"
 
     return {
         "THIS_DIR": THIS_DIR,
@@ -54,7 +54,9 @@ method-2-key의 extract_key_ks.py를 먼저 실행하여 key_raw.csv를 생성�
         df = pd.read_csv(key_raw_path, dtype={"idx": int, "band": str, "song": str})
         # extract_key_ks.py는 --idx 재추출 시 중복 idx를 append할 수 있다(관례상 "build
         # 단계에서 최신 우선 처리" — 이 스크립트가 그 build 단계) → idx당 마지막 행만 채택.
-        df = df.drop_duplicates(subset="idx", keep="last").reset_index(drop=True)
+        # idx는 band 간에 유일하지 않을 수 있어(2026-08-01 확인) (idx, band) 복합키로
+        # 중복 제거해야 서로 다른 band의 동일 idx 곡이 유실되지 않는다.
+        df = df.drop_duplicates(subset=["idx", "band"], keep="last").reset_index(drop=True)
         return df
     except Exception as e:
         print(f"key_raw.csv 읽기 실패: {e}", file=sys.stderr)

@@ -62,7 +62,7 @@ _AUDIO_DIR = (
     / "cluster"
     / "audio_full"
 )
-_OUT_CSV = _METHOD_DIR / "out" / "tempo_raw.csv"
+_OUT_CSV = _METHOD_DIR / "out" / "csv" / "tempo_raw.csv"
 
 # ---------------------------------------------------------------------------
 # 추출 파라미터 (재현성 고정)
@@ -161,7 +161,8 @@ def _build_tasks(
         if only_idx is None and idx in done:
             continue
         band = r["band"]
-        path = _audio_path(band, idx)
+        file_idx = int(r.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
+        path = _audio_path(band, file_idx)
         if not path.exists():
             print(f"  [WARN] 오디오 없음 idx={idx} {path.name} — 건너뜀", flush=True)
             continue

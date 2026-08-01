@@ -1,0 +1,737 @@
+idx,band,song,key_ks,mode_ks,key_essentia,mode_essentia,key_modal,mode_modal,mode_modal_family,modal_confidence,is_non_major_minor,family_agrees_with_ks
+0,afterglow,ON YOUR MARK,A,major,D,major,A,ionian,major,0.379,False,True
+1,afterglow,That Is How I Roll!,D,major,D,major,D,lydian,major,0.159,True,True
+2,afterglow,SENSENFUKOKU,F,major,D,minor,A,phrygian,minor,0.281,True,False
+3,afterglow,I knew it!,A,major,A,major,A,lydian,major,0.368,True,True
+4,afterglow,ツナグ、ソラモヨウ,E,major,E,major,E,ionian,major,0.919,False,True
+5,afterglow,Hey-day狂騒曲(カプリチオ),A,minor,D,minor,G,dorian,minor,0.196,True,True
+6,afterglow,"Easy come, Easy go!",D,major,D,major,D,ionian,major,0.535,False,True
+7,afterglow,Sasanqua,C#,major,C#,major,C#,ionian,major,0.611,False,True
+8,afterglow,RED RED RED,C#,major,C#,major,C#,ionian,major,0.441,False,True
+9,afterglow,ONE OF US,G,minor,F,major,G,aeolian,minor,0.515,False,True
+10,afterglow,Y.O.L.O!!!!!,F,major,F,major,F,ionian,major,0.365,False,True
+11,afterglow,Scarlet Sky,A,major,A,major,A,ionian,major,0.698,False,True
+12,afterglow,Off we go.,C,major,C,major,C,ionian,major,0.426,False,True
+13,afterglow,いつも通りのBrand new days,C#,major,F#,minor,C#,ionian,major,0.324,False,True
+14,afterglow,SWITCH ON NOW,G#,minor,Ab,minor,G#,aeolian,minor,0.409,False,True
+15,afterglow,ランブリングメモリー,E,major,E,major,E,ionian,major,0.93,False,True
+16,afterglow,COMIC PANIC!!!,F,major,F,major,F,ionian,major,0.81,False,True
+17,afterglow,Trouble Joyful!!,D,major,D,minor,C,ionian,major,0.259,False,True
+18,afterglow,Jamboree!Journey!,F#,major,F#,major,F#,ionian,major,0.561,False,True
+19,afterglow,カナユメ,D,major,D,major,D,ionian,major,0.518,False,True
+20,afterglow,独創収差,F#,major,Eb,minor,F#,ionian,major,0.194,False,True
+21,afterglow,極彩色,D,major,G,major,D,ionian,major,0.226,False,True
+22,afterglow,サクラゼンセン,F#,minor,A,major,F#,aeolian,minor,0.551,False,True
+23,afterglow,True color,B,minor,G,major,B,phrygian,minor,0.273,True,True
+24,afterglow,Crow Song,D#,major,Eb,major,D#,ionian,major,0.314,False,True
+25,afterglow,カサブタ,A,major,A,major,A,ionian,major,0.493,False,True
+26,afterglow,アイのシナリオ,D,major,D,major,D,ionian,major,0.705,False,True
+27,afterglow,Northern lights,A,minor,A,minor,A,aeolian,minor,0.518,False,True
+28,afterglow,トーキョーワンダー。,C,major,F,major,D,aeolian,minor,0.303,False,False
+29,afterglow,Reach Out To The Truth,B,minor,D,major,D,ionian,major,0.319,False,False
+30,afterglow,Listen!!,A,major,A,minor,A,mixolydian,major,0.269,True,True
+31,afterglow,青い栞,B,major,B,major,B,ionian,major,0.562,False,True
+32,afterglow,イマジネーション,G#,major,Ab,minor,G#,ionian,major,0.349,False,True
+33,afterglow,Butter-Fly,G#,major,Ab,major,G#,ionian,major,0.336,False,True
+34,afterglow,燦々,E,major,E,major,E,ionian,major,0.705,False,True
+35,afterglow,That's why I'm here.,B,major,Ab,major,B,ionian,major,0.319,False,True
+36,afterglow,IGNITE GLOW,E,minor,C,major,E,phrygian,minor,0.312,True,True
+37,afterglow,ペトリコール・オベーション,F,major,F,major,F,ionian,major,0.372,False,True
+38,afterglow,Made My Day,F,major,F,major,F,ionian,major,0.66,False,True
+39,afterglow,Glowing After,F#,minor,B,major,F#,dorian,minor,0.686,True,True
+40,afterglow,A Sunset So Bright,E,minor,A,minor,E,phrygian,minor,0.568,True,True
+41,afterglow,Start as Usual,D,major,G,major,F#,phrygian,minor,0.389,True,False
+42,afterglow,“Say cheese!!!!!”,A,major,A,major,A,ionian,major,0.412,False,True
+43,afterglow,花笑みのデュオ,G,major,G,major,G,ionian,major,0.42,False,True
+44,afterglow,READY STEADY GO (Cover),E,major,A,major,E,ionian,major,0.417,False,True
+45,afterglow,abnormalize (Cover),F,major,F,major,F,ionian,major,0.593,False,True
+46,afterglow,メンタルチェンソー (Cover),D,minor,C,minor,D,locrian,minor,0.219,True,True
+47,afterglow,Bunny Girl (Cover),G#,minor,A,major,G#,phrygian,minor,0.666,True,True
+48,afterglow,オレンジ (Cover),G,major,G,major,G,ionian,major,0.78,False,True
+49,afterglow,カゲロウデイズ (Cover),G,minor,F,major,G,phrygian,minor,0.294,True,True
+50,afterglow,DAY×DAY (Cover),G,major,C,major,G,ionian,major,0.314,False,True
+51,afterglow,ロキ (Cover),E,minor,E,minor,E,phrygian,minor,0.368,True,True
+52,afterglow,CHAINSAW BLOOD (Cover),A,minor,A,minor,A,phrygian,minor,0.436,True,True
+53,afterglow,チルドレンレコード (Re:boot) (Cover),A#,major,C,minor,E,locrian,minor,0.243,True,False
+54,afterglow,青のすみか (Cover),F#,major,F#,major,B,lydian,major,0.377,True,True
+55,afterglow,GO!!! (Cover),F,major,F,major,F,ionian,major,0.761,False,True
+56,afterglow,天ノ弱 (Cover),C#,major,C#,major,C#,ionian,major,0.407,False,True
+57,afterglow,アスノヨゾラ哨戒班 (Cover),A,major,A,major,A,ionian,major,0.684,False,True
+58,afterglow,瞬間センチメンタル (Cover),A,major,F#,minor,A,ionian,major,0.301,False,True
+59,afterglow,プライド革命 (Cover),E,major,E,major,E,ionian,major,0.969,False,True
+60,afterglow,命に嫌われている。 (Cover),C,major,C,major,C,ionian,major,0.754,False,True
+61,afterglow,Redo (Cover),C,minor,C,minor,C,aeolian,minor,0.382,False,True
+62,afterglow,インフェルノ (Cover),A,major,A,major,A,ionian,major,0.605,False,True
+63,afterglow,ドラマツルギー (Cover),F#,minor,F#,minor,F#,aeolian,minor,0.419,False,True
+64,afterglow,COLORS (Cover),C#,major,Bb,minor,C#,ionian,major,0.594,False,True
+65,afterglow,午夜の待ち合わせ (Cover),G#,major,C#,minor,G#,mixolydian,major,0.273,True,True
+66,afterglow,サムライハート（Some Like It Hot!!） (Cover),G,major,G,major,G,ionian,major,0.717,False,True
+67,afterglow,ベノム (Cover),F,minor,F,minor,F,aeolian,minor,0.466,False,True
+68,afterglow,Don't say “lazy” (Cover),E,major,E,minor,E,mixolydian,major,0.195,True,True
+69,afterglow,Part of the Life,B,major,B,major,B,ionian,major,0.275,False,True
+70,afterglow,Punchline Halloween!!!,C,major,C,minor,C,mixolydian,major,0.359,True,True
+71,afterglow,I love your way！,F#,minor,D,major,F#,phrygian,minor,0.433,True,True
+72,ave_mujica,KiLLKiSS,E,minor,E,minor,E,aeolian,minor,0.703,False,True
+73,ave_mujica,"Georgette Me, Georgette You",C#,minor,C#,minor,C#,aeolian,minor,0.293,False,True
+74,ave_mujica,Imprisoned XII,C,major,C,major,E,phrygian,minor,0.443,True,False
+75,ave_mujica,Crucifix X,D,minor,D,minor,E,locrian,minor,0.308,True,True
+76,ave_mujica,八芒星ダンス,C#,major,C#,minor,C#,ionian,major,0.334,False,True
+77,ave_mujica,顔,F#,minor,B,minor,F#,locrian,minor,0.59,True,True
+78,ave_mujica,天球のMúsica,F,major,F,major,F,ionian,major,0.408,False,True
+79,ave_mujica,黒のバースデイ,D#,minor,Eb,minor,D#,aeolian,minor,0.685,False,True
+80,ave_mujica,ふたつの月 ~Deep Into The Forest~,E,minor,E,minor,E,aeolian,minor,0.376,False,True
+81,ave_mujica,Choir ‘S’ Choir,G,minor,G,minor,G,phrygian,minor,0.397,True,True
+82,ave_mujica,神さま、バカ,D,minor,F,major,D,aeolian,minor,0.449,False,True
+83,ave_mujica,Mas?uerade Rhapsody Re?uest,G#,minor,C#,minor,G#,phrygian,minor,0.489,True,True
+84,ave_mujica,Ave Mujica,G,minor,G,minor,G,phrygian,minor,0.191,True,True
+85,ave_mujica,Symbol I : △,F#,minor,B,minor,F#,phrygian,minor,0.489,True,True
+86,ave_mujica,Symbol II : Air,F#,minor,B,minor,F#,phrygian,minor,0.495,True,True
+87,ave_mujica,Symbol III : ▽,G,major,G,major,G,ionian,major,0.495,False,True
+88,ave_mujica,Symbol IV : Earth,D#,major,C,minor,D#,ionian,major,0.355,False,True
+89,ave_mujica,Ether,G#,minor,E,major,G#,phrygian,minor,0.293,True,True
+90,ave_mujica,The Whole Blue World,C#,major,C#,major,F,phrygian,minor,0.445,True,False
+91,ave_mujica,in your blue eyes,D,minor,D,minor,D,aeolian,minor,0.239,False,True
+92,ave_mujica,素晴らしき世界 でも どこにもない場所,C,major,C,minor,C,lydian,major,0.31,True,True
+93,ave_mujica,Angles,B,major,Ab,minor,B,ionian,major,0.306,False,True
+94,ave_mujica,DIVINE,F,major,G,major,F,ionian,major,0.297,False,True
+95,ave_mujica,Sophie,B,minor,B,minor,B,aeolian,minor,0.623,False,True
+96,ave_mujica,‘S/’ The Way,E,minor,E,minor,E,aeolian,minor,0.404,False,True
+97,ave_mujica,碧い瞳の中に,D,minor,D,minor,D,aeolian,minor,0.241,False,True
+98,ave_mujica,堕天 (Cover),F#,minor,Ab,minor,E,dorian,minor,0.168,True,True
+99,ave_mujica,KINGS (Cover),B,major,Ab,minor,B,ionian,major,0.264,False,True
+100,ave_mujica,暗黒天国 (Cover),F,minor,Bb,minor,F,phrygian,minor,0.461,True,True
+101,various_artists,Don't be afraid!,A#,minor,Eb,minor,A#,phrygian,minor,0.194,True,True
+102,various_artists,Glee! Glee! Glee!,G,major,G,major,G,ionian,major,0.651,False,True
+103,various_artists,"Be shine, shining!",E,major,E,major,E,ionian,major,0.419,False,True
+104,various_artists,"Here, the world",G#,major,Ab,major,G#,ionian,major,0.509,False,True
+105,various_artists,CiRCLE THANKS MUSiC♪,G,major,G,major,G,ionian,major,0.756,False,True
+106,hello_happy_world,キミがいなくちゃっ！,D,major,D,major,D,ionian,major,0.748,False,True
+107,hello_happy_world,ハイファイブ∞あどべんちゃっ,D#,major,Eb,major,D#,ionian,major,0.748,False,True
+108,hello_happy_world,スマイルブーケで た〜まや〜！,G,major,C#,minor,C#,ionian,major,0.196,False,True
+109,hello_happy_world,えがお･シング･あ･ソング,E,major,E,major,E,ionian,major,0.388,False,True
+110,hello_happy_world,YAPPY! SCHOOL CARNIVAL☆彡,B,major,E,major,D#,locrian,minor,0.26,True,False
+111,hello_happy_world,にこ×にこ=ハイパースマイルパワー！,F#,minor,F#,minor,B,dorian,minor,0.261,True,True
+112,hello_happy_world,ないすみちゅっ！,G#,major,Eb,minor,G,locrian,minor,0.178,True,False
+113,hello_happy_world,ゴーカ！ごーかい！？ファントムシーフ！,G#,minor,Ab,minor,G#,aeolian,minor,0.418,False,True
+114,hello_happy_world,うぃーきゃん☆フレフレっ！,D,major,A,major,D,ionian,major,0.349,False,True
+115,hello_happy_world,えがおのオーケストラっ！,A#,major,Bb,major,A#,ionian,major,0.732,False,True
+116,hello_happy_world,にこにこねくと！,D,major,D,major,D,ionian,major,0.549,False,True
+117,hello_happy_world,ふぁいぶスマイル◯オールインっ！,A,major,A,major,G#,phrygian,minor,0.344,True,False
+118,hello_happy_world,せかいのっびのびトレジャー！,D,major,D,major,G,ionian,major,0.242,False,True
+119,hello_happy_world,きらっ☆と キミフェス！,G#,minor,Ab,minor,G#,aeolian,minor,0.501,False,True
+120,hello_happy_world,うちゃパ！で ぱっぴかポーんっ！,C,major,C,major,C,mixolydian,major,0.895,True,True
+121,hello_happy_world,はれやか すこやか ぴかりんりん♪,C,major,C,major,C,ionian,major,0.505,False,True
+122,hello_happy_world,ふわふわ☆ゆめいろサンドイッチ,F,major,F,major,F,ionian,major,0.545,False,True
+123,hello_happy_world,Happy! Happier! Happiest!,F,major,F,major,F,ionian,major,0.347,False,True
+124,hello_happy_world,現るっ！大怪盗ハロハッピー！,A,minor,A,minor,A,dorian,minor,0.345,True,True
+125,hello_happy_world,わちゃ・もちゃ・ぺったん行進曲,D#,major,Eb,major,D#,ionian,major,0.425,False,True
+126,hello_happy_world,おもいでイルミネーション,A#,major,Bb,major,A#,mixolydian,major,0.304,True,True
+127,hello_happy_world,おもいやりハーモニー,F#,major,F#,major,F#,mixolydian,major,0.233,True,True
+128,hello_happy_world,ハピネスっ！ハピィーマジカルっ♪,A,major,A,major,A,ionian,major,0.761,False,True
+129,hello_happy_world,えがお、あーゆーれでぃ???,D,major,D,major,D,ionian,major,0.494,False,True
+130,hello_happy_world,ハッピーサマーウェディング,C,major,D,minor,D,lydian,major,0.213,True,True
+131,hello_happy_world,ひまわりの約束,D,major,D,major,D,ionian,major,0.359,False,True
+132,hello_happy_world,ハッピー☆マテリアル,C#,major,Eb,minor,D#,lydian,major,0.372,True,True
+133,hello_happy_world,太陽曰く燃えよカオス,A,minor,C,major,A,aeolian,minor,0.452,False,True
+134,hello_happy_world,エクストラ・マジック・アワー,D#,major,Eb,major,D#,ionian,major,0.315,False,True
+135,hello_happy_world,コレカラ,A,major,A,major,A,ionian,major,0.251,False,True
+136,hello_happy_world,全力少年,G,major,G,major,G,ionian,major,0.526,False,True
+137,hello_happy_world,オレンジ,F,major,F,major,F,ionian,major,0.655,False,True
+138,hello_happy_world,Happy Girl,D,major,D,major,D,ionian,major,0.485,False,True
+139,hello_happy_world,ン・パカマーチ,D,major,D,major,D,lydian,major,0.498,True,True
+140,hello_happy_world,サンバロハッピ〜！,C,major,F,major,F#,locrian,minor,0.429,True,False
+141,hello_happy_world,ボクらの夏's☆ショーたいむっ！！,D,minor,F,major,C,mixolydian,major,0.298,True,False
+142,hello_happy_world,むすんでわらって,C,major,F,major,F,ionian,major,0.379,False,True
+143,hello_happy_world,キミを れっつ・はぶ・ふぁん♪,E,major,E,major,D#,locrian,minor,0.391,True,False
+144,hello_happy_world,らいふ・いず・みゅーじかるっ♪♪♪,A,major,A,major,A,ionian,major,0.417,False,True
+145,hello_happy_world,れっつ・スマイル・すとり〜みんぐっ♪,F#,major,F#,major,C#,mixolydian,major,0.269,True,True
+146,hello_happy_world,やっほー！いっぽ！わんだふぉー！,G#,major,Ab,major,G#,ionian,major,0.289,False,True
+147,hello_happy_world,とーくとぅみー・とーくとぅゆー,G,minor,C,minor,G,aeolian,minor,0.518,False,True
+148,hello_happy_world,ハイタッチ／＼びりーばーず☆,C,major,C,major,C,ionian,major,0.328,False,True
+149,hello_happy_world,Listen to Smile!,G,major,G,major,G,ionian,major,0.434,False,True
+150,hello_happy_world,スマイリーキャロル,F,major,C,major,F,ionian,major,0.154,False,True
+151,hello_happy_world,えがお、み〜っけた！,G,major,G,major,G,ionian,major,0.381,False,True
+152,hello_happy_world,上海ハニー (Cover),D,major,A,minor,D,mixolydian,major,0.262,True,True
+153,hello_happy_world,シル・ヴ・プレジデント (Cover),G#,major,Ab,major,C,phrygian,minor,0.401,True,False
+154,hello_happy_world,ヒャダインのじょーじょーゆーじょー (Cover),D,minor,C,major,D,dorian,minor,0.183,True,True
+155,hello_happy_world,はいよろこんで (Cover),C#,minor,C#,minor,C#,aeolian,minor,0.821,False,True
+156,hello_happy_world,シカ色デイズ (Cover),D,major,G,major,D,mixolydian,major,0.377,True,True
+157,hello_happy_world,強風オールバック (Cover),G,major,E,minor,G,ionian,major,0.741,False,True
+158,hello_happy_world,最高到達点 (Cover),F,major,F,major,F,ionian,major,0.697,False,True
+159,hello_happy_world,許婚っきゅん (Cover),B,minor,B,minor,B,dorian,minor,0.35,True,True
+160,hello_happy_world,新宝島 (Cover),D,major,D,major,D,ionian,major,0.579,False,True
+161,hello_happy_world,ドレミファロンド (Cover),D#,major,Eb,major,D#,ionian,major,0.849,False,True
+162,hello_happy_world,きゅうくらりん (Cover),D,minor,C,major,D,dorian,minor,0.431,True,True
+163,hello_happy_world,ロメオ (Cover),G#,major,Ab,major,G#,mixolydian,major,0.31,True,True
+164,hello_happy_world,エイリアンエイリアン (Cover),C#,minor,C#,minor,G#,phrygian,minor,0.379,True,True
+165,hello_happy_world,いーあるふぁんくらぶ (Cover),D,minor,D,minor,D,dorian,minor,0.285,True,True
+166,hello_happy_world,回レ！雪月花 (Cover),C,minor,C,minor,C,aeolian,minor,0.423,False,True
+167,hello_happy_world,恋愛裁判 (Cover),E,major,E,major,E,ionian,major,0.311,False,True
+168,hello_happy_world,TOMORROW (Cover),F,major,F,major,A,phrygian,minor,0.39,True,False
+169,hello_happy_world,GO! GO! MANIAC (Cover),B,minor,B,major,B,dorian,minor,0.306,True,True
+170,hello_happy_world,Dragon Night (Cover),D#,major,Eb,major,G,phrygian,minor,0.503,True,False
+171,hello_happy_world,ようこそジャパリパークへ (Cover),F,major,F,major,C,mixolydian,major,0.299,True,True
+172,hello_happy_world,ウィーアー！ (Cover),G,major,G,major,G,mixolydian,major,0.399,True,True
+173,hello_happy_world,おジャ魔女カーニバル!! (Cover),C,minor,C,minor,D#,lydian,major,0.421,True,False
+174,hello_happy_world,ダーリンダンス (Cover),F#,minor,E,major,F#,dorian,minor,0.335,True,True
+175,hello_happy_world,ノーポイッ！ (Cover),B,major,E,major,B,mixolydian,major,0.315,True,True
+176,hello_happy_world,SHINY DAYS (Cover),F#,major,F#,major,F#,ionian,major,0.306,False,True
+177,hello_happy_world,シルエット (Cover),G,minor,Eb,major,G,phrygian,minor,0.462,True,True
+178,ikka_dumb_rock,ホーミー・タイッ！！,D,minor,D,minor,D,mixolydian,major,0.355,True,False
+179,millsage,起死開戦,E,major,E,major,F#,dorian,minor,0.235,True,False
+180,morfonica,Daylight -デイライト-,G,minor,G,minor,E,locrian,minor,0.192,True,True
+181,morfonica,メランコリックララバイ,G,minor,F,minor,G,dorian,minor,0.358,True,True
+182,morfonica,flame of hope,A,minor,A,minor,A,aeolian,minor,0.608,False,True
+183,morfonica,ブルームブルーム,D,major,F#,minor,G,dorian,minor,0.274,True,False
+184,morfonica,カラフルリバティー,G#,minor,E,major,G#,phrygian,minor,0.733,True,True
+185,morfonica,fly with the night,A,major,A,major,A,ionian,major,0.411,False,True
+186,morfonica,金色へのプレリュード,B,minor,C,major,B,phrygian,minor,0.309,True,True
+187,morfonica,The Circle Of Butterflies,B,major,B,major,B,ionian,major,0.473,False,True
+188,morfonica,ハーモニー・デイ,D#,major,Eb,major,D#,ionian,major,0.558,False,True
+189,morfonica,Sweet Cheers!,G,major,G,major,B,phrygian,minor,0.271,True,False
+190,morfonica,"寄る辺のSunny, Sunny",A,minor,F,major,A,phrygian,minor,0.573,True,True
+191,morfonica,誓いのWingbeat,A,minor,A,minor,A,phrygian,minor,0.835,True,True
+192,morfonica,Ever Sky Blue,A#,minor,Ab,minor,A#,locrian,minor,0.348,True,True
+193,morfonica,Polyphonyscape,F#,major,F#,major,F#,ionian,major,0.64,False,True
+194,morfonica,Wreath of Brave,B,major,B,major,E,lydian,major,0.578,True,True
+195,morfonica,Merry Merry Thanks!!,B,major,E,major,B,mixolydian,major,0.237,True,True
+196,morfonica,Sonorous,G,major,G,major,G,ionian,major,0.513,False,True
+197,morfonica,両翼のBrilliance,A,minor,D,minor,A,phrygian,minor,0.983,True,True
+198,morfonica,Steer to Utopia,G#,minor,B,major,E,lydian,major,0.465,True,False
+199,morfonica,Fateful...,G,major,B,minor,G,ionian,major,0.257,False,True
+200,morfonica,ティリカモニカリラ,B,minor,B,minor,B,aeolian,minor,0.362,False,True
+201,morfonica,Secret Dawn,A#,major,Bb,major,A,locrian,minor,0.452,True,False
+202,morfonica,Angel's Ladder,A#,major,Bb,major,A,locrian,minor,0.395,True,False
+203,morfonica,One step at a time,E,major,E,major,E,ionian,major,0.682,False,True
+204,morfonica,Tempest,A,minor,E,minor,A,dorian,minor,0.609,True,True
+205,morfonica,フレージング ミラージュ,E,minor,E,minor,E,aeolian,minor,0.26,False,True
+206,morfonica,MUGEN Reverberate!,B,minor,B,minor,B,aeolian,minor,0.532,False,True
+207,morfonica,わたしまちがいさがし,E,minor,A,minor,E,phrygian,minor,0.419,True,True
+208,morfonica,esora no clover,A,minor,D,minor,A,phrygian,minor,0.441,True,True
+209,morfonica,きょうもMerry go rounD,F#,minor,F#,minor,D#,phrygian,minor,0.226,True,True
+210,morfonica,Feathered Dreams,E,major,A,minor,E,mixolydian,major,0.27,True,True
+211,morfonica,Portray Empathy,G,major,G,major,B,phrygian,minor,0.547,True,False
+212,morfonica,ビューティ・フォー,B,minor,D,major,B,phrygian,minor,0.324,True,True
+213,morfonica,胡蝶翔る星月夜,A,major,A,major,A,ionian,major,0.862,False,True
+214,morfonica,Color of Us,G#,major,Ab,major,G#,ionian,major,0.392,False,True
+215,morfonica,Resonant Strings,A,minor,A,minor,A,phrygian,minor,0.475,True,True
+216,morfonica,Shining Leaves,A,major,D,major,D,ionian,major,0.21,False,True
+217,morfonica,音がえしのセレナーデ,D,major,G,major,A,dorian,minor,0.302,True,False
+218,morfonica,蒼穹へのトレイル,G,minor,G,minor,A,locrian,minor,0.279,True,True
+219,morfonica,QUEEN (Cover),G,minor,G,minor,G,dorian,minor,0.52,True,True
+220,morfonica,again (Cover),A,minor,E,minor,A,dorian,minor,0.397,True,True
+221,morfonica,輪舞-revolution (Cover),A,minor,D,minor,A,phrygian,minor,0.81,True,True
+222,morfonica,メロウ (Cover),G#,major,Ab,major,G#,ionian,major,0.418,False,True
+223,morfonica,祝福 (Cover),A,minor,A,minor,A,phrygian,minor,0.24,True,True
+224,morfonica,Overdose (Cover),A,minor,A,minor,A,phrygian,minor,0.961,True,True
+225,morfonica,かくれんぼ (Cover),A#,minor,B,major,A#,phrygian,minor,0.436,True,True
+226,morfonica,chAngE (Cover),B,minor,D,minor,F,ionian,major,0.214,False,False
+227,morfonica,ALIVE (Cover),G#,minor,B,major,E,lydian,major,0.394,True,False
+228,morfonica,Nameless Story (Cover),A,minor,A,minor,A,phrygian,minor,0.598,True,True
+229,morfonica,青空のラプソディ (Cover),A,minor,F,major,A,phrygian,minor,0.93,True,True
+230,morfonica,Nevereverland (Cover),A,minor,A,minor,A,aeolian,minor,0.239,False,True
+231,morfonica,メリッサ (Cover),F,major,C,minor,C,dorian,minor,0.208,True,False
+232,morfonica,COLORFUL BOX (Cover),A,minor,F,major,A,phrygian,minor,0.711,True,True
+233,morfonica,unravel (Cover),G#,major,Ab,major,G#,ionian,major,0.486,False,True
+234,morfonica,アゲハ蝶 (Cover),A,minor,D,minor,A,phrygian,minor,0.326,True,True
+235,morfonica,V.I.P (Cover),A,minor,F,minor,A,phrygian,minor,0.361,True,True
+236,morfonica,CQCQ (Cover),G#,minor,B,minor,G#,locrian,minor,1.0,True,True
+237,mugendai_mutype,アイの夢限,A,major,A,major,D#,locrian,minor,0.463,True,False
+238,mugendai_mutype,どんがらがっしゃん,E,minor,A,minor,E,phrygian,minor,0.351,True,True
+239,mugendai_mutype,みゅーたんとミュータント,D,major,G,major,F#,phrygian,minor,0.383,True,False
+240,mugendai_mutype,チューニング,C#,major,C#,major,C#,ionian,major,0.414,False,True
+241,mugendai_mutype,Dream Voyage,E,minor,C,major,E,phrygian,minor,0.29,True,True
+242,mugendai_mutype,グラディエント,G,major,G,major,G,ionian,major,0.46,False,True
+243,mugendai_mutype,LET'Sあちあちトレーニング！,C#,minor,C#,major,C#,ionian,major,0.149,False,False
+244,mugendai_mutype,真夜中遊園地,D,minor,F,major,D,phrygian,minor,0.402,True,True
+245,mugendai_mutype,テレパシー,A,major,A,minor,A,ionian,major,0.363,False,True
+246,mugendai_mutype,TRASH LIFE,A#,major,Bb,major,A#,ionian,major,0.613,False,True
+247,mugendai_mutype,新人類は仮想世界の夢を見るか?,E,minor,G,major,E,aeolian,minor,0.543,False,True
+248,mugendai_mutype,コミュ着火Fire!,C,minor,F,minor,F,dorian,minor,0.209,True,True
+249,mugendai_mutype,Calling,D,minor,D,minor,D,phrygian,minor,0.844,True,True
+250,mugendai_mutype,Hi-Vision,C#,minor,F#,minor,C#,locrian,minor,0.297,True,True
+251,mugendai_mutype,コハク,D,major,D,major,D,ionian,major,0.453,False,True
+252,mugendai_mutype,✞animaるパーティ✞開催中✞,D,minor,D,major,D,phrygian,minor,0.475,True,True
+253,mugendai_mutype,エンプティパペット,D,minor,D,minor,D,aeolian,minor,0.666,False,True
+254,mugendai_mutype,限界現実サバイブ天使,A,major,D,major,A,ionian,major,0.234,False,True
+255,mugendai_mutype,ビッグマウス,D#,minor,Ab,minor,G#,lydian,major,0.291,True,False
+256,mugendai_mutype,夢現妄想世界,G#,minor,A,minor,G#,phrygian,minor,0.639,True,True
+257,mugendai_mutype,やわやわNERD 超FreQuency,F#,minor,F#,minor,F#,phrygian,minor,0.285,True,True
+258,mugendai_mutype,超惑星Xへの旅,F#,minor,F#,minor,F#,phrygian,minor,0.779,True,True
+259,mugendai_mutype,これはぼくたちの生存のあらすじ,G#,major,Ab,major,G#,ionian,major,0.293,False,True
+260,mygo,迷星叫,G#,major,Ab,major,C,phrygian,minor,0.47,True,False
+261,mygo,壱雫空,C#,major,F#,major,C#,dorian,minor,0.243,True,False
+262,mygo,碧天伴走,C#,major,C#,major,C#,dorian,minor,0.384,True,False
+263,mygo,影色舞,A#,minor,Bb,minor,A#,aeolian,minor,0.364,False,True
+264,mygo,歌いましょう鳴らしましょう,E,minor,A,minor,E,locrian,minor,0.868,True,True
+265,mygo,潜在表明,B,minor,B,minor,F#,mixolydian,major,0.232,True,False
+266,mygo,音一会,F,minor,Ab,major,C,phrygian,minor,0.298,True,True
+267,mygo,春日影 (MyGO!!!!! ver.),B,major,B,major,B,ionian,major,0.525,False,True
+268,mygo,詩超絆,C,major,F,major,C,mixolydian,major,0.648,True,True
+269,mygo,迷路日々,E,minor,D,major,E,dorian,minor,0.394,True,True
+270,mygo,無路矢,B,minor,E,minor,B,phrygian,minor,0.726,True,True
+271,mygo,名無声,F#,major,F#,major,F#,lydian,major,0.449,True,True
+272,mygo,栞,D,major,D,major,D,ionian,major,0.512,False,True
+273,mygo,歩拾道,E,minor,G,major,E,phrygian,minor,0.56,True,True
+274,mygo,明弦音,B,major,E,minor,E,lydian,major,0.314,True,True
+275,mygo,孤壊牢,E,minor,E,minor,E,dorian,minor,0.394,True,True
+276,mygo,霧周途,D,minor,F,major,D,aeolian,minor,0.451,False,True
+277,mygo,端程山,C#,minor,E,major,C#,aeolian,minor,0.412,False,True
+278,mygo,処救生,F,minor,C#,major,F,phrygian,minor,0.49,True,True
+279,mygo,輪符雨,F,minor,F,minor,A#,dorian,minor,0.186,True,True
+280,mygo,夜隠染,A#,major,Bb,major,A#,ionian,major,0.617,False,True
+281,mygo,過惰幻,A#,major,Bb,major,A#,ionian,major,0.712,False,True
+282,mygo,回層浮,C#,major,Ab,minor,C#,ionian,major,0.177,False,True
+283,mygo,砂寸奏,C#,minor,A,major,C#,phrygian,minor,0.864,True,True
+284,mygo,焚音打,C#,minor,A,major,C#,phrygian,minor,0.473,True,True
+285,mygo,残痕字,E,major,E,major,E,ionian,major,0.358,False,True
+286,mygo,掌心正銘,E,major,E,major,E,ionian,major,0.59,False,True
+287,mygo,証命讃歌,A,minor,F,major,A,phrygian,minor,0.678,True,True
+288,mygo,エガクミライ,G#,major,Ab,major,G#,ionian,major,0.349,False,True
+289,mygo,静降想,A#,major,Bb,major,A#,ionian,major,0.328,False,True
+290,mygo,聿日箋秋,A,major,D,major,A,mixolydian,major,0.513,True,True
+291,mygo,往欄印,D#,major,Eb,major,D#,ionian,major,0.462,False,True
+292,mygo,だれかの心臓になれたなら (Cover),G#,major,F,minor,C,phrygian,minor,0.357,True,False
+293,mygo,遥か彼方 (Cover),A,major,A,major,A,ionian,major,0.52,False,True
+294,mygo,雑踏、僕らの街 (Cover),E,minor,E,minor,E,phrygian,minor,0.854,True,True
+295,mygo,過去を喰らう (Cover),D#,major,Eb,major,D#,ionian,major,0.348,False,True
+296,mygo,君の神様になりたい。 (Cover),D,major,D,major,G,lydian,major,0.275,True,True
+297,mygo,ノンブレス・オブリージュ (Cover),C,major,C,major,C,ionian,major,0.633,False,True
+298,mygo,swim (Cover),E,major,E,major,E,ionian,major,0.509,False,True
+299,mygo,猛独が襲う (Cover),B,major,E,major,D#,phrygian,minor,0.627,True,False
+300,mygo,春日影,B,major,B,major,B,ionian,major,0.682,False,True
+301,pastel_palettes,TITLE IDOL,A#,major,Bb,major,A#,ionian,major,0.429,False,True
+302,pastel_palettes,ワクワクmeetsトリップ,G,major,E,minor,G,ionian,major,0.676,False,True
+303,pastel_palettes,ゆら・ゆらRing-Dong-Dance,G,major,C,major,B,phrygian,minor,0.309,True,False
+304,pastel_palettes,もういちど ルミナス,A,major,D,major,D,lydian,major,0.41,True,True
+305,pastel_palettes,あっつあつ 常夏 らぶ☆サマー！,F,major,F,major,C,ionian,major,0.308,False,True
+306,pastel_palettes,天下トーイツ A to Z☆,E,major,E,major,E,ionian,major,0.21,False,True
+307,pastel_palettes,しゅわりん☆どり〜みん,G#,major,Ab,major,G#,ionian,major,0.454,False,True
+308,pastel_palettes,Power of LOVE!!!,E,minor,G,major,F#,phrygian,minor,0.3,True,True
+309,pastel_palettes,きゅ～まい＊flower,F#,major,F#,major,G,locrian,minor,0.765,True,False
+310,pastel_palettes,Winking☆Cheer,C,major,C,major,C,ionian,major,0.687,False,True
+311,pastel_palettes,ゆめゆめグラデーション,E,major,E,major,E,ionian,major,0.826,False,True
+312,pastel_palettes,はなまる◎アンダンテ,G,minor,Eb,major,G,phrygian,minor,0.439,True,True
+313,pastel_palettes,パスパレボリューションず☆,F#,major,F#,minor,F#,ionian,major,0.433,False,True
+314,pastel_palettes,SURVIVOR ねばーぎぶあっぷ!,F#,minor,D,major,F#,phrygian,minor,0.766,True,True
+315,pastel_palettes,Wonderland Girl,F#,major,F#,minor,G,ionian,major,0.326,False,True
+316,pastel_palettes,ゼッタイ宣言～Recital～,A#,minor,C#,major,A#,aeolian,minor,0.19,False,True
+317,pastel_palettes,ぎゅっDAYS♪,F,major,F,major,F,ionian,major,0.604,False,True
+318,pastel_palettes,Wonderful Sweet!,E,major,E,major,E,ionian,major,0.461,False,True
+319,pastel_palettes,るんっ♪てぃてぃー！,D,major,D,major,A,dorian,minor,0.436,True,False
+320,pastel_palettes,パッパレ☆人生！バーン万歳！,C,minor,C,minor,C,aeolian,minor,0.461,False,True
+321,pastel_palettes,Brand new Pastel Road!,A#,major,Bb,major,A#,ionian,major,0.315,False,True
+322,pastel_palettes,あこがれacross,A,major,A,major,E,mixolydian,major,0.359,True,True
+323,pastel_palettes,ハレハレ☆フォーチュン,E,minor,B,minor,E,aeolian,minor,0.225,False,True
+324,pastel_palettes,ハナヒバナ,G,major,C,major,G,ionian,major,0.888,False,True
+325,pastel_palettes,そばかす,G,major,G,major,G,ionian,major,0.733,False,True
+326,pastel_palettes,気まぐれロマンティック,A,major,D,major,D,ionian,major,0.346,False,True
+327,pastel_palettes,ドリームパレード,D,major,D,major,F#,phrygian,minor,0.521,True,False
+328,pastel_palettes,ラムのラブソング,E,minor,G,major,E,dorian,minor,0.24,True,True
+329,pastel_palettes,DANCE! おジャ魔女,A,minor,C,major,A,dorian,minor,0.312,True,True
+330,pastel_palettes,DISCOTHEQUE,A,minor,A,minor,E,mixolydian,major,0.283,True,False
+331,pastel_palettes,ゆりゆららららゆるゆり大事件,D#,major,Eb,major,D#,ionian,major,0.402,False,True
+332,pastel_palettes,SAKURAスキップ,F,major,F,major,F,ionian,major,0.43,False,True
+333,pastel_palettes,Stay Alive,G#,major,Ab,major,G#,ionian,major,0.548,False,True
+334,pastel_palettes,秘密の扉から会いにきて,F,major,F,major,F,lydian,major,0.72,True,True
+335,pastel_palettes,トリドリ＊パレット,E,major,E,minor,E,ionian,major,0.213,False,True
+336,pastel_palettes,ドラマチック！アライブ,C,minor,C,minor,C,phrygian,minor,0.321,True,True
+337,pastel_palettes,Radiate Warriors,C#,minor,C#,minor,C#,lydian,major,0.272,True,False
+338,pastel_palettes,ReReReエボリューションず☆,E,major,E,major,E,ionian,major,0.359,False,True
+339,pastel_palettes,everyday flower,A,major,A,major,A,ionian,major,0.557,False,True
+340,pastel_palettes,With〜きみとわたしたちの物語〜,E,major,E,major,E,ionian,major,0.344,False,True
+341,pastel_palettes,フレっとパレットFight Song!!,G,major,G,major,G,ionian,major,0.537,False,True
+342,pastel_palettes,デイオフ・ラフ・ラブ・サンクス,C,major,C,major,G,phrygian,minor,0.252,True,False
+343,pastel_palettes,ホワイト ノスタルジア,F,major,C,major,A,phrygian,minor,0.297,True,False
+344,pastel_palettes,Y.O.L.O！！！！！(パスパレver.),G,minor,F,major,G,phrygian,minor,0.429,True,True
+345,pastel_palettes,奏（かなで） (Cover),E,major,E,minor,E,ionian,major,0.336,False,True
+346,pastel_palettes,Sparkling Daydream (Cover),G,major,G,major,G,ionian,major,0.245,False,True
+347,pastel_palettes,春を告げる (Cover),F#,major,F#,major,F#,ionian,major,0.465,False,True
+348,pastel_palettes,だから、ひとりじゃない (Cover),D#,major,Eb,major,D#,ionian,major,0.599,False,True
+349,pastel_palettes,サインはB (Cover),F#,major,F#,major,A#,phrygian,minor,0.573,True,False
+350,pastel_palettes,愛包ダンスホール (Cover),C#,minor,C#,minor,C#,aeolian,minor,0.273,False,True
+351,pastel_palettes,最上級にかわいいの！ (Cover),F,major,F,major,F,ionian,major,0.363,False,True
+352,pastel_palettes,♡桃色片想い♡ (Cover),F#,major,F#,major,F#,ionian,major,0.237,False,True
+353,pastel_palettes,金曜日のおはよう (Cover),D#,major,Eb,major,D#,ionian,major,0.653,False,True
+354,pastel_palettes,魔法少女とチョコレゐト (Cover),E,major,A,major,E,locrian,minor,0.326,True,False
+355,pastel_palettes,可愛くてごめん (Cover),D,major,D,major,D,ionian,major,0.93,False,True
+356,pastel_palettes,からくりピエロ (Cover),C,minor,C,minor,C,dorian,minor,0.183,True,True
+357,pastel_palettes,みくみくにしてあげる♪【してやんよ】 (Cover),F,major,F,major,F,ionian,major,0.768,False,True
+358,pastel_palettes,ルカルカ★ナイトフィーバー (Cover),F,minor,F,minor,F,dorian,minor,0.379,True,True
+359,pastel_palettes,アイドル (Cover),A,minor,A,minor,A,locrian,minor,0.246,True,True
+360,pastel_palettes,secret base ～君がくれたもの～ (Cover),F#,major,F#,major,F#,ionian,major,0.611,False,True
+361,pastel_palettes,ふわふわ時間 (Cover),E,major,E,major,E,ionian,major,0.815,False,True
+362,pastel_palettes,Fantastic future (Cover),A#,minor,F#,major,A#,phrygian,minor,0.4,True,True
+363,pastel_palettes,Baby Sweet Berry Love (Cover),E,major,A,major,G#,phrygian,minor,0.44,True,False
+364,pastel_palettes,Q＆A　リサイタル！ (Cover),D,major,G,major,G,lydian,major,0.316,True,True
+365,pastel_palettes,ヒトリゴト (Cover),F,major,C,minor,F,mixolydian,major,0.228,True,True
+366,pastel_palettes,惑星ループ (Cover),F,minor,Eb,major,F,dorian,minor,0.783,True,True
+367,pastel_palettes,世界は恋に落ちている (Cover),D,major,G,major,D,mixolydian,major,0.512,True,True
+368,pastel_palettes,ハッピーシンセサイザ (Cover),F,major,F,major,F,ionian,major,0.55,False,True
+369,pastel_palettes,春擬き (Cover),D,major,D,major,D,ionian,major,0.372,False,True
+370,pastel_palettes,Make it! (Cover),E,major,E,major,E,ionian,major,0.544,False,True
+371,pastel_palettes,花ハ踊レヤいろはにほ (Cover),C,minor,C,minor,C,phrygian,minor,0.366,True,True
+372,pastel_palettes,夜に駆ける (Cover),G,minor,C,minor,G,phrygian,minor,0.579,True,True
+373,pastel_palettes,徒花ネクロマンシー (Cover),C,major,C,major,C,ionian,major,0.41,False,True
+374,pastel_palettes,ノスタルジックレインフォール (Cover),G,major,G,major,G,ionian,major,0.935,False,True
+375,poppin_party,Yes! BanG_Dream!,B,major,B,major,B,ionian,major,0.319,False,True
+376,poppin_party,STAR BEAT!～ホシノコドウ～,G,major,G,major,G,ionian,major,0.928,False,True
+377,poppin_party,走り始めたばかりのキミに,C,major,A,minor,C,ionian,major,0.236,False,True
+378,poppin_party,ティアドロップス,B,minor,E,minor,B,phrygian,minor,0.386,True,True
+379,poppin_party,ときめきエクスペリエンス！,G,major,E,minor,G,ionian,major,0.267,False,True
+380,poppin_party,キラキラだとか夢だとか ～Sing Girls～,D,major,D,major,D,ionian,major,0.651,False,True
+381,poppin_party,私の心はチョココロネ,D,major,D,major,F#,phrygian,minor,0.486,True,False
+382,poppin_party,前へススメ！,B,minor,G,minor,G,ionian,major,0.214,False,False
+383,poppin_party,夢みるSunflower,A,major,E,minor,E,ionian,major,0.163,False,True
+384,poppin_party,ティアドロップス ～Popipa Acoustic Ver.～,B,minor,E,minor,B,phrygian,minor,0.804,True,True
+385,poppin_party,走り始めたばかりのキミに ～Popipa Acoustic Ver.～,B,minor,C,major,B,locrian,minor,0.49,True,True
+386,poppin_party,Time Lapse,E,minor,E,minor,E,dorian,minor,0.276,True,True
+387,poppin_party,八月のif,A,major,A,major,A,ionian,major,0.64,False,True
+388,poppin_party,クリスマスのうた,A,major,A,major,A,ionian,major,0.766,False,True
+389,poppin_party,B.O.F,F#,major,F#,minor,A#,phrygian,minor,0.279,True,False
+390,poppin_party,CiRCLING,F#,major,F#,major,F#,ionian,major,0.411,False,True
+391,poppin_party,二重の虹(ダブル レインボウ),F,major,F,major,F,ionian,major,0.562,False,True
+392,poppin_party,最高(さあ行こう)！,E,major,E,minor,B,phrygian,minor,0.201,True,False
+393,poppin_party,ガールズコード,E,major,E,major,E,ionian,major,0.328,False,True
+394,poppin_party,Yes! BanG_Dream! ～Popipa Acoustic Ver.～,B,major,B,major,B,ionian,major,0.763,False,True
+395,poppin_party,夏空 SUN! SUN! SEVEN! ～Popipa Acoustic Ver.～,B,minor,C,minor,B,locrian,minor,0.455,True,True
+396,poppin_party,STAR BEAT!～ホシノコドウ～ ～Popipa Acoustic Ver.～,G,major,G,major,B,phrygian,minor,0.559,True,False
+397,poppin_party,Breakthrough!,C,major,F,major,C,mixolydian,major,0.445,True,True
+398,poppin_party,NO GIRL NO CRY/Poppin'Party Ver.,D,major,D,major,D,ionian,major,0.756,False,True
+399,poppin_party,イニシャル,C,major,A,minor,E,phrygian,minor,0.258,True,False
+400,poppin_party,Hello! Wink!,D,minor,D,minor,D,aeolian,minor,0.461,False,True
+401,poppin_party,Step×Step!,G#,major,Ab,major,G#,ionian,major,0.735,False,True
+402,poppin_party,Jumpin',G#,major,Ab,major,G#,ionian,major,0.522,False,True
+403,poppin_party,White Afternoon,C,major,C,major,C,ionian,major,0.43,False,True
+404,poppin_party,キラキラスター！,F#,major,F#,minor,F#,ionian,major,0.278,False,True
+405,poppin_party,Returns,C,major,C,major,C,ionian,major,0.319,False,True
+406,poppin_party,Dreamers Go!,E,major,E,major,B,mixolydian,major,0.356,True,True
+407,poppin_party,キズナミュージック♪,A,major,A,major,A,ionian,major,0.207,False,True
+408,poppin_party,ミライトレイン,D,major,D,major,D,ionian,major,0.769,False,True
+409,poppin_party,夢を撃ち抜く瞬間に！,C,major,C,major,C,ionian,major,0.816,False,True
+410,poppin_party,ぽっぴん'しゃっふる,A,major,A,major,E,mixolydian,major,0.355,True,True
+411,poppin_party,夏空 SUN! SUN! SEVEN!,A#,major,Bb,major,A#,ionian,major,0.196,False,True
+412,poppin_party,1000回潤んだ空,F,major,F,major,F,ionian,major,0.161,False,True
+413,poppin_party,HAPPY HAPPY PARTY!,G,major,E,minor,G,ionian,major,0.407,False,True
+414,poppin_party,夏のドーン！,E,minor,B,minor,E,dorian,minor,0.556,True,True
+415,poppin_party,キミにもらったもの,F,major,F,major,F,ionian,major,0.748,False,True
+416,poppin_party,Light Delight,E,major,E,major,B,mixolydian,major,0.36,True,True
+417,poppin_party,切ないSandglass,F#,minor,A,major,D,lydian,major,0.219,True,False
+418,poppin_party,Home Street,E,major,E,major,E,ionian,major,0.605,False,True
+419,poppin_party,What's the POPIPA!?,D,major,E,minor,D,ionian,major,0.464,False,True
+420,poppin_party,SAKURA MEMORIES,G,major,C,major,G,mixolydian,major,0.507,True,True
+421,poppin_party,アニバーサリー,F,major,F,major,F,ionian,major,0.447,False,True
+422,poppin_party,Tomorrow's Door,B,major,B,major,B,ionian,major,0.461,False,True
+423,poppin_party,イントロダクション,F#,minor,F#,minor,F#,aeolian,minor,0.312,False,True
+424,poppin_party,TARINAI,F#,minor,F#,minor,C#,phrygian,minor,0.349,True,True
+425,poppin_party,DOKI DOKI SCARY,B,minor,B,minor,B,aeolian,minor,0.683,False,True
+426,poppin_party,Photograph,G#,major,Ab,major,G#,lydian,major,0.467,True,True
+427,poppin_party,夏に閉じこめて,D,major,D,major,D,ionian,major,0.765,False,True
+428,poppin_party,ぽっぴん'どりーむ！,D,major,G,major,E,dorian,minor,0.281,True,False
+429,poppin_party,星の約束,E,minor,G,major,E,dorian,minor,0.251,True,True
+430,poppin_party,新しい季節に,G,major,G,major,G,ionian,major,0.928,False,True
+431,poppin_party,トレモロアイズ,D,major,D,major,D,ionian,major,0.79,False,True
+432,poppin_party,雨上がり、キミと,F,major,F,major,F,ionian,major,0.69,False,True
+433,poppin_party,花咲く未来に,B,major,E,minor,B,mixolydian,major,0.278,True,True
+434,poppin_party,Live Beyond!!,F,major,F,major,F,ionian,major,0.433,False,True
+435,poppin_party,Sweets BAN!,G#,major,F,minor,G#,ionian,major,0.179,False,True
+436,poppin_party,キミが始まる！,F,major,F,major,C,mixolydian,major,0.28,True,True
+437,poppin_party,Moonlight Walk,F,minor,F,minor,F,aeolian,minor,0.236,False,True
+438,poppin_party,ここから先は歌にならない,F#,major,F#,major,F#,lydian,major,0.219,True,True
+439,poppin_party,青春 To Be Continued,C,major,C,major,C,ionian,major,0.327,False,True
+440,poppin_party,Future Place,D,major,D,major,D,ionian,major,0.869,False,True
+441,poppin_party,大好き！,A,major,A,minor,C#,phrygian,minor,0.215,True,False
+442,poppin_party,Five Letters,G#,major,Ab,major,G#,ionian,major,0.857,False,True
+443,poppin_party,最強☆ソング,A,major,D,major,A,mixolydian,major,0.566,True,True
+444,poppin_party,RiNG A BELL,B,major,E,major,B,mixolydian,major,0.236,True,True
+445,poppin_party,Drive Your Heart,G,major,G,major,G,ionian,major,0.771,False,True
+446,poppin_party,とっておきAnswer,C,major,C,major,C,ionian,major,0.585,False,True
+447,poppin_party,START!! True dreams,F,major,F,major,F,ionian,major,0.378,False,True
+448,poppin_party,どきどきデエト,F,major,F,major,F,ionian,major,0.456,False,True
+449,poppin_party,チョコレイトの低音レシピ,F,major,F,major,C,mixolydian,major,0.421,True,True
+450,poppin_party,Chu Chueen!,G,minor,G,minor,G,aeolian,minor,0.368,False,True
+451,poppin_party,どきどきSING OUT!,G,major,G,major,G,ionian,major,0.552,False,True
+452,poppin_party,Freedom,A#,major,Bb,major,D,phrygian,minor,0.375,True,False
+453,poppin_party,Game Changer,E,minor,E,minor,E,aeolian,minor,0.313,False,True
+454,poppin_party,花園電気ギター！！！,G,minor,C,minor,G,phrygian,minor,0.387,True,True
+455,poppin_party,す、好きなんかじゃない！,A,major,A,major,A,ionian,major,0.357,False,True
+456,poppin_party,遠い音楽 ～ハートビート～,G,major,C,major,G,ionian,major,0.535,False,True
+457,poppin_party,ほな！,E,major,E,major,E,mixolydian,major,0.236,True,True
+458,poppin_party,世界中の青空をあつめて,A,major,A,major,C#,phrygian,minor,0.502,True,False
+459,poppin_party,勇気Limit！,G,minor,Eb,major,G,aeolian,minor,0.173,False,True
+460,poppin_party,開けたらDream!,F,minor,F,major,F,dorian,minor,0.607,True,True
+461,poppin_party,絆色のアンサンブル,A#,major,C,minor,A#,ionian,major,0.269,False,True
+462,poppin_party,NO GIRL NO CRY (Poppin'Party Ver.),D,major,D,major,D,ionian,major,0.756,False,True
+463,poppin_party,ちゅ、多様性。 (Cover),B,major,B,major,D#,locrian,minor,0.57,True,False
+464,poppin_party,フィクション (Cover),D,major,G,major,D,ionian,major,0.295,False,True
+465,poppin_party,幾億光年 (Cover),G#,major,Ab,major,C,phrygian,minor,0.334,True,False
+466,poppin_party,心絵 (Cover),B,major,B,major,B,ionian,major,0.535,False,True
+467,poppin_party,じょいふる (Cover),E,minor,G,major,E,dorian,minor,0.745,True,True
+468,poppin_party,MATSURI BAYASHI (Cover),G,minor,G,minor,G,phrygian,minor,0.434,True,True
+469,poppin_party,私は最強 (Cover),E,major,E,major,D#,locrian,minor,0.326,True,False
+470,poppin_party,トウキョウ・シャンディ・ランデヴ (Cover),F#,minor,F#,minor,F#,dorian,minor,0.625,True,True
+471,poppin_party,夜行性ハイズ (Cover),A#,minor,F#,major,E,aeolian,minor,0.169,False,True
+472,poppin_party,メランコリック (Cover),D,minor,F,major,D,aeolian,minor,0.452,False,True
+473,poppin_party,怪獣の花唄 (Cover),D,major,D,major,D,ionian,major,0.516,False,True
+474,poppin_party,光るなら (Cover),F#,minor,A,major,F#,aeolian,minor,0.485,False,True
+475,poppin_party,ミュージック・アワー (Cover),A#,major,Bb,major,G,phrygian,minor,0.272,True,False
+476,poppin_party,only my railgun (Cover),D#,minor,Ab,minor,D#,aeolian,minor,0.304,False,True
+477,poppin_party,ロミオとシンデレラ (Cover),F#,major,F#,major,F#,ionian,major,0.517,False,True
+478,poppin_party,Daydream café (Cover),F,minor,C,minor,G,phrygian,minor,0.604,True,True
+479,poppin_party,君じゃなきゃダメみたい (Cover),D,minor,F,minor,D,aeolian,minor,0.349,False,True
+480,poppin_party,＊〜アスタリスク〜 (Cover),G,major,C,major,G,ionian,major,0.334,False,True
+481,poppin_party,DAYS of DASH (Cover),F#,minor,A,major,F#,aeolian,minor,0.576,False,True
+482,poppin_party,檄！帝国華撃団 (Cover),E,minor,G,major,E,dorian,minor,0.252,True,True
+483,poppin_party,DAYS (Cover),G,minor,F,major,G,dorian,minor,0.456,True,True
+484,poppin_party,ディスカバリー！ (Cover),C#,major,C#,major,G#,ionian,major,0.301,False,True
+485,poppin_party,チェリボム (Cover),F#,minor,F#,major,F#,phrygian,minor,0.469,True,True
+486,poppin_party,ヴァンパイア (Cover),C#,major,C#,minor,F#,dorian,minor,0.296,True,False
+487,poppin_party,怪物 (Cover),G#,minor,Ab,minor,G#,phrygian,minor,0.298,True,True
+488,poppin_party,大河よ共に泣いてくれ (Cover),F,minor,F,minor,F,phrygian,minor,0.446,True,True
+489,poppin_party,空色デイズ (Cover),F#,minor,B,minor,F#,phrygian,minor,0.576,True,True
+490,raise_a_suilen,Invincible Fighter,F,major,G,minor,F,ionian,major,0.183,False,True
+491,raise_a_suilen,A DECLARATION OF ×××,A#,minor,C#,minor,A#,locrian,minor,0.24,True,True
+492,raise_a_suilen,SOUL SOLDIER,F#,minor,B,minor,F#,phrygian,minor,0.666,True,True
+493,raise_a_suilen,UNSTOPPABLE,G,major,E,minor,B,phrygian,minor,0.602,True,False
+494,raise_a_suilen,HELL! or HELL?,E,minor,E,minor,E,aeolian,minor,0.732,False,True
+495,raise_a_suilen,Beautiful Birthday,B,minor,B,minor,B,aeolian,minor,0.268,False,True
+496,raise_a_suilen,Takin’ my Heart,G,minor,G,minor,G,aeolian,minor,0.186,False,True
+497,raise_a_suilen,DRIVE US CRAZY,F,minor,Ab,major,F,aeolian,minor,0.248,False,True
+498,raise_a_suilen,!NVADE SHOW!,C#,major,C#,minor,G#,phrygian,minor,0.23,True,False
+499,raise_a_suilen,REIGNING,F,major,F,major,F,ionian,major,0.765,False,True
+500,raise_a_suilen,EXPOSE ‘Burn out!!!’,C,minor,C,minor,C,aeolian,minor,0.567,False,True
+501,raise_a_suilen,R・I・O・T,G,minor,G,minor,G,phrygian,minor,0.403,True,True
+502,raise_a_suilen,V.I.P MONSTER,D,minor,D,minor,D,phrygian,minor,0.347,True,True
+503,raise_a_suilen,mind of Prominence,A#,minor,Ab,major,A#,phrygian,minor,0.201,True,True
+504,raise_a_suilen,Ray of hope,D,minor,D,minor,D,aeolian,minor,0.364,False,True
+505,raise_a_suilen,EXIST,G,major,C,minor,G,ionian,major,0.356,False,True
+506,raise_a_suilen,Sacred world,F#,minor,B,major,G#,phrygian,minor,0.278,True,True
+507,raise_a_suilen,-N-E-M-E-S-I-S-,F#,major,Eb,minor,A#,phrygian,minor,0.401,True,False
+508,raise_a_suilen,DANCING DARING,A,minor,D,minor,A,phrygian,minor,0.43,True,True
+509,raise_a_suilen,BATTLE CRY,C,minor,C,major,C,aeolian,minor,0.315,False,True
+510,raise_a_suilen,Domination to world,A,minor,D,minor,A,aeolian,minor,0.26,False,True
+511,raise_a_suilen,THE WAY OF LIFE,G,minor,G,minor,G,aeolian,minor,0.776,False,True
+512,raise_a_suilen,灼熱 Bonfire!,C,minor,Ab,major,C,phrygian,minor,0.508,True,True
+513,raise_a_suilen,Repaint,C#,major,Eb,minor,A#,phrygian,minor,0.13,True,False
+514,raise_a_suilen,Life on the Lotus,B,minor,B,minor,G,dorian,minor,0.252,True,True
+515,raise_a_suilen,CORUSCATE -DNA-,G,minor,C,minor,C,dorian,minor,0.398,True,True
+516,raise_a_suilen,That Is How I Roll!,B,minor,A,major,B,aeolian,minor,0.374,False,True
+517,raise_a_suilen,しゅわりん☆どり～みん,G#,major,Ab,major,G#,ionian,major,0.396,False,True
+518,raise_a_suilen,パスパレボリューションず☆,F#,major,F#,minor,F#,ionian,major,0.233,False,True
+519,raise_a_suilen,えがおのオーケストラっ！,A#,major,Bb,major,A#,ionian,major,0.566,False,True
+520,raise_a_suilen,Don't be afraid!,A#,minor,Ab,major,C,phrygian,minor,0.269,True,True
+521,raise_a_suilen,ゆら・ゆらRing-Dong-Dance,D,minor,D,minor,D,aeolian,minor,0.31,False,True
+522,raise_a_suilen,Hey-day狂騒曲(カプリチオ),G,major,D,minor,A,phrygian,minor,0.221,True,False
+523,raise_a_suilen,Scarlet Sky,A,major,A,major,C#,phrygian,minor,0.5,True,False
+524,raise_a_suilen,ゴーカ！ごーかい！？ファントムシーフ！,G#,minor,Ab,minor,G#,aeolian,minor,0.284,False,True
+526,raise_a_suilen,That Is How I Roll! (ライブ / アンコール),B,minor,B,minor,B,aeolian,minor,0.271,False,True
+527,raise_a_suilen,R･I･O･T (ライブ / アンコール),G,minor,G,minor,G,aeolian,minor,0.655,False,True
+528,raise_a_suilen,Apocalypse,D,minor,D,minor,D,phrygian,minor,0.517,True,True
+529,raise_a_suilen,TWIN TALE,G,major,E,minor,G,ionian,major,0.315,False,True
+530,raise_a_suilen,STRAY CERBERUS,E,minor,E,minor,E,aeolian,minor,0.257,False,True
+531,raise_a_suilen,BERSER-KEY,F#,minor,F#,minor,F#,phrygian,minor,0.8,True,True
+532,raise_a_suilen,POLARIS,G#,minor,B,major,B,ionian,major,0.271,False,False
+533,raise_a_suilen,HOWLING AMBITION,G,minor,G,minor,G,aeolian,minor,0.474,False,True
+534,raise_a_suilen,VIVID FIRST TIME,B,major,C#,minor,B,ionian,major,0.736,False,True
+535,raise_a_suilen,'FIGHT' ADDICT,B,major,C#,minor,B,ionian,major,0.367,False,True
+536,raise_a_suilen,Drown Out the Noise and Push Through the Trash,C#,major,C#,minor,C#,lydian,major,0.322,True,True
+537,raise_a_suilen,FIVE as ONE,B,major,B,major,B,ionian,major,0.507,False,True
+538,raise_a_suilen,EXPOSE 'Burn out!!!' (English),C,minor,C,minor,C,aeolian,minor,0.405,False,True
+539,raise_a_suilen,Takin' my Heart (English),G,minor,G,minor,G,aeolian,minor,0.16,False,True
+540,raise_a_suilen,WELCOME TO PANDEMONIUM,F#,minor,F#,minor,F#,phrygian,minor,0.672,True,True
+541,raise_a_suilen,WHAT AN EXPLOSION,A,minor,A,minor,A,aeolian,minor,0.394,False,True
+542,raise_a_suilen,RUNAWAY STAR,F#,minor,F#,minor,F#,phrygian,minor,0.564,True,True
+543,raise_a_suilen,Bad Kids All Bet,B,minor,B,minor,B,aeolian,minor,0.328,False,True
+544,raise_a_suilen,Light a fire,B,major,B,major,B,ionian,major,0.486,False,True
+545,raise_a_suilen,Embrace of light,A,major,A,minor,A,aeolian,minor,0.224,False,False
+546,raise_a_suilen,OUTSIDER RODEO,G,major,E,minor,G,ionian,major,0.486,False,True
+547,raise_a_suilen,JUST THE WAY I AM,D,minor,D,minor,D,phrygian,minor,0.355,True,True
+548,raise_a_suilen,ラスハピーポー！,D,major,D,major,D,ionian,major,0.463,False,True
+549,raise_a_suilen,1/3の純情な感情 (Cover),F#,major,F#,major,F#,lydian,major,0.343,True,True
+550,raise_a_suilen,ヒトリノ夜 (Cover),A#,minor,F#,major,A#,aeolian,minor,0.259,False,True
+551,raise_a_suilen,激動 (Cover),B,minor,B,minor,F#,locrian,minor,0.297,True,True
+552,raise_a_suilen,メギツネ (Cover),F,minor,F,minor,F,phrygian,minor,0.275,True,True
+553,raise_a_suilen,Bling-Bang-Bang-Born (Cover),F,minor,F,minor,F,dorian,minor,0.357,True,True
+554,raise_a_suilen,第六感 (Cover),E,minor,E,minor,E,aeolian,minor,0.281,False,True
+555,raise_a_suilen,革命道中 (Cover),B,minor,E,minor,B,phrygian,minor,0.777,True,True
+556,raise_a_suilen,Get Wild (Cover),F,major,F,minor,F,ionian,major,0.426,False,True
+557,raise_a_suilen,ボッカデラべリタ (Cover),D,major,D,minor,D,lydian,major,0.423,True,True
+558,raise_a_suilen,第ゼロ感 (Cover),G,minor,G,minor,G,aeolian,minor,0.365,False,True
+559,raise_a_suilen,劣等上等 (Cover),F#,minor,C#,minor,F#,locrian,minor,0.194,True,True
+560,raise_a_suilen,Just Awake (Cover),D#,major,Ab,major,D#,ionian,major,0.447,False,True
+561,raise_a_suilen,Keep the Heat and Fire Yourself Up (Cover),A#,minor,Bb,minor,A#,aeolian,minor,0.262,False,True
+562,raise_a_suilen,ボッカデラベリタ (Cover),D,major,D,minor,D,lydian,major,0.434,True,True
+563,raise_a_suilen,VORACITY (Cover),G#,minor,Ab,minor,G#,aeolian,minor,0.442,False,True
+564,raise_a_suilen,神っぽいな (Cover),G,major,G,minor,G,ionian,major,0.512,False,True
+565,raise_a_suilen,狂乱 Hey Kids!! (Cover),G,minor,C,minor,G,locrian,minor,0.489,True,True
+566,raise_a_suilen,SAVIOR OF SONG (Cover),A,minor,C,major,A,phrygian,minor,0.52,True,True
+567,raise_a_suilen,恋しさとせつなさと心強さと (Cover),F,major,D,minor,F,ionian,major,0.336,False,True
+568,raise_a_suilen,DEPARTURES (Cover),D,major,G,major,D,mixolydian,major,0.434,True,True
+569,raise_a_suilen,CORE PRIDE (Cover),D,minor,D,minor,A,phrygian,minor,0.326,True,True
+570,roselia,Neo-Aspect,B,major,B,major,B,ionian,major,0.556,False,True
+571,roselia,BLACK SHOUT,E,minor,E,minor,E,phrygian,minor,0.461,True,True
+572,roselia,Opera of the wasteland,F#,major,F#,minor,F#,ionian,major,0.266,False,True
+573,roselia,陽だまりロードナイト,D,major,D,major,D,ionian,major,0.686,False,True
+574,roselia,ONENESS,F#,minor,F#,minor,F#,phrygian,minor,0.226,True,True
+575,roselia,Re:birth day,D,major,G,major,D,mixolydian,major,0.315,True,True
+576,roselia,Legendary,A,minor,A,minor,E,phrygian,minor,0.467,True,True
+577,roselia,- HEROIC ADVENT -,D,major,G,major,D,mixolydian,major,0.485,True,True
+578,roselia,Determination Symphony,D,major,G,major,D,mixolydian,major,0.349,True,True
+579,roselia,熱色スターマイン,B,minor,E,minor,F#,phrygian,minor,0.163,True,True
+580,roselia,軌跡,A,major,A,major,A,ionian,major,0.44,False,True
+581,roselia,LOUDER,D,major,D,major,D,ionian,major,0.286,False,True
+582,roselia,R,D,minor,D,minor,D,aeolian,minor,0.798,False,True
+583,roselia,BRAVE JEWEL,A,minor,A,minor,A,phrygian,minor,0.215,True,True
+584,roselia,FIRE BIRD,G,minor,G,minor,G,aeolian,minor,0.42,False,True
+585,roselia,Safe and Sound,G,major,C,major,G,ionian,major,0.355,False,True
+586,roselia,Avant-garde HISTORY,F#,minor,F#,minor,F#,aeolian,minor,0.42,False,True
+587,roselia,Break your desire,F,minor,C#,major,F,phrygian,minor,0.294,True,True
+589,roselia,約束,E,minor,G,major,E,aeolian,minor,0.624,False,True
+590,roselia,"""UNIONS"" Road",F,major,F,major,C,mixolydian,major,0.344,True,True
+591,roselia,Song I am.,F,minor,F,major,F,aeolian,minor,0.37,False,True
+592,roselia,Sage der Rosen,D,minor,D,minor,D,dorian,minor,0.314,True,True
+593,roselia,覚悟のLiberation,F,minor,C#,major,F,aeolian,minor,0.354,False,True
+594,roselia,Keep Heart,E,minor,G,major,C,lydian,major,0.405,True,False
+595,roselia,Original Call,D#,major,Eb,major,D#,ionian,major,0.575,False,True
+596,roselia,Always recall.,E,minor,G,major,D,dorian,minor,0.274,True,True
+597,roselia,Floral Haven,B,major,B,major,B,ionian,major,0.19,False,True
+598,roselia,Sprechchor,E,minor,G,major,D,mixolydian,major,0.196,True,False
+599,roselia,閃光,C#,minor,E,major,C#,aeolian,minor,0.559,False,True
+600,roselia,THE HISTORIC...,E,minor,E,minor,E,aeolian,minor,0.281,False,True
+601,roselia,ROZEN HORIZON,E,minor,E,minor,E,aeolian,minor,0.68,False,True
+602,roselia,廻廻奇譚,C#,minor,E,major,C#,phrygian,minor,0.174,True,True
+603,roselia,鳥の詩,F#,minor,B,minor,F#,phrygian,minor,0.256,True,True
+604,roselia,Synchrogazer,D#,minor,Bb,minor,F,locrian,minor,0.373,True,True
+605,roselia,名前のない怪物,F,major,F,major,F,ionian,major,0.277,False,True
+606,roselia,Dazzle the Destiny,A,major,F#,minor,A,lydian,major,0.221,True,True
+607,roselia,Grateful Melting,C,major,C,major,C,ionian,major,0.421,False,True
+608,roselia,Second to None,D,minor,D,minor,D,aeolian,minor,0.261,False,True
+609,roselia,Steadfast Spirits,E,minor,A,minor,E,aeolian,minor,0.492,False,True
+610,roselia,紫炎,E,minor,A,minor,E,phrygian,minor,0.417,True,True
+611,roselia,XV,E,minor,C,major,E,phrygian,minor,0.423,True,True
+612,roselia,Blessing Chord,C,major,F,major,F,ionian,major,0.246,False,True
+613,roselia,Fear Nothing,C,major,G,minor,C,lydian,major,0.335,True,True
+614,roselia,PASSIONATE ANTHEM,F#,minor,A,minor,F#,dorian,minor,0.378,True,True
+615,roselia,Requiem for Fate,E,major,D,minor,E,mixolydian,major,0.356,True,True
+616,roselia,Sanctuary,G,major,G,major,D,mixolydian,major,0.441,True,True
+617,roselia,Sunlit Musical,G,minor,Bb,major,G,phrygian,minor,0.164,True,True
+618,roselia,Talk to My Tone,C,major,C,major,C,ionian,major,0.656,False,True
+619,roselia,一逢のFull Glory,A,major,A,major,A,ionian,major,0.574,False,True
+620,roselia,礎の花冠,F#,minor,A,major,A,ionian,major,0.308,False,False
+621,roselia,FRONTIER FANTASIA,E,minor,G,minor,E,locrian,minor,0.232,True,True
+622,roselia,Dear Gleam,A#,major,Bb,major,A#,ionian,major,0.303,False,True
+623,roselia,Call the shots,F,minor,F,minor,F,aeolian,minor,0.662,False,True
+624,roselia,THRONE OF ROSE,E,minor,E,minor,E,aeolian,minor,0.685,False,True
+625,roselia,VIOLET LINE,A,major,A,major,A,ionian,major,0.422,False,True
+626,roselia,Ringing Bloom,C#,minor,A,major,C#,aeolian,minor,0.296,False,True
+627,roselia,ZEAL of proud,D#,minor,F#,major,D#,dorian,minor,0.327,True,True
+628,roselia,Singing “OURS”,E,minor,E,minor,E,aeolian,minor,0.384,False,True
+629,roselia,競宴Red×Violet,E,minor,E,minor,E,aeolian,minor,0.549,False,True
+630,roselia,overtuRe,D,minor,D,minor,D,aeolian,minor,0.314,False,True
+631,roselia,Proud of oneself,E,minor,A,minor,E,phrygian,minor,0.39,True,True
+632,roselia,Sing Alive,A#,major,F,major,F,mixolydian,major,0.144,True,True
+633,roselia,Swear ～Night & Day～,D,minor,F,major,D,aeolian,minor,0.623,False,True
+634,roselia,Reweave (Cover),D#,minor,F#,major,D#,dorian,minor,0.744,True,True
+635,roselia,ヒバナ -Reloaded- (Cover),D#,minor,F#,major,D#,dorian,minor,0.299,True,True
+636,roselia,ファタール (Cover),G,major,G,major,C,lydian,major,0.313,True,True
+637,roselia,HONEY (Cover),F#,minor,A,major,F#,dorian,minor,0.37,True,True
+638,roselia,悪魔の子 (Cover),B,major,B,minor,B,ionian,major,0.202,False,True
+639,roselia,slash (Cover),F,minor,F,minor,F,aeolian,minor,0.411,False,True
+640,roselia,右肩の蝶 (Cover),E,minor,C,major,A,dorian,minor,0.278,True,True
+641,roselia,乙女解剖 (Cover),G#,minor,C#,minor,G#,phrygian,minor,0.689,True,True
+642,roselia,六兆年と一夜物語 (Cover),F#,minor,B,minor,F#,phrygian,minor,0.929,True,True
+643,roselia,残酷な天使のテーゼ (Cover),F,minor,Eb,major,F,dorian,minor,0.348,True,True
+644,roselia,海色 (Cover),F,minor,F,minor,F,phrygian,minor,0.297,True,True
+645,roselia,ETERNAL BLAZE (Cover),G,minor,G,minor,D,phrygian,minor,0.221,True,True
+646,roselia,魂のルフラン (Cover),C,major,A,minor,E,phrygian,minor,0.479,True,False
+647,roselia,This game (Cover),E,minor,E,minor,E,aeolian,minor,0.189,False,True
+648,roselia,スカイクラッドの観測者 (Cover),D#,minor,Ab,minor,D#,phrygian,minor,0.447,True,True
+649,roselia,シャルル (Cover),G,major,G,major,G,ionian,major,0.542,False,True
+650,roselia,新時代 (Cover),E,minor,E,minor,E,aeolian,minor,0.236,False,True
+651,roselia,革命デュアリズム (Cover),A,minor,A,minor,A,aeolian,minor,0.842,False,True
+652,roselia,Red fraction (Cover),E,minor,E,minor,E,aeolian,minor,0.692,False,True
+653,roselia,深愛 (Cover),D#,minor,Ab,major,D#,phrygian,minor,0.252,True,True
+654,roselia,Paradisus‐Paradoxum (Cover),F,major,F,major,F#,locrian,minor,0.36,True,False
+655,roselia,Realize (Cover),D,major,D,major,C#,locrian,minor,0.375,True,False
+656,roselia,Preserved Roses (Cover),F#,major,F#,major,F#,dorian,minor,0.254,True,False
+657,roselia,My Dearest (Cover),C,major,C,major,C,ionian,major,0.808,False,True
+658,roselia,Shangri-La (Cover),F,major,G,minor,G,dorian,minor,0.226,True,False
+659,roselia,KING (Cover),C,major,A,minor,E,phrygian,minor,0.343,True,False
+660,mygo,素寄曲,D,major,G,major,D,ionian,major,0.388,False,True
+661,mygo,羅永線,A#,major,Bb,major,A#,ionian,major,0.49,False,True
+662,mygo,騒混出,G#,major,C#,major,G#,ionian,major,0.438,False,True
+663,morfonica,深海少女 (Cover),G#,minor,Ab,minor,G#,aeolian,minor,0.595,False,True
+664,mugendai_mutype,等身大あんりみてっど,A,minor,F,major,A,phrygian,minor,0.551,True,True
+665,mugendai_mutype,好きになっちゃえ！,G#,major,Ab,major,G#,ionian,major,0.368,False,True
+666,mugendai_mutype,YoU kNOw the overture,A,minor,A,minor,A,phrygian,minor,0.309,True,True
+667,mugendai_mutype,唱 (Cover),D#,major,Eb,minor,D#,mixolydian,major,0.196,True,True
+668,mugendai_mutype,インキャのキャキャキャ (Cover),F#,minor,A,major,F#,aeolian,minor,0.452,False,True
+669,mugendai_mutype,デビルじゃないもん (Cover),F,minor,F,minor,F,phrygian,minor,0.286,True,True
+670,mugendai_mutype,エイリアンエイリアン (Cover),C#,minor,C#,minor,C#,aeolian,minor,0.35,False,True
+671,mugendai_mutype,ぼくたちいつでも しゅわっしゅわ！ (Cover),G,major,E,major,G#,phrygian,minor,0.168,True,False
+672,mugendai_mutype,回レ!雪月花 (Cover),C,minor,C,minor,C,aeolian,minor,0.456,False,True
+673,mugendai_mutype,ビッグマウス feat.りむる (Cover),G#,major,Ab,major,G#,mixolydian,major,0.309,True,True
+674,mugendai_mutype,KiLLKiSS (Cover),E,minor,E,minor,E,aeolian,minor,0.702,False,True
+675,mugendai_mutype,君が飛び降りるのならば (Cover),G#,major,Ab,major,G#,ionian,major,0.486,False,True
+676,mugendai_mutype,地球最後の告白を (Cover),A#,major,Bb,major,A#,ionian,major,0.201,False,True
+677,mugendai_mutype,パラレルラルラ (Cover),C#,major,C#,major,C#,ionian,major,0.438,False,True
+678,mugendai_mutype,夜もすがら君想ふ (Cover),A#,major,Eb,major,A#,mixolydian,major,0.584,True,True
+679,mugendai_mutype,ジレンマ (Cover),G#,major,Ab,major,G#,ionian,major,0.507,False,True
+680,mugendai_mutype,glow (Cover),A,major,A,major,A,ionian,major,0.53,False,True
+681,mugendai_mutype,メンタルチェンソー (Cover),D,minor,G,minor,D,locrian,minor,0.262,True,True
+682,mugendai_mutype,ホシアイ (Cover),F,major,F,major,F,ionian,major,0.69,False,True
+683,mugendai_mutype,フォニイ (Cover),A,minor,A,minor,A#,phrygian,minor,0.122,True,True
+684,mugendai_mutype,ELECT (Cover),G,minor,D,minor,D,mixolydian,major,0.241,True,False
+685,mugendai_mutype,ユキトキ (Cover),F,major,F,major,F,ionian,major,0.28,False,True
+686,mugendai_mutype,スイートマジック (Cover),G#,major,C,minor,G#,ionian,major,0.321,False,True
+687,mugendai_mutype,少年よ我に帰れ (Cover),A,minor,D,minor,A,phrygian,minor,0.388,True,True
+688,mugendai_mutype,One Last Kiss (Cover),C#,minor,Ab,minor,C#,dorian,minor,0.616,True,True
+689,mugendai_mutype,ミルククラウン・オン・ソーネチカ (Cover),E,major,E,major,E,ionian,major,0.287,False,True
+690,mugendai_mutype,決戦スピリット (Cover),D#,major,Eb,major,A#,mixolydian,major,0.224,True,True
+691,mugendai_mutype,ティアドロップス (Cover),B,minor,E,minor,B,phrygian,minor,0.357,True,True
+692,mugendai_mutype,ロウワー (Cover),F,minor,F,minor,F,aeolian,minor,0.434,False,True
+693,mugendai_mutype,ハイドアンド・シーク (Cover),E,minor,G,major,E,phrygian,minor,0.863,True,True
+694,mugendai_mutype,不可解 (Cover),F,major,F,major,F,ionian,major,0.355,False,True
+695,mugendai_mutype,GURU (Cover),G#,major,C#,minor,C#,lydian,major,0.403,True,True
+696,mugendai_mutype,経験値上昇中☆ (Cover),E,minor,G,major,D#,locrian,minor,0.393,True,True
+697,mugendai_mutype,翼をください (Cover),A#,major,F,major,A#,ionian,major,0.441,False,True
+698,mugendai_mutype,元気を出して (Cover),C,major,F,minor,C,ionian,major,0.369,False,True
+699,mugendai_mutype,ハッピー☆マテリアル (Cover),F#,major,Eb,minor,D#,lydian,major,0.289,True,True
+700,mugendai_mutype,時をかける少女 (Cover),F#,minor,A,major,F#,aeolian,minor,0.312,False,True
+701,mugendai_mutype,TOMORROW (Cover),F,major,F,major,F,ionian,major,0.317,False,True
+702,mugendai_mutype,PARTY☆NIGHT（D-POP version） (Cover),F#,major,F#,major,G,locrian,minor,0.714,True,False
+703,mugendai_mutype,CH4NGE (Cover),D#,major,Eb,minor,D#,lydian,major,0.663,True,True
+704,mugendai_mutype,絶え間なく藍色 (Cover),G,minor,G,minor,G,aeolian,minor,0.486,False,True
+705,mugendai_mutype,撫でんな (Cover),G,major,B,minor,G,ionian,major,0.367,False,True
+706,mugendai_mutype,なにやってもうまくいかない (Cover),E,minor,E,minor,B,phrygian,minor,0.357,True,True
+707,mugendai_mutype,マーシャル・マキシマイザー (Cover),B,minor,F#,minor,C#,ionian,major,0.192,False,False
+708,mugendai_mutype,ZEAL of proud (Cover),D#,minor,F#,major,D#,dorian,minor,0.382,True,True
+709,mugendai_mutype,繰り返し一粒 (Cover),F,major,F,major,F,ionian,major,0.387,False,True
+710,poppin_party,乙女はサイコパス (Cover),E,major,E,major,E,ionian,major,0.624,False,True
+711,roselia,Neo-Aspect,B,major,B,major,B,ionian,major,0.564,False,True
+712,millsage,カーネーションの咲く日に,C,major,F,major,C,mixolydian,major,0.453,True,True
+713,mugendai_mutype,唱 (Cover),D#,major,Eb,minor,D#,mixolydian,major,0.196,True,True
+714,mugendai_mutype,インキャのキャキャキャ (Cover),F#,minor,A,major,F#,aeolian,minor,0.452,False,True
+715,mugendai_mutype,デビルじゃないもん (Cover),F,minor,F,minor,F,phrygian,minor,0.286,True,True
+716,mugendai_mutype,エイリアンエイリアン (Cover),C#,minor,C#,minor,C#,aeolian,minor,0.35,False,True
+717,mugendai_mutype,ぼくたちいつでも しゅわっしゅわ！ (Cover),G,major,E,major,G#,phrygian,minor,0.168,True,False
+718,mugendai_mutype,回レ!雪月花 (Cover),C,minor,C,minor,C,aeolian,minor,0.456,False,True
+719,mugendai_mutype,ビッグマウス feat.りむる (Cover),G#,major,Ab,major,G#,mixolydian,major,0.309,True,True
+720,mugendai_mutype,KiLLKiSS (Cover),E,minor,E,minor,E,aeolian,minor,0.681,False,True
+721,mygo,二息歩行 (Reloaded) (Cover),E,major,E,major,E,lydian,major,0.622,True,True
+722,mygo,社会距離 (Cover),F#,minor,D,major,F#,phrygian,minor,0.346,True,True
+723,mygo,君の神様になりたい。 (Cover),C,minor,F,major,C,ionian,major,0.332,False,False
+724,mygo,Henceforth (Cover),B,major,F#,major,B,lydian,major,0.489,True,True
+725,mygo,ティアドロップス (Cover),B,minor,E,minor,B,phrygian,minor,0.43,True,True
+726,mygo,遠心力 (Cover),F#,minor,D,major,F#,phrygian,minor,0.272,True,True
+727,mygo,ないばいたりてぃ (Cover),C,major,C,minor,C,locrian,minor,0.505,True,False
+728,mygo,キリトリセン (Cover),A,major,A,major,A,ionian,major,0.356,False,True
+729,mygo,もしも命が描けたら (Cover),F#,major,F#,major,F#,lydian,major,0.641,True,True
+730,mygo,TEENAGE RIOT (Cover),E,minor,E,minor,E,aeolian,minor,0.413,False,True
+731,mygo,パメラ (Cover),E,minor,B,minor,E,dorian,minor,0.431,True,True
+732,mygo,栞 (Cover),F#,major,F#,major,F#,ionian,major,0.884,False,True
+733,mygo,シンデレラボーイ (Cover),A,major,A,major,A,ionian,major,0.567,False,True
+734,mygo,少女レイ (Cover),A,major,A,major,G#,locrian,minor,0.397,True,False
+735,mygo,正しくなれない (Cover),F,major,F,major,F,ionian,major,0.284,False,True
+736,mygo,恋してる自分すら愛せるんだ (Cover),C,major,G,major,C,ionian,major,0.242,False,True
+737,roselia,擬態ごっこ (Cover),C,minor,C,major,C,phrygian,minor,0.265,True,True

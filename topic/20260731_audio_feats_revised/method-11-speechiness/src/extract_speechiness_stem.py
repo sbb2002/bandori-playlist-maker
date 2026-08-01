@@ -61,7 +61,7 @@ VOCAL_STEM_DIR = (
 
 OUT_DIR = _METHOD_DIR / "out"
 TIMESERIES_DIR = OUT_DIR / "timeseries"
-SPEECHINESS_CSV = OUT_DIR / "speechiness_raw.csv"
+SPEECHINESS_CSV = OUT_DIR / "csv" / "speechiness_raw.csv"
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -337,14 +337,15 @@ def _worker(task: dict) -> dict:
 # ============================================================================
 
 def get_done_idxs(csv_path: Path) -> set:
-    """이미 처리된 idx 읽기."""
+    """이미 처리된 idx 읽기. error가 None/NaN인 행은 미처리로 간주."""
     if not csv_path.exists():
         return set()
 
     done_idxs = set()
     try:
-        df = pd.read_csv(csv_path, usecols=["idx"])
-        done_idxs = set(df["idx"].unique())
+        df = pd.read_csv(csv_path, usecols=["idx", "error"])
+        # error가 None/NaN인 행은 제외 (미처리)
+        done_idxs = set(df[df["error"].notna()]["idx"].unique())
     except Exception as e:
         logger.warning(f"Failed to read done_idxs from {csv_path}: {e}")
 
@@ -445,9 +446,10 @@ def main():
         idx = int(row["idx"])
         band = row["band"]
         song = row["song"]
+        file_idx = int(row.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
 
         # 보컬 스템 경로 확인
-        paths = stem_paths(band, idx)
+        paths = stem_paths(band, file_idx)
         vocal_path = paths[0] if paths else None
 
         tasks.append({

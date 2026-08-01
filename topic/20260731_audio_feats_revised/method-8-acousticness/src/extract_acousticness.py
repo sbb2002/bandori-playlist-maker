@@ -6,14 +6,14 @@ Essentia 사전학습 mood_acoustic 분류기(MusiCNN 백본)를 사용해 2단�
 
 산출물
 ------
-`out/acousticness_raw.csv` — idx별 acoustic 요약통계 및 메타정보.
+`out/csv/acousticness_raw.csv` — idx별 acoustic 요약통계 및 메타정보.
 `out/timeseries/<idx>_acoustic.npy` — 패치별 acoustic 클래스 확률 시계열(1D float32).
 
 주의
 ----
 - WSL2 필요: Essentia 의존. 이 환경에 미설치된 경우 안내 후 조기 종료.
 - 오디오 파일은 저작물 → 읽기 전용. 절대 이동/삭제 금지.
-- 쓰기 대상: `out/acousticness_raw.csv`, `out/timeseries/*.npy` 뿐.
+- 쓰기 대상: `out/csv/acousticness_raw.csv`, `out/timeseries/*.npy` 뿐.
 
 실행
 ----
@@ -58,7 +58,7 @@ _REPO_ROOT = _TOPIC_DIR.parents[1]                              # bpm-research/
 _MYPROJECTS_ROOT = _REPO_ROOT.parent                            # pyworks/
 
 MASTER_CSV = _REPO_ROOT / "data" / "songs_master.csv"
-OUT_CSV = _METHOD_DIR / "out" / "acousticness_raw.csv"
+OUT_CSV = _METHOD_DIR / "out" / "csv" / "acousticness_raw.csv"
 TIMESERIES_DIR = _METHOD_DIR / "out" / "timeseries"
 
 AUDIO_FULL_DIR = (
@@ -293,7 +293,8 @@ def _build_tasks(
         if only_idx is None and idx in done:
             continue
         band = r["band"]
-        path = _audio_path(band, idx)
+        file_idx = int(r.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
+        path = _audio_path(band, file_idx)
         if not path.exists():
             print(f"  [WARN] 오디오 없음 idx={idx} {path.name} — 건너뜀", flush=True)
             continue
@@ -317,10 +318,11 @@ def _open_writer(append: bool) -> tuple:
     return f, writer
 
 
-def _save_timeseries(idx: int, timeseries: np.ndarray) -> None:
+def _save_timeseries(idx: int, timeseries: np.ndarray, band: str = "") -> None:
     """패치별 acoustic 확률 시계열을 npy 파일로 저장."""
     TIMESERIES_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = TIMESERIES_DIR / f"{idx:03d}_acoustic.npy"
+    prefix = f"{band}__{idx:03d}" if band else f"{idx:03d}"
+    out_path = TIMESERIES_DIR / f"{prefix}_acoustic.npy"  # band+idx: idx는 band 간 유일하지 않을 수 있음(2026-08-01 확인)
     np.save(str(out_path), timeseries)
 
 
@@ -413,7 +415,7 @@ def main() -> None:
         for i, res in enumerate(it, 1):
             # 시계열 저장(error 없을 때)
             if not res.get("error") and res.get("_timeseries") is not None:
-                _save_timeseries(res["idx"], res["_timeseries"])
+                _save_timeseries(res["idx"], res["_timeseries"], band=res.get("band", ""))
 
             # 내부 저장용 필드 제거
             res.pop("_timeseries", None)

@@ -8,3 +8,6 @@ topic/audio_feats_analysis/src/method-1/*.log
 topic/audio_feats_analysis/out/*.bak_prebugfix
 __pycache__/
 *.pyc
+
+# Bass stem audio (파생물, demucs 4-stem 분리 — 저작물)
+topic/20260731_audio_feats_revised/method-2-key/out/bass_key_validation/stems/

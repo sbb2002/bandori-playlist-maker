@@ -83,7 +83,7 @@ AUDIO_FULL_DIR = (
 
 OUT_DIR = _METHOD_DIR / "out"
 TIMESERIES_DIR = OUT_DIR / "timeseries"
-ENERGY_CSV = OUT_DIR / "energy_raw.csv"
+ENERGY_CSV = OUT_DIR / "csv" / "energy_raw.csv"
 
 # ============================================================================
 # MODEL LOADING
@@ -280,7 +280,7 @@ def _worker(task: dict) -> dict:
         # 통째로 되돌려보내지 않기 위함 — 대용량 ndarray를 결과로 반환하면 멀티
         # 프로세싱 파이프에서 교착 상태를 유발하는 사례가 있었다).
         if result["arousal_series"] is not None:
-            npy_path = TIMESERIES_DIR / f"{idx:03d}_arousal.npy"
+            npy_path = TIMESERIES_DIR / f"{band}__{idx:03d}_arousal.npy"  # band+idx: idx는 band 간 유일하지 않을 수 있음(2026-08-01 확인)
             try:
                 np.save(str(npy_path), result["arousal_series"])
             except Exception as e:
@@ -433,8 +433,11 @@ def main():
     else:
         tasks_df = df_master.copy()
 
-    if not args.fresh:
+    if not args.fresh and not args.idx:
         # Resume: 이미 처리된 것 제외
+        # ⚠️ --idx로 특정 idx를 명시한 경우에는 이 필터를 적용하지 않는다. idx는 band 간에
+        # 유일하지 않을 수 있어(2026-08-01 확인), done_idxs에 "다른 band의 동일 idx 곡"이
+        # 이미 들어있으면 이번에 재처리하려는 신규곡이 통째로 스킵되는 사고가 발생한다.
         tasks_df = tasks_df[~tasks_df["idx"].isin(done_idxs)].copy()
 
     if args.limit:
@@ -452,9 +455,10 @@ def main():
         idx = int(row["idx"])
         band = row["band"]
         song = row["song"]
+        file_idx = int(row.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
 
-        # 오디오 파일 경로: {band}__{idx:03d}.wav
-        audio_filename = f"{band}__{idx:03d}.wav"
+        # 오디오 파일 경로: {band}__{file_idx:03d}.wav
+        audio_filename = f"{band}__{file_idx:03d}.wav"
         audio_path = AUDIO_FULL_DIR / audio_filename
 
         tasks.append({
@@ -515,6 +519,8 @@ def main():
     ]
 
     # 기존 CSV 읽기 (resume 시)
+    # ⚠️ idx는 band 간에 유일하지 않을 수 있어(2026-08-01 확인) (idx, band) 복합키로
+    # 저장해야 서로 다른 band의 동일 idx 곡이 서로를 덮어쓰는 사고를 막는다.
     existing_rows = {}
     if ENERGY_CSV.exists() and not args.fresh:
         try:
@@ -522,7 +528,7 @@ def main():
                 reader = csv.DictReader(f)
                 for row in reader:
                     idx = int(row["idx"])
-                    existing_rows[idx] = row
+                    existing_rows[(idx, row["band"])] = row
         except Exception as e:
             logger.warning(f"Failed to read existing CSV: {e}")
 
@@ -542,10 +548,10 @@ def main():
             "n_patches": result["n_patches"],
             "error": result["error"]
         }
-        existing_rows[idx] = row
+        existing_rows[(idx, result["band"])] = row
 
     # 정렬해서 저장
-    sorted_rows = [existing_rows[idx] for idx in sorted(existing_rows.keys())]
+    sorted_rows = [existing_rows[k] for k in sorted(existing_rows.keys())]
 
     with open(ENERGY_CSV, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=csv_fieldnames)

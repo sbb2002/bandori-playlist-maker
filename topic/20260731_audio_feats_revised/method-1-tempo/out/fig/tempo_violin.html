@@ -1,0 +1,297 @@
+<title>Tempo(BPM) 분포 — 전체 및 밴드별 바이올린 플롯</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --surface-1:      #fcfcfb;
+  --surface-page:   #f9f9f7;
+  --text-primary:   #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted:     #898781;
+  --gridline:       #e1e0d9;
+  --baseline:       #c3c2b7;
+  --series-all:     #4a3aa7;   /* violet — 전체(집계) */
+  --series-band:    #2a78d6;   /* blue — 개별 밴드 */
+  --box-fill:       #ffffff;
+  --border:         rgba(11,11,11,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-page:   #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --series-all:     #9085e9;
+    --series-band:    #3987e5;
+    --box-fill:       #1a1a19;
+    --border:         rgba(255,255,255,0.10);
+  }
+}
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --surface-1:      #1a1a19;
+  --surface-page:   #0d0d0d;
+  --text-primary:   #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted:     #898781;
+  --gridline:       #2c2c2a;
+  --baseline:       #383835;
+  --series-all:     #9085e9;
+  --series-band:    #3987e5;
+  --box-fill:       #1a1a19;
+  --border:         rgba(255,255,255,0.10);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+.viz-root {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--surface-page);
+  color: var(--text-primary);
+  padding: 28px 20px 40px;
+  min-height: 100vh;
+}
+.wrap { max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+p.sub { color: var(--text-secondary); font-size: 13px; margin: 0 0 20px; line-height: 1.5; }
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 12px 12px;
+  overflow-x: auto;
+}
+svg { display: block; font-family: inherit; }
+.tick text { fill: var(--text-muted); font-size: 11px; }
+.axis-label { fill: var(--text-secondary); font-size: 11px; }
+.gridline { stroke: var(--gridline); stroke-width: 1; }
+.baseline { stroke: var(--baseline); stroke-width: 1; }
+.violin-band { fill: var(--series-band); fill-opacity: 0.28; stroke: var(--series-band); stroke-width: 1.25; }
+.violin-all { fill: var(--series-all); fill-opacity: 0.28; stroke: var(--series-all); stroke-width: 1.25; }
+.box-band { fill: var(--box-fill); stroke: var(--series-band); stroke-width: 1.5; }
+.box-all { fill: var(--box-fill); stroke: var(--series-all); stroke-width: 1.5; }
+.median-band { stroke: var(--series-band); stroke-width: 2; }
+.median-all { stroke: var(--series-all); stroke-width: 2; }
+.whisker-band { stroke: var(--series-band); stroke-width: 1.25; }
+.whisker-all { stroke: var(--series-all); stroke-width: 1.25; }
+.cat-label { fill: var(--text-secondary); font-size: 11.5px; }
+.cat-label.all { fill: var(--text-primary); font-weight: 600; }
+.n-label { fill: var(--text-muted); font-size: 10px; }
+.divider { stroke: var(--gridline); stroke-width: 1; stroke-dasharray: 2 3; }
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  opacity: 0;
+  transition: opacity 0.1s;
+  white-space: nowrap;
+  z-index: 10;
+}
+.tooltip .t-title { font-weight: 600; margin-bottom: 3px; }
+.tooltip .t-row { color: var(--text-secondary); }
+.legend { display: flex; gap: 18px; align-items: center; margin: 14px 0 0; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+.legend .sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.note { margin-top: 16px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+.note b { color: var(--text-primary); }
+</style>
+
+<div class="viz-root">
+  <div class="wrap">
+    <h1>Tempo(bpm_madmom) 분포 — 전체 &amp; 밴드별</h1>
+    <p class="sub">661곡 중 madmom 정상 추출값 기준. 표본수 10곡 미만 밴드(various_artists 5·ikka_dumb_rock 1·millsage 1)는
+      바이올린 형태가 무의미해 제외했습니다. 밴드는 중앙값 내림차순 정렬.</p>
+    <div class="card">
+      <svg id="chart"></svg>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="note" id="note"></div>
+  </div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const DATA = {"afterglow": [187.5, 181.82, 200.0, 200.0, 193.55, 157.89, 136.36, 200.0, 187.5, 206.9, 206.9, 181.82, 181.82, 193.55, 200.0, 125.0, 206.9, 193.55, 157.89, 125.0, 125.0, 187.5, 142.86, 162.16, 171.43, 171.43, 181.82, 136.36, 136.36, 171.43, 176.47, 133.33, 206.9, 171.43, 193.55, 187.5, 133.33, 187.5, 187.5, 200.0, 187.5, 181.82, 120.0, 200.0, 142.86, 176.47, 187.5, 162.16, 200.0, 200.0, 193.55, 150.0, 146.34, 206.9, 153.85, 133.33, 200.0, 187.5, 166.67, 187.5, 200.0, 187.5, 187.5, 150.0, 136.36, 187.5, 113.21, 153.85, 181.82, 187.5, 181.82, 260.87], "ave_mujica": [200.0, 142.86, 105.26, 103.45, 115.38, 139.53, 98.36, 200.0, 181.82, 150.0, 181.82, 187.5, 113.21, 117.65, 200.0, 95.24, 146.34, 187.5, 200.0, 146.34, 100.0, 98.36, 230.77, 200.0, 157.89, 146.34, 206.9, 176.47, 95.24], "hello_happy_world": [125.0, 200.0, 150.0, 150.0, 171.43, 187.5, 176.47, 214.29, 181.82, 139.53, 166.67, 125.0, 193.55, 127.66, 193.55, 115.38, 130.43, 171.43, 181.82, 162.16, 166.67, 136.36, 181.82, 139.53, 127.66, 78.95, 162.16, 142.86, 181.82, 162.16, 133.33, 139.53, 146.34, 117.65, 127.66, 176.47, 130.43, 157.89, 139.53, 150.0, 315.79, 136.36, 166.67, 127.66, 109.09, 142.86, 130.43, 176.47, 200.0, 146.34, 181.82, 136.36, 133.33, 146.34, 157.89, 125.0, 222.22, 139.53, 153.85, 146.34, 157.89, 133.33, 133.33, 125.0, 125.0, 171.43, 166.67, 146.34, 153.85, 157.89, 109.09, 181.82], "morfonica": [187.5, 181.82, 187.5, 181.82, 187.5, 171.43, 176.47, 176.47, 181.82, 109.09, 181.82, 206.9, 193.55, 153.85, 136.36, 146.34, 133.33, 171.43, 193.55, 133.33, 139.53, 130.43, 200.0, 176.47, 200.0, 187.5, 187.5, 181.82, 162.16, 133.33, 176.47, 171.43, 200.0, 100.0, 193.55, 193.55, 187.5, 181.82, 193.55, 171.43, 139.53, 127.66, 146.34, 171.43, 117.65, 181.82, 166.67, 181.82, 193.55, 136.36, 200.0, 171.43, 162.16, 136.36, 115.38, 187.5, 142.86], "mugendai_mutype": [122.45, 133.33, 150.0, 96.77, 157.89, 120.0, 176.47, 193.55, 176.47, 176.47, 181.82, 200.0, 176.47, 200.0, 98.36, 193.55, 125.0, 187.5, 146.34, 193.55, 146.34, 136.36, 193.55], "mygo": [187.5, 200.0, 193.55, 166.67, 222.22, 136.36, 200.0, 193.55, 187.5, 133.33, 120.0, 187.5, 88.24, 130.43, 187.5, 181.82, 222.22, 181.82, 193.55, 153.85, 111.11, 166.67, 98.36, 181.82, 187.5, 176.47, 181.82, 206.9, 88.24, 93.75, 181.82, 181.82, 146.34, 171.43, 171.43, 187.5, 98.36, 146.34, 193.55, 157.89, 187.5, 117.65, 187.5, 181.82], "pastel_palettes": [146.34, 136.36, 171.43, 171.43, 171.43, 153.85, 176.47, 176.47, 181.82, 100.0, 136.36, 166.67, 176.47, 200.0, 136.36, 176.47, 171.43, 166.67, 162.16, 171.43, 171.43, 187.5, 146.34, 95.24, 171.43, 171.43, 171.43, 181.82, 153.85, 142.86, 176.47, 166.67, 139.53, 181.82, 176.47, 187.5, 130.43, 187.5, 136.36, 93.75, 146.34, 139.53, 139.53, 105.26, 150.0, 176.47, 120.0, 181.82, 176.47, 139.53, 166.67, 153.85, 150.0, 150.0, 162.16, 101.69, 162.16, 162.16, 166.67, 142.86, 181.82, 171.43, 171.43, 181.82, 166.67, 171.43, 130.43, 127.66, 176.47, 171.43, 162.16, 130.43, 171.43, 166.67], "poppin_party": [187.5, 193.55, 125.0, 187.5, 181.82, 181.82, 133.33, 181.82, 162.16, 181.82, 107.14, 193.55, 120.0, 139.53, 176.47, 162.16, 187.5, 181.82, 125.0, 171.43, 162.16, 87.59, 181.82, 187.5, 193.55, 153.85, 146.34, 193.55, 146.34, 150.0, 181.82, 187.5, 187.5, 176.47, 200.0, 222.22, 176.47, 181.82, 139.53, 162.16, 146.34, 181.82, 181.82, 105.26, 187.5, 176.47, 171.43, 176.47, 166.67, 187.5, 142.86, 150.0, 187.5, 200.0, 176.47, 125.0, 166.67, 187.5, 139.53, 187.5, 157.89, 176.47, 187.5, 187.5, 193.55, 181.82, 166.67, 127.66, 181.82, 181.82, 153.85, 193.55, 176.47, 187.5, 187.5, 206.9, 193.55, 162.16, 200.0, 187.5, 166.67, 166.67, 187.5, 193.55, 222.22, 139.53, 187.5, 187.5, 153.85, 122.45, 96.77, 95.24, 157.89, 153.85, 193.55, 136.36, 133.33, 139.53, 150.0, 162.16, 136.36, 142.86, 171.43, 150.0, 130.43, 127.66, 162.16, 142.86, 136.36, 171.43, 187.5, 162.16, 171.43, 176.47, 176.47], "raise_a_suilen": [200.0, 150.0, 193.55, 171.43, 200.0, 176.47, 181.82, 105.26, 171.43, 181.82, 187.5, 139.53, 171.43, 187.5, 127.66, 139.53, 142.86, 146.34, 187.5, 187.5, 200.0, 171.43, 153.85, 206.9, 101.69, 150.0, 181.82, 176.47, 176.47, 136.36, 181.82, 171.43, 157.89, 181.82, 214.29, 181.82, 139.53, 150.0, 193.55, 181.82, 120.0, 187.5, 136.36, 200.0, 193.55, 127.66, 187.5, 187.5, 181.82, 206.9, 193.55, 200.0, 171.43, 139.53, 153.85, 150.0, 181.82, 193.55, 153.85, 176.47, 113.21, 142.86, 157.89, 133.33, 187.5, 133.33, 171.43, 150.0, 162.16, 193.55, 157.89, 171.43, 200.0, 142.86, 272.73, 193.55, 130.43, 100.0, 187.5], "roselia": [181.82, 187.5, 260.87, 142.86, 187.5, 171.43, 142.86, 181.82, 187.5, 187.5, 84.51, 193.55, 187.5, 193.55, 150.0, 181.82, 230.77, 206.9, 122.45, 136.36, 187.5, 157.89, 181.82, 200.0, 176.47, 187.5, 187.5, 150.0, 176.47, 176.47, 157.89, 187.5, 122.45, 157.89, 181.82, 193.55, 120.0, 187.5, 193.55, 187.5, 193.55, 153.85, 115.38, 193.55, 153.85, 181.82, 187.5, 103.45, 200.0, 176.47, 176.47, 193.55, 187.5, 162.16, 200.0, 193.55, 193.55, 125.0, 146.34, 193.55, 193.55, 193.55, 113.21, 181.82, 200.0, 157.89, 181.82, 176.47, 107.14, 139.53, 133.33, 187.5, 139.53, 193.55, 153.85, 130.43, 146.34, 166.67, 146.34, 176.47, 206.9, 142.86, 139.53, 200.0, 206.9, 166.67, 166.67, 153.85, 166.67]};
+
+function mean(a){ return a.reduce((s,x)=>s+x,0)/a.length; }
+function std(a){ const m=mean(a); return Math.sqrt(mean(a.map(x=>(x-m)**2))); }
+function quantile(sorted, q){
+  const pos = (sorted.length-1)*q;
+  const base = Math.floor(pos), rest = pos-base;
+  return sorted[base+1]!==undefined ? sorted[base]+rest*(sorted[base+1]-sorted[base]) : sorted[base];
+}
+function stats(arr){
+  const sorted = [...arr].sort((a,b)=>a-b);
+  const q1=quantile(sorted,0.25), q3=quantile(sorted,0.75), med=quantile(sorted,0.5);
+  const iqr=q3-q1;
+  const loFence = q1-1.5*iqr, hiFence = q3+1.5*iqr;
+  const lo = Math.min(...sorted.filter(v=>v>=loFence)) ?? sorted[0];
+  const hi = Math.max(...sorted.filter(v=>v<=hiFence)) ?? sorted[sorted.length-1];
+  return {n:arr.length, min:sorted[0], max:sorted[sorted.length-1], q1, q3, med, loWhisker:lo, hiWhisker:hi, iqr};
+}
+function kde(arr, evalPoints){
+  const n = arr.length;
+  const s = std(arr);
+  const sorted=[...arr].sort((a,b)=>a-b);
+  const iqr = quantile(sorted,0.75)-quantile(sorted,0.25);
+  const sigma = Math.min(s, iqr/1.34) || s || 1;
+  const h = 0.9 * sigma * Math.pow(n, -0.2);
+  return evalPoints.map(x=>{
+    let sum=0;
+    for(const v of arr){
+      const u=(x-v)/h;
+      sum += Math.exp(-0.5*u*u);
+    }
+    return sum/(n*h*Math.sqrt(2*Math.PI));
+  });
+}
+
+// 그룹 구성: 전체 + 표본 10곡 이상 밴드, 중앙값 내림차순
+const bandNames = Object.keys(DATA).filter(k=>DATA[k].length>=10);
+const allValues = bandNames.flatMap(k=>DATA[k]);
+const groups = [{key:'__all__', label:'전체', values:allValues, isAll:true}]
+  .concat(bandNames.map(k=>({key:k, label:k, values:DATA[k], isAll:false})));
+groups.slice(1).sort((a,b)=>stats(b.values).med-stats(a.values).med);
+const order = [groups[0], ...groups.slice(1).sort((a,b)=>stats(b.values).med-stats(a.values).med)];
+
+const globalMin = Math.min(...allValues), globalMax = Math.max(...allValues);
+const pad = (globalMax-globalMin)*0.08;
+const yMin = Math.max(0, globalMin-pad), yMax = globalMax+pad;
+
+// 레이아웃
+const marginL=48, marginR=16, marginT=10, marginB=40;
+const colW = 96;
+const plotW = colW*order.length;
+const plotH = 420;
+const W = marginL+plotW+marginR, H = marginT+plotH+marginB;
+
+const svg = document.getElementById('chart');
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+svg.setAttribute('width', W);
+svg.setAttribute('height', H);
+
+function yScale(v){ return marginT + plotH*(1-(v-yMin)/(yMax-yMin)); }
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(tag, attrs){
+  const e = document.createElementNS(ns, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+// gridlines + y axis
+const yTicks = [];
+const tickStep = 25;
+for(let t=Math.ceil(yMin/tickStep)*tickStep; t<=yMax; t+=tickStep) yTicks.push(t);
+yTicks.forEach(t=>{
+  const y = yScale(t);
+  svg.appendChild(el('line', {class:'gridline', x1:marginL, x2:marginL+plotW, y1:y, y2:y}));
+  const label = el('text', {class:'tick', x:marginL-8, y:y+4, 'text-anchor':'end'});
+  label.textContent = t;
+  svg.appendChild(label);
+});
+svg.appendChild(el('line', {class:'baseline', x1:marginL, x2:marginL, y1:marginT, y2:marginT+plotH}));
+
+const axisLabel = el('text', {class:'axis-label', x:14, y:marginT+plotH/2, transform:`rotate(-90 14 ${marginT+plotH/2})`, 'text-anchor':'middle'});
+axisLabel.textContent = 'bpm_madmom';
+svg.appendChild(axisLabel);
+
+const tooltip = document.getElementById('tooltip');
+const chartCard = svg.parentElement;
+
+const evalN = 140;
+const evalPoints = Array.from({length:evalN}, (_,i)=> yMin + (yMax-yMin)*i/(evalN-1));
+const maxHalfWidth = 34;
+const boxHalfWidth = 9;
+
+order.forEach((g, i)=>{
+  const cx = marginL + colW*i + colW/2;
+  const st = stats(g.values);
+  const dens = kde(g.values, evalPoints);
+  const maxDens = Math.max(...dens);
+  const densNorm = dens.map(d=>d/maxDens);
+
+  // violin path (mirror around cx)
+  let leftPts = [], rightPts = [];
+  evalPoints.forEach((yv, idx)=>{
+    const y = yScale(yv);
+    const w = densNorm[idx]*maxHalfWidth;
+    leftPts.push([cx-w, y]);
+    rightPts.push([cx+w, y]);
+  });
+  const pathD = 'M ' + leftPts.map(p=>p.join(',')).join(' L ') +
+    ' L ' + rightPts.slice().reverse().map(p=>p.join(',')).join(' L ') + ' Z';
+  const violin = el('path', {d: pathD, class: g.isAll ? 'violin-all':'violin-band'});
+  svg.appendChild(violin);
+
+  // box plot overlay
+  const yQ1=yScale(st.q1), yQ3=yScale(st.q3), yMed=yScale(st.med);
+  const yLo=yScale(st.loWhisker), yHi=yScale(st.hiWhisker);
+  svg.appendChild(el('line', {class: g.isAll?'whisker-all':'whisker-band', x1:cx, x2:cx, y1:yQ3, y2:yHi}));
+  svg.appendChild(el('line', {class: g.isAll?'whisker-all':'whisker-band', x1:cx, x2:cx, y1:yQ1, y2:yLo}));
+  svg.appendChild(el('rect', {x:cx-boxHalfWidth, y:yQ3, width:boxHalfWidth*2, height:Math.max(1,yQ1-yQ3), class: g.isAll?'box-all':'box-band', rx:2}));
+  svg.appendChild(el('line', {class: g.isAll?'median-all':'median-band', x1:cx-boxHalfWidth, x2:cx+boxHalfWidth, y1:yMed, y2:yMed}));
+
+  // labels
+  const label = el('text', {class:'cat-label'+(g.isAll?' all':''), x:cx, y:marginT+plotH+18, 'text-anchor':'middle'});
+  label.textContent = g.isAll ? '전체' : g.label.replace(/_/g,'\n');
+  // multiline via tspans for long band names
+  if(!g.isAll && g.label.includes('_')){
+    label.textContent = '';
+    const parts = g.label.split('_');
+    parts.forEach((p, pi)=>{
+      const tspan = document.createElementNS(ns,'tspan');
+      tspan.setAttribute('x', cx);
+      tspan.setAttribute('dy', pi===0? '0':'11');
+      tspan.textContent = p;
+      label.appendChild(tspan);
+    });
+  }
+  svg.appendChild(label);
+  const nLabel = el('text', {class:'n-label', x:cx, y:marginT+plotH+ (g.label.includes('_')? 40:30), 'text-anchor':'middle'});
+  nLabel.textContent = `n=${st.n}`;
+  svg.appendChild(nLabel);
+
+  if(i>0){
+    svg.appendChild(el('line', {class:'divider', x1:marginL+colW*i, x2:marginL+colW*i, y1:marginT, y2:marginT+plotH}));
+  }
+
+  // hover target
+  const hit = el('rect', {x:marginL+colW*i, y:marginT, width:colW, height:plotH, fill:'transparent', style:'cursor:pointer'});
+  hit.addEventListener('mousemove', (e)=>{
+    const rect = chartCard.getBoundingClientRect();
+    tooltip.style.left = (e.clientX - rect.left + chartCard.scrollLeft + 14) + 'px';
+    tooltip.style.top = (e.clientY - rect.top + 8) + 'px';
+    tooltip.style.opacity = 1;
+    tooltip.innerHTML = `<div class="t-title">${g.isAll?'전체':g.label}</div>
+      <div class="t-row">n = ${st.n}</div>
+      <div class="t-row">중앙값 = ${st.med.toFixed(1)} bpm</div>
+      <div class="t-row">IQR = ${st.q1.toFixed(1)} ~ ${st.q3.toFixed(1)}</div>
+      <div class="t-row">범위 = ${st.min.toFixed(1)} ~ ${st.max.toFixed(1)}</div>`;
+  });
+  hit.addEventListener('mouseleave', ()=>{ tooltip.style.opacity = 0; });
+  svg.appendChild(hit);
+});
+
+document.getElementById('legend').innerHTML = `
+  <span><span class="sw" style="background:var(--series-all)"></span>전체(집계)</span>
+  <span><span class="sw" style="background:var(--series-band)"></span>개별 밴드</span>
+  <span style="color:var(--text-muted)">상자: IQR(25–75%) · 굵은 선: 중앙값 · 수염: 1.5×IQR 이내 범위</span>
+`;
+
+const allSt = stats(allValues);
+document.getElementById('note').innerHTML =
+  `<b>전체</b> 653곡(표본 10곡 미만 3밴드 제외) 중앙값 <b>${allSt.med.toFixed(1)} bpm</b>, IQR ${allSt.q1.toFixed(1)}–${allSt.q3.toFixed(1)}.
+  분포가 두 개 이상의 봉우리(약 140bpm대와 180~200bpm대)로 갈라지는 밴드가 다수 보이는데,
+  이는 밴드별로 다양한 곡 템포가 섞여 있거나 madmom이 일부 곡에서 배음 옥타브(하프타임/더블타임) 오차를 낸 결과일 수 있음 —
+  halftime_flag=True 31곡(4.7%)이 이 영향을 일부 설명한다.`;
+</script>

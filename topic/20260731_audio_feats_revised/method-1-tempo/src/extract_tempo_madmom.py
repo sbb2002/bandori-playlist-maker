@@ -91,7 +91,7 @@ _AUDIO_DIR = (
     / "cluster"
     / "audio_full"
 )
-_OUT_CSV = _METHOD_DIR / "out" / "tempo_raw.csv"
+_OUT_CSV = _METHOD_DIR / "out" / "csv" / "tempo_raw.csv"
 
 # ---------------------------------------------------------------------------
 # 추출 파라미터 (재현성 고정)
@@ -222,7 +222,8 @@ def _build_tasks(
         if only_idx is None and idx in done:
             continue
         band = r["band"]
-        path = _audio_path(band, idx)
+        file_idx = int(r.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
+        path = _audio_path(band, file_idx)
         if not path.exists():
             print(f"  [WARN] 오디오 없음 idx={idx} {path.name} — 건너뜀", flush=True)
             continue
@@ -245,7 +246,7 @@ def _merge_madmom_results(csv_path: Path, madmom_results: dict[int, dict]) -> No
     else:
         rows = []
 
-    existing_idx = {int(r["idx"]) for r in rows}
+    existing_keys = {(r["band"], int(r["idx"])) for r in rows}  # (band, idx) 복합키: idx는 band 간 유일하지 않을 수 있음
     for idx, res in madmom_results.items():
         row_update = {
             "duration_sec": res.get("duration_sec", ""),
@@ -256,9 +257,10 @@ def _merge_madmom_results(csv_path: Path, madmom_results: dict[int, dict]) -> No
             "extract_sec": res.get("extract_sec", ""),
             "error": res.get("error", ""),
         }
-        if idx in existing_idx:
+        key = (res.get("band", ""), idx)
+        if key in existing_keys:
             for r in rows:
-                if int(r["idx"]) == idx:
+                if r["band"] == key[0] and int(r["idx"]) == idx:
                     # duration_sec은 librosa가 이미 채웠으면 madmom 값(빈 값 포함)으로 덮지
                     # 않는다(madmom 실패로 librosa 값이 지워지는 사고 방지). error는 이번 실행
                     # 결과가 이 idx에 대한 최신 진실이므로 항상 덮어써서 이전 실패 잔여물이
@@ -269,10 +271,10 @@ def _merge_madmom_results(csv_path: Path, madmom_results: dict[int, dict]) -> No
                         r[k] = v
                     break
         else:
-            new_row = {"idx": idx, "band": res.get("band", ""), "song": res.get("song", "")}
+            new_row = {"idx": idx, "band": key[0], "song": res.get("song", "")}
             new_row.update(row_update)
             rows.append(new_row)
-            existing_idx.add(idx)
+            existing_keys.add(key)
 
     all_cols: list[str] = []
     for r in rows:

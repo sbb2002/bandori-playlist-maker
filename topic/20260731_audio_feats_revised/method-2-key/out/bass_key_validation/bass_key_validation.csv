@@ -1,0 +1,51 @@
+idx,band,song,key_ks,mode_ks,key_essentia,mode_essentia,key_bass,mode_bass,key_bass_confidence,agree_with_ks,agree_with_essentia
+6,afterglow,"Easy come, Easy go!",D,major,D,major,D,major,0.724,True,True
+25,afterglow,カサブタ,A,major,A,major,A,major,0.468,True,True
+27,afterglow,Northern lights,A,minor,A,minor,A,minor,0.666,True,True
+30,afterglow,Listen!!,A,major,A,minor,A,minor,0.495,False,True
+32,afterglow,イマジネーション,G#,major,Ab,minor,B,major,0.306,False,False
+89,ave_mujica,Ether,G#,minor,E,major,F#,minor,0.372,False,False
+95,ave_mujica,Sophie,B,minor,B,minor,F#,minor,0.273,False,False
+104,various_artists,"Here, the world",G#,major,Ab,major,G#,major,0.405,True,False
+114,hello_happy_world,うぃーきゃん☆フレフレっ！,D,major,A,major,D,major,0.19,True,False
+142,hello_happy_world,むすんでわらって,C,major,F,major,F,major,0.621,False,True
+163,hello_happy_world,ロメオ (Cover),G#,major,Ab,major,G#,major,0.857,True,False
+203,morfonica,One step at a time,E,major,E,major,E,major,0.625,True,True
+223,morfonica,祝福 (Cover),A,minor,A,minor,D,minor,0.16,False,False
+225,morfonica,かくれんぼ (Cover),A#,minor,B,major,A#,minor,0.154,True,False
+228,morfonica,Nameless Story (Cover),A,minor,A,minor,C,major,0.315,False,False
+238,mugendai_mutype,どんがらがっしゃん,E,minor,A,minor,C,major,0.273,False,False
+250,mugendai_mutype,Hi-Vision,C#,minor,F#,minor,B,major,0.127,False,False
+281,mygo,過惰幻,A#,major,Bb,major,A#,major,0.615,True,False
+284,mygo,焚音打,C#,minor,A,major,A,major,0.441,False,True
+348,pastel_palettes,だから、ひとりじゃない (Cover),D#,major,Eb,major,G#,major,0.301,False,False
+429,poppin_party,星の約束,E,minor,G,major,G,major,0.408,False,True
+432,poppin_party,雨上がり、キミと,F,major,F,major,F,major,0.316,True,True
+459,poppin_party,勇気Limit！,G,minor,Eb,major,F#,major,0.312,False,False
+517,raise_a_suilen,しゅわりん☆どり～みん,G#,major,Ab,major,G#,major,0.424,True,False
+559,raise_a_suilen,劣等上等 (Cover),F#,minor,C#,minor,C#,major,0.389,False,False
+575,roselia,Re:birth day,D,major,G,major,C,major,0.399,False,False
+605,roselia,名前のない怪物,F,major,F,major,D,minor,0.277,False,False
+606,roselia,Dazzle the Destiny,A,major,F#,minor,A,major,0.348,True,False
+618,roselia,Talk to My Tone,C,major,C,major,C,major,0.501,True,True
+656,roselia,Preserved Roses (Cover),F#,major,F#,major,A,major,0.217,False,False
+13,afterglow,いつも通りのBrand new days,C#,major,F#,minor,C#,major,0.356,True,False
+29,afterglow,Reach Out To The Truth,B,minor,D,major,B,minor,0.501,True,False
+149,hello_happy_world,Listen to Smile!,G,major,G,major,G,major,0.466,True,True
+176,hello_happy_world,SHINY DAYS (Cover),F#,major,F#,major,F#,major,0.463,True,True
+181,morfonica,メランコリックララバイ,G,minor,F,minor,F,minor,0.787,False,True
+182,morfonica,flame of hope,A,minor,A,minor,A,minor,0.332,True,True
+254,mugendai_mutype,限界現実サバイブ天使,A,major,D,major,D,minor,0.258,False,False
+263,mygo,影色舞,A#,minor,Bb,minor,A#,minor,0.509,True,False
+282,mygo,回層浮,C#,major,Ab,minor,G#,minor,0.206,False,False
+303,pastel_palettes,ゆら・ゆらRing-Dong-Dance,G,major,C,major,F,major,0.223,False,False
+306,pastel_palettes,天下トーイツ A to Z☆,E,major,E,major,C#,minor,0.419,False,False
+328,pastel_palettes,ラムのラブソング,E,minor,G,major,D,major,0.479,False,False
+375,poppin_party,Yes! BanG_Dream!,B,major,B,major,B,major,0.73,True,True
+384,poppin_party,ティアドロップス ～Popipa Acoustic Ver.～,B,minor,E,minor,B,minor,0.393,True,False
+419,poppin_party,What's the POPIPA!?,D,major,E,minor,E,minor,0.546,False,True
+422,poppin_party,Tomorrow's Door,B,major,B,major,B,major,0.307,True,True
+492,raise_a_suilen,SOUL SOLDIER,F#,minor,B,minor,B,minor,0.571,False,True
+544,raise_a_suilen,Light a fire,B,major,B,major,B,major,0.6,True,True
+553,raise_a_suilen,Bling-Bang-Bang-Born (Cover),F,minor,F,minor,F,minor,0.816,True,True
+631,roselia,Proud of oneself,E,minor,A,minor,A,minor,0.228,False,True

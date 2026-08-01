@@ -83,7 +83,7 @@ _AUDIO_DIR = (
     / "cluster"
     / "audio_full"
 )
-_OUT_CSV = _METHOD_DIR / "out" / "valence_raw.csv"
+_OUT_CSV = _METHOD_DIR / "out" / "csv" / "valence_raw.csv"
 _TIMESERIES_DIR = _METHOD_DIR / "out" / "timeseries"
 
 # ---------------------------------------------------------------------------
@@ -230,7 +230,7 @@ def _worker(task: tuple[int, str, str, str]) -> dict:
 
         # Timeseries npy 저장
         _TIMESERIES_DIR.mkdir(parents=True, exist_ok=True)
-        ts_path = _TIMESERIES_DIR / f"{idx:03d}_valence.npy"
+        ts_path = _TIMESERIES_DIR / f"{band}__{idx:03d}_valence.npy"  # band+idx: idx는 band 간 유일하지 않을 수 있음(2026-08-01 확인)
         np.save(str(ts_path), timeseries)
 
         feats["extract_sec"] = round(time.time() - t0, 2)
@@ -278,7 +278,8 @@ def _build_tasks(
         if only_idx is None and idx in done:
             continue
         band = r["band"]
-        path = _audio_path(band, idx)
+        file_idx = int(r.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
+        path = _audio_path(band, file_idx)
         if not path.exists():
             print(f"  [WARN] 오디오 없음 idx={idx} {path.name} — 건너뜀", flush=True)
             continue

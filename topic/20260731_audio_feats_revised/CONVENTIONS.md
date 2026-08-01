@@ -19,7 +19,9 @@ MASTER_CSV = _REPO_ROOT / "data" / "songs_master.csv"
 AUDIO_FULL_DIR = (
     _MYPROJECTS_ROOT / "bandori-song-sorter" / "src" / "content" / "cluster" / "audio_full"
 )
-# 파일명: f"{band}__{idx:03d}.wav"  (예: afterglow__000.wav) — 743개 존재(전곡, 저작물)
+# 파일명: f"{band}__{file_idx:03d}.wav"  (예: afterglow__000.wav) — 743개 존재(전곡, 저작물)
+# ⚠️ 2026-08-01부로 idx != file_idx. 반드시 songs_master.csv의 file_idx 컬럼으로 파일을 찾을 것.
+# 아래 "idx와 file_idx" 절 참고.
 
 VOCAL_STEM_DIR = (
     _MYPROJECTS_ROOT / "bandori-playlist-maker" / "topic" / "mfcc_analysis" / "stems" / "htdemucs"
@@ -28,8 +30,8 @@ VOCAL_STEM_DIR = (
 # ⚠️ 661곡 중 30곡분만 존재(밴드당 3곡, idx 예: afterglow__000/001/002 등). 나머지는 스킵.
 ```
 
-- `songs_master.csv`는 idx, band, song 등 컬럼 포함(662행=헤더+661곡). 이 파일이 곡 목록의
-  단일 진처(source of truth).
+- `songs_master.csv`는 idx, band, song, file_idx 등 컬럼 포함(737행=헤더+736곡, 2026-08-01
+  기준). 이 파일이 곡 목록의 단일 진처(source of truth).
 - **오디오 파일은 저작물 → 읽기 전용.** 절대 이동/삭제/커밋하지 않는다.
 
 ## 출력
@@ -77,3 +79,40 @@ VOCAL_STEM_DIR = (
 - GT 라벨 수집·캘리브레이션·대표 스칼라 최종 선택(energy/valence) — 별도 후속 스크립트.
   이번 라운드는 **원시 추론 + 요약통계 산출까지만**.
 - `songs_master.csv` 병합 — 각 피처가 독립적으로 검증된 뒤 별도로 진행.
+
+
+## idx와 file_idx (2026-08-01 구조 개선 — 재발 방지 필독)
+
+**배경**: 초기 661곡(idx 0~662, 2개 결번 525·588 포함)은 idx가 곧 오디오 파일명 번호였다.
+이후 형제 프로젝트(bandori-song-sorter)의 `audio_full/` 폴더에 새로 생긴 75곡을 `songs_master.csv`에
+병합하면서, 이 75곡의 idx를 오디오 파일명 번호에서 그대로 가져왔더니 **다른 밴드의 기존 idx와
+48건 충돌**했다(예: `mugendai_mutype__263.wav`와 기존 `mygo__263.wav`가 둘 다 idx=263). 이를 계기로
+idx의 의미를 아래와 같이 재정의했다.
+
+- **`idx`는 이 연구 저장소가 관리하는 전역 유일(global unique) synthetic key다.**
+  오디오 파일명 번호와 절대 동일하다고 가정하지 말 것.
+- **`file_idx`는 실제 오디오 파일명(`{band}__{file_idx:03d}.wav`)의 번호**이며, **밴드 내에서만**
+  유일함이 보장된다(전역 유일 아님 — 다른 밴드가 같은 file_idx를 쓸 수 있다).
+- 오디오 파일(및 `VOCAL_STEM_DIR`의 스템 폴더 `{band}__{file_idx:03d}/`)을 찾을 때는 반드시
+  `file_idx`를 써야 한다. `idx`로 파일명을 조립하면 틀린 파일을 열거나(다른 밴드 곡과 충돌),
+  파일이 아예 없을 수 있다.
+- 2026-08-01 기준 매핑 결과: 원래 661곡(idx 0~662, 2개 결번)은 `file_idx == idx`(그대로).
+  신규 75곡은 idx 663~737을 새로 순차 부여받았고, `file_idx`에는 원래 갖고 있던(=오디오
+  파일명 그대로의) 값을 보존했다. 즉 idx 전체 범위는 0~737(525·588 결번, 736곡)이며 완전히
+  유일하다.
+- 각 method의 `_audio_path()`/`stem_paths()` 계열 함수는 모두 `file_idx`를 인자로 받도록
+  고쳐져 있다(`songs_master.csv`의 `r["file_idx"]`를 읽어 전달). 새 추출 스크립트를 작성할
+  때도 이 규칙을 반드시 따를 것 — `r["idx"]`를 오디오 경로 조립에 직접 쓰지 말 것.
+
+### 신곡 추가 절차(권장)
+
+앞으로 신곡을 `songs_master.csv`에 추가할 때는:
+
+1. 새 idx는 반드시 `max(기존 idx) + 1`부터 순차 부여한다. 오디오 파일명 번호를 그대로
+   idx로 쓰지 않는다.
+2. `file_idx`에는 실제 오디오 파일명(`{band}__{file_idx:03d}.wav`)의 번호를 그대로 기록한다.
+3. 추가 전 다음을 검증한다(간단한 assert 또는 체크 스크립트 권장):
+   - 새로 부여하려는 idx 값들이 기존 `idx` 컬럼과 전혀 겹치지 않는가(전역 유일성).
+   - 신규 행의 `(band, file_idx)` 조합이 같은 밴드 내에서 기존 행과 겹치지 않는가
+     (동일 곡 중복 추가 방지).
+4. 기존 out/*_raw.csv·timeseries 파일은 건드리지 않는다 — 신규 곡 분만 추가로 추출한다.

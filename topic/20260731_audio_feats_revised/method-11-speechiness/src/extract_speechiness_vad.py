@@ -72,7 +72,7 @@ VOCAL_STEM_DIR = (
 # ⚠️ 661곡 중 30곡분만 존재
 
 OUT_DIR = _METHOD_DIR / "out"
-SPEECHINESS_CSV = OUT_DIR / "speechiness_raw.csv"
+SPEECHINESS_CSV = OUT_DIR / "csv" / "speechiness_raw.csv"
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -124,7 +124,10 @@ def extract_vad_ratio(vocal_path: Path) -> dict:
         logger.debug(f"Loaded audio for VAD from {vocal_path}: {len(y)} samples @ {sr}Hz")
 
         # inaSpeechSegmenter 실행
-        segmenter = Segmenter()
+        # ⚠️ detect_gender=True(기본값)면 speech 구간이 'male'/'female'로 라벨링돼
+        # 아래 "speech" 문자열 매칭이 항상 실패해 speech_duration이 0으로 고정되는
+        # 버그가 있었다(2026-08-01 발견). detect_gender=False로 'speech' 단일 라벨 사용.
+        segmenter = Segmenter(detect_gender=False)
         segments = segmenter(str(vocal_path))  # [(label, start, end), ...]
 
         logger.debug(f"Segmenter returned {len(segments)} segments")
@@ -351,9 +354,10 @@ def main():
         idx = int(row["idx"])
         band = row["band"]
         song = row["song"]
+        file_idx = int(row.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
 
         # 보컬 스템 경로 확인
-        paths = stem_paths(band, idx)
+        paths = stem_paths(band, file_idx)
         vocal_path = paths[0] if paths else None
 
         tasks.append({
@@ -397,61 +401,28 @@ def main():
                 )
 
     # ========================================================================
-    # UPDATE RESULTS IN SPEECHINESS_RAW.CSV
+    # SAVE RESULTS TO TEMPORARY FILE (NOT MERGING YET)
     # ========================================================================
 
-    if not SPEECHINESS_CSV.exists():
-        logger.warning(
-            f"speechiness_raw.csv not found at {SPEECHINESS_CSV}. "
-            f"Please run extract_speechiness_stem.py first."
-        )
-        logger.info("Saving VAD results to temporary table (not merging)...")
-        # 그냥 결과 로깅만 함
-        return
+    logger.info("Saving VAD results to temporary CSV (not merging to main CSV yet)...")
 
-    logger.info(f"Updating {SPEECHINESS_CSV} with VAD results...")
-
-    # 기존 CSV 읽기
-    try:
-        df_existing = pd.read_csv(SPEECHINESS_CSV)
-    except Exception as e:
-        logger.error(f"Failed to read existing CSV: {e}")
-        sys.exit(1)
-
-    # VAD 결과를 딕셔너리로 구성
-    vad_dict = {}
-    for result in results:
-        idx = result["idx"]
-        vad_dict[idx] = {
+    # VAD 결과 DataFrame 구성
+    df_vad_results = pd.DataFrame([
+        {
+            "idx": result["idx"],
             "vad_speech_ratio": result["vad_speech_ratio"],
             "vad_n_frames": result["n_frames"],
             "vad_error": result["error"]
         }
+        for result in results
+    ])
 
-    # vad_speech_ratio 컬럼 추가 (기본값 NaN)
-    if "vad_speech_ratio" not in df_existing.columns:
-        df_existing["vad_speech_ratio"] = np.nan
-    if "vad_n_frames" not in df_existing.columns:
-        df_existing["vad_n_frames"] = None
-    if "vad_error" not in df_existing.columns:
-        df_existing["vad_error"] = None
-
-    # VAD 결과 병합
-    for idx, vad_values in vad_dict.items():
-        if idx in df_existing["idx"].values:
-            row_idx = df_existing[df_existing["idx"] == idx].index[0]
-            df_existing.loc[row_idx, "vad_speech_ratio"] = vad_values["vad_speech_ratio"]
-            df_existing.loc[row_idx, "vad_n_frames"] = vad_values["vad_n_frames"]
-            # vad_error는 원래 error와 별도로 기록하거나, 기존 error가 있으면 유지
-            if df_existing.loc[row_idx, "error"] is None or pd.isna(df_existing.loc[row_idx, "error"]):
-                df_existing.loc[row_idx, "error"] = vad_values["vad_error"]
-
-    # CSV 저장
+    vad_temp_csv = OUT_DIR / "csv" / "vad_results_temp.csv"
     try:
-        df_existing.to_csv(SPEECHINESS_CSV, index=False, encoding="utf-8")
-        logger.info(f"Updated {SPEECHINESS_CSV} with VAD results")
+        df_vad_results.to_csv(vad_temp_csv, index=False, encoding="utf-8")
+        logger.info(f"Saved VAD results to temporary file: {vad_temp_csv}")
     except Exception as e:
-        logger.error(f"Failed to save updated CSV: {e}")
+        logger.error(f"Failed to save VAD temp CSV: {e}")
         sys.exit(1)
 
     # ========================================================================

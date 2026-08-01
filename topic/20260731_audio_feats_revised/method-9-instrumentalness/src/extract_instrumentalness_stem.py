@@ -64,7 +64,7 @@ VOCAL_STEM_DIR = (
     / "htdemucs"
 )
 
-OUT_CSV = _METHOD_DIR / "out" / "instrumentalness_raw.csv"
+OUT_CSV = _METHOD_DIR / "out" / "csv" / "instrumentalness_raw.csv"
 TIMESERIES_DIR = _METHOD_DIR / "out" / "timeseries"
 
 # ---------------------------------------------------------------------------
@@ -99,7 +99,7 @@ def stem_paths(band: str, idx: int) -> tuple[Path, Path] | None:
     return vocal_path, instr_path
 
 
-def extract_features(band: str, idx: int) -> dict[str, float]:
+def extract_features(band: str, idx: int, file_idx: int | None = None) -> dict[str, float]:
     """단일 곡의 보컬 스템 에너지비를 계산해 dict로 반환.
 
     반환 값:
@@ -109,7 +109,7 @@ def extract_features(band: str, idx: int) -> dict[str, float]:
     """
     import librosa  # worker 프로세스에서 import (spawn 안전)
 
-    paths = stem_paths(band, idx)
+    paths = stem_paths(band, file_idx if file_idx is not None else idx)
     if paths is None:
         return {"error": "no_stem"}
 
@@ -143,14 +143,14 @@ def extract_features(band: str, idx: int) -> dict[str, float]:
         return {"error": repr(exc)}
 
 
-def _worker(task: tuple[int, str, str]) -> dict:
-    """멀티프로세싱 worker. (idx, band, song) → 결과 행 dict.
+def _worker(task: tuple[int, str, str, int]) -> dict:
+    """멀티프로세싱 worker. (idx, band, song, file_idx) → 결과 행 dict.
 
     실패해도 죽지 않고 error 필드를 담아 반환한다.
     """
-    idx, band, song = task
+    idx, band, song, file_idx = task
     try:
-        feats = extract_features(band, idx)
+        feats = extract_features(band, idx, file_idx)
         if "error" in feats:
             return {"idx": idx, "band": band, "song": song, "error": feats["error"]}
         return {
@@ -212,13 +212,14 @@ def _build_tasks(
         if only_idx is None and idx in done:
             continue
         band = r["band"]
+        file_idx = int(r.get("file_idx", idx))  # 오디오 파일명 번호(2026-08-01: idx와 분리)
 
         # 스템 폴더 존재 확인
-        if stem_paths(band, idx) is None:
+        if stem_paths(band, file_idx) is None:
             skipped_no_stem += 1
             continue
 
-        tasks.append((idx, band, r["song"]))
+        tasks.append((idx, band, r["song"], file_idx))
         if limit is not None and len(tasks) >= limit:
             break
 

@@ -1,0 +1,51 @@
+idx,band,song,key_ks,mode_ks,key_essentia,mode_essentia,key_modal,mode_modal,mode_modal_family,modal_confidence,is_non_major_minor,family_agrees_with_ks
+6,afterglow,"Easy come, Easy go!",D,major,D,major,D,ionian,major,0.535,False,True
+25,afterglow,カサブタ,A,major,A,major,A,ionian,major,0.493,False,True
+27,afterglow,Northern lights,A,minor,A,minor,A,aeolian,minor,0.518,False,True
+30,afterglow,Listen!!,A,major,A,minor,A,mixolydian,major,0.269,True,True
+32,afterglow,イマジネーション,G#,major,Ab,minor,G#,ionian,major,0.349,False,True
+89,ave_mujica,Ether,G#,minor,E,major,G#,phrygian,minor,0.293,True,True
+95,ave_mujica,Sophie,B,minor,B,minor,B,aeolian,minor,0.623,False,True
+104,various_artists,"Here, the world",G#,major,Ab,major,G#,ionian,major,0.509,False,True
+114,hello_happy_world,うぃーきゃん☆フレフレっ！,D,major,A,major,D,ionian,major,0.349,False,True
+142,hello_happy_world,むすんでわらって,C,major,F,major,F,ionian,major,0.379,False,True
+163,hello_happy_world,ロメオ (Cover),G#,major,Ab,major,G#,mixolydian,major,0.31,True,True
+203,morfonica,One step at a time,E,major,E,major,E,ionian,major,0.682,False,True
+223,morfonica,祝福 (Cover),A,minor,A,minor,A,phrygian,minor,0.24,True,True
+225,morfonica,かくれんぼ (Cover),A#,minor,B,major,A#,phrygian,minor,0.436,True,True
+228,morfonica,Nameless Story (Cover),A,minor,A,minor,A,phrygian,minor,0.598,True,True
+238,mugendai_mutype,どんがらがっしゃん,E,minor,A,minor,E,phrygian,minor,0.351,True,True
+250,mugendai_mutype,Hi-Vision,C#,minor,F#,minor,C#,locrian,minor,0.297,True,True
+281,mygo,過惰幻,A#,major,Bb,major,A#,ionian,major,0.712,False,True
+284,mygo,焚音打,C#,minor,A,major,C#,phrygian,minor,0.473,True,True
+348,pastel_palettes,だから、ひとりじゃない (Cover),D#,major,Eb,major,D#,ionian,major,0.599,False,True
+429,poppin_party,星の約束,E,minor,G,major,E,dorian,minor,0.251,True,True
+432,poppin_party,雨上がり、キミと,F,major,F,major,F,ionian,major,0.69,False,True
+459,poppin_party,勇気Limit！,G,minor,Eb,major,G,aeolian,minor,0.173,False,True
+517,raise_a_suilen,しゅわりん☆どり～みん,G#,major,Ab,major,G#,ionian,major,0.396,False,True
+559,raise_a_suilen,劣等上等 (Cover),F#,minor,C#,minor,F#,locrian,minor,0.194,True,True
+575,roselia,Re:birth day,D,major,G,major,D,mixolydian,major,0.315,True,True
+605,roselia,名前のない怪物,F,major,F,major,F,ionian,major,0.277,False,True
+606,roselia,Dazzle the Destiny,A,major,F#,minor,A,lydian,major,0.221,True,True
+618,roselia,Talk to My Tone,C,major,C,major,C,ionian,major,0.656,False,True
+656,roselia,Preserved Roses (Cover),F#,major,F#,major,F#,dorian,minor,0.254,True,False
+13,afterglow,いつも通りのBrand new days,C#,major,F#,minor,C#,ionian,major,0.324,False,True
+29,afterglow,Reach Out To The Truth,B,minor,D,major,D,ionian,major,0.319,False,False
+149,hello_happy_world,Listen to Smile!,G,major,G,major,G,ionian,major,0.434,False,True
+176,hello_happy_world,SHINY DAYS (Cover),F#,major,F#,major,F#,ionian,major,0.306,False,True
+181,morfonica,メランコリックララバイ,G,minor,F,minor,G,dorian,minor,0.358,True,True
+182,morfonica,flame of hope,A,minor,A,minor,A,aeolian,minor,0.608,False,True
+254,mugendai_mutype,限界現実サバイブ天使,A,major,D,major,A,ionian,major,0.234,False,True
+263,mygo,影色舞,A#,minor,Bb,minor,A#,aeolian,minor,0.364,False,True
+282,mygo,回層浮,C#,major,Ab,minor,C#,ionian,major,0.177,False,True
+303,pastel_palettes,ゆら・ゆらRing-Dong-Dance,G,major,C,major,B,phrygian,minor,0.309,True,False
+306,pastel_palettes,天下トーイツ A to Z☆,E,major,E,major,E,ionian,major,0.21,False,True
+328,pastel_palettes,ラムのラブソング,E,minor,G,major,E,dorian,minor,0.24,True,True
+375,poppin_party,Yes! BanG_Dream!,B,major,B,major,B,ionian,major,0.319,False,True
+384,poppin_party,ティアドロップス ～Popipa Acoustic Ver.～,B,minor,E,minor,B,phrygian,minor,0.804,True,True
+419,poppin_party,What's the POPIPA!?,D,major,E,minor,D,ionian,major,0.464,False,True
+422,poppin_party,Tomorrow's Door,B,major,B,major,B,ionian,major,0.461,False,True
+492,raise_a_suilen,SOUL SOLDIER,F#,minor,B,minor,F#,phrygian,minor,0.666,True,True
+544,raise_a_suilen,Light a fire,B,major,B,major,B,ionian,major,0.486,False,True
+553,raise_a_suilen,Bling-Bang-Bang-Born (Cover),F,minor,F,minor,F,dorian,minor,0.357,True,True
+631,roselia,Proud of oneself,E,minor,A,minor,E,phrygian,minor,0.39,True,True
