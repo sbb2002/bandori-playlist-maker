@@ -36,6 +36,7 @@ import bisect
 import csv
 import datetime
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -502,6 +503,64 @@ def band_average_intensity(master_rows: list[dict], band: str,
 # 5) danceability_norm 동결 (frozen percentile normalization)
 # ---------------------------------------------------------------------------
 
+_COVER_SUFFIX_RE = re.compile(r"\s*\(Cover\)\s*$", re.IGNORECASE)
+
+
+def _strip_cover_suffix(song: str) -> str:
+    """곡명 끝의 ' (Cover)' 표기를 제거한다(대소문자 무시, 앞 공백 포함)."""
+    return _COVER_SUFFIX_RE.sub("", song)
+
+
+def _load_dance_raw_index(danceability_raw_csv: Path
+                          ) -> tuple[dict[tuple[str, str], dict],
+                                     dict[tuple[str, str], dict]]:
+    """danceability_raw.csv를 읽어 (band, song) 조회용 인덱스 2종을 만든다.
+
+    - primary: 원본 (band, song) 그대로 → {raw_alpha, stored_norm}
+    - stripped: (band, "(Cover)" 접미사 제거한 song) → 동일 딕셔너리
+
+    2026-07-26에 master 쪽 25곡(Roselia 4·Pastel*Palettes 10·Afterglow 10·
+    Poppin'Party 1)의 " (Cover)" 접미사 누락 버그가 수정됐는데, 이 연구용
+    CSV는 그보다 앞서 만들어진 오디오 파일명을 기준으로 곡명을 기록해 그 25곡만
+    접미사가 없다. band+song 정확 매칭이 실패하면 접미사를 뗀 이름으로도
+    한 번 더 찾아본다 — 이미 계산돼 있는 값을 접미사 차이 때문에 버리지 않기 위함.
+    """
+    primary: dict[tuple[str, str], dict] = {}
+    stripped: dict[tuple[str, str], dict] = {}
+    with danceability_raw_csv.open(encoding="utf-8", newline="") as f:
+        for r in csv.DictReader(f):
+            alpha_str = (r.get("dfa_alpha") or "").strip()
+            if not alpha_str:
+                continue
+            try:
+                entry = {"raw_alpha": float(alpha_str)}
+            except ValueError:
+                continue
+            norm_str = (r.get("danceability_norm") or "").strip()
+            if norm_str:
+                try:
+                    entry["stored_norm"] = float(norm_str)
+                except ValueError:
+                    entry["stored_norm"] = None
+            else:
+                entry["stored_norm"] = None
+            band, song = r["band"], r["song"]
+            primary[(band, song)] = entry
+            stripped.setdefault((band, _strip_cover_suffix(song)), entry)
+    return primary, stripped
+
+
+def _lookup_dance_row(band: str, song: str,
+                      primary: dict[tuple[str, str], dict],
+                      stripped: dict[tuple[str, str], dict]) -> dict | None:
+    """정확 매칭 우선, 실패하면 양쪽 다 (Cover) 접미사를 떼고 재시도한다."""
+    key = (band, song)
+    if key in primary:
+        return primary[key]
+    stripped_key = (band, _strip_cover_suffix(song))
+    return stripped.get(stripped_key)
+
+
 class DanceabilityFrozen:
     """기존(2026-08-02) 분포에서 동결한 danceability_norm 계산기.
 
@@ -531,23 +590,13 @@ class DanceabilityFrozen:
         Note:
             idx로 조인하지 않고 band+song으로 조인한다 (과거 idx 정합성 버그 이력).
         """
-        # Load raw CSV and build (band, song) → alpha mapping
-        raw_by_key = {}  # (band, song) → dfa_alpha
-        with danceability_raw_csv.open(encoding="utf-8", newline="") as f:
-            for r in csv.DictReader(f):
-                if (r.get("dfa_alpha") or "").strip():
-                    try:
-                        key = (r["band"], r["song"])
-                        raw_by_key[key] = float(r["dfa_alpha"])
-                    except (ValueError, KeyError):
-                        continue
+        primary, stripped = _load_dance_raw_index(danceability_raw_csv)
 
-        # Join with master rows and extract raw values
         raw_alphas = []
         for m in master_rows:
-            key = (m["band"], m["song"])
-            if key in raw_by_key:
-                raw_alphas.append(raw_by_key[key])
+            hit = _lookup_dance_row(m["band"], m["song"], primary, stripped)
+            if hit is not None:
+                raw_alphas.append(hit["raw_alpha"])
 
         if not raw_alphas:
             raise ValueError("No raw DFA alpha values found in danceability_raw.csv")
@@ -649,28 +698,13 @@ class DanceabilityFrozen:
             항상 실패해 무의미하므로, 절대오차 통계(평균/중앙값/p90/최대)와
             큰 이상치(diff>0.05) 개수를 반환한다.
         """
-        # Load raw CSV with (band, song) → (raw_alpha, stored_norm) mapping
-        rows_by_key = {}
-        with danceability_raw_csv.open(encoding="utf-8", newline="") as f:
-            for r in csv.DictReader(f):
-                key = (r["band"], r["song"])
-                alpha_str = (r.get("dfa_alpha") or "").strip()
-                norm_str = (r.get("danceability_norm") or "").strip()
-                if alpha_str and norm_str:
-                    try:
-                        rows_by_key[key] = {
-                            "raw_alpha": float(alpha_str),
-                            "stored_norm": float(norm_str)
-                        }
-                    except (ValueError, KeyError):
-                        continue
+        primary, stripped = _load_dance_raw_index(danceability_raw_csv)
 
         diffs: list[float] = []
         for m in master_rows:
-            key = (m["band"], m["song"])
-            if key not in rows_by_key:
+            row_data = _lookup_dance_row(m["band"], m["song"], primary, stripped)
+            if row_data is None or row_data.get("stored_norm") is None:
                 continue
-            row_data = rows_by_key[key]
             mine = self.danceability_norm_for(row_data["raw_alpha"])
             stored = row_data["stored_norm"]
             diffs.append(abs(mine - stored))
