@@ -439,7 +439,12 @@ function renderStageGraph() {
     const defs = document.createElementNS(SVG_NS, "defs");
     const grad = document.createElementNS(SVG_NS, "linearGradient");
     grad.setAttribute("id", "path-grad");
-    grad.setAttribute("x1", "0%"); grad.setAttribute("x2", "100%");
+    // userSpaceOnUse + viewBox 좌표(0~100)로 고정 — 기본(objectBoundingBox)은 경로가 완전히
+    // 수직/수평이면(바운딩박스 폭 또는 높이가 0) 그라디언트가 특이(degenerate)해져 선 자체가
+    // 안 보이는 버그가 있었다(정서 궤적 기본값이 전부 밝기 50%라 세로 직선이 되는 케이스).
+    grad.setAttribute("gradientUnits", "userSpaceOnUse");
+    grad.setAttribute("x1", "0"); grad.setAttribute("x2", "100");
+    grad.setAttribute("y1", "0"); grad.setAttribute("y2", "0");
     const s1 = document.createElementNS(SVG_NS, "stop");
     s1.setAttribute("offset", "0%"); s1.setAttribute("stop-color", "#7c6cff");
     const s2 = document.createElementNS(SVG_NS, "stop");
