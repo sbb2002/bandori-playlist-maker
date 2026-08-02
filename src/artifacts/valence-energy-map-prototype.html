@@ -43,17 +43,62 @@
   .card h2 { font-size: 1rem; margin: 0 0 4px; }
   .card .card-note { color: var(--muted); font-size: 0.78rem; margin: 0 0 16px; }
 
-  /* 상단 컨트롤: 총 재생시간 + 구간 수 */
-  .controls-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-  .minutes-field { display: flex; align-items: center; gap: 8px; }
-  .minutes-field label { font-size: 0.8rem; color: var(--muted); }
-  .minutes-field input {
-    width: 64px; padding: 7px 8px; text-align: center;
-    border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
-    background: var(--card-2); color: var(--text); font-size: 0.9rem;
-    font-variant-numeric: tabular-nums;
+  /* ── 아래부터는 실제 앱 src/frontend/style.css의 "세부 설정" 패널 클래스를 그대로 재사용
+     (필드·options·setting-block·band-list·picker-type-*). 이 프로토타입 전용 스타일은 이후
+     구획(2D 정서 지도 이하)에만 남긴다. ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label { font-size: 0.85rem; color: var(--muted); }
+  input[type="text"], input[type="number"] {
+    width: 100%; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1); background: var(--card-2);
+    color: var(--text); font-size: 1rem; font-family: inherit;
   }
-  .minutes-field input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  button { font-family: inherit; cursor: pointer; border: none; border-radius: 10px; font-size: 1rem; }
+
+  .options summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
+  .options-guide { margin: 12px 0 4px; color: var(--muted); font-size: 0.72rem; line-height: 1.55; }
+  .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; max-width: 240px; }
+
+  .setting-block { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .setting-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-weight: 400; }
+  .link-btn { background: none; color: var(--accent); font-size: 0.8rem; padding: 2px 4px; }
+
+  .picker-type-filter { display: flex; gap: 6px; }
+  .picker-type-pill {
+    padding: 5px 12px; border-radius: 999px; cursor: pointer;
+    background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--muted); font-size: 0.82rem;
+  }
+  .picker-type-pill:hover { background: var(--card-2); color: var(--text); }
+  .picker-type-pill.active {
+    background: rgba(124,108,255,0.15); border-color: var(--accent); color: var(--text); font-weight: 600;
+  }
+
+  /* 밴드 셀렉터 — 실제 UI는 밴드 로고 PNG(assets/bands/*.png)를 쓰지만, 이 아티팩트는 외부/로컬
+     파일을 불러올 수 없어(자기완결형) 같은 자리에 이니셜 배지로 대신한다. 레이아웃·상호작용은
+     동일(그리드 셀 = 아이콘 + 곡 수, 클릭 시 :has()로 셀 강조, 이름은 title 툴팁). */
+  .band-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px;
+    max-height: 240px; overflow-y: auto;
+  }
+  .band-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 8px 4px; border-radius: 10px; cursor: pointer;
+    background: var(--card-2); border: 1px solid transparent;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .band-item:hover { border-color: rgba(124,108,255,0.45); }
+  .band-item:has(.band-cb:checked) { border-color: var(--accent); background: rgba(124,108,255,0.14); }
+  .band-cb { display: none; }
+  .band-item-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.66rem; font-weight: 700; color: #fff; letter-spacing: -0.02em;
+  }
+  .band-item-count { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* 상단 컨트롤: 구간 수 */
   .stage-count { display: inline-flex; background: var(--card-2); border-radius: 999px; padding: 3px; gap: 2px; }
   .stage-count button {
     border: none; background: none; color: var(--text); font-size: 0.85rem; font-weight: 700;
@@ -246,69 +291,89 @@
 <div class="wrap">
   <div class="hero">
     <span class="eyebrow">epic/improved-playlist-maker · Step 1 프로토타입</span>
-    <h1>정서 궤적 세부설정 (energy × valence)</h1>
-    <p class="sub">점을 끌어 곡의 분위기 흐름을 2D 위에서 직접 그려보세요.</p>
+    <h1>세부 설정 미리보기</h1>
+    <p class="sub">
+      실제 앱의 "세부 설정" 패널 그대로입니다. 재생시간·곡 종류·밴드 필터는 기존 UI를 그대로
+      가져왔고, 정서 궤적 이하가 이번에 새로 추가되는 부분입니다.
+    </p>
   </div>
 
   <div class="card">
-    <h2>정서 지도</h2>
-    <p class="card-note">
-      가로 = 밝기(우울↔경쾌), 세로 = 격렬함(잔잔↔격렬). 번호가 매겨진 점은 재생 순서이며,
-      점을 드래그하면 해당 구간의 분위기가 바뀝니다. 아래 시간 배분 바는 모든 그래프가
-      공유합니다 — 경계(◆)를 끌면 구간 길이가 달라집니다.
-    </p>
+    <details class="options" open>
+      <summary>세부 설정 (선택)</summary>
+      <p class="options-guide">
+        여기서 플레이리스트를 직접 다듬을 수 있어요. 바꾼 설정은 같은 요청에서 유지되고,
+        프롬프트를 새 내용으로 바꾸면 다시 자동으로 맞춰드려요.
+      </p>
 
-    <div class="controls-row">
-      <div class="minutes-field">
-        <label for="total-min">총 재생시간</label>
-        <input id="total-min" type="number" min="10" max="180" step="5" value="60" />
-        <span class="minutes-field-unit" style="color:var(--muted); font-size:0.8rem;">분</span>
+      <div class="options-grid">
+        <label class="field">
+          <span class="field-label">재생시간(분)</span>
+          <input id="total-min" type="number" min="10" max="180" step="5" value="60" />
+        </label>
       </div>
-      <div class="stage-count">
-        <button id="stage-minus" type="button" aria-label="구간 줄이기">−</button>
-        <span class="n" id="stage-n">5구간</span>
-        <button id="stage-plus" type="button" aria-label="구간 늘리기">+</button>
-      </div>
-    </div>
 
-    <div class="map-stage">
-      <div class="map-wrap">
-        <div class="map-pad" id="map-pad">
-          <svg class="map-svg" id="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <!-- 그리드는 JS가 채움 -->
-          </svg>
-          <div class="quadrant-label q-tl">무겁고<br />격렬한</div>
-          <div class="quadrant-label q-tr">밝고<br />신나는</div>
-          <div class="quadrant-label q-bl">차분하고<br />가라앉은</div>
-          <div class="quadrant-label q-br">밝고<br />잔잔한</div>
-          <!-- stage-node들은 JS가 채움 -->
+      <div class="setting-block">
+        <span class="field-label">곡 종류 <small class="muted">(안 건드리면 모델이 판단 · 기본 전체)</small></span>
+        <div id="settings-type-filter" class="picker-type-filter"></div>
+      </div>
+
+      <div class="setting-block">
+        <div class="setting-head">
+          <span class="field-label">밴드 필터 <small class="muted">(선택 안 하면 전체)</small></span>
+          <button type="button" id="band-clear" class="link-btn">전체 해제</button>
         </div>
-        <span class="axis-label-x">밝기(정서) →</span>
-        <span class="axis-label-y">↑ 격렬함(에너지)</span>
+        <div id="band-list" class="band-list"></div>
       </div>
-    </div>
-    <p class="map-hint">드래그해서 구간별 분위기를 조정하세요. 점 위에 커서를 올리면 현재 값이 보입니다.</p>
 
-    <div class="timebar-label-row"><span>시간 배분</span><span id="timebar-total-label"></span></div>
-    <div class="timebar" id="timebar"></div>
-    <div class="timebar-ticks" id="timebar-ticks"></div>
-    <p class="timebar-hint">동그란 버튼을 좌우로 끌면 구간별 재생시간을 조절할 수 있습니다. 최소 1분.</p>
+      <div class="setting-block">
+        <div class="setting-head">
+          <span class="field-label">정서 궤적 <small class="muted">(에너지 × 밝기 — 점을 2D로 드래그 · NEW)</small></span>
+          <div class="stage-count">
+            <button id="stage-minus" type="button" aria-label="구간 줄이기">−</button>
+            <span class="n" id="stage-n">5구간</span>
+            <button id="stage-plus" type="button" aria-label="구간 늘리기">+</button>
+          </div>
+        </div>
 
-    <div class="options-section">
-      <h3 class="options-heading">고급 설정 — 라우드니스 · 다이내믹 · 리듬감 · 보컬 비중 · 음절밀도</h3>
-      <div class="options-body">
+        <div class="map-stage">
+          <div class="map-wrap">
+            <div class="map-pad" id="map-pad">
+              <svg class="map-svg" id="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <!-- 그리드는 JS가 채움 -->
+              </svg>
+              <div class="quadrant-label q-tl">무겁고<br />격렬한</div>
+              <div class="quadrant-label q-tr">밝고<br />신나는</div>
+              <div class="quadrant-label q-bl">차분하고<br />가라앉은</div>
+              <div class="quadrant-label q-br">밝고<br />잔잔한</div>
+              <!-- stage-node들은 JS가 채움 -->
+            </div>
+            <span class="axis-label-x">밝기(정서) →</span>
+            <span class="axis-label-y">↑ 격렬함(에너지)</span>
+          </div>
+        </div>
+        <p class="map-hint">드래그해서 구간별 분위기를 조정하세요. 점 위에 커서를 올리면 현재 값이 보입니다.</p>
+
+        <div class="timebar-label-row"><span>시간 배분</span><span id="timebar-total-label"></span></div>
+        <div class="timebar" id="timebar"></div>
+        <div class="timebar-ticks" id="timebar-ticks"></div>
+        <p class="timebar-hint">동그란 버튼을 좌우로 끌면 구간별 재생시간을 조절할 수 있습니다. 최소 1분.</p>
+      </div>
+
+      <div class="setting-block">
+        <span class="field-label">고급 설정 <small class="muted">라우드니스 · 다이내믹 · 리듬감 · 보컬 비중 · 음절밀도 · NEW</small></span>
         <p class="options-guide">
           research 브랜치 report_final.md가 "백분위 슬라이더"로 분류한 나머지 5개 지표입니다.
-          단일 슬라이더 대신, 위 시간 배분과 같은 구간에 대해 지금의 에너지 그래프와 동일한
-          방식(구간별 점을 위아래로 드래그)으로 조절합니다. 값은 모두 0~100 백분위입니다.
+          단일 슬라이더 대신, 위 시간 배분과 같은 구간에 대해 정서 궤적과 동일한 방식(구간별
+          점을 위아래로 드래그)으로 조절합니다. 값은 모두 0~100 백분위입니다.
         </p>
         <div id="param-graphs"></div>
       </div>
-    </div>
+    </details>
   </div>
 
   <div class="card">
-    <h2>미리보기 문장</h2>
+    <h2>미리보기 문장 <small class="muted">(프로토타입 전용 — 실제 앱엔 없는 기능)</small></h2>
     <p class="preview-line" id="preview-line"></p>
   </div>
 
@@ -319,7 +384,10 @@
     밝기)와, "고급 설정"에 배치한 나머지 5개 백분위 지표(<code>m4-lufs_integrated</code>,
     <code>m4-lra</code>, <code>m7-danceability_norm</code>, <code>m9-instr_stem_ratio</code>,
     <code>m11-speech_median</code>)를 함께 보여줍니다. <code>m8-acoustic_median</code>(토글)·
-    <code>m3-mode</code>(필터)는 그래프형이 아니라 이 프로토타입 범위 밖입니다. 실제 앱 반영은
+    <code>m3-mode</code>(필터)는 그래프형이 아니라 이 프로토타입 범위 밖입니다. 재생시간·곡
+    종류·밴드 필터는 <code>src/frontend/index.html</code>·<code>style.css</code>의 실제 "세부
+    설정" 마크업/클래스를 그대로 재사용했습니다(밴드 로고 PNG만 자기완결형 아티팩트 제약상
+    이니셜 배지로 대체, 밴드별 곡 수도 예시값). 실제 앱 반영은
     <code>docs/WIP_epic-improved-playlist-maker.md</code> 2단계에서 진행 예정이며, 이 화면은
     UX 검증용 목업이라 백엔드 연동은 없습니다.
   </p>
@@ -361,6 +429,90 @@
 
   let stages = SAMPLE_ARC.map((s) => ({ ...s }));
   let totalMinutes = 60;
+
+  // ── 곡 종류 · 밴드 필터 ────────────────────────────────────────────────
+  // 실제 앱(app.js)의 PICKER_TYPE_OPTIONS / BAND_ORDER / prettyBand 를 그대로 재현.
+  const PICKER_TYPE_OPTIONS = [
+    { key: "all", label: "ALL" },
+    { key: "original", label: "Original" },
+    { key: "cover", label: "Cover" },
+  ];
+  let settingsType = "all";
+
+  const BAND_ORDER = [
+    "poppin_party", "afterglow", "pastel_palettes", "roselia",
+    "hello_happy_world", "morfonica", "raise_a_suilen", "mygo",
+    "ave_mujica", "mugendai_mutype", "millsage", "ikka_dumb_rock",
+  ];
+  // 곡 수는 예시값(실데이터 아님) — 실제 앱은 백엔드 /bands 응답을 사용한다.
+  const BAND_COUNTS = {
+    poppin_party: 92, afterglow: 78, pastel_palettes: 64, roselia: 88,
+    hello_happy_world: 55, morfonica: 60, raise_a_suilen: 58, mygo: 45,
+    ave_mujica: 30, mugendai_mutype: 12, millsage: 8, ikka_dumb_rock: 6,
+  };
+  const BAND_COLORS = [
+    "#7c6cff", "#ff6cc4", "#3ecf8e", "#ffb020", "#4fc3f7", "#f06292",
+    "#9575cd", "#4db6ac", "#ff8a65", "#90a4ae", "#aed581", "#ba68c8",
+  ];
+  const manualBands = new Set();
+
+  function prettyBand(band) {
+    return String(band).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  function bandInitials(band) {
+    const words = prettyBand(band).split(" ");
+    return (words.length > 1 ? words[0][0] + words[1][0] : words[0].slice(0, 2)).toUpperCase();
+  }
+
+  function renderTypeFilter() {
+    const el = document.getElementById("settings-type-filter");
+    el.replaceChildren();
+    for (const { key, label } of PICKER_TYPE_OPTIONS) {
+      const pill = document.createElement("button");
+      pill.type = "button";
+      pill.className = "picker-type-pill" + (settingsType === key ? " active" : "");
+      pill.textContent = label;
+      pill.addEventListener("click", () => {
+        if (settingsType === key) return; // 실제 앱과 동일 — 켜진 걸 다시 누르면 무시
+        settingsType = key;
+        renderTypeFilter();
+      });
+      el.appendChild(pill);
+    }
+  }
+  renderTypeFilter();
+
+  function renderBandList() {
+    const el = document.getElementById("band-list");
+    el.replaceChildren();
+    BAND_ORDER.forEach((band, i) => {
+      const label = document.createElement("label");
+      label.className = "band-item";
+      label.title = prettyBand(band);
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.value = band;
+      cb.className = "band-cb";
+      cb.addEventListener("change", () => {
+        if (cb.checked) manualBands.add(band); else manualBands.delete(band);
+      });
+      const icon = document.createElement("span");
+      icon.className = "band-item-icon";
+      icon.style.background = BAND_COLORS[i % BAND_COLORS.length];
+      icon.textContent = bandInitials(band);
+      const count = document.createElement("span");
+      count.className = "band-item-count";
+      count.textContent = String(BAND_COUNTS[band] ?? "");
+      label.append(cb, icon, count);
+      el.appendChild(label);
+    });
+  }
+  renderBandList();
+
+  document.getElementById("band-clear").addEventListener("click", () => {
+    manualBands.clear();
+    document.querySelectorAll(".band-cb").forEach((cb) => { cb.checked = false; });
+  });
 
   const mapPad = document.getElementById("map-pad");
   const mapSvg = document.getElementById("map-svg");
