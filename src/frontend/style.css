@@ -249,7 +249,12 @@ input[type="number"] { -moz-appearance: textfield; }
 .timebar-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; margin-bottom: 6px; }
 .timebar-label-row span { font-size: 0.75rem; color: var(--muted); }
 .timebar-label-actions { display: flex; align-items: baseline; gap: 10px; }
-.timebar-label-actions .link-btn { font-size: 0.72rem; padding: 0; }
+.timebar-equalize-btn {
+  border: 1px solid rgba(255,255,255,0.14); background: var(--card-2); color: var(--text);
+  font-size: 0.7rem; font-weight: 600; padding: 4px 8px; border-radius: 6px;
+  cursor: pointer; font-family: inherit; transition: border-color 0.12s, background 0.12s;
+}
+.timebar-equalize-btn:hover { border-color: rgba(124,108,255,0.5); background: rgba(124,108,255,0.15); }
 .timebar {
   position: relative; height: 22px; border-radius: 999px;
   background: var(--card-2); border: 1px solid rgba(255,255,255,0.1);
