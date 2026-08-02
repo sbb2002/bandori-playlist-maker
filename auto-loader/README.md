@@ -93,6 +93,33 @@ python autoloader/run_autoloader.py --soft     # 부분 wav 환경 긴급 반영
   애초에 불필요하다.
 - 재실행 안전: video_id 기준 감별이라 멱등, 실패 곡은 다음 실행에서 자동 재시도.
 
+### 신곡 1곡이 반영되는 과정 (내부 로직)
+
+1. **감별**(`sources.py`): 형제 `songs_full.csv`/`audio_map.json`에는 있지만 이 저장소
+   `data/songs_master.csv`엔 없는 곡을 video_id 기준으로 찾는다.
+2. **idx 채번**(`merge_data.merge()`): 신곡에 부여할 idx는 **이 저장소 master 자신의
+   기존 최대값+1**로 독립적으로 매긴다 — 형제 `songs_full.csv`의 idx를 그대로 쓰지
+   않는다. 형제 쪽은 밴드 yaml 알파벳순으로 전체가 주기적으로 재정렬되기 때문에(중간에
+   신곡이 끼면 그 뒤 밴드들의 idx가 통째로 밀림), 형제 idx를 그대로 master에 옮기면 이미
+   존재하는 다른 곡의 idx와 우연히 겹치는 사고가 났던 이력이 있다(PR #59로 분리 완료).
+   형제 idx는 wav 캐시 파일명 등 형제 저장소 참조에만 계속 쓰인다.
+3. **band eligibility 재계산**(`merge_data.band_eligibility()`): 신곡 포함 밴드별 곡 수를
+   다시 세되, 기존 행의 `eligible_band` 값이 이 재계산으로 바뀌면(정책 변경 감지) 그
+   자리에서 전체 반영을 중단한다 — 조용히 다른 곡들의 필터링 상태가 바뀌는 걸 막기 위함.
+4. **지표 산출**: 45s 발췌(`excerpt_features.py`) + 전곡 서브피처/시간분절(`data/extract_*`)
+   + 가벼운 3개 오디오 지표(`extract_loudness.py`, DFA 기반 danceability)를 계산하고,
+   **동결 norm**(바로 위 항목)으로 기존 카탈로그와 같은 척도에 맞춘다.
+5. **원자적 반영**(`merge_data.merge()`): `data/` 6~7개 파일에 동시에 쓰되, 하나라도
+   검증(`_pre_checks`/`_post_checks` — video_id/idx 유일성, camelot 매핑 성공, 기존 행
+   바이트 불변, append 파일이 기존 내용의 순수 연장인지 등)에 실패하면 **전체 파일을
+   실행 전 스냅샷으로 롤백**하고 예외를 올린다. append 대상 파일들은 기존 행을 절대
+   덮어쓰지 않고 끝에만 추가한다("append-only, 기존 바이트 불변" 원칙).
+6. **곡별 fail-soft**: 위 1~5는 신곡 여러 곡을 한 배치로 처리할 때, **곡 하나의 실패가
+   나머지 곡 전체를 막지 않는다** — 실패한 곡만 스킵되고 다음 실행 때 자동 재시도된다
+   (감별이 video_id 기준 멱등이라 "아직 반영 안 됨"으로 계속 잡힘).
+7. **무거운 3개 지표는 여기 포함되지 않는다** — 위 "전체 운영 순서" 참조, 별도로
+   `enrich_heavy_feats.py`가 나중에 채운다.
+
 ## data/ — 수동/반자동 보강 스크립트
 
 라이브 오토로더(`autoloader/`)가 처리하기엔 의존성이 너무 무거운 작업들을 모아 둔 폴더.
