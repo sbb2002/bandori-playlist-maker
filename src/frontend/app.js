@@ -292,7 +292,7 @@ const fromMapPct = (pct) => clamp01((pct - MAP_PAD) / (100 - MAP_PAD * 2));
 const MIN_SEGMENTS = 2;  // 구간 최소 개수
 const MAX_SEGMENTS = 11; // 구간 최대 개수
 const DEFAULT_STAGE_COUNT = 3; // 기본 구간 수
-const MIN_WIDTH_MIN = 1; // 구간 최소 길이(분)
+const MIN_WIDTH_MIN = 3; // 구간 최소 길이(분) — 구간이 너무 촘촘해지면 곡 배정이 어색해짐
 
 // 고급 설정 그래프 5개
 const PARAM_DEFS = [
@@ -769,7 +769,7 @@ function collectStages() {
   const total = stageModel.totalMinutes;
   return stageModel.segments.map((s) => ({
     energy: +s.energy.toFixed(3),
-    minutes: Math.max(1, Math.round(s.width * total)),
+    minutes: Math.max(MIN_WIDTH_MIN, Math.round(s.width * total)),
     valence: +s.valence.toFixed(3),
     lufs_integrated: +s.lufs_integrated.toFixed(3),
     lra: +s.lra.toFixed(3),
@@ -954,7 +954,7 @@ function collectStagesForCustomMode() {
   const total = stageModel.totalMinutes;
   return stageModel.segments.map((s) => ({
     energy: +s.energy.toFixed(3),
-    minutes: Math.max(1, Math.round(s.width * total)),
+    minutes: Math.max(MIN_WIDTH_MIN, Math.round(s.width * total)),
     valence: +s.valence.toFixed(3),
     lufs_integrated: +s.lufs_integrated.toFixed(3),
     lra: +s.lra.toFixed(3),

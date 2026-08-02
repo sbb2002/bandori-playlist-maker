@@ -96,7 +96,9 @@ input[type="number"] { -moz-appearance: textfield; }
 .options-guide {
   margin: 12px 0 4px; color: var(--muted); font-size: 0.72rem; line-height: 1.55;
 }
-.options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; max-width: 240px; }
+.options-grid { display: flex; align-items: flex-start; gap: 20px; margin-top: 12px; }
+.options-grid .field { flex: 1 1 160px; min-width: 0; }
+.options-grid-divider { align-self: stretch; width: 1px; flex: 0 0 auto; background: rgba(255,255,255,0.12); }
 
 /* 설정 블록 */
 .setting-block { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); }
@@ -458,7 +460,7 @@ button.ghost {
 .track .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .badge {
   font-size: 0.72rem; padding: 2px 8px; border-radius: 999px;
-  background: var(--card-2); color: var(--muted);
+  background: var(--card-2); border: 1px solid rgba(255,255,255,0.1); color: var(--muted);
 }
 .badge.same, .badge.adjacent { color: var(--ok); }
 .badge.non_harmonic { color: var(--warn); }
@@ -939,7 +941,8 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 @media (max-width: 520px) {
   .wrap { padding: 56px 14px 76px; } /* 상단 여백: 좌상단 메뉴 버튼과 겹침 방지 */
   .hero h1 { font-size: 1.6rem; }
-  .options-grid { grid-template-columns: 1fr; }
+  .options-grid { flex-direction: column; }
+  .options-grid-divider { display: none; }
   .picker-body { grid-template-columns: 1fr; }
   .picker-bands { flex-direction: row; flex-wrap: wrap; max-height: 110px; }
   .picker-panel { padding: 14px; }
