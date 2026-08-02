@@ -21,6 +21,39 @@
 
 ## Log
 
+### v1.1.0 — 2026-08-02 19:31 (Minor)
+
+`songs_master.csv`에 9개 신규 오디오 지표 컬럼 추가(`bpm-research` 연구
+`topic/20260731_audio_feats_revised/report_final.md` 최종 채택분): `m3-mode`,
+`m4-lufs_integrated`, `m4-lra`, `m5-arousal_median`, `m6-valence_median`,
+`m7-danceability_norm`, `m8-acoustic_median`, `m9-instr_stem_ratio`,
+`m11-speech_median`. 기존 컬럼·행은 전혀 건드리지 않고 끝에 추가만 함(순수
+additive) — `main` 배포판(`song_repo.py`)은 이름으로 필요한 컬럼만 읽으므로
+영향 없음(직접 로드 테스트로 확인).
+
+- 현재 총 곡 수: **732곡** (변동 없음, 컬럼만 추가)
+- 앱(`bandori-playlist-maker`) 쪽 반영은 아직 "배관"만 돼 있고(요청/응답 왕복만),
+  선곡 엔진 가중치엔 미반영 — `epic/improved-playlist-maker` 브랜치에서 진행 중.
+- 값 중 `m4-lufs_integrated`·`m4-lra`·`m5-arousal_median`·`m6-valence_median`·
+  `m9-instr_stem_ratio`·`m11-speech_median`은 아직 **원시값**(0~100 백분위
+  변환 전) — 정규화는 추후 앱 쪽에서 처리 예정.
+- 신곡 반영 시 이 9개 중 가벼운 3개(`m4-lufs_integrated`·`m4-lra`·
+  `m7-danceability_norm`)는 `tools` 브랜치 `run_autoloader.py`가 자동으로
+  채우고, 무거운 3개(`m5-arousal_median`·`m6-valence_median`·
+  `m9-instr_stem_ratio`·`m11-speech_median`... 실제로는 valence·
+  instr_stem_ratio·speech_median 3개)는 `data/enrich_heavy_feats.py`(WSL2
+  전용, 반자동)로 별도 주기 보강. `m3-mode`·`m8-acoustic_median`은 신곡
+  반영 로직에 아직 미배선(범위 밖).
+
+### v1.0.6 — 2026-07-31 20:09 (Patch)
+
+오토로더 신곡 자동 반영 2곡.
+
+- 현재 총 곡 수: **732곡** (이전 730곡)
+- 추가 곡 목록(band·song·url):
+  - mugendai_mutype / Face The Next — https://youtu.be/6PpzqcesklA
+  - mugendai_mutype / TearJerker — https://youtu.be/T8ynAJWmPtM
+
 ### v1.0.5 — 2026-07-26 16:50 (Patch)
 
 오토로더 신곡 자동 반영 43곡(커밋 `c0e0249`). 이번 반영 직전, 두 가지 파이프라인
