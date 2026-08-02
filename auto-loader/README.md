@@ -16,6 +16,23 @@ python autoloader/run_autoloader.py --repo-root <data브랜치 워크트리>  # 
 곡 감별 → 다운로드 → 지표 산출 → `data/` 반영까지 한 번에 도는 원커맨드다. 세부 흐름·플래그는
 아래 "autoloader/" 절 참조.
 
+## 전체 운영 순서 (2026-08-03 확정)
+
+신곡 반영은 3단계로 나뉜다 — **①·②는 평소 cmd(Windows)에서, ③만 가끔 WSL2에서.**
+전체를 WSL로 옮길 필요는 없다, essentia-tensorflow/torch가 필요한 ③ 하나만 WSL 전용이다.
+
+1. **`run_local.py`**(형제 프로젝트 `bandori-song-sorter`) — 신곡 감지, cmd.
+2. **`autoloader/run_autoloader.py`**(이 저장소) — 신곡 반영, cmd. `m4-lufs_integrated`·
+   `m4-lra`·`m7-danceability_norm`(가벼운 3개, `pyloudnorm`/`librosa`만 필요)은 이 단계에서
+   자동으로 채워진다. `m6-valence_median`·`m9-instr_stem_ratio`·`m11-speech_median`(무거운
+   3개)은 이 단계에서 항상 빈 칸으로 남는다 — 의도된 동작.
+3. **`data/enrich_heavy_feats.py`**(이 저장소) — 무거운 3개 보강, **WSL2 전용**, 주기적/수동
+   실행. 매번 신곡마다 돌릴 필요 없이 밀린 곡이 쌓이면 가끔 실행. 자세한 실행법은 아래
+   "data/" 절 참조.
+
+WSL2가 준비 안 된 로컬에서는 ①·②만 평소대로 돌리면 되고, ③은 WSL2가 있는 로컬에서
+나중에 몰아서 처리해도 무방하다(멱등 — 이미 채워진 행은 건드리지 않음).
+
 ## 작성규칙
 
 1. **표준 라이브러리만** 사용한다 — venv 없이 바로 실행 가능해야 한다.
@@ -86,14 +103,23 @@ python autoloader/run_autoloader.py --soft     # 부분 wav 환경 긴급 반영
 **목표**: `songs_master.csv`의 `m6-valence_median`, `m9-instr_stem_ratio`, 
 `m11-speech_median` (감정 밝기, 보컬/악기 비중, 음절 밀도)을 주기적으로 실측값으로 보강.
 
-**의존성**: essentia-tensorflow, librosa, scipy (WSL2 필요)
+**의존성**: essentia-tensorflow, librosa, scipy, torch (WSL2 필요)
   - 없으면 명확한 안내 후 조용히 종료(fail-soft).
+  - Debian 계열 WSL2는 PEP 668(externally-managed-environment)로 시스템 파이썬에 바로
+    `pip install`이 막혀 있다 — venv 필수: `python3 -m venv .venv && source .venv/bin/activate`
+    후 그 안에서 설치·실행. (`python` 명령이 없다는 에러가 뜨면 `python3`를 대신 쓰거나
+    `sudo apt install python-is-python3`.)
 
 **실행**:
 ```bash
 cd auto-loader
-python data/enrich_heavy_feats.py
+python data/enrich_heavy_feats.py --limit 2      # 스모크테스트: 앞 2곡만
+python data/enrich_heavy_feats.py --idx 24,25    # 특정 idx만
+python data/enrich_heavy_feats.py                # 전체 배치(실제 운영)
 ```
+경로 기본값(형제 디렉토리 관례: `bpm-data-branch`/`bandori-song-sorter`/
+`bandori-playlist-maker`)이 로컬 배치와 다르면 `--repo-root`/`--audio-dir`/`--stem-dir`로
+덮어쓴다.
 
 **동작**:
   1. `songs_master.csv`에서 3개 지표 중 하나라도 빈 행 탐지.
