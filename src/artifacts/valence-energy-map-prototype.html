@@ -1,0 +1,401 @@
+<style>
+  /* 앱 테마 그대로 재사용 (src/frontend/style.css :root 토큰) */
+  :root {
+    --bg: #0f1017;
+    --card: #1a1c28;
+    --card-2: #232636;
+    --text: #eef0f7;
+    --muted: #9aa0b4;
+    --accent: #7c6cff;
+    --accent-2: #ff6cc4;
+    --ok: #3ecf8e;
+    --warn: #ffb020;
+    --err: #ff6b6b;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
+    background: radial-gradient(1200px 600px at 20% -10%, #241d3a 0%, var(--bg) 55%);
+    color: var(--text);
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 32px 20px 60px; }
+  .hero { text-align: center; margin-bottom: 20px; }
+  .hero .eyebrow {
+    display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+    color: var(--accent-2); background: rgba(255,108,196,0.10); border: 1px solid rgba(255,108,196,0.3);
+    padding: 3px 11px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .hero h1 { font-size: 1.5rem; margin: 0 0 6px; }
+  .hero .sub { color: var(--muted); margin: 0; font-size: 0.9rem; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  }
+  .card h2 { font-size: 1rem; margin: 0 0 4px; }
+  .card .card-note { color: var(--muted); font-size: 0.78rem; margin: 0 0 16px; }
+
+  /* 상단 컨트롤: 총 재생시간 + 구간 수 */
+  .controls-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .minutes-field { display: flex; align-items: center; gap: 8px; }
+  .minutes-field label { font-size: 0.8rem; color: var(--muted); }
+  .minutes-field input {
+    width: 64px; padding: 7px 8px; text-align: center;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+    background: var(--card-2); color: var(--text); font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .minutes-field input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  .stage-count { display: inline-flex; background: var(--card-2); border-radius: 999px; padding: 3px; gap: 2px; }
+  .stage-count button {
+    border: none; background: none; color: var(--text); font-size: 0.85rem; font-weight: 700;
+    width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-family: inherit;
+  }
+  .stage-count button:hover:not(:disabled) { background: rgba(124,108,255,0.25); }
+  .stage-count button:disabled { color: var(--muted); cursor: default; opacity: 0.5; }
+  .stage-count .n { min-width: 46px; text-align: center; align-self: center; font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* 2D 정서 지도 */
+  .map-stage { display: flex; justify-content: center; }
+  .map-wrap { position: relative; width: 100%; max-width: 420px; }
+  .map-pad {
+    position: relative; width: 100%; aspect-ratio: 1 / 1;
+    border-radius: 12px; overflow: hidden; touch-action: none; user-select: none;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255,108,196,0.16), transparent 60%),
+      radial-gradient(circle at 0% 0%, rgba(124,108,255,0.16), transparent 60%),
+      radial-gradient(circle at 100% 100%, rgba(255,108,196,0.07), transparent 60%),
+      radial-gradient(circle at 0% 100%, rgba(124,108,255,0.07), transparent 60%),
+      var(--card-2);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .map-grid { stroke: rgba(255,255,255,0.07); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .map-grid.mid { stroke: rgba(255,255,255,0.14); stroke-dasharray: 3 3; }
+  .map-path {
+    fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .map-arrow { fill: var(--accent-2); opacity: 0.9; }
+
+  .quadrant-label {
+    position: absolute; font-size: 0.68rem; color: var(--muted); line-height: 1.35;
+    pointer-events: none; max-width: 40%;
+  }
+  .quadrant-label.q-tl { top: 8px; left: 10px; text-align: left; }
+  .quadrant-label.q-tr { top: 8px; right: 10px; text-align: right; }
+  .quadrant-label.q-bl { bottom: 8px; left: 10px; text-align: left; }
+  .quadrant-label.q-br { bottom: 8px; right: 10px; text-align: right; }
+
+  .axis-label-x {
+    position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+    font-size: 0.72rem; color: var(--muted); white-space: nowrap;
+  }
+  .axis-label-y {
+    position: absolute; top: 50%; left: -12px; transform: translateY(-50%) rotate(-90deg);
+    font-size: 0.72rem; color: var(--muted); white-space: nowrap;
+  }
+
+  .stage-node {
+    position: absolute; z-index: 3; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+    border-radius: 50%; cursor: grab; touch-action: none;
+    background: var(--accent); border: 2px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 700; color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+    transition: background 0.1s;
+  }
+  .stage-node.dragging { cursor: grabbing; background: var(--accent-2); z-index: 4; }
+  .stage-node:hover, .stage-node.linked { background: var(--accent-2); }
+  .node-val {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    font-size: 0.66rem; color: var(--text); background: rgba(0,0,0,0.6);
+    padding: 2px 6px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+    opacity: 0; transition: opacity 0.12s;
+  }
+  .stage-node:hover .node-val, .stage-node.dragging .node-val { opacity: 1; }
+
+  .map-hint { margin: 34px 0 0; font-size: 0.75rem; color: var(--muted); }
+
+  /* 타임라인(구간별 분량) */
+  .timeline-row { display: flex; gap: 2px; margin-top: 18px; height: 34px; }
+  .timeline-seg {
+    position: relative; border-radius: 8px; background: var(--card-2);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums;
+    transition: border-color 0.12s, background 0.12s, color 0.12s;
+  }
+  .timeline-seg.linked { border-color: var(--accent); background: rgba(124,108,255,0.16); color: var(--text); }
+
+  /* 요약 미리보기 */
+  .preview-line { font-size: 0.92rem; margin: 0; }
+  .preview-line .hl { color: var(--accent-2); font-weight: 600; }
+
+  .footnote { color: var(--muted); font-size: 0.74rem; line-height: 1.6; }
+  .footnote code {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.92em;
+    background: var(--card-2); padding: 1px 5px; border-radius: 4px;
+  }
+</style>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="eyebrow">epic/improved-playlist-maker · Step 1 프로토타입</span>
+    <h1>정서 궤적 세부설정 (energy × valence)</h1>
+    <p class="sub">점을 끌어 곡의 분위기 흐름을 2D 위에서 직접 그려보세요.</p>
+  </div>
+
+  <div class="card">
+    <h2>정서 지도</h2>
+    <p class="card-note">
+      가로 = 밝기(우울↔경쾌), 세로 = 격렬함(잔잔↔격렬). 번호가 매겨진 점은 재생 순서이며,
+      점을 드래그하면 해당 구간의 분위기가 바뀝니다.
+    </p>
+
+    <div class="controls-row">
+      <div class="minutes-field">
+        <label for="total-min">총 재생시간</label>
+        <input id="total-min" type="number" min="10" max="180" step="5" value="60" />
+        <span class="minutes-field-unit" style="color:var(--muted); font-size:0.8rem;">분</span>
+      </div>
+      <div class="stage-count">
+        <button id="stage-minus" type="button" aria-label="구간 줄이기">−</button>
+        <span class="n" id="stage-n">5구간</span>
+        <button id="stage-plus" type="button" aria-label="구간 늘리기">+</button>
+      </div>
+    </div>
+
+    <div class="map-stage">
+      <div class="map-wrap">
+        <div class="map-pad" id="map-pad">
+          <svg class="map-svg" id="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <!-- 그리드는 JS가 채움 -->
+          </svg>
+          <div class="quadrant-label q-tl">무겁고<br />격렬한</div>
+          <div class="quadrant-label q-tr">밝고<br />신나는</div>
+          <div class="quadrant-label q-bl">차분하고<br />가라앉은</div>
+          <div class="quadrant-label q-br">밝고<br />잔잔한</div>
+          <!-- stage-node들은 JS가 채움 -->
+        </div>
+        <span class="axis-label-x">밝기(정서) →</span>
+        <span class="axis-label-y">↑ 격렬함(에너지)</span>
+      </div>
+    </div>
+    <p class="map-hint">드래그해서 구간별 분위기를 조정하세요. 점 위에 커서를 올리면 현재 값이 보입니다.</p>
+
+    <div class="timeline-row" id="timeline-row"></div>
+  </div>
+
+  <div class="card">
+    <h2>미리보기 문장</h2>
+    <p class="preview-line" id="preview-line"></p>
+  </div>
+
+  <p class="footnote">
+    이 프로토타입은 <code>research</code> 브랜치
+    <code>topic/20260731_audio_feats_revised/report_final.md</code>에서 채택한
+    <code>m5-arousal_median</code>(에너지) · <code>m6-valence_median</code>(정서 밝기) 두 지표를
+    0~100 백분위 축으로 표현합니다(상관 r=+0.417). 실제 앱 반영은
+    <code>docs/WIP_epic-improved-playlist-maker.md</code> 2단계에서 진행 예정이며, 이 화면은
+    UX 검증용 목업이라 백엔드 연동은 없습니다.
+  </p>
+</div>
+
+<script>
+(() => {
+  const PAD = 8; // 상하좌우 여백(%) — 점이 가장자리에서 잘리지 않게
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const toPct = (frac) => PAD + frac * (100 - PAD * 2);
+  const fromPct = (pct) => clamp01((pct - PAD) / (100 - PAD * 2));
+
+  const MIN_STAGES = 3, MAX_STAGES = 8;
+  const SAMPLE_ARC = [
+    { valence: 0.28, energy: 0.32 },
+    { valence: 0.40, energy: 0.55 },
+    { valence: 0.62, energy: 0.78 },
+    { valence: 0.74, energy: 0.60 },
+    { valence: 0.58, energy: 0.34 },
+  ];
+
+  let stages = SAMPLE_ARC.map((s) => ({ ...s }));
+  let totalMinutes = 60;
+
+  const pad = document.getElementById("map-pad");
+  const svg = document.getElementById("map-svg");
+  const timelineRow = document.getElementById("timeline-row");
+  const stageNEl = document.getElementById("stage-n");
+  const previewEl = document.getElementById("preview-line");
+  const totalMinInput = document.getElementById("total-min");
+
+  function buildGrid() {
+    svg.innerHTML = "";
+    const gridG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    [0, 25, 50, 75, 100].forEach((p) => {
+      const v = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      v.setAttribute("x1", p); v.setAttribute("x2", p); v.setAttribute("y1", 0); v.setAttribute("y2", 100);
+      v.setAttribute("class", "map-grid" + (p === 50 ? " mid" : ""));
+      const h = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      h.setAttribute("y1", p); h.setAttribute("y2", p); h.setAttribute("x1", 0); h.setAttribute("x2", 100);
+      h.setAttribute("class", "map-grid" + (p === 50 ? " mid" : ""));
+      gridG.append(v, h);
+    });
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("class", "map-path");
+    path.setAttribute("id", "map-path-line");
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    grad.setAttribute("id", "path-grad");
+    grad.setAttribute("x1", "0%"); grad.setAttribute("x2", "100%");
+    const s1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    s1.setAttribute("offset", "0%"); s1.setAttribute("stop-color", "#7c6cff");
+    const s2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    s2.setAttribute("offset", "100%"); s2.setAttribute("stop-color", "#ff6cc4");
+    grad.append(s1, s2);
+    defs.append(grad);
+    path.setAttribute("stroke", "url(#path-grad)");
+    svg.append(defs, gridG, path);
+  }
+
+  function toXY(s) { return { x: toPct(s.valence), y: toPct(1 - s.energy) }; }
+
+  function updatePath() {
+    const path = document.getElementById("map-path-line");
+    const pts = stages.map(toXY);
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) d += ` L ${pts[i].x} ${pts[i].y}`;
+    path.setAttribute("d", d);
+  }
+
+  let nodeEls = [];
+  function buildNodes() {
+    pad.querySelectorAll(".stage-node").forEach((n) => n.remove());
+    nodeEls = stages.map((s, i) => {
+      const node = document.createElement("div");
+      node.className = "stage-node";
+      node.textContent = String(i + 1);
+      const val = document.createElement("span");
+      val.className = "node-val";
+      node.append(val);
+      pad.appendChild(node);
+      bindDrag(node, i);
+      node.addEventListener("pointerenter", () => setLinked(i));
+      node.addEventListener("pointerleave", () => setLinked(-1));
+      return node;
+    });
+  }
+
+  function setLinked(i) {
+    nodeEls.forEach((n, j) => n.classList.toggle("linked", j === i));
+    [...timelineRow.children].forEach((seg, j) => seg.classList.toggle("linked", j === i));
+  }
+
+  function updateNodes() {
+    stages.forEach((s, i) => {
+      const { x, y } = toXY(s);
+      const node = nodeEls[i];
+      node.style.left = `${x}%`;
+      node.style.top = `${y}%`;
+      node.querySelector(".node-val").textContent =
+        `밝기 ${Math.round(s.valence * 100)} · 에너지 ${Math.round(s.energy * 100)}`;
+    });
+  }
+
+  function bindDrag(node, i) {
+    node.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      node.setPointerCapture(e.pointerId);
+      node.classList.add("dragging");
+      const move = (ev) => {
+        const r = pad.getBoundingClientRect();
+        const fx = fromPct(((ev.clientX - r.left) / r.width) * 100);
+        const fy = fromPct(((ev.clientY - r.top) / r.height) * 100);
+        stages[i].valence = fx;
+        stages[i].energy = clamp01(1 - fy);
+        updateNodes();
+        updatePath();
+        renderPreview();
+      };
+      const up = () => {
+        node.classList.remove("dragging");
+        node.removeEventListener("pointermove", move);
+        node.removeEventListener("pointerup", up);
+      };
+      node.addEventListener("pointermove", move);
+      node.addEventListener("pointerup", up);
+    });
+  }
+
+  function renderTimeline() {
+    timelineRow.innerHTML = "";
+    const each = totalMinutes / stages.length;
+    stages.forEach((s, i) => {
+      const seg = document.createElement("div");
+      seg.className = "timeline-seg";
+      seg.style.flex = "1 1 0";
+      seg.textContent = `${i + 1} · ${Math.round(each)}분`;
+      seg.addEventListener("pointerenter", () => setLinked(i));
+      seg.addEventListener("pointerleave", () => setLinked(-1));
+      timelineRow.appendChild(seg);
+    });
+  }
+
+  function moodWord(s) {
+    const bright = s.valence >= 0.5, hot = s.energy >= 0.5;
+    if (bright && hot) return "밝고 신나는";
+    if (bright && !hot) return "밝고 잔잔한";
+    if (!bright && hot) return "무겁고 격렬한";
+    return "차분하고 가라앉은";
+  }
+
+  function renderPreview() {
+    const first = moodWord(stages[0]);
+    const last = moodWord(stages[stages.length - 1]);
+    const peak = stages.reduce((a, b) => (b.energy > a.energy ? b : a));
+    const peakIdx = stages.indexOf(peak) + 1;
+    previewEl.innerHTML =
+      `<span class="hl">${first}</span> 분위기로 시작해, ${peakIdx}번째 구간에서 가장 격렬해졌다가 ` +
+      `<span class="hl">${last}</span> 분위기로 마무리되는 ${totalMinutes}분 흐름.`;
+  }
+
+  function renderAll() {
+    buildGrid();
+    buildNodes();
+    updateNodes();
+    updatePath();
+    renderTimeline();
+    renderPreview();
+    stageNEl.textContent = `${stages.length}구간`;
+    document.getElementById("stage-minus").disabled = stages.length <= MIN_STAGES;
+    document.getElementById("stage-plus").disabled = stages.length >= MAX_STAGES;
+  }
+
+  document.getElementById("stage-plus").addEventListener("click", () => {
+    if (stages.length >= MAX_STAGES) return;
+    const last = stages[stages.length - 1];
+    stages.push({ valence: clamp01(last.valence + 0.05), energy: clamp01(last.energy - 0.1) });
+    renderAll();
+  });
+  document.getElementById("stage-minus").addEventListener("click", () => {
+    if (stages.length <= MIN_STAGES) return;
+    stages.pop();
+    renderAll();
+  });
+  totalMinInput.addEventListener("input", () => {
+    const v = parseInt(totalMinInput.value, 10);
+    totalMinutes = Number.isFinite(v) ? Math.max(10, Math.min(180, v)) : 60;
+    renderTimeline();
+    renderPreview();
+  });
+
+  renderAll();
+})();
+</script>
