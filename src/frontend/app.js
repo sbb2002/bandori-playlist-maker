@@ -516,7 +516,10 @@ function renderStageGraph() {
   }
 
   // ── 시간 배분 바 ──────────────────────────────────────────────────────────
-  let timebarSegEls = [], timebarHandleEls = [], timebarNumEls = [];
+  // "(1)-----(2)----(3)---" 형태: 구간 순번 동그라미 자체가 그 구간의 시작 경계에
+  // 놓이고, 그 동그라미를 좌우로 끄는 것이 곧 경계 이동이다. (1)은 항상 0분(맨 앞)
+  // 고정이라 드래그되지 않고, (2)부터는 바로 앞 구간과의 경계를 옮기는 핸들을 겸한다.
+  let timebarSegEls = [], timebarNumEls = [];
 
   function buildTimebar() {
     timebarEl.innerHTML = "";
@@ -536,15 +539,14 @@ function renderStageGraph() {
       const num = document.createElement("span");
       num.className = "timebar-num";
       num.textContent = String(i + 1);
+      if (i === 0) {
+        num.classList.add("fixed");
+      } else {
+        num.classList.add("draggable");
+        bindBoundaryDrag(num, i - 1);
+      }
       timebarEl.appendChild(num);
       return num;
-    });
-    timebarHandleEls = stageModel.segments.slice(1).map((_, j) => {
-      const handle = document.createElement("div");
-      handle.className = "timebar-handle";
-      bindBoundaryDrag(handle, j);
-      timebarEl.appendChild(handle);
-      return handle;
     });
 
     timebarTicksEl.innerHTML = "";
@@ -566,14 +568,13 @@ function renderStageGraph() {
 
   function updateTimebar() {
     timebarTotalLabelEl.textContent = `총 ${stageModel.totalMinutes}분`;
-    const { cum, mid } = centers();
+    const { cum } = centers();
     stageModel.segments.forEach((s, i) => {
       const seg = timebarSegEls[i];
       seg.style.left = `${cum[i] * 100}%`;
       seg.style.width = `${s.width * 100}%`;
-      timebarNumEls[i].style.left = `${mid[i] * 100}%`;
+      timebarNumEls[i].style.left = `${cum[i] * 100}%`;
     });
-    timebarHandleEls.forEach((handle, j) => { handle.style.left = `${cum[j + 1] * 100}%`; });
 
     const timebarTickEls = timebarTicksEl.querySelectorAll(".timebar-tick");
     cum.forEach((c, i) => {
@@ -883,11 +884,12 @@ function setMode(mode) {
   }
   promptEl.required = isAi;
 
-  // 옵션 강제 펼침(커스텀 모드) 또는 해제(AI 모드)
+  // 세부 설정은 커스텀 모드 전용 화면으로 취급한다 — AI 모드에서는 통째로 숨기고,
+  // 커스텀 모드에서는 항상 펼쳐서 보여준다(더 이상 접었다 펴는 선택 요소가 아님).
   const optionsDetails = $("options-details");
   if (optionsDetails) {
+    optionsDetails.style.display = isAi ? "none" : "";
     if (isAi) {
-      // AI 모드로 돌아올 때는 force-open만 제거하고, 사용자가 열어놨으면 열린 채로 둔다
       optionsDetails.classList.remove("force-open");
     } else {
       optionsDetails.classList.add("force-open");

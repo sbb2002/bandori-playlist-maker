@@ -245,33 +245,27 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 }
 .timebar-seg:last-child { border-right: none; }
 .timebar-seg.linked { background: rgba(255,255,255,0.16); }
-/* 구간 중심 숫자 — 정서 지도 점(.stage-node)과 같은 동그라미 배지 스타일로, 순번을
-   공유해 두 UI의 같은 구간을 한눈에 대응시킨다. */
+/* 구간 순번 동그라미 — 정서 지도 점(.stage-node)과 같은 배지 스타일이면서, 그 자체가
+   경계 드래그 핸들을 겸한다. (1)은 시작점(0분)에 고정되어 끌 수 없고, (2)부터는 좌우로
+   끌어 바로 앞 구간과의 경계를 옮긴다 — "[(1)-----(2)----(3)---]" 형태. */
 .timebar-num {
-  position: absolute; top: 50%; z-index: 1;
+  position: absolute; top: 50%; z-index: 2;
   transform: translate(-50%, -50%);
-  width: 18px; height: 18px; border-radius: 50%;
+  width: 20px; height: 20px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   background: var(--accent); border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-  font-size: 0.62rem; font-weight: 700; color: #fff;
-  pointer-events: none; font-variant-numeric: tabular-nums;
-  transition: background 0.12s;
+  font-size: 0.64rem; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.12s, transform 0.12s;
+}
+.timebar-num.fixed { pointer-events: none; }
+.timebar-num.draggable { cursor: ew-resize; touch-action: none; }
+.timebar-num.draggable:hover { transform: translate(-50%, -50%) scale(1.12); }
+.timebar-num.draggable.dragging {
+  background: var(--accent-2); transform: translate(-50%, -50%) scale(1.2); z-index: 3;
 }
 .timebar-num.linked { background: var(--accent-2); }
-.timebar-handle {
-  position: absolute; z-index: 2; top: 0; height: 100%; width: 22px; margin-left: -11px;
-  cursor: ew-resize; touch-action: none;
-  display: flex; align-items: center; justify-content: center;
-}
-.timebar-handle::after {
-  content: ""; width: 15px; height: 15px; border-radius: 50%;
-  background: #fff; border: 2px solid var(--accent-2);
-  box-shadow: 0 1px 5px rgba(0,0,0,0.5);
-  transition: border-color 0.12s, transform 0.12s;
-}
-.timebar-handle:hover::after { transform: scale(1.1); }
-.timebar-handle.dragging::after { border-color: var(--accent); transform: scale(1.2); }
 .timebar-ticks { position: relative; height: 16px; margin-top: 4px; }
 .timebar-tick {
   position: absolute; top: 0; transform: translateX(-50%);
