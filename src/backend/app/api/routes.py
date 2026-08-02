@@ -153,12 +153,19 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
 
         params = interpreter.interpret(payload.prompt, payload.previous_prompt, energy_stats=energy_stats)
 
-        # 핫픽스(세부설정 우선순위): 'honor'는 **재생 형태 설정**(에너지 아크·단계 수·재생시간)에만 적용.
-        # 직전 요청과 의도가 본질적으로 같을 때만 사용자가 건드린 이 값들을 존중하고, 1회차이거나 의도가
-        # 바뀌면(honor=False) 무시하고 모델이 새로 제어한다(프롬프트 바꿔도 옛 아크가 고착되던 버그 해소).
+        # DEPRECATED(2026-08-03, 3단계): 예전엔 'honor'를 "직전 요청과 의도가 같은가"
+        # (params.same_as_previous)로 판정해, 같을 때만 사용자가 건드린 세부설정(에너지
+        # 아크·단계 수·재생시간)을 존중했다 — AI/커스텀 모드가 나뉘기 전, 한 화면에서
+        # 프롬프트+수동 그래프 조정이 섞여 있던 시절의 핫픽스였다. 지금은 AI 모드가 항상
+        # 세부설정 UI 자체를 숨기고 매번 새로 해석하므로(커스텀 모드는 반대로 항상 honor=True,
+        # 위 분기) 이 판정이 더 이상 필요 없다 — AI 모드는 항상 honor=False.
+        # params.same_as_previous/payload.previous_prompt 자체는 하위호환을 위해 계속 받고
+        # LLM에도 전달하지만(interpret 호출 그대로), 라우팅 판단에는 더 이상 쓰지 않는다.
+        # 옛 판정식(참고용, 삭제 안 함): bool(payload.previous_prompt) and bool(params.same_as_previous)
+        honor = False
+
         # ※ **스코프 필터(밴드·커버)는 honor와 무관하게 항상 적용** — 사용자가 명시적으로 좁힌 범위라
         #   프롬프트 mood와 독립적으로 지속되어야 한다(밴드 셀렉터가 2회차에 무시되던 문제 해소).
-        honor = bool(payload.previous_prompt) and bool(params.same_as_previous)
 
     # 커버/오리지널(스코프 필터): 프롬프트 의도와 무관하게 항상 사용자 명시값을 존중(없으면 LLM song_type).
     inc_original, inc_cover = _resolve_song_type(

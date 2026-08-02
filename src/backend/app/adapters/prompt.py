@@ -22,6 +22,11 @@ _SUMMARY_MAX = 120
 DEFAULT_BRIGHTNESS = 0.0
 DEFAULT_START_ENERGY = 0.4
 DEFAULT_STAGE_COUNT = 3
+# 3단계: MoodParameters.stage_params 항목의 키(StageSpec/Stage와 동일 이름, 전부 0.0~1.0).
+_STAGE_PARAM_KEYS = (
+    "valence", "lufs_integrated", "lra",
+    "danceability_norm", "instr_stem_ratio", "speech_median",
+)
 
 SYSTEM_PROMPT = (
     "너는 뱅드림(BanG Dream!) 음악 세트리스트 생성기의 무드 해석기다. "
@@ -56,10 +61,32 @@ SYSTEM_PROMPT = (
     "'오리지널만/원곡만'이면 \"original\", 언급이 없으면 \"all\".\n"
     "- same_as_previous: 불리언. **직전 요청이 함께 제공된 경우에만** 의미가 있다. 직전 요청과 현재 "
     "요청이 본질적으로 같은 의도(같은 상황·목적, 표현·군더더기만 다름)면 true, 의도가 달라졌으면 false. "
-    "직전 요청이 제공되지 않으면 false.\n\n"
+    "직전 요청이 제공되지 않으면 false.\n"
+    "- stage_params: **반드시** 길이가 stage_count와 정확히 같은 객체 배열로 채워라(brightness/"
+    "start_energy와 마찬가지로 요청 맥락에서 적극적으로 추론 — 비워도 되는 선택 필드가 아니다). "
+    "각 객체는 그 단계의 음향 성격을 0.0~1.0 실수 6개로 나타낸다:\n"
+    "  · valence: 정서 밝기(낮음=무겁고 어두운 느낌, 높음=밝고 화사한 느낌). brightness와 같은 방향.\n"
+    "  · lufs_integrated: 체감 라우드니스(낮음=조용/절제된 소리, 높음=크고 꽉 찬 소리). energy와 비슷하게 움직임.\n"
+    "  · lra: 다이내믹 범위(낮음=음량이 일정, 높음=조용한 부분과 큰 부분 격차가 큼). 발라드·클래식풍은 높게, "
+    "일렉트로닉/파티는 낮게.\n"
+    "  · danceability_norm: 리듬감(낮음=리듬이 불규칙/약함, 높음=규칙적이고 춤추기 좋음). energy와 비슷하게 움직임.\n"
+    "  · instr_stem_ratio: 악기 비중(낮음=보컬 위주, 높음=연주/악기 비중이 큼). 특별한 언급 없으면 0.5 근처.\n"
+    "  · speech_median: 가사 밀도(낮음=여백이 많고 느긋한 가창, 높음=가사가 빽빽하고 빠른 딕션). 랩/힙합은 높게, "
+    "발라드는 낮게, 특별한 언급 없으면 0.4~0.6.\n"
+    "  6개 키 전부 채워라(정말 판단 근거가 없는 키만 예외적으로 생략). "
+    "예: 조용한 발라드 2단계→[{\"valence\":0.3,\"lufs_integrated\":0.25,\"lra\":0.7,\"danceability_norm\":0.2,"
+    "\"instr_stem_ratio\":0.45,\"speech_median\":0.35},{\"valence\":0.35,\"lufs_integrated\":0.3,\"lra\":0.65,"
+    "\"danceability_norm\":0.25,\"instr_stem_ratio\":0.45,\"speech_median\":0.4}], "
+    "신나는 파티 1단계 예시 객체→{\"valence\":0.85,\"lufs_integrated\":0.8,\"lra\":0.25,\"danceability_norm\":0.85,"
+    "\"instr_stem_ratio\":0.55,\"speech_median\":0.5}.\n\n"
     '예: {"brightness":0.7,"start_energy":0.35,"end_energy":0.85,"stage_count":3,'
     '"target_minutes":60,"interpretation_summary":"주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",'
-    '"tags":["드라이브","설렘","주말","고조되는"],"song_type":"all","same_as_previous":false}'
+    '"tags":["드라이브","설렘","주말","고조되는"],"song_type":"all","same_as_previous":false,'
+    '"stage_params":['
+    '{"valence":0.55,"lufs_integrated":0.4,"lra":0.55,"danceability_norm":0.4,"instr_stem_ratio":0.5,"speech_median":0.45},'
+    '{"valence":0.7,"lufs_integrated":0.65,"lra":0.4,"danceability_norm":0.65,"instr_stem_ratio":0.5,"speech_median":0.5},'
+    '{"valence":0.85,"lufs_integrated":0.8,"lra":0.3,"danceability_norm":0.8,"instr_stem_ratio":0.55,"speech_median":0.55}'
+    ']}'
 )
 
 # OpenRouter response_format용 JSON 스키마(structured output 지원 모델에서 사용).
@@ -77,6 +104,25 @@ RESPONSE_JSON_SCHEMA = {
                 "end_energy": {"type": "number"},
                 "stage_count": {"type": "integer"},
                 "stage_energies": {"type": ["array", "null"], "items": {"type": "number"}},
+                "stage_params": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "properties": {
+                            "valence": {"type": ["number", "null"]},
+                            "lufs_integrated": {"type": ["number", "null"]},
+                            "lra": {"type": ["number", "null"]},
+                            "danceability_norm": {"type": ["number", "null"]},
+                            "instr_stem_ratio": {"type": ["number", "null"]},
+                            "speech_median": {"type": ["number", "null"]},
+                        },
+                        "required": [
+                            "valence", "lufs_integrated", "lra",
+                            "danceability_norm", "instr_stem_ratio", "speech_median",
+                        ],
+                    },
+                },
                 "target_minutes": {"type": ["integer", "null"]},
                 "interpretation_summary": {"type": "string"},
                 "tags": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 5},
@@ -89,6 +135,7 @@ RESPONSE_JSON_SCHEMA = {
                 "end_energy",
                 "stage_count",
                 "stage_energies",
+                "stage_params",
                 "target_minutes",
                 "interpretation_summary",
                 "tags",
@@ -193,6 +240,31 @@ def parse_mood(raw_text: str) -> MoodParameters:
     else:
         stage_energies = None
 
+    # 3단계: 단계별 신규 오디오 파라미터(선택). 배열 길이가 stage_count와 다르면(모델이 단계
+    # 수를 안 맞췄거나 통째로 이상하면) 신뢰할 수 없다고 보고 전체를 None으로 폴백한다.
+    # 개별 항목 안에서는 필드 하나가 이상해도 그 필드만 None 처리하고 나머지는 살린다.
+    stage_params = obj.get("stage_params")
+    if isinstance(stage_params, list) and len(stage_params) == stage_count:
+        parsed_stage_params: list[dict[str, float | None]] = []
+        for entry in stage_params:
+            if not isinstance(entry, dict):
+                parsed_stage_params.append({})
+                continue
+            row: dict[str, float | None] = {}
+            for key in _STAGE_PARAM_KEYS:
+                v = entry.get(key)
+                if v is None:
+                    row[key] = None
+                    continue
+                try:
+                    row[key] = _clamp(float(v), *_ENERGY_RANGE)
+                except (TypeError, ValueError):
+                    row[key] = None
+            parsed_stage_params.append(row)
+        stage_params = parsed_stage_params
+    else:
+        stage_params = None
+
     # LLM이 태그를 누락/부족(0~1개)하게 줘도 요약 카드가 허전하지 않도록 최소 2개 보장.
     # 부족분은 산출된 무드 파라미터에서 대표 키워드를 결정론적으로 파생해 채운다.
     tags = ensure_min_tags(
@@ -223,6 +295,7 @@ def parse_mood(raw_text: str) -> MoodParameters:
         tags=tags,
         song_type=song_type,
         same_as_previous=same_as_previous,
+        stage_params=stage_params,
     )
 
 

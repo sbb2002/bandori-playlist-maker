@@ -225,6 +225,39 @@ def test_stage_specs_pass_through_new_fields():
     assert setlist.stages[1].lra == 10.2
 
 
+def test_ai_mode_stage_params_used_when_no_stage_specs():
+    """3단계: stage_specs가 없어도(=AI 모드 첫 요청) params.stage_params가 있으면 Stage에 반영된다."""
+    params = MoodParameters(
+        brightness=0.3, start_energy=0.2, end_energy=0.9, stage_count=2,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[
+            {"valence": 0.7, "lra": 5.5},
+            {"valence": 0.4, "lra": 10.2},
+        ],
+    )
+    setlist = build_setlist(_songs(), params, target_seconds=999, rng=random.Random(0))
+    assert len(setlist.stages) == 2
+    assert setlist.stages[0].valence == 0.7
+    assert setlist.stages[0].lra == 5.5
+    assert setlist.stages[0].danceability_norm is None
+    assert setlist.stages[1].valence == 0.4
+    assert setlist.stages[1].lra == 10.2
+
+
+def test_stage_specs_take_priority_over_stage_params():
+    """사용자 지정 stage_specs가 있으면 LLM stage_params보다 우선한다(필드별)."""
+    specs = [StageSpec(energy_target=0.3, song_count=3, valence=0.9)]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.3, end_energy=0.3, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[{"valence": 0.1, "lra": 0.5}],
+    )
+    setlist = build_setlist(_songs(), params, target_seconds=999, stage_specs=specs, rng=random.Random(0))
+    # valence는 spec이 우선(0.9, LLM의 0.1 아님), lra는 spec에 없어 stage_params로 폴백(0.5).
+    assert setlist.stages[0].valence == 0.9
+    assert setlist.stages[0].lra == 0.5
+
+
 def test_new_fields_do_not_affect_selection():
     """신규 필드(valence 등)의 유무가 선곡 결과에 영향을 주지 않음(에너지만 매칭에 사용)."""
     # valence가 다르지만 energy_target이 같은 두 개의 specs

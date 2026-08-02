@@ -328,17 +328,33 @@ def build_setlist(
     slot_cursor = 0  # slot_targets에서 이 스테이지가 차지하는 구간 추적(Stage A와 동일 순서)
 
     for stage_index, (target, members) in enumerate(zip(targets, stage_members)):
-        # stage_specs가 있으면 신규 필드 매핑, 없으면 None
+        # stage_specs(사용자 지정, 커스텀 모드 등)가 최우선. 없으면 3단계: LLM이 AI 모드
+        # 단일 응답으로 함께 채운 params.stage_params를 단계별로 폴백 사용(둘 다 없으면 None).
         spec = stage_specs[stage_index] if stage_specs else None
+        llm_stage = (
+            params.stage_params[stage_index]
+            if params.stage_params and stage_index < len(params.stage_params)
+            else None
+        )
+
+        def _field(name: str) -> float | None:
+            if spec is not None:
+                v = getattr(spec, name)
+                if v is not None:
+                    return v
+            if llm_stage is not None:
+                return llm_stage.get(name)
+            return None
+
         stages_out.append(Stage(
             index=stage_index,
             energy_target=round(target, 4),
-            valence=spec.valence if spec else None,
-            lufs_integrated=spec.lufs_integrated if spec else None,
-            lra=spec.lra if spec else None,
-            danceability_norm=spec.danceability_norm if spec else None,
-            instr_stem_ratio=spec.instr_stem_ratio if spec else None,
-            speech_median=spec.speech_median if spec else None,
+            valence=_field("valence"),
+            lufs_integrated=_field("lufs_integrated"),
+            lra=_field("lra"),
+            danceability_norm=_field("danceability_norm"),
+            instr_stem_ratio=_field("instr_stem_ratio"),
+            speech_median=_field("speech_median"),
         ))
         if not members:
             continue

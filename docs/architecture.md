@@ -91,7 +91,8 @@ composition root로 어댑터를 포트 자리에 주입. `domain/`은 `adapters
 | `stage_count` (N) | integer, 2~5 | 3 | 경계 클램프 |
 | `target_minutes` | integer\|null, 10~180 | null→API가 60 적용 | 발화에서 추출 |
 | `interpretation_summary` | string ≤120자 | "" | 설명 전용(로직 무영향) |
-| `same_as_previous` | boolean\|null | null | 직전 요청(`previous_prompt`) 제공 시만 판정. 현재와 의도가 같으면 true. §5-1 세부설정 override 존중 여부를 라우트가 이 값으로 가름 |
+| `same_as_previous` | boolean\|null | null | **DEPRECATED(2026-08-03)** — 직전 요청과 의도가 같은지 LLM이 판정하던 필드. AI 모드/커스텀 모드가 명확히 분리된 뒤로는 라우팅에 쓰이지 않는다(§5-1 옛 핫픽스, 아래 스키마3 참고). 필드 자체는 하위호환을 위해 남아 있음(계속 파싱·전달되지만 무시됨) |
+| `stage_params` | array<object>\|null | null | 3단계(2026-08-03): AI 모드 단일 응답이 단계별로 함께 채우는 신규 오디오 지표. 길이는 `stage_count`와 같아야 함(안 맞으면 통째로 null 폴백). 각 객체 키는 `valence`·`lufs_integrated`·`lra`·`danceability_norm`·`instr_stem_ratio`·`speech_median`(전부 0.0~1.0, 개별 키 생략/null 허용). `stage_specs`(사용자 지정, 있으면 최우선)가 없을 때만 `Stage`에 반영됨(`selection.py`). **선곡 매칭 가중치엔 아직 미반영 — echo 전용**(energy만 매칭에 씀, §7 미해결 질문과 동일 선상) |
 
 검증 실패: 누락 필드 기본값 주입 / 완전 파싱 불가 시 `MoodInterpretationError`(재시도 없음, §7).
 
@@ -125,22 +126,32 @@ prev_camelot, brightness_fit, text}`.
 ### 스키마 3 — 백엔드 API
 
 ```
-POST /api/setlist   { "prompt": str, "previous_prompt"?: str|null,
+POST /api/setlist   { "mode"?: "ai"|"custom"(기본 ai), "prompt"?: str|null, "previous_prompt"?: str|null,
                       "target_minutes"?: int|null, "stage_count"?: int,
-                      "bands"?: str[], "stages"?: {energy, minutes|song_count}[](최대 11구간),
+                      "bands"?: str[], "stages"?: {energy, minutes|song_count, 6개 신규 지표}[](최대 11구간),
                       "include_original"?: bool, "include_cover"?: bool }
   → 200: Setlist 객체 그대로 (+ applied_bands, include_original, include_cover, honored_overrides)
 GET /api/health     → 200 { "status": "ok", "version", "interpreter": "stub"|"groq" }
 ```
 
-**세부설정 우선순위(§5-1, 핫픽스 2026-07)** — 설정을 두 부류로 나눠 다룬다:
-- **재생 형태 설정**(`target_minutes`·`stage_count`·`stages` 에너지 아크)은 **직전 요청(`previous_prompt`)과
-  의도가 본질적으로 같을 때만** 적용(LLM `same_as_previous` 판정). 1회차이거나 의도가 바뀌면 무시하고
-  모델이 새로 제어 — 프롬프트를 바꿔도 이전 아크가 고착되던 문제 해소. 응답의 `honored_overrides`(bool)로
-  이 존중 여부를 노출해, 프론트가 자동 해석 시 그래프·재생시간을 새 해석으로 되돌린다.
-- **스코프 필터**(`bands`·`include_*`)는 **의도와 무관하게 항상 적용** — 사용자가 명시적으로 좁힌 범위라
-  프롬프트 mood와 독립적으로 지속(밴드 셀렉터가 2회차에 무시되던 문제 해소). 프롬프트 밴드 자동감지도
-  '현재' 프롬프트 기준으로 항상 적용. 수동 에너지 그래프는 최대 11구간(분리선 10개).
+**AI 모드 / 커스텀 모드(2단계, 2026-08-02)** — `mode`가 라우팅을 가른다:
+- `mode="ai"`(기본): `prompt` 필수. `interpreter.interpret()`를 호출해 LLM이 매 요청 파라미터
+  전체(3단계부터는 `stage_params` 포함)를 새로 제어한다. `honor`는 **항상 false** — 즉
+  `target_minutes`·`stage_count`·`stages`로 보낸 값이 있어도 무시하고 LLM 해석을 따른다.
+- `mode="custom"`: `stages` 필수, LLM 호출 안 함. 사용자가 보낸 `stages`를 그대로 써서
+  `MoodParameters`를 직접 구성한다. `honor`는 **항상 true**.
+- `bands`·`include_original`·`include_cover`(스코프 필터)는 모드와 무관하게 항상 적용.
+
+**DEPRECATED — 세부설정 우선순위(§5-1, 핫픽스 2026-07, 2026-08-03 폐기)**: AI/커스텀 모드로
+나뉘기 전에는 화면 하나에서 프롬프트+수동 그래프 조정이 섞여 있어서, "직전 요청과 의도가
+같을 때만"(`same_as_previous`) 사용자가 건드린 재생 형태 설정을 존중하는 핫픽스가 필요했다.
+지금은 모드 자체가 이미 그 의도를 명시하므로(AI=항상 자동, 커스텀=항상 수동) 이 판정이
+불필요해졌다 — `routes.py`의 `honor` 계산은 이제 `payload.mode`만 본다. 관련 필드·로직
+(`MoodParameters.same_as_previous`, 옛 판정식)은 코드에서 삭제하지 않고 주석으로 deprecated
+표시만 해뒀다(하위호환·참고용). 응답의 `honored_overrides`(bool)는 그대로 유지 — 이제 항상
+`mode=="custom"`과 동일한 값이다.
+
+수동 에너지 그래프는 최대 11구간(분리선 10개).
 
 **CORS**: `FRONTEND_ORIGIN` 환경변수(GitHub Pages 오리진)만 명시 허용 + 개발용 localhost.
 와일드카드 금지.

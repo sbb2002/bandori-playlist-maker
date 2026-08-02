@@ -88,6 +88,40 @@ def test_parse_stage_energies_nonmonotonic():
     assert p.stage_energies == [0.3, 0.85, 0.85, 0.4]
 
 
+def test_parse_stage_params_matching_length_kept_and_clamped():
+    """3단계: stage_count와 길이가 같으면 stage_params를 살리고, 범위 밖 값은 클램프한다."""
+    from app.adapters.prompt import parse_mood
+    p = parse_mood(
+        '{"brightness":0.3,"start_energy":0.3,"end_energy":0.4,"stage_count":2,'
+        '"stage_params":['
+        '{"valence":0.8,"lufs_integrated":5,"lra":null},'
+        '{"valence":-1,"instr_stem_ratio":0.4}'
+        '],"target_minutes":45,"interpretation_summary":""}'
+    )
+    assert p.stage_params == [
+        {"valence": 0.8, "lufs_integrated": 1.0, "lra": None,
+         "danceability_norm": None, "instr_stem_ratio": None, "speech_median": None},
+        {"valence": 0.0, "lufs_integrated": None, "lra": None,
+         "danceability_norm": None, "instr_stem_ratio": 0.4, "speech_median": None},
+    ]
+
+
+def test_parse_stage_params_length_mismatch_dropped():
+    """stage_count(3)와 배열 길이(2)가 안 맞으면 통째로 None 폴백(부분 신뢰 안 함)."""
+    from app.adapters.prompt import parse_mood
+    p = parse_mood(
+        '{"brightness":0,"start_energy":0.4,"end_energy":0.4,"stage_count":3,'
+        '"stage_params":[{"valence":0.5},{"valence":0.6}],'
+        '"target_minutes":null,"interpretation_summary":""}'
+    )
+    assert p.stage_params is None
+
+
+def test_parse_stage_params_absent_is_none():
+    from app.adapters.prompt import parse_mood
+    assert parse_mood(_OK_JSON).stage_params is None
+
+
 def test_out_of_range_values_clamped():
     content = ('{"brightness":5,"start_energy":-2,"end_energy":9,'
                '"stage_count":99,"target_minutes":9999,"interpretation_summary":""}')

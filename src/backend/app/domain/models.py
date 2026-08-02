@@ -58,11 +58,19 @@ class MoodParameters:
     # 곡 종류 필터 의도: "all" | "original" | "cover". 사용자가 커버/오리지널만 원하면 그에 맞게,
     # 아니면 "all". 사용자가 체크박스를 명시하면 그게 우선(라우트에서 조정).
     song_type: str = "all"
-    # 직전 요청과 현재 요청이 '본질적으로 같은 의도'인지 LLM 판정(핫픽스: 세부설정 우선순위).
-    # 직전 프롬프트가 함께 주어졌을 때만 의미가 있다. True면 사용자가 건드린 세부설정 override를
-    # 존중하고, False/None이면(1회차 또는 의도가 바뀜) 모델이 전 파라미터를 새로 제어한다.
-    # 라우트가 이 값(과 previous_prompt 존재 여부)으로 override 적용 여부를 가른다.
+    # DEPRECATED(2026-08-03, 3단계): AI 모드/커스텀 모드가 명확히 분리되면서(AI=항상 LLM이
+    # 새로 해석, 커스텀=항상 사용자 설정 그대로) "직전 요청과 의도가 같은가"를 판정해 세부설정
+    # override 여부를 가르던 이 메커니즘 자체가 불필요해졌다 — 라우트는 이제 payload.mode만
+    # 보고 honor를 정한다(routes.py 참고). 필드는 하위호환을 위해 유지하되 더 이상 라우팅에
+    # 쓰이지 않는다. 삭제하지 말 것(다른 로컬/세션이 참조 중일 수 있음).
     same_as_previous: bool | None = None
+    # 3단계: LLM이 AI 모드 단일 응답으로 단계별 6개 신규 오디오 파라미터를 함께 채운 값(선택).
+    # 길이는 stage_count와 같아야 하며, 각 dict의 키는 StageSpec/Stage와 동일: valence·
+    # lufs_integrated·lra·danceability_norm·instr_stem_ratio·speech_median(전부 0.0~1.0,
+    # 개별 키가 없거나 None이면 그 값만 미상). selection.py가 stage_specs 없을 때(AI 모드
+    # 첫 요청 등) 이 값을 Stage에 반영한다 — 선곡 매칭 가중치엔 아직 안 씀(echo 전용, 2단계
+    # "배관만" 결정 계승).
+    stage_params: list[dict[str, float | None]] | None = None
 
 
 @dataclass(frozen=True)
