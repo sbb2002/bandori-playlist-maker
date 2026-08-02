@@ -496,3 +496,181 @@ def band_average_intensity(master_rows: list[dict], band: str,
     if not vals["i_mean"]:
         return None
     return {f: f"{np.mean(vals[f]):.5f}" for f in I_FIELDS}
+
+
+# ---------------------------------------------------------------------------
+# 5) danceability_norm 동결 (frozen percentile normalization)
+# ---------------------------------------------------------------------------
+
+class DanceabilityFrozen:
+    """기존(2026-08-02) 분포에서 동결한 danceability_norm 계산기.
+
+    원본 732곡의 raw DFA alpha 값들의 정렬된 분포를 동결 저장하고,
+    신곡의 raw alpha를 그 분포에 대입해 백분위를 계산한다.
+    낮은 alpha = 높은 댄서빌리티 = 1에 가까운 백분위(역순).
+    """
+
+    def __init__(self, raw_alpha_sorted: list[float]):
+        """
+        Args:
+            raw_alpha_sorted: 정렬된 raw DFA alpha 값 리스트 (동결 분포)
+        """
+        self._raw_alpha_sorted = raw_alpha_sorted
+
+    # -- 구축/영속화 ---------------------------------------------------------
+
+    @classmethod
+    def build_from_csv(cls, danceability_raw_csv: Path,
+                       master_rows: list[dict]) -> "DanceabilityFrozen":
+        """원본 연구 저장소의 danceability_raw.csv에서 분포를 구축한다.
+
+        - danceability_raw.csv로부터 (band, song) → raw dfa_alpha 매핑 생성
+        - master_rows와 band+song으로 조인해 732곡의 raw alpha 값 추출
+        - 정렬 후 동결 저장 준비
+
+        Note:
+            idx로 조인하지 않고 band+song으로 조인한다 (과거 idx 정합성 버그 이력).
+        """
+        # Load raw CSV and build (band, song) → alpha mapping
+        raw_by_key = {}  # (band, song) → dfa_alpha
+        with danceability_raw_csv.open(encoding="utf-8", newline="") as f:
+            for r in csv.DictReader(f):
+                if (r.get("dfa_alpha") or "").strip():
+                    try:
+                        key = (r["band"], r["song"])
+                        raw_by_key[key] = float(r["dfa_alpha"])
+                    except (ValueError, KeyError):
+                        continue
+
+        # Join with master rows and extract raw values
+        raw_alphas = []
+        for m in master_rows:
+            key = (m["band"], m["song"])
+            if key in raw_by_key:
+                raw_alphas.append(raw_by_key[key])
+
+        if not raw_alphas:
+            raise ValueError("No raw DFA alpha values found in danceability_raw.csv")
+
+        raw_alphas_sorted = sorted(raw_alphas)
+        return cls(raw_alphas_sorted)
+
+    @classmethod
+    def load_or_build(cls, danceability_raw_csv: Path, master_rows: list[dict],
+                      json_path: Path, verify_enable: bool = True) -> "DanceabilityFrozen":
+        """영속화 로드. 없으면 구축 → 기존 master 저장값 재현 검증(선택) → 저장.
+
+        Args:
+            danceability_raw_csv: 원본 danceability_raw.csv 경로
+            master_rows: 현재 songs_master.csv 행들
+            json_path: 동결 분포 저장할 JSON 경로
+            verify_enable: 검증 수행 여부(기본 True)
+
+        Raises:
+            RuntimeError: 검증 실패 시(verify_enable=True일 때만)
+        """
+        if json_path.exists():
+            d = json.loads(json_path.read_text(encoding="utf-8"))
+            return cls(d["raw_alpha_sorted"])
+
+        self = cls.build_from_csv(danceability_raw_csv, master_rows)
+
+        verify_result = None
+        if verify_enable:
+            ok, total, worst = self.verify(master_rows, danceability_raw_csv)
+            print(f"danceability_norm 동결 분포 검증: exact {ok}/{total}, max diff {worst:.2e}")
+            verify_result = {"exact": ok, "total": total, "max_abs_diff": worst}
+            if total == 0 or ok / total < 0.80:  # 80% 일치도(약간의 오차 허용)
+                raise RuntimeError(
+                    f"danceability_norm 분포 재현 실패({ok}/{total}) — "
+                    "원본 CSV 산식 대조 필요")
+        else:
+            print(f"danceability_norm 동결 분포 검증 스킵(verify_enable=False)")
+
+        payload = {
+            "purpose": "danceability_norm 동결 분포(신곡 증분용)",
+            "source": "bpm-research/method-7-danceability/out/csv/danceability_raw.csv "
+                      "원시 분포 — 732곡 raw DFA alpha",
+            "built_at": datetime.date.today().isoformat(),
+            "n_songs": len(self._raw_alpha_sorted),
+            "verify": verify_result,
+            "raw_alpha_sorted": self._raw_alpha_sorted,
+        }
+        json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+                             encoding="utf-8")
+        print(f"danceability_norm 동결 분포 저장: {json_path} (풀 {len(self._raw_alpha_sorted)}곡)")
+        return self
+
+    # -- 계산 -----------------------------------------------------------------
+
+    def _pct(self, v: float) -> float:
+        """주어진 값이 동결 분포에서 몇 백분위에 해당하는지 계산(중앙순위).
+
+        낮은 alpha일수록 높은 댄서빌리티이므로, 원래 순서로 백분위를 구한 뒤
+        역순으로 변환한다.
+        """
+        srt = self._raw_alpha_sorted
+        n = len(srt)
+        if n == 0:
+            return 0.5
+        # alpha를 동결 분포에서 정렬 위치 찾기
+        less = bisect.bisect_left(srt, v)
+        equal = bisect.bisect_right(srt, v) - less
+        # 낮은 alpha = 높은 댄서빌리티 → 역순: 1 - percentile
+        pct_raw = (less + 0.5 * equal) / n
+        return 1.0 - pct_raw
+
+    def danceability_norm_for(self, raw_alpha: float) -> float:
+        """신곡 raw DFA alpha → 동결 분포 기준 danceability_norm(0~1).
+
+        Args:
+            raw_alpha: 추출된 raw DFA alpha값
+
+        Returns:
+            float: 0~1 정규화된 백분위값 (1에 가까울수록 높은 댄서빌리티)
+        """
+        return self._pct(raw_alpha)
+
+    def verify(self, master_rows: list[dict],
+               danceability_raw_csv: Path) -> tuple[int, int, float]:
+        """기존 master 행의 저장된 m7-danceability_norm을 동결 분포로 재계산해
+        일치도 검증. (일치, 비교, 최대오차)
+
+        Note:
+            danceability_raw.csv의 danceability_norm 컬럼과 우리 동결 분포
+            기준으로 재계산한 값을 비교한다.
+        """
+        # Load raw CSV with (band, song) → (raw_alpha, stored_norm) mapping
+        rows_by_key = {}
+        with danceability_raw_csv.open(encoding="utf-8", newline="") as f:
+            for r in csv.DictReader(f):
+                key = (r["band"], r["song"])
+                alpha_str = (r.get("dfa_alpha") or "").strip()
+                norm_str = (r.get("danceability_norm") or "").strip()
+                if alpha_str and norm_str:
+                    try:
+                        rows_by_key[key] = {
+                            "raw_alpha": float(alpha_str),
+                            "stored_norm": float(norm_str)
+                        }
+                    except (ValueError, KeyError):
+                        continue
+
+        ok = total = 0
+        worst = 0.0
+
+        for m in master_rows:
+            key = (m["band"], m["song"])
+            if key not in rows_by_key:
+                continue
+
+            total += 1
+            row_data = rows_by_key[key]
+            mine = self.danceability_norm_for(row_data["raw_alpha"])
+            stored = row_data["stored_norm"]
+            worst = max(worst, abs(mine - stored))
+            # Check if values match to 4 decimal places
+            if f"{mine:.4f}" == f"{stored:.4f}":
+                ok += 1
+
+        return ok, total, worst

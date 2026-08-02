@@ -204,7 +204,7 @@ def merge(repo_root: Path, landed: list[dict],
             assemble_master_row(s["master_idx"], s["cand"], s["excerpt"], s["proxies"],
                                 s["audio_entry"], s["energy_full"],
                                 s["intensity"], elig[s["cand"]["band"]],
-                                s["shape"])
+                                s["shape"], s.get("audio_feats"))
             for s in landed])
 
         _post_checks(paths, snapshot, master_before, landed)

@@ -62,6 +62,7 @@ import norms  # noqa: E402
 import sources  # noqa: E402
 from excerpt_features import extract_from_wav  # noqa: E402
 from extract_full_energy import extract_features  # noqa: E402  (기존 모듈 재사용)
+from extract_loudness import extract_features as extract_loudness  # noqa: E402
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -97,19 +98,119 @@ def _load_dotenv() -> None:
                 os.environ[key] = value
 
 
-# 커밋 대상(데이터 산출물 + 동결 norm 4종)
+# 커밋 대상(데이터 산출물 + 동결 norm 5종)
 # 2026-07-16: shape_norm.json이 누락돼 있던 버그 수정 — 이 목록에 없어서 한 번도
 # data 브랜치에 커밋된 적이 없었고, 로컬에 우연히 남아있던 파일에 의존하고 있었다.
+# 2026-08-03: danceability_norm.json 추가 (m7-danceability_norm 정규화용)
 DATA_PATHS = [
     "data/songs_full.csv", "data/audio_map.json",
     "data/song_features_with_proxies.csv", "data/full_audio_features.csv",
     "data/temporal_intensity.csv", "data/songs_master.csv",
     "data/feature_norms.json", "data/energy_full_norm.json",
     "data/intensity_norm.json", "data/shape_norm.json",
+    "data/danceability_norm.json",
     "data/provisional_intensity.json",
 ]
 
 PROVISIONAL_JSON_REL = "data/provisional_intensity.json"
+
+
+def _compute_dfa_alpha(path: Path) -> float:
+    """Extract raw DFA (Detrended Fluctuation Analysis) alpha value from audio.
+
+    Uses numpy fallback implementation (no nolds dependency).
+
+    Args:
+        path: Path to audio file (wav)
+
+    Returns:
+        float: DFA alpha value (0.5~2.5, lower = higher danceability)
+    """
+    import librosa
+
+    SR = 22050
+    y, sr = librosa.load(str(path), sr=SR, mono=True)
+
+    # Extract RMS energy time series
+    rms = librosa.feature.rms(y=y)[0]
+
+    # DFA implementation (numpy-based, no nolds dependency)
+    return _dfa_numpy(rms)
+
+
+def _dfa_numpy(signal: np.ndarray, min_scale: int = 10,
+               max_scale: int | None = None) -> float:
+    """numpy-based DFA implementation (fallback when nolds unavailable).
+
+    Args:
+        signal: 1D time series (e.g., RMS energy)
+        min_scale: Minimum window size (frames)
+        max_scale: Maximum window size (None = len(signal)//2)
+
+    Returns:
+        float: DFA alpha value
+    """
+    if len(signal) < 4:
+        return 1.0
+
+    # Integrated series (cumulative sum of zero-centered signal)
+    integrated = np.cumsum(signal - np.mean(signal))
+
+    if max_scale is None:
+        max_scale = len(integrated) // 2
+
+    scales = np.logspace(np.log10(min_scale), np.log10(max_scale), num=20, dtype=int)
+    scales = np.unique(scales)
+
+    fluctuations = []
+
+    for scale in scales:
+        n_chunks = len(integrated) // scale
+        if n_chunks < 1:
+            continue
+
+        fluctuation = 0.0
+
+        # Forward: from start
+        for i in range(n_chunks):
+            start = i * scale
+            end = start + scale
+            chunk = integrated[start:end]
+            x = np.arange(len(chunk))
+            coeffs = np.polyfit(x, chunk, 1)
+            trend = np.polyval(coeffs, x)
+            fluctuation += np.sum((chunk - trend) ** 2)
+
+        # Backward: from end
+        remainder = len(integrated) % scale
+        if remainder > 0:
+            for i in range(n_chunks):
+                start = len(integrated) - (i + 1) * scale
+                end = start + scale
+                if start < 0:
+                    break
+                chunk = integrated[start:end]
+                x = np.arange(len(chunk))
+                coeffs = np.polyfit(x, chunk, 1)
+                trend = np.polyval(coeffs, x)
+                fluctuation += np.sum((chunk - trend) ** 2)
+
+        # RMS fluctuation
+        fluctuation = np.sqrt(fluctuation / (2 * n_chunks * scale))
+        fluctuations.append(fluctuation)
+
+    # Log-log regression
+    fluctuations = np.array(fluctuations)
+    if len(fluctuations) < 2 or np.any(fluctuations <= 0):
+        return 1.0
+
+    log_scales = np.log10(scales[:len(fluctuations)])
+    log_fluct = np.log10(fluctuations)
+
+    coeffs = np.polyfit(log_scales, log_fluct, 1)
+    alpha = coeffs[0]
+
+    return float(alpha)
 
 
 def _load_provisional(repo_root: Path) -> dict[int, dict]:
@@ -129,8 +230,9 @@ def _save_provisional(repo_root: Path, reg: dict[int, dict]) -> None:
 
 
 def _prepare_norms(repo_root: Path, master_rows: list[dict], audio_dir: Path,
-                   workers: int, soft: bool
-                   ) -> tuple[dict, norms.EnergyFullFrozen, tuple, dict, bool]:
+                   workers: int, soft: bool,
+                   bpm_research_root: Path | None = None
+                   ) -> tuple[dict, norms.EnergyFullFrozen, tuple, dict, norms.DanceabilityFrozen, bool]:
     """동결 norm 4계열 준비(최초 구축 시 기존 행 재현 검증 후 영속화).
 
     proxy/shape/energy_full은 이미 반영된 CSV 산출물(song_features_with_proxies.csv
@@ -160,6 +262,33 @@ def _prepare_norms(repo_root: Path, master_rows: list[dict], audio_dir: Path,
         data / "full_audio_features.csv", elig, master_rows,
         data / "energy_full_norm.json")
 
+    # danceability_norm 동결 분포 로드/구축
+    dance_norm_json = data / "danceability_norm.json"
+    try:
+        # danceability_raw.csv 위치 탐색
+        dance_raw_csv = None
+        if bpm_research_root and (bpm_research_root / "topic" / "20260731_audio_feats_revised" /
+                                  "method-7-danceability" / "out" / "csv" / "danceability_raw.csv").exists():
+            dance_raw_csv = (bpm_research_root / "topic" / "20260731_audio_feats_revised" /
+                            "method-7-danceability" / "out" / "csv" / "danceability_raw.csv")
+        else:
+            # Try sibling directory relative to this repo
+            potential = (repo_root.parents[1] / "bpm-research" / "topic" / "20260731_audio_feats_revised" /
+                        "method-7-danceability" / "out" / "csv" / "danceability_raw.csv")
+            if potential.exists():
+                dance_raw_csv = potential
+
+        if dance_raw_csv:
+            df = norms.DanceabilityFrozen.load_or_build(dance_raw_csv, master_rows, dance_norm_json)
+        else:
+            raise FileNotFoundError("danceability_raw.csv not found in bpm-research")
+    except Exception as exc:  # noqa: BLE001
+        if not soft:
+            raise SystemExit(f"‼️ danceability_norm 준비 실패: {exc}") from exc
+        print(f"⚠️ --soft: danceability_norm 준비 실패({exc}) — "
+              "이번 실행의 신곡 m7-danceability_norm은 None으로 표기")
+        df = None
+
     norm_json = data / "intensity_norm.json"
     try:
         if not norm_json.exists():
@@ -183,8 +312,8 @@ def _prepare_norms(repo_root: Path, master_rows: list[dict], audio_dir: Path,
             raise SystemExit(f"‼️ {exc}") from exc
         print(f"⚠️ --soft: intensity_norm 준비 실패({exc}) — "
               "이번 실행의 신곡 i_*는 밴드 평균으로 임시 대체하고 provisional 기록")
-        return p_norms, ef, (None, None), shape_norms, False
-    return p_norms, ef, (med, mad), shape_norms, True
+        return p_norms, ef, (None, None), shape_norms, df, False
+    return p_norms, ef, (med, mad), shape_norms, df, True
 
 
 def _backfill_provisional(repo_root: Path, audio_dir: Path, med, mad,
@@ -242,6 +371,7 @@ def _backfill_provisional(repo_root: Path, audio_dir: Path, med, mad,
 def _process_song(cand: dict, wav: Path, p_norms: dict,
                   ef: norms.EnergyFullFrozen, med, mad,
                   audio_entries: dict[int, dict], shape_norms: dict,
+                  df: norms.DanceabilityFrozen | None = None,
                   master_rows: list[dict] | None = None) -> dict | None:
     """신곡 1곡 분석(fail-soft). 성공 시 merge_data.merge용 landed dict.
 
@@ -262,6 +392,30 @@ def _process_song(cand: dict, wav: Path, p_norms: dict,
         full["extract_sec"] = round(time.time() - t0, 2)
         energy_full = ef.energy_full_for(full)
 
+        # Extract new audio features (lufs_integrated, lra, danceability_norm)
+        audio_feats = {}
+        try:
+            loudness = extract_loudness(wav)
+            audio_feats["m4-lufs_integrated"] = loudness.get("lufs_integrated")
+            audio_feats["m4-lra"] = loudness.get("lra")
+        except Exception as exc:  # noqa: BLE001
+            print(f"    ⚠️ 라우드니스 추출 실패: {exc!r} — None으로 표기")
+            audio_feats["m4-lufs_integrated"] = None
+            audio_feats["m4-lra"] = None
+
+        # Danceability normalization (requires DFA alpha from somewhere)
+        # For now, we'll set it to None since we don't have raw DFA alpha extraction here
+        # In a full implementation, you'd extract DFA alpha and normalize it
+        audio_feats["m7-danceability_norm"] = None
+        if df is not None:
+            try:
+                # Try to compute DFA alpha from this wav
+                dfa_alpha = _compute_dfa_alpha(wav)
+                audio_feats["m7-danceability_norm"] = df.danceability_norm_for(dfa_alpha)
+            except Exception as exc:  # noqa: BLE001
+                print(f"    ⚠️ 댄서빌리티 계산 실패: {exc!r} — None으로 표기")
+                audio_feats["m7-danceability_norm"] = None
+
         provisional = False
         if med is not None:
             frames = norms.compute_frames_for(wav)            # 프레임 강도
@@ -280,6 +434,7 @@ def _process_song(cand: dict, wav: Path, p_norms: dict,
         return {"cand": cand, "excerpt": excerpt, "proxies": proxies,
                 "full_feats": full, "audio_entry": entry, "shape": shape,
                 "energy_full": energy_full, "intensity": intensity,
+                "audio_feats": audio_feats,
                 "provisional": provisional}
     except Exception as exc:  # noqa: BLE001 — 곡별 격리(fail-soft)
         print(f"  ✗ 분석 실패(스킵·다음 실행 재시도): {cand['band']} · {cand['song']} — {exc!r}")
@@ -381,8 +536,9 @@ def main(argv=None) -> int:
     wavs = fetch_new.download_all(cands, audio_dir) if cands else {}
 
     # ③ 동결 norm(soft-run이면 intensity_norm 실패를 흡수)
-    p_norms, ef, (med, mad), shape_norms, intensity_ready = _prepare_norms(
-        repo_root, master_rows, audio_dir, a.workers, soft=a.soft)
+    p_norms, ef, (med, mad), shape_norms, df, intensity_ready = _prepare_norms(
+        repo_root, master_rows, audio_dir, a.workers, soft=a.soft,
+        bpm_research_root=Path(a.sorter_repo).parent.parent)
 
     # ④ 정상(비-soft) run이면, 먼저 이전 soft-run이 남긴 provisional i_*를 백필
     if not a.soft and intensity_ready and not a.dry:
@@ -401,7 +557,7 @@ def main(argv=None) -> int:
             failed.append(c)
             continue
         res = _process_song(c, wav, p_norms, ef, med, mad, audio_entries, shape_norms,
-                            master_rows=master_rows)
+                            df=df, master_rows=master_rows)
         (landed if res else failed).append(res or c)
 
     print(f"\n반영 {len(landed)}곡 · 실패 {len(failed)}곡")
@@ -417,7 +573,7 @@ def main(argv=None) -> int:
             row = merge_data.assemble_master_row(
                 preview_idx, s["cand"], s["excerpt"], s["proxies"], s["audio_entry"],
                 s["energy_full"], s["intensity"],
-                True, s["shape"])  # dry에서는 eligible 근사 표기(실반영 시 재계산)
+                True, s["shape"], s.get("audio_feats"))  # dry에서는 eligible 근사 표기(실반영 시 재계산)
             preview_idx += 1
             prov = " [provisional i_*]" if s.get("provisional") else ""
             print(f"  {row}{prov}")
