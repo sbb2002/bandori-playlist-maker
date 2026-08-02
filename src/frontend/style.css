@@ -53,6 +53,13 @@ input[type="text"], input[type="number"] {
 }
 input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 
+/* 재생시간 입력의 네이티브 위아래 스피너 버튼 제거 — 숫자를 직접 타이핑하는 용도라 불필요 */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }
+
 /* 모드 토글: AI모드 ↔ 커스텀모드 — 손잡이가 좌우로 슬라이드하는 스위치 형태.
    두 상태뿐이라 버튼 하나(role=switch)로 전체를 감싸고 클릭할 때마다 반대 모드로 전환한다. */
 .mode-switch {
