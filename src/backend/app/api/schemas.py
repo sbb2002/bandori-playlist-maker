@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ..domain.models import Setlist
@@ -16,6 +18,12 @@ class StageInput(BaseModel):
     energy: float = Field(..., ge=0.0, le=1.0, description="이 단계의 에너지 레벨 0~1")
     minutes: int | None = Field(default=None, ge=1, le=180, description="이 단계 지정 시간(분)")
     song_count: int | None = Field(default=None, ge=1, le=60, description="이 단계 곡 수")
+    valence: float | None = Field(default=None, ge=0.0, le=1.0, description="밝기 지표 0~1")
+    lufs_integrated: float | None = Field(default=None, description="통합 라우드니스(LUFS)")
+    lra: float | None = Field(default=None, description="다이나믹 범위(LRA, dB)")
+    danceability_norm: float | None = Field(default=None, ge=0.0, le=1.0, description="리듬감 0~1")
+    instr_stem_ratio: float | None = Field(default=None, ge=0.0, le=1.0, description="악기 비율 0~1")
+    speech_median: float | None = Field(default=None, ge=0.0, le=1.0, description="음절 밀도 0~1")
 
     @model_validator(mode="after")
     def _require_size(self) -> "StageInput":
@@ -27,7 +35,8 @@ class StageInput(BaseModel):
 class SetlistRequest(BaseModel):
     """POST /api/setlist 요청 바디."""
 
-    prompt: str = Field(..., min_length=1, max_length=500, description="자연어 요청 한 문장")
+    prompt: str | None = Field(default=None, max_length=500, description="자연어 요청 한 문장(AI 모드 필수)")
+    mode: Literal["ai", "custom"] = Field(default="ai", description="AI 모드(LLM) 또는 커스텀 모드(수동 설정)")
     # 직전 회차 요청(2회차+). 주어지면 백엔드가 LLM에 함께 넘겨 '의도가 같은지'를 판정하고,
     # 같을 때만 아래 사용자 override(target_minutes·stage_count·stages·bands·cover)를 적용한다.
     previous_prompt: str | None = Field(default=None, max_length=500, description="직전 회차 요청(의도 동일성 판정용)")
@@ -40,13 +49,17 @@ class SetlistRequest(BaseModel):
     include_original: bool | None = Field(default=None, description="오리지널 포함(None=LLM 판단)")
     include_cover: bool | None = Field(default=None, description="커버 포함(None=LLM 판단)")
 
-    @field_validator("prompt")
-    @classmethod
-    def _strip_prompt(cls, v: str) -> str:
-        v = v.strip()
-        if not v:
-            raise ValueError("prompt는 공백만으로 구성될 수 없습니다.")
-        return v
+    @model_validator(mode="after")
+    def _validate_prompt(self) -> "SetlistRequest":
+        # AI 모드에서만 prompt 필수
+        if self.mode == "ai":
+            if self.prompt is None:
+                raise ValueError("AI 모드에서는 prompt가 필수입니다.")
+            prompt_stripped = self.prompt.strip()
+            if not prompt_stripped:
+                raise ValueError("prompt는 공백만으로 구성될 수 없습니다.")
+            self.prompt = prompt_stripped
+        return self
 
 
 def serialize_setlist(setlist: Setlist) -> dict:
@@ -63,7 +76,17 @@ def serialize_setlist(setlist: Setlist) -> dict:
             "song_type": setlist.params.song_type,
         },
         "stages": [
-            {"index": s.index, "energy_target": s.energy_target} for s in setlist.stages
+            {
+                "index": s.index,
+                "energy_target": s.energy_target,
+                "valence": s.valence,
+                "lufs_integrated": s.lufs_integrated,
+                "lra": s.lra,
+                "danceability_norm": s.danceability_norm,
+                "instr_stem_ratio": s.instr_stem_ratio,
+                "speech_median": s.speech_median,
+            }
+            for s in setlist.stages
         ],
         "estimated_total_seconds": setlist.estimated_total_seconds,
         "picks": [

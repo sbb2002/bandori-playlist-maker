@@ -206,3 +206,40 @@ def test_all_ineligible_raises_no_setlist():
     songs = [Song(0, "a", "song", "vid0000000", "8A", 0.5, 0.0, "neutral", eligible_band=False)]
     with pytest.raises(NoSetlistError):
         build_setlist(songs, _params(), target_seconds=6 * 213)
+
+
+# ── 신규 필드 통과 및 매칭 미반영 회귀 ──────────────────────────────────────────
+def test_stage_specs_pass_through_new_fields():
+    """StageSpec의 신규 필드(valence 등)가 Stage까지 전달되는지 확인."""
+    specs = [
+        StageSpec(energy_target=0.3, song_count=2, valence=0.7, lra=5.5),
+        StageSpec(energy_target=0.7, song_count=3, valence=0.4, lra=10.2),
+    ]
+    setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs, rng=random.Random(0))
+    assert len(setlist.stages) == 2
+    assert setlist.stages[0].energy_target == 0.3
+    assert setlist.stages[0].valence == 0.7
+    assert setlist.stages[0].lra == 5.5
+    assert setlist.stages[1].energy_target == 0.7
+    assert setlist.stages[1].valence == 0.4
+    assert setlist.stages[1].lra == 10.2
+
+
+def test_new_fields_do_not_affect_selection():
+    """신규 필드(valence 등)의 유무가 선곡 결과에 영향을 주지 않음(에너지만 매칭에 사용)."""
+    # valence가 다르지만 energy_target이 같은 두 개의 specs
+    specs_without_valence = [
+        StageSpec(energy_target=0.3, song_count=3),
+        StageSpec(energy_target=0.7, song_count=3),
+    ]
+    specs_with_valence = [
+        StageSpec(energy_target=0.3, song_count=3, valence=0.9),
+        StageSpec(energy_target=0.7, song_count=3, valence=0.1),
+    ]
+    setlist1 = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs_without_valence, rng=random.Random(42))
+    setlist2 = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs_with_valence, rng=random.Random(42))
+
+    # 선곡 결과(picks의 idx 집합)가 동일해야 함
+    picks1 = {p.idx for p in setlist1.picks}
+    picks2 = {p.idx for p in setlist2.picks}
+    assert picks1 == picks2, "신규 필드의 유무가 선곡 결과를 변경해서는 안 됨"

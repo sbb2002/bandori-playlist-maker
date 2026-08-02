@@ -111,30 +111,54 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     # 밴드 필터(설정 §5-1b, 스코프 필터): 항상 적용 — 수동 선택 밴드 ∪ 현재 프롬프트 자동감지.
     # interpreter.interpret() 호출 전에 계산 (band_filter는 LLM 결과에 의존하지 않음).
     band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
-    band_names |= detect_bands(payload.prompt)  # 현재 프롬프트에 밴드명(별명) 언급 시 자동 필터
+    band_names |= detect_bands(payload.prompt or "")  # 현재 프롬프트에 밴드명(별명) 언급 시 자동 필터
     band_filter = band_names or None
 
-    # band_filter를 이용해 현재 필터 곡 풀의 에너지 분포 통계 계산 (3차 LLM 프롬프트용).
-    pool = [s for s in request.app.state.songs if not band_filter or s.band in band_filter]
-    if pool:
-        energies = [s.energy for s in pool]
-        energy_stats = {
-            "min": min(energies),
-            "max": max(energies),
-            "mean": statistics.fmean(energies),
-            "std": statistics.pstdev(energies) if len(energies) > 1 else 0.0,
-        }
+    # AI 모드 vs 커스텀 모드 분기
+    if payload.mode == "custom":
+        # 커스텀 모드: LLM 호출 안 함, stages 필수
+        if not payload.stages:
+            raise HTTPException(
+                status_code=400,
+                detail={"error": {"code": "INVALID_REQUEST", "message": "커스텀 모드는 stages가 필요합니다."}}
+            )
+        # 사용자가 직접 지정한 단계들로부터 MoodParameters 구성
+        params = MoodParameters(
+            brightness=0.0,
+            start_energy=payload.stages[0].energy,
+            end_energy=payload.stages[-1].energy,
+            stage_count=len(payload.stages),
+            target_minutes=payload.target_minutes,
+            interpretation_summary="",
+            stage_energies=[s.energy for s in payload.stages],
+            tags=[],
+            song_type="all",
+            same_as_previous=None,
+        )
+        honor = True  # 커스텀 모드는 항상 사용자 설정을 존중
     else:
-        energy_stats = None
+        # AI 모드: 기존 로직
+        # band_filter를 이용해 현재 필터 곡 풀의 에너지 분포 통계 계산 (3차 LLM 프롬프트용).
+        pool = [s for s in request.app.state.songs if not band_filter or s.band in band_filter]
+        if pool:
+            energies = [s.energy for s in pool]
+            energy_stats = {
+                "min": min(energies),
+                "max": max(energies),
+                "mean": statistics.fmean(energies),
+                "std": statistics.pstdev(energies) if len(energies) > 1 else 0.0,
+            }
+        else:
+            energy_stats = None
 
-    params: MoodParameters = interpreter.interpret(payload.prompt, payload.previous_prompt, energy_stats=energy_stats)
+        params = interpreter.interpret(payload.prompt, payload.previous_prompt, energy_stats=energy_stats)
 
-    # 핫픽스(세부설정 우선순위): 'honor'는 **재생 형태 설정**(에너지 아크·단계 수·재생시간)에만 적용.
-    # 직전 요청과 의도가 본질적으로 같을 때만 사용자가 건드린 이 값들을 존중하고, 1회차이거나 의도가
-    # 바뀌면(honor=False) 무시하고 모델이 새로 제어한다(프롬프트 바꿔도 옛 아크가 고착되던 버그 해소).
-    # ※ **스코프 필터(밴드·커버)는 honor와 무관하게 항상 적용** — 사용자가 명시적으로 좁힌 범위라
-    #   프롬프트 mood와 독립적으로 지속되어야 한다(밴드 셀렉터가 2회차에 무시되던 문제 해소).
-    honor = bool(payload.previous_prompt) and bool(params.same_as_previous)
+        # 핫픽스(세부설정 우선순위): 'honor'는 **재생 형태 설정**(에너지 아크·단계 수·재생시간)에만 적용.
+        # 직전 요청과 의도가 본질적으로 같을 때만 사용자가 건드린 이 값들을 존중하고, 1회차이거나 의도가
+        # 바뀌면(honor=False) 무시하고 모델이 새로 제어한다(프롬프트 바꿔도 옛 아크가 고착되던 버그 해소).
+        # ※ **스코프 필터(밴드·커버)는 honor와 무관하게 항상 적용** — 사용자가 명시적으로 좁힌 범위라
+        #   프롬프트 mood와 독립적으로 지속되어야 한다(밴드 셀렉터가 2회차에 무시되던 문제 해소).
+        honor = bool(payload.previous_prompt) and bool(params.same_as_previous)
 
     # 커버/오리지널(스코프 필터): 프롬프트 의도와 무관하게 항상 사용자 명시값을 존중(없으면 LLM song_type).
     inc_original, inc_cover = _resolve_song_type(
@@ -151,6 +175,12 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
                 song_count=st.song_count
                 if st.song_count is not None
                 else max(1, round(st.minutes * 60 / DEFAULT_AVG_SONG_SECONDS)),
+                valence=st.valence,
+                lufs_integrated=st.lufs_integrated,
+                lra=st.lra,
+                danceability_norm=st.danceability_norm,
+                instr_stem_ratio=st.instr_stem_ratio,
+                speech_median=st.speech_median,
             )
             for st in payload.stages
         ]

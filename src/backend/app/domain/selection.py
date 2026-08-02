@@ -328,7 +328,18 @@ def build_setlist(
     slot_cursor = 0  # slot_targets에서 이 스테이지가 차지하는 구간 추적(Stage A와 동일 순서)
 
     for stage_index, (target, members) in enumerate(zip(targets, stage_members)):
-        stages_out.append(Stage(index=stage_index, energy_target=round(target, 4)))
+        # stage_specs가 있으면 신규 필드 매핑, 없으면 None
+        spec = stage_specs[stage_index] if stage_specs else None
+        stages_out.append(Stage(
+            index=stage_index,
+            energy_target=round(target, 4),
+            valence=spec.valence if spec else None,
+            lufs_integrated=spec.lufs_integrated if spec else None,
+            lra=spec.lra if spec else None,
+            danceability_norm=spec.danceability_norm if spec else None,
+            instr_stem_ratio=spec.instr_stem_ratio if spec else None,
+            speech_median=spec.speech_median if spec else None,
+        ))
         if not members:
             continue
         stage_slot_targets = slot_targets[slot_cursor : slot_cursor + len(members)]

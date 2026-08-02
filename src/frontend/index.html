@@ -84,8 +84,52 @@
         </div>
 
         <div class="setting-block">
-          <span class="field-label">에너지 텐션 그래프 <small class="muted">(드래그로 조정 · 우클릭/길게눌러 구간 추가·제거, 최대 11구간)</small></span>
-          <div id="stage-editor" class="stage-editor"></div>
+          <div class="setting-head">
+            <span class="field-label">정서 궤적 <small class="muted">(에너지 × 밝기 — 점을 2D로 드래그)</small></span>
+            <div class="stage-count">
+              <button id="stage-minus" type="button" aria-label="구간 줄이기">−</button>
+              <span class="n" id="stage-n">5구간</span>
+              <button id="stage-plus" type="button" aria-label="구간 늘리기">+</button>
+            </div>
+          </div>
+
+          <div class="bg-toggle-row">
+            <div class="bg-toggle" id="bg-toggle">
+              <button type="button" data-bg="current">1) 현재</button>
+              <button type="button" data-bg="quadrant">2) 사분면 4색</button>
+              <button type="button" data-bg="emoi">3) EMOI-MAP풍</button>
+            </div>
+          </div>
+          <div class="map-stage">
+            <div class="map-wrap">
+              <div class="map-pad bg-current" id="map-pad">
+                <svg class="map-svg" id="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <!-- 그리드는 JS가 채움 -->
+                </svg>
+                <div class="quadrant-label q-tl">무겁고<br />격렬한</div>
+                <div class="quadrant-label q-tr">밝고<br />신나는</div>
+                <div class="quadrant-label q-bl">차분하고<br />가라앉은</div>
+                <div class="quadrant-label q-br">밝고<br />잔잔한</div>
+                <!-- stage-node들은 JS가 채움 -->
+              </div>
+              <span class="axis-label-x">밝기(정서) →</span>
+              <span class="axis-label-y">↑ 격렬함(에너지)</span>
+            </div>
+          </div>
+          <p class="map-hint">드래그해서 구간별 분위기를 조정하세요. 점 위에 커서를 올리면 현재 값이 보입니다.</p>
+
+          <div class="timebar-label-row"><span>시간 배분</span><span id="timebar-total-label"></span></div>
+          <div class="timebar" id="timebar"></div>
+          <div class="timebar-ticks" id="timebar-ticks"></div>
+          <p class="timebar-hint">동그란 버튼을 좌우로 끌면 구간별 재생시간을 조절할 수 있습니다. 최소 1분.</p>
+        </div>
+
+        <div class="setting-block">
+          <span class="field-label">고급 설정 <small class="muted">라우드니스 · 다이내믹 · 리듬감 · 보컬 비중 · 음절밀도</small></span>
+          <p class="options-guide">
+            설정한 시간 배분과 같은 구간에 대해 정서 궤적과 동일한 방식(구간별 점을 위아래로 드래그)으로 조절합니다. 값은 모두 0~100 백분위입니다.
+          </p>
+          <div id="param-graphs"></div>
         </div>
       </details>
 

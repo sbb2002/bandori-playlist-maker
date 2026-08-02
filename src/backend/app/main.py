@@ -29,7 +29,7 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -352,6 +352,14 @@ def _register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(RequestValidationError)
     async def _on_validation(_: Request, exc: RequestValidationError) -> JSONResponse:
         return _error_response(400, "INVALID_REQUEST", "요청 형식이 올바르지 않습니다.")
+
+    @app.exception_handler(HTTPException)
+    async def _on_http_exception(_: Request, exc: HTTPException) -> JSONResponse:
+        # HTTPException의 detail이 dict인 경우 {error: {code, message}} 형식으로 처리
+        if isinstance(exc.detail, dict) and "error" in exc.detail:
+            return JSONResponse(status_code=exc.status_code, content=exc.detail)
+        # 그 외의 경우는 기본 메시지로 처리
+        return _error_response(exc.status_code, "HTTP_ERROR", str(exc.detail) if exc.detail else "요청에 오류가 있습니다.")
 
     @app.exception_handler(MoodInterpretationError)
     async def _on_mood(_: Request, exc: MoodInterpretationError) -> JSONResponse:

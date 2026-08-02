@@ -71,6 +71,13 @@ class Stage:
 
     index: int
     energy_target: float
+    valence: float | None = None
+    lufs_integrated: float | None = None
+    lra: float | None = None
+    danceability_norm: float | None = None
+    instr_stem_ratio: float | None = None
+    speech_median: float | None = None
+    # TODO(data-pipeline): songs_master.csv에 컬럼 추가 후 domain/selection.py 매칭에 반영
 
 
 @dataclass(frozen=True)
@@ -83,6 +90,13 @@ class StageSpec:
 
     energy_target: float   # 0.0 ~ 1.0
     song_count: int        # >= 1
+    valence: float | None = None
+    lufs_integrated: float | None = None
+    lra: float | None = None
+    danceability_norm: float | None = None
+    instr_stem_ratio: float | None = None
+    speech_median: float | None = None
+    # TODO(data-pipeline): songs_master.csv에 컬럼 추가 후 domain/selection.py 매칭에 반영
 
 
 @dataclass(frozen=True)

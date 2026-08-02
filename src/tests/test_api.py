@@ -311,3 +311,115 @@ def test_refresh_data_succeeds_with_correct_token(client, monkeypatch):
     assert body["status"] == "ok"
     assert body["song_count"] == len(client.app.state.songs)
     assert calls == [True]
+
+
+# ── AI 모드 / 커스텀 모드 토글 테스트 ──────────────────────────────────────────────
+def test_custom_mode_requires_stages(client):
+    """커스텀 모드는 stages가 필수."""
+    r = client.post("/api/setlist", json={"mode": "custom"})
+    assert r.status_code == 400
+    assert r.json()["error"]["code"] == "INVALID_REQUEST"
+
+
+def test_custom_mode_builds_from_stages(client):
+    """커스텀 모드는 stages를 받아 직접 세트리스트 구성."""
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "stages": [{"energy": 0.2, "minutes": 5}, {"energy": 0.85, "minutes": 5}],
+        "target_minutes": 10,
+    })
+    assert r.status_code == 200
+    body = r.json()
+    assert body["params"]["interpretation_summary"] == ""
+    assert body["params"]["stage_count"] == 2
+    assert len(body["stages"]) == 2
+    assert body["stages"][0]["energy_target"] == 0.2
+    assert body["stages"][1]["energy_target"] == 0.85
+
+
+def test_custom_mode_ignores_previous_prompt(client):
+    """커스텀 모드는 previous_prompt를 무시(LLM 호출 없음)."""
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "previous_prompt": "불필요한 프롬프트",
+        "stages": [{"energy": 0.5, "song_count": 3}],
+    })
+    assert r.status_code == 200
+
+
+def test_custom_mode_new_stage_fields_echoed(client):
+    """커스텀 모드에서 신규 필드(valence 등)가 요청에 있으면 응답에도 있어야 한다."""
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "stages": [
+            {
+                "energy": 0.5,
+                "song_count": 2,
+                "valence": 0.7,
+                "lufs_integrated": -10.5,
+                "lra": 8.2,
+                "danceability_norm": 0.6,
+                "instr_stem_ratio": 0.8,
+                "speech_median": 0.1,
+            }
+        ],
+    })
+    assert r.status_code == 200
+    body = r.json()
+    stage0 = body["stages"][0]
+    assert stage0["valence"] == 0.7
+    assert stage0["lufs_integrated"] == -10.5
+    assert stage0["lra"] == 8.2
+    assert stage0["danceability_norm"] == 0.6
+    assert stage0["instr_stem_ratio"] == 0.8
+    assert stage0["speech_median"] == 0.1
+
+
+def test_custom_mode_skips_llm_interpreter(client, monkeypatch):
+    """커스텀 모드에서는 LLM interpreter.interpret이 호출되지 않아야 한다."""
+    calls = []
+
+    def fake_interpret(prompt, previous_prompt=None, energy_stats=None):
+        calls.append((prompt, previous_prompt))
+        raise RuntimeError("interpreter.interpret should not be called in custom mode")
+
+    monkeypatch.setattr(client.app.state, "interpreter", type("FakeInterpreter", (), {"interpret": fake_interpret})())
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "stages": [{"energy": 0.5, "song_count": 1}],
+    })
+    assert r.status_code == 200
+    assert calls == []  # interpreter.interpret 호출 안 됨
+
+
+def test_ai_mode_default_when_mode_omitted(client):
+    """mode 필드를 생략하면 기본값 'ai'로 동작(회귀 테스트)."""
+    r = client.post("/api/setlist", json={"prompt": "신나는 곡"})
+    assert r.status_code == 200
+    body = r.json()
+    assert "params" in body and "stages" in body
+
+
+def test_empty_prompt_still_invalid_in_ai_mode(client):
+    """AI 모드(기본)에서는 빈 prompt가 여전히 무효."""
+    r = client.post("/api/setlist", json={"prompt": "   "})
+    assert r.status_code == 400
+    assert r.json()["error"]["code"] == "INVALID_REQUEST"
+
+
+def test_missing_prompt_still_invalid_in_ai_mode(client):
+    """AI 모드(명시적)에서 prompt 없음은 무효."""
+    r = client.post("/api/setlist", json={"mode": "ai"})
+    assert r.status_code == 400
+    assert r.json()["error"]["code"] == "INVALID_REQUEST"
+
+
+def test_custom_mode_with_null_new_fields(client):
+    """커스텀 모드에서 신규 필드가 null이면 응답에도 null."""
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "stages": [{"energy": 0.5, "song_count": 1, "valence": None}],
+    })
+    assert r.status_code == 200
+    body = r.json()
+    assert body["stages"][0]["valence"] is None

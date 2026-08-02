@@ -91,58 +91,218 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
   font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums;
 }
 
-/* 시간×에너지 텐션 그래프 편집기 */
-.stage-editor { margin-top: 12px; }
+/* 2D 정서 지도 + 시간 배분 + 고급 설정 그래프 (새로운 UI) */
+/* 상단 컨트롤: 구간 수 */
+.stage-count { display: inline-flex; background: var(--card-2); border-radius: 999px; padding: 3px; gap: 2px; }
+.stage-count button {
+  border: none; background: none; color: var(--text); font-size: 0.85rem; font-weight: 700;
+  width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-family: inherit;
+}
+.stage-count button:hover:not(:disabled) { background: rgba(124,108,255,0.25); }
+.stage-count button:disabled { color: var(--muted); cursor: default; opacity: 0.5; }
+.stage-count .n { min-width: 46px; text-align: center; align-self: center; font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* 2D 정서 지도 배경 — 3가지 시안을 토글로 비교(.bg-toggle). 셋 다 시안 확정 전이라 나란히
+   실험용으로 남겨둔다. 최종 채택안이 정해지면 나머지 두 세트는 지운다. */
+.bg-toggle-row { display: flex; justify-content: center; margin-bottom: 12px; }
+.bg-toggle { display: inline-flex; background: var(--card-2); border-radius: 999px; padding: 3px; gap: 2px; }
+.bg-toggle button {
+  border: none; background: none; color: var(--muted); font-size: 0.76rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px; cursor: pointer; font-family: inherit;
+}
+.bg-toggle button.on { background: var(--accent); color: #fff; }
+.bg-toggle button:hover:not(.on) { background: rgba(255,255,255,0.08); color: var(--text); }
+
+.map-stage { display: flex; justify-content: center; }
+.map-wrap { position: relative; width: 100%; max-width: 420px; }
+.map-pad {
+  position: relative; width: 100%; aspect-ratio: 1 / 1;
+  border-radius: 12px; overflow: hidden; touch-action: none; user-select: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: background 0.2s ease;
+}
+/* 1안 — 현재(기존 프로토타입 그대로): accent/accent-2 코너 라디얼 */
+.map-pad.bg-current {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,108,196,0.16), transparent 60%),
+    radial-gradient(circle at 0% 0%, rgba(124,108,255,0.16), transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(255,108,196,0.07), transparent 60%),
+    radial-gradient(circle at 0% 100%, rgba(124,108,255,0.07), transparent 60%),
+    var(--card-2);
+}
+/* 2안 — 사분면 4색: 1사분면(우상)=노랑, 2사분면(좌상)=빨강, 3사분면(좌하)=파랑, 4사분면(우하)=초록 */
+.map-pad.bg-quadrant {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(250,204,21,0.32), transparent 62%),
+    radial-gradient(circle at 0% 0%, rgba(239,68,68,0.30), transparent 62%),
+    radial-gradient(circle at 0% 100%, rgba(59,130,246,0.30), transparent 62%),
+    radial-gradient(circle at 100% 100%, rgba(34,197,94,0.30), transparent 62%),
+    var(--card-2);
+}
+.map-pad.bg-quadrant .quadrant-label {
+  color: rgba(255,255,255,0.92); text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+/* 3안 — 형제 프로젝트 EMOI-MAP 톤(딥스페이스 + 별/성운)을 가볍게 재현한 예시. */
+.map-pad.bg-emoi {
+  background:
+    radial-gradient(1.6px 1.6px at 12% 18%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 26% 62%, #fff, transparent 100%),
+    radial-gradient(1.8px 1.8px at 40% 30%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 55% 76%, #fff, transparent 100%),
+    radial-gradient(1.4px 1.4px at 68% 22%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 78% 58%, #fff, transparent 100%),
+    radial-gradient(1.6px 1.6px at 88% 14%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 15% 85%, #fff, transparent 100%),
+    radial-gradient(1.4px 1.4px at 92% 80%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 48% 8%, #fff, transparent 100%),
+    radial-gradient(60% 45% at 70% 75%, rgba(80,120,200,0.28), transparent 70%),
+    radial-gradient(55% 40% at 20% 20%, rgba(130,70,180,0.24), transparent 70%),
+    radial-gradient(125% 95% at 50% 12%, #10141f 0%, #0a0b13 48%, #05050a 100%);
+}
+.map-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.map-grid { stroke: rgba(255,255,255,0.07); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.map-grid.mid { stroke: rgba(255,255,255,0.14); stroke-dasharray: 3 3; }
+.map-path {
+  fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.quadrant-label {
+  position: absolute; font-size: 0.68rem; color: var(--muted); line-height: 1.35;
+  pointer-events: none; max-width: 40%;
+}
+.quadrant-label.q-tl { top: 8px; left: 10px; text-align: left; }
+.quadrant-label.q-tr { top: 8px; right: 10px; text-align: right; }
+.quadrant-label.q-bl { bottom: 8px; left: 10px; text-align: left; }
+.quadrant-label.q-br { bottom: 8px; right: 10px; text-align: right; }
+
+.axis-label-x {
+  position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+  font-size: 0.72rem; color: var(--muted); white-space: nowrap;
+}
+.axis-label-y {
+  position: absolute; top: 50%; left: -12px; transform: translateY(-50%) rotate(-90deg);
+  font-size: 0.72rem; color: var(--muted); white-space: nowrap;
+}
+
+.stage-node {
+  position: absolute; z-index: 3; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+  border-radius: 50%; cursor: grab; touch-action: none;
+  background: var(--accent); border: 2px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+  transition: background 0.1s;
+}
+.stage-node.dragging { cursor: grabbing; background: var(--accent-2); z-index: 4; }
+.stage-node:hover, .stage-node.linked { background: var(--accent-2); }
+.node-val {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  font-size: 0.66rem; color: var(--text); background: rgba(0,0,0,0.6);
+  padding: 2px 6px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.12s;
+}
+.stage-node:hover .node-val, .stage-node.dragging .node-val { opacity: 1; }
+
+.map-hint { margin: 34px 0 0; font-size: 0.75rem; color: var(--muted); }
+
+/* 시간 배분 바 — 구간 경계를 직접 드래그(생산 코드의 bound-handle과 동일한 개념).
+   모든 그래프(정서 지도 + 아래 고급 설정 그래프들)가 이 경계를 공유한다. */
+.timebar-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; margin-bottom: 6px; }
+.timebar-label-row span { font-size: 0.75rem; color: var(--muted); }
+.timebar {
+  position: relative; height: 22px; border-radius: 999px;
+  background: var(--card-2); border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden; touch-action: none; user-select: none;
+}
+.timebar-track {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  opacity: 0.55;
+}
+.timebar-seg {
+  position: absolute; top: 0; height: 100%;
+  border-right: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  transition: background 0.12s;
+}
+.timebar-seg:last-child { border-right: none; }
+.timebar-seg.linked { background: rgba(255,255,255,0.16); }
+/* 구간 중심 숫자 — 정서 지도 점(.stage-node)과 같은 동그라미 배지 스타일로, 순번을
+   공유해 두 UI의 같은 구간을 한눈에 대응시킨다. */
+.timebar-num {
+  position: absolute; top: 50%; z-index: 1;
+  transform: translate(-50%, -50%);
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  font-size: 0.62rem; font-weight: 700; color: #fff;
+  pointer-events: none; font-variant-numeric: tabular-nums;
+  transition: background 0.12s;
+}
+.timebar-num.linked { background: var(--accent-2); }
+.timebar-handle {
+  position: absolute; z-index: 2; top: 0; height: 100%; width: 22px; margin-left: -11px;
+  cursor: ew-resize; touch-action: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.timebar-handle::after {
+  content: ""; width: 15px; height: 15px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--accent-2);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.5);
+  transition: border-color 0.12s, transform 0.12s;
+}
+.timebar-handle:hover::after { transform: scale(1.1); }
+.timebar-handle.dragging::after { border-color: var(--accent); transform: scale(1.2); }
+.timebar-ticks { position: relative; height: 16px; margin-top: 4px; }
+.timebar-tick {
+  position: absolute; top: 0; transform: translateX(-50%);
+  font-size: 0.68rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.timebar-unit { position: absolute; right: -14px; top: 0; font-size: 0.68rem; color: var(--muted); }
+.timebar-hint { margin: 8px 0 0; font-size: 0.72rem; color: var(--muted); }
+
+/* 고급 설정 — 접이식이 아니라 항상 펼쳐둠(이 화면 전체가 이미 세부설정 진입 화면이라
+   한 번 더 접을 필요가 없음). 나머지 지표는 기존 시간구간 그래프 UI를 그대로 재사용. */
+.param-graph { margin-bottom: 20px; }
+.param-graph:last-child { margin-bottom: 0; }
+.param-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.param-head strong { font-size: 0.85rem; }
+.param-head .param-unit { font-size: 0.72rem; color: var(--muted); }
 .plot-row { display: flex; gap: 6px; }
 .y-axis {
-  width: 40px; flex: 0 0 40px; display: flex; flex-direction: column;
+  width: 34px; flex: 0 0 34px; display: flex; flex-direction: column;
   justify-content: space-between; align-items: flex-end; padding: 2px 4px 2px 0;
 }
-.y-tick { font-size: 0.68rem; color: var(--muted); }
-.y-axis-title { writing-mode: vertical-rl; font-size: 0.72rem; color: var(--muted); }
+.y-tick { font-size: 0.65rem; color: var(--muted); }
 .plot {
-  position: relative; flex: 1; height: 180px; background: var(--card-2);
+  position: relative; flex: 1; height: 84px; background: var(--card-2);
   border-left: 1px solid rgba(255,255,255,0.16); border-bottom: 1px solid rgba(255,255,255,0.16);
   border-radius: 0 8px 0 0; overflow: visible; touch-action: none; user-select: none;
 }
 .graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .grid { stroke: rgba(255,255,255,0.06); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .grid-edge { stroke: rgba(255,255,255,0.12); }
-.graph-area { fill: rgba(124,108,255,0.18); stroke: none; }
-.graph-curve { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; }
-.energy-dot {
-  position: absolute; z-index: 3; width: 20px; height: 20px; margin: -10px 0 0 -10px;
+.grid-boundary { stroke: rgba(255,255,255,0.14); stroke-dasharray: 3 3; }
+.graph-area { fill: rgba(124,108,255,0.16); stroke: none; }
+.graph-curve { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+/* 정서 지도(.stage-node)·시간 배분 바(.timebar-num)와 같은 동그라미 순번 배지 스타일 */
+.param-dot {
+  position: absolute; z-index: 3; width: 18px; height: 18px; margin: -9px 0 0 -9px;
   border-radius: 50%; background: var(--accent); border: 2px solid #fff;
-  cursor: ns-resize; box-shadow: 0 2px 6px rgba(0,0,0,0.45); touch-action: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums;
+  cursor: ns-resize; box-shadow: 0 2px 6px rgba(0,0,0,0.4); touch-action: none;
 }
-.dot-val {
-  position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
-  font-size: 0.68rem; color: var(--text); background: rgba(0,0,0,0.55);
+.param-dot.dragging { background: var(--accent-2); }
+.param-dot-val {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  font-size: 0.64rem; color: var(--text); background: rgba(0,0,0,0.6);
   padding: 1px 5px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.12s;
 }
-.bound-handle {
-  position: absolute; z-index: 2; top: 0; height: 100%; width: 18px; margin-left: -9px;
-  cursor: ew-resize; touch-action: none;
-}
-.bound-handle::before {
-  content: ""; position: absolute; left: 50%; top: 0; height: 100%; width: 2px;
-  transform: translateX(-50%); background: rgba(255,108,196,0.55);
-}
-.bound-handle::after {
-  content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px;
-  transform: translate(-50%,-50%) rotate(45deg);
-  background: var(--accent-2); border: 2px solid #fff; border-radius: 2px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-}
-.energy-dot.dragging { background: var(--accent-2); }
-.bound-handle.dragging::after { background: var(--accent); }
-.x-axis-row { display: flex; gap: 6px; margin-top: 4px; }
-.x-spacer { width: 40px; flex: 0 0 40px; }
-.x-axis { position: relative; flex: 1; height: 16px; }
-.x-tick { position: absolute; top: 0; transform: translateX(-50%); font-size: 0.68rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.x-unit { position: absolute; right: -16px; top: 0; font-size: 0.68rem; color: var(--muted); }
-.graph-hint { margin-top: 8px; font-size: 0.75rem; color: var(--muted); }
-.graph-hint.notice { color: var(--accent); font-weight: 600; }
+.param-dot:hover .param-dot-val, .param-dot.dragging .param-dot-val { opacity: 1; }
 
 .field-hint { font-size: 0.75rem; color: var(--muted); min-height: 1em; }
 .field-hint.notice { color: var(--warn); font-weight: 600; }

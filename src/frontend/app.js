@@ -174,7 +174,16 @@ function showError(message) {
 
 // ── 설정: 밴드 필터 · 단계 직접 지정 (§5-1) ────────────────────────────────────
 const bandListEl = $("band-list");
-const stageEditorEl = $("stage-editor");
+const mapPadEl = $("map-pad");
+const mapSvgEl = $("map-svg");
+const timebarEl = $("timebar");
+const timebarTicksEl = $("timebar-ticks");
+const timebarTotalLabelEl = $("timebar-total-label");
+const stageNEl = $("stage-n");
+const paramGraphsEl = $("param-graphs");
+const bgToggleEl = $("bg-toggle");
+const stagePlusBtn = $("stage-plus");
+const stageMinusBtn = $("stage-minus");
 let stageTouched = false; // 사용자가 그래프를 조정했는지 — 조정 전엔 LLM 에너지 자동 사용
 // 사용자가 직접 건드린 설정만 요청에 override로 싣는다. 안 건드린 값은 생략 → LLM이 결정하고,
 // 응답 후 그 값을 UI에 '반영'만 한다(다음 요청에 강제되지 않게 — 밴드 필터 패턴과 동일).
@@ -237,18 +246,34 @@ $("band-clear").addEventListener("click", () => {
   document.querySelectorAll(".band-cb:checked").forEach((c) => (c.checked = false));
 });
 
-// 시간×에너지 텐션 그래프 편집기 (§5-1a). 점=에너지(상하 드래그), 경계=구간 길이(좌우 드래그).
+// 2D 정서 지도 + 시간 배분 + 고급 설정 편집기 (§5-1a)
 const SVG_NS = "http://www.w3.org/2000/svg";
-const PAD_TOP = 10;      // 그래프 상하 여백(뷰박스 0~100 기준)
-const PAD_BOTTOM = 12;
-const MIN_WIDTH = 0.08;  // 구간 최소 폭(전체 대비)
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+const MAP_PAD = 8; // 지도 여백(%)
+const toMapPct = (frac) => MAP_PAD + frac * (100 - MAP_PAD * 2);
+const fromMapPct = (pct) => clamp01((pct - MAP_PAD) / (100 - MAP_PAD * 2));
 const MIN_SEGMENTS = 2;  // 구간 최소 개수
-const MAX_SEGMENTS = 11; // 구간 최대 개수(= 분리선 최대 10개, 핫픽스 제안2)
-const DEFAULT_STAGE_COUNT = 3; // 단계 수 텍스트박스 제거 후 기본 구간 수
-const LONGPRESS_MS = 1000;     // 모바일 길게누름(1초) → 구간 추가/제거 메뉴 (우클릭 대체)
-const GRAPH_HINT_TEXT = "● 점 위·아래 = 에너지  ·  ◆ 경계 좌·우 = 구간 길이  ·  우클릭/길게눌러 구간 추가·제거";
+const MAX_SEGMENTS = 11; // 구간 최대 개수
+const DEFAULT_STAGE_COUNT = 3; // 기본 구간 수
+const MIN_WIDTH_MIN = 1; // 구간 최소 길이(분)
 
-let stageModel = null; // { totalMinutes, segments: [{energy(0~1), width(합=1)}] }
+// 고급 설정 그래프 5개
+const PARAM_DEFS = [
+  { key: "lufs_integrated", label: "라우드니스", col: "m4-lufs_integrated" },
+  { key: "lra", label: "다이내믹 범위", col: "m4-lra" },
+  { key: "danceability_norm", label: "리듬감", col: "m7-danceability_norm" },
+  { key: "instr_stem_ratio", label: "보컬/악기 비중", col: "m9-instr_stem_ratio" },
+  { key: "speech_median", label: "음절밀도", col: "m11-speech_median" },
+];
+
+// 고급 설정 그래프용 여백
+const PAD_TOP = 10;      // 그래프 상하 여백(뷰박스 0~100 기준)
+const PAD_BOTTOM = 6;
+const valToY = (v) => PAD_TOP + (1 - v) * (100 - PAD_TOP - PAD_BOTTOM);
+const yToVal = (fracY) => clamp01(1 - (fracY * 100 - PAD_TOP) / (100 - PAD_TOP - PAD_BOTTOM));
+
+// stageModel: { totalMinutes, segments: [{energy, width, valence, lufs_integrated, lra, danceability_norm, instr_stem_ratio, speech_median}] }
+let stageModel = null;
 
 // 백엔드도 180분(3시간) 하드캡을 두지만(routes.py _MAX_TARGET_MINUTES), 여기서도 넘긴 순간
 // 180으로 되돌리고 안내한다(number input의 native max는 스핀 버튼만 막고 타이핑은 안 막음).
@@ -299,18 +324,13 @@ function renderSettingsTypeFilter() {
 }
 renderSettingsTypeFilter();
 
-function initStageModel(n = DEFAULT_STAGE_COUNT) {
-  const count = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, n));
-  const total = clampInt($("target-minutes").value, 10, 180, 60);
-  const segments = [];
-  for (let i = 0; i < count; i++) {
-    segments.push({ energy: +(0.3 + (0.55 * i) / (count - 1)).toFixed(2), width: 1 / count });
-  }
-  stageModel = { totalMinutes: total, segments };
+// 2D 정서 지도 + 시간 배분 + 고급 설정 그래프들
+function centers() {
+  if (!stageModel) return { cum: [0], mid: [] };
+  const cum = [0];
+  stageModel.segments.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
+  return { cum, mid: stageModel.segments.map((s, i) => (cum[i] + cum[i + 1]) / 2) };
 }
-
-function energyToY(energy) { return PAD_TOP + (1 - energy) * (100 - PAD_TOP - PAD_BOTTOM); }
-function yToEnergy(frac) { return clamp01(1 - (frac * 100 - PAD_TOP) / (100 - PAD_TOP - PAD_BOTTOM)); }
 
 function smoothPath(pts) {
   let d = `M ${pts[0].x} ${pts[0].y}`;
@@ -323,105 +343,362 @@ function smoothPath(pts) {
   return d;
 }
 
+function initStageModel(n = DEFAULT_STAGE_COUNT) {
+  const count = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, n));
+  const total = clampInt($("target-minutes").value, 10, 180, 60);
+  const segments = [];
+  for (let i = 0; i < count; i++) {
+    segments.push({
+      width: 1 / count,
+      valence: 0.5,
+      energy: +(0.3 + (0.55 * i) / (count - 1)).toFixed(2),
+      lufs_integrated: 0.5,
+      lra: 0.5,
+      danceability_norm: 0.5,
+      instr_stem_ratio: 0.5,
+      speech_median: 0.5,
+    });
+  }
+  stageModel = { totalMinutes: total, segments };
+}
+
 function renderStageGraph() {
   if (!stageModel) initStageModel();
-  stageEditorEl.replaceChildren();
 
-  // 축 프레임: [Y축 라벨][플롯] / [여백][X축 시간 라벨]
-  const plotRow = elDiv("plot-row");
-  const yAxis = elDiv("y-axis");
-  const yTop = elDiv("y-tick"); yTop.textContent = "높음";
-  const yTitle = elDiv("y-axis-title"); yTitle.textContent = "에너지";
-  const yBot = elDiv("y-tick"); yBot.textContent = "낮음";
-  yAxis.append(yTop, yTitle, yBot);
+  function buildAllGraphics() {
+    buildMap();
+    buildTimebar();
+    buildParamGraphs();
+    updateAllGraphics();
+  }
 
-  const plot = elDiv("plot");
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("viewBox", "0 0 100 100");
-  svg.setAttribute("preserveAspectRatio", "none");
-  svg.setAttribute("class", "graph-svg");
-  const gridG = document.createElementNS(SVG_NS, "g");
-  [0, 0.25, 0.5, 0.75, 1].forEach((e) => {
-    const ln = document.createElementNS(SVG_NS, "line");
-    const y = energyToY(e);
-    ln.setAttribute("x1", "0"); ln.setAttribute("x2", "100");
-    ln.setAttribute("y1", String(y)); ln.setAttribute("y2", String(y));
-    ln.setAttribute("class", e === 0 || e === 1 ? "grid grid-edge" : "grid");
-    gridG.append(ln);
-  });
-  const area = document.createElementNS(SVG_NS, "path"); area.setAttribute("class", "graph-area");
-  const curve = document.createElementNS(SVG_NS, "path"); curve.setAttribute("class", "graph-curve");
-  svg.append(gridG, area, curve);
-  plot.append(svg);
+  function updateAllGraphics() {
+    updateMap();
+    updateTimebar();
+    updateAllParamCharts();
+    stageNEl.textContent = `${stageModel.segments.length}구간`;
+    stageMinusBtn.disabled = stageModel.segments.length <= MIN_SEGMENTS;
+    stagePlusBtn.disabled = stageModel.segments.length >= MAX_SEGMENTS;
+  }
 
-  const dots = stageModel.segments.map(() => {
-    const dot = elDiv("energy-dot");
-    dot.append(elDiv("dot-val"));
-    return plot.appendChild(dot);
-  });
-  const handles = stageModel.segments.slice(1).map(() => plot.appendChild(elDiv("bound-handle")));
-  plotRow.append(yAxis, plot);
+  // ── 2D 정서 지도 ──────────────────────────────────────────────────────────
+  let mapNodeEls = [];
 
-  const xRow = elDiv("x-axis-row");
-  xRow.append(elDiv("x-spacer"));
-  const xAxis = elDiv("x-axis");
-  xRow.append(xAxis);
+  function buildMap() {
+    mapSvgEl.innerHTML = "";
+    const gridG = document.createElementNS(SVG_NS, "g");
+    [0, 25, 50, 75, 100].forEach((p) => {
+      const v = document.createElementNS(SVG_NS, "line");
+      v.setAttribute("x1", p); v.setAttribute("x2", p); v.setAttribute("y1", 0); v.setAttribute("y2", 100);
+      v.setAttribute("class", "map-grid" + (p === 50 ? " mid" : ""));
+      const h = document.createElementNS(SVG_NS, "line");
+      h.setAttribute("y1", p); h.setAttribute("y2", p); h.setAttribute("x1", 0); h.setAttribute("x2", 100);
+      h.setAttribute("class", "map-grid" + (p === 50 ? " mid" : ""));
+      gridG.append(v, h);
+    });
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("class", "map-path");
+    path.setAttribute("id", "map-path-line");
+    const defs = document.createElementNS(SVG_NS, "defs");
+    const grad = document.createElementNS(SVG_NS, "linearGradient");
+    grad.setAttribute("id", "path-grad");
+    grad.setAttribute("x1", "0%"); grad.setAttribute("x2", "100%");
+    const s1 = document.createElementNS(SVG_NS, "stop");
+    s1.setAttribute("offset", "0%"); s1.setAttribute("stop-color", "#7c6cff");
+    const s2 = document.createElementNS(SVG_NS, "stop");
+    s2.setAttribute("offset", "100%"); s2.setAttribute("stop-color", "#ff6cc4");
+    grad.append(s1, s2);
+    defs.append(grad);
+    path.setAttribute("stroke", "url(#path-grad)");
+    mapSvgEl.append(defs, gridG, path);
 
-  const hint = elDiv("graph-hint");
-  hint.textContent = GRAPH_HINT_TEXT;
-  stageEditorEl.append(plotRow, xRow, hint);
+    mapPadEl.querySelectorAll(".stage-node").forEach((n) => n.remove());
+    mapNodeEls = stageModel.segments.map((s, i) => {
+      const node = document.createElement("div");
+      node.className = "stage-node";
+      node.textContent = String(i + 1);
+      const val = document.createElement("span");
+      val.className = "node-val";
+      node.append(val);
+      mapPadEl.appendChild(node);
+      bindMapDrag(node, i);
+      node.addEventListener("pointerenter", () => setLinked(i));
+      node.addEventListener("pointerleave", () => setLinked(-1));
+      return node;
+    });
+  }
 
-  // 우클릭(데스크톱)·길게누름(모바일)으로 구간 추가/제거(핫픽스 제안2).
-  attachGraphMenu(plot);
+  function toXY(s) {
+    return { x: toMapPct(s.valence), y: toMapPct(1 - s.energy) };
+  }
 
-  function update() {
-    const segs = stageModel.segments, n = segs.length, total = stageModel.totalMinutes;
-    const cum = [0];
-    segs.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
-    const centers = segs.map((s, i) => (cum[i] + cum[i + 1]) / 2);
+  function updateMap() {
+    const path = document.getElementById("map-path-line");
+    const pts = stageModel.segments.map(toXY);
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) d += ` L ${pts[i].x} ${pts[i].y}`;
+    path.setAttribute("d", d);
 
-    const pts = [{ x: 0, y: energyToY(segs[0].energy) }];
-    segs.forEach((s, i) => pts.push({ x: centers[i] * 100, y: energyToY(s.energy) }));
-    pts.push({ x: 100, y: energyToY(segs[n - 1].energy) });
+    stageModel.segments.forEach((s, i) => {
+      const { x, y } = toXY(s);
+      const node = mapNodeEls[i];
+      node.style.left = `${x}%`;
+      node.style.top = `${y}%`;
+      node.querySelector(".node-val").textContent =
+        `밝기 ${Math.round(s.valence * 100)} · 에너지 ${Math.round(s.energy * 100)}`;
+    });
+  }
+
+  function bindMapDrag(node, i) {
+    node.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      node.setPointerCapture(e.pointerId);
+      node.classList.add("dragging");
+      const move = (ev) => {
+        stageTouched = true;
+        const r = mapPadEl.getBoundingClientRect();
+        const fx = fromMapPct(((ev.clientX - r.left) / r.width) * 100);
+        const fy = fromMapPct(((ev.clientY - r.top) / r.height) * 100);
+        stageModel.segments[i].valence = fx;
+        stageModel.segments[i].energy = clamp01(1 - fy);
+        updateMap();
+      };
+      const up = () => {
+        node.classList.remove("dragging");
+        node.removeEventListener("pointermove", move);
+        node.removeEventListener("pointerup", up);
+      };
+      node.addEventListener("pointermove", move);
+      node.addEventListener("pointerup", up);
+    });
+  }
+
+  // ── 시간 배분 바 ──────────────────────────────────────────────────────────
+  let timebarSegEls = [], timebarHandleEls = [], timebarNumEls = [];
+
+  function buildTimebar() {
+    timebarEl.innerHTML = "";
+    const track = document.createElement("div");
+    track.className = "timebar-track";
+    timebarEl.appendChild(track);
+
+    timebarSegEls = stageModel.segments.map((_, i) => {
+      const seg = document.createElement("div");
+      seg.className = "timebar-seg";
+      seg.addEventListener("pointerenter", () => setLinked(i));
+      seg.addEventListener("pointerleave", () => setLinked(-1));
+      timebarEl.appendChild(seg);
+      return seg;
+    });
+    timebarNumEls = stageModel.segments.map((_, i) => {
+      const num = document.createElement("span");
+      num.className = "timebar-num";
+      num.textContent = String(i + 1);
+      timebarEl.appendChild(num);
+      return num;
+    });
+    timebarHandleEls = stageModel.segments.slice(1).map((_, j) => {
+      const handle = document.createElement("div");
+      handle.className = "timebar-handle";
+      bindBoundaryDrag(handle, j);
+      timebarEl.appendChild(handle);
+      return handle;
+    });
+
+    timebarTicksEl.innerHTML = "";
+    const timebarTickEls = stageModel.segments.map((_, i) => {
+      const tick = document.createElement("span");
+      tick.className = "timebar-tick";
+      timebarTicksEl.appendChild(tick);
+      return tick;
+    });
+    const lastTick = document.createElement("span");
+    lastTick.className = "timebar-tick";
+    timebarTicksEl.appendChild(lastTick);
+    timebarTickEls.push(lastTick);
+    const unit = document.createElement("span");
+    unit.className = "timebar-unit";
+    unit.textContent = "분";
+    timebarTicksEl.appendChild(unit);
+  }
+
+  function updateTimebar() {
+    timebarTotalLabelEl.textContent = `총 ${stageModel.totalMinutes}분`;
+    const { cum, mid } = centers();
+    stageModel.segments.forEach((s, i) => {
+      const seg = timebarSegEls[i];
+      seg.style.left = `${cum[i] * 100}%`;
+      seg.style.width = `${s.width * 100}%`;
+      timebarNumEls[i].style.left = `${mid[i] * 100}%`;
+    });
+    timebarHandleEls.forEach((handle, j) => { handle.style.left = `${cum[j + 1] * 100}%`; });
+
+    const timebarTickEls = timebarTicksEl.querySelectorAll(".timebar-tick");
+    cum.forEach((c, i) => {
+      const tick = timebarTickEls[i];
+      tick.style.left = `${c * 100}%`;
+      tick.style.transform = i === 0 ? "translateX(0)" : i === cum.length - 1 ? "translateX(-100%)" : "translateX(-50%)";
+      tick.textContent = String(Math.round(c * stageModel.totalMinutes));
+    });
+  }
+
+  function bindBoundaryDrag(handle, j) {
+    handle.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add("dragging");
+      const move = (ev) => {
+        stageTouched = true;
+        const minFrac = MIN_WIDTH_MIN / stageModel.totalMinutes;
+        const r = timebarEl.getBoundingClientRect();
+        const fx = clamp01((ev.clientX - r.left) / r.width);
+        const segs = stageModel.segments;
+        const leftFixed = segs.slice(0, j).reduce((a, s) => a + s.width, 0);
+        const rightFixed = segs.slice(j + 2).reduce((a, s) => a + s.width, 0);
+        const b = Math.max(leftFixed + minFrac, Math.min(fx, 1 - rightFixed - minFrac));
+        segs[j].width = b - leftFixed;
+        segs[j + 1].width = 1 - rightFixed - b;
+        updateAllParamCharts();
+        updateTimebar();
+      };
+      const up = () => {
+        handle.classList.remove("dragging");
+        handle.removeEventListener("pointermove", move);
+        handle.removeEventListener("pointerup", up);
+      };
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", up);
+    });
+  }
+
+  function setLinked(i) {
+    mapNodeEls.forEach((n, j) => n.classList.toggle("linked", j === i));
+    timebarSegEls.forEach((seg, j) => seg.classList.toggle("linked", j === i));
+    timebarNumEls.forEach((num, j) => num.classList.toggle("linked", j === i));
+  }
+
+  // ── 고급 설정 그래프 ──────────────────────────────────────────────────────
+  let paramCharts = [];
+
+  function buildParamGraphs() {
+    paramGraphsEl.innerHTML = "";
+    paramCharts = PARAM_DEFS.map(({ key, label, col }) => {
+      const wrap = document.createElement("div");
+      wrap.className = "param-graph";
+
+      const head = document.createElement("div");
+      head.className = "param-head";
+      const strong = document.createElement("strong");
+      strong.textContent = label;
+      const unit = document.createElement("span");
+      unit.className = "param-unit";
+      unit.textContent = col;
+      head.append(strong, unit);
+
+      const plotRow = document.createElement("div");
+      plotRow.className = "plot-row";
+      const yAxis = document.createElement("div");
+      yAxis.className = "y-axis";
+      const yTop = document.createElement("span"); yTop.className = "y-tick"; yTop.textContent = "100";
+      const yBot = document.createElement("span"); yBot.className = "y-tick"; yBot.textContent = "0";
+      yAxis.append(yTop, yBot);
+
+      const plot = document.createElement("div");
+      plot.className = "plot";
+      const svg = document.createElementNS(SVG_NS, "svg");
+      svg.setAttribute("viewBox", "0 0 100 100");
+      svg.setAttribute("preserveAspectRatio", "none");
+      svg.setAttribute("class", "graph-svg");
+      const gridG = document.createElementNS(SVG_NS, "g");
+      [0, 0.5, 1].forEach((v) => {
+        const ln = document.createElementNS(SVG_NS, "line");
+        const y = valToY(v);
+        ln.setAttribute("x1", "0"); ln.setAttribute("x2", "100");
+        ln.setAttribute("y1", String(y)); ln.setAttribute("y2", String(y));
+        ln.setAttribute("class", v === 0 || v === 1 ? "grid grid-edge" : "grid");
+        gridG.append(ln);
+      });
+      const boundaryG = document.createElementNS(SVG_NS, "g");
+      const boundaryLines = stageModel.segments.slice(1).map(() => {
+        const ln = document.createElementNS(SVG_NS, "line");
+        ln.setAttribute("y1", "0"); ln.setAttribute("y2", "100");
+        ln.setAttribute("class", "grid-boundary");
+        boundaryG.append(ln);
+        return ln;
+      });
+      const area = document.createElementNS(SVG_NS, "path"); area.setAttribute("class", "graph-area");
+      const curve = document.createElementNS(SVG_NS, "path"); curve.setAttribute("class", "graph-curve");
+      svg.append(gridG, boundaryG, area, curve);
+      plot.append(svg);
+
+      const dotEls = stageModel.segments.map((_, i) => {
+        const dot = document.createElement("div");
+        dot.className = "param-dot";
+        dot.append(document.createTextNode(String(i + 1)));
+        const val = document.createElement("span");
+        val.className = "param-dot-val";
+        dot.append(val);
+        plot.appendChild(dot);
+        return dot;
+      });
+
+      plotRow.append(yAxis, plot);
+      wrap.append(head, plotRow);
+      paramGraphsEl.appendChild(wrap);
+
+      const chart = { key, plot, curve, area, boundaryLines, dotEls };
+      dotEls.forEach((dot, i) => bindParamDotDrag(dot, chart, i));
+      return chart;
+    });
+  }
+
+  function updateParamChart(chart) {
+    const { key, curve, area, boundaryLines, dotEls } = chart;
+    const { cum, mid } = centers();
+    const pts = [{ x: 0, y: valToY(stageModel.segments[0][key]) }];
+    stageModel.segments.forEach((s, i) => pts.push({ x: mid[i] * 100, y: valToY(s[key]) }));
+    pts.push({ x: 100, y: valToY(stageModel.segments[stageModel.segments.length - 1][key]) });
     const d = smoothPath(pts);
     curve.setAttribute("d", d);
     area.setAttribute("d", `${d} L 100 100 L 0 100 Z`);
 
-    dots.forEach((dot, i) => {
-      dot.style.left = `${centers[i] * 100}%`;
-      dot.style.top = `${energyToY(segs[i].energy)}%`;
-      dot.firstChild.textContent = segs[i].energy.toFixed(2);
+    dotEls.forEach((dot, i) => {
+      dot.style.left = `${mid[i] * 100}%`;
+      dot.style.top = `${valToY(stageModel.segments[i][key])}%`;
+      dot.querySelector(".param-dot-val").textContent = Math.round(stageModel.segments[i][key] * 100);
     });
-    handles.forEach((h, j) => { h.style.left = `${cum[j + 1] * 100}%`; });
-
-    // X축 시간 눈금(구간 경계 = 누적 분)
-    xAxis.replaceChildren();
-    cum.forEach((c, i) => {
-      const tick = elDiv("x-tick");
-      tick.style.left = `${c * 100}%`;
-      if (i === 0) tick.style.transform = "translateX(0)";
-      else if (i === cum.length - 1) tick.style.transform = "translateX(-100%)";
-      tick.textContent = String(Math.round(c * total));
-      xAxis.append(tick);
+    boundaryLines.forEach((ln, j) => {
+      ln.setAttribute("x1", String(cum[j + 1] * 100));
+      ln.setAttribute("x2", String(cum[j + 1] * 100));
     });
-    const unit = elDiv("x-unit"); unit.textContent = "분"; xAxis.append(unit);
   }
 
-  dots.forEach((dot, i) => bindDrag(dot, plot, (fx, fy) => {
-    stageModel.segments[i].energy = yToEnergy(fy);
-    update();
-  }));
-  handles.forEach((handle, j) => bindDrag(handle, plot, (fx) => {
-    const segs = stageModel.segments;
-    const leftFixed = segs.slice(0, j).reduce((a, s) => a + s.width, 0);
-    const rightFixed = segs.slice(j + 2).reduce((a, s) => a + s.width, 0);
-    const b = clamp(fx, leftFixed + MIN_WIDTH, 1 - rightFixed - MIN_WIDTH);
-    segs[j].width = b - leftFixed;
-    segs[j + 1].width = 1 - rightFixed - b;
-    update();
-  }));
+  function updateAllParamCharts() { paramCharts.forEach(updateParamChart); }
 
-  update();
+  function bindParamDotDrag(dot, chart, i) {
+    dot.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      dot.setPointerCapture(e.pointerId);
+      dot.classList.add("dragging");
+      const move = (ev) => {
+        stageTouched = true;
+        const r = chart.plot.getBoundingClientRect();
+        const fy = clamp01((ev.clientY - r.top) / r.height);
+        stageModel.segments[i][chart.key] = yToVal(fy);
+        updateParamChart(chart);
+      };
+      const up = () => {
+        dot.classList.remove("dragging");
+        dot.removeEventListener("pointermove", move);
+        dot.removeEventListener("pointerup", up);
+      };
+      dot.addEventListener("pointermove", move);
+      dot.addEventListener("pointerup", up);
+    });
+  }
+
+  // 모든 내부 함수·변수 정의 후, 마지막에 그래프 렌더링 호출
+  buildAllGraphics();
 }
 
 function bindDrag(node, graph, onMove) {
@@ -430,7 +707,7 @@ function bindDrag(node, graph, onMove) {
     node.setPointerCapture(e.pointerId);
     node.classList.add("dragging");
     const move = (ev) => {
-      stageTouched = true; // 사용자가 그래프를 조정함 → 이후 요청에 이 아크를 적용
+      stageTouched = true;
       const r = graph.getBoundingClientRect();
       onMove(clamp01((ev.clientX - r.left) / r.width), clamp01((ev.clientY - r.top) / r.height));
     };
@@ -450,146 +727,15 @@ function collectStages() {
   return stageModel.segments.map((s) => ({
     energy: +s.energy.toFixed(3),
     minutes: Math.max(1, Math.round(s.width * total)),
+    valence: +s.valence.toFixed(3),
+    lufs_integrated: +s.lufs_integrated.toFixed(3),
+    lra: +s.lra.toFixed(3),
+    danceability_norm: +s.danceability_norm.toFixed(3),
+    instr_stem_ratio: +s.instr_stem_ratio.toFixed(3),
+    speech_median: +s.speech_median.toFixed(3),
   }));
 }
 
-// ── 에너지 그래프 구간 추가/제거 + 컨텍스트 메뉴 (핫픽스 제안2) ───────────────────────────
-// 우클릭(데스크톱)·길게누름(모바일)으로 그래프 빈 곳에 구간을 추가하거나 마름모 포인트의 구간을
-// 제거한다. 구간 최소 2·최대 11(= 분리선 최대 10). 조작 시 stageTouched=true로 사용자 아크로 전환.
-let graphMenuEl = null;
-
-function closeGraphMenu() {
-  if (graphMenuEl) { graphMenuEl.remove(); graphMenuEl = null; }
-}
-
-function openGraphMenu(clientX, clientY, items) {
-  closeGraphMenu();
-  const menu = elDiv("graph-menu");
-  for (const it of items) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "graph-menu-item";
-    b.textContent = it.label;
-    if (it.disabled) b.disabled = true;
-    else b.addEventListener("click", () => { closeGraphMenu(); it.onClick(); });
-    menu.appendChild(b);
-  }
-  menu.style.visibility = "hidden"; // 측정 후 위치 보정
-  document.body.appendChild(menu);
-  const r = menu.getBoundingClientRect();
-  menu.style.left = `${Math.max(8, Math.min(clientX, window.innerWidth - r.width - 8))}px`;
-  menu.style.top = `${Math.max(8, Math.min(clientY, window.innerHeight - r.height - 8))}px`;
-  menu.style.visibility = "";
-  graphMenuEl = menu;
-}
-
-// 바깥 상호작용으로 메뉴 닫기(캡처 단계 — 메뉴 내부 클릭은 contains로 제외).
-document.addEventListener("pointerdown", (e) => {
-  if (graphMenuEl && !graphMenuEl.contains(e.target)) closeGraphMenu();
-}, true);
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeGraphMenu(); });
-window.addEventListener("scroll", () => closeGraphMenu(), true);
-
-// 모바일 길게누름 상태. 캡처된 dot 드래그 중에도 이동을 감지하려 document(capture)에서 취소한다.
-let lpTimer = null;
-let lpStartXY = null;
-function clearGraphLongPress() { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } lpStartXY = null; }
-document.addEventListener("pointermove", (e) => {
-  if (lpStartXY && Math.hypot(e.clientX - lpStartXY.x, e.clientY - lpStartXY.y) > 10) clearGraphLongPress();
-}, true);
-document.addEventListener("pointerup", clearGraphLongPress, true);
-document.addEventListener("pointercancel", clearGraphLongPress, true);
-
-// plot에 우클릭·길게누름 핸들러를 건다. renderStageGraph가 매 렌더에 새 plot으로 호출하므로 이전
-// plot 리스너는 함께 폐기된다(누수 없음). 문서 레벨 리스너는 위에서 1회만 등록.
-function attachGraphMenu(plot) {
-  // 어느 좌표에서 우클릭/길게눌러도 두 옵션을 모두 제공(사용자 검수). 상한/하한은 각 함수가
-  // showGraphNotice로 안내하므로 항상 enabled로 둔다. 추가=클릭 x, 제거=클릭 최근접 포인트 기준.
-  const openFor = (clientX, clientY) => {
-    const rect = plot.getBoundingClientRect();
-    const fx = clamp01((clientX - rect.left) / rect.width);
-    openGraphMenu(clientX, clientY, [
-      { label: "여기에 에너지 단계 추가", onClick: () => addSegmentAt(fx) },
-      { label: "이 에너지 단계를 제거", onClick: () => removeSegmentAt(nearestSegmentIndex(fx)) },
-    ]);
-  };
-  plot.addEventListener("contextmenu", (e) => { e.preventDefault(); openFor(e.clientX, e.clientY); });
-  plot.addEventListener("pointerdown", (e) => {
-    if (e.pointerType === "mouse") return; // 데스크톱은 contextmenu 사용
-    const x = e.clientX, y = e.clientY;
-    if (lpTimer) clearTimeout(lpTimer);
-    lpStartXY = { x, y };
-    lpTimer = setTimeout(() => { lpTimer = null; openFor(x, y); }, LONGPRESS_MS);
-  });
-}
-
-// 클릭 x(0~1)에 가장 가까운 에너지 포인트(구간 중심)의 구간 index — '이 에너지 단계 제거' 대상.
-function nearestSegmentIndex(fx) {
-  const segs = stageModel.segments;
-  const cum = [0];
-  segs.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
-  let best = 0, bestDist = Infinity;
-  for (let i = 0; i < segs.length; i++) {
-    const d = Math.abs((cum[i] + cum[i + 1]) / 2 - fx);
-    if (d < bestDist) { bestDist = d; best = i; }
-  }
-  return best;
-}
-
-function addSegmentAt(fx) {
-  if (!stageModel) return;
-  const segs = stageModel.segments;
-  if (segs.length >= MAX_SEGMENTS) { showGraphNotice("구간 분리선은 최대 10개까지 만들 수 있어요!"); return; }
-  const cum = [0];
-  segs.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
-  let i = 0;
-  while (i < segs.length - 1 && fx >= cum[i + 1]) i++;
-  let lw = fx - cum[i], rw = cum[i + 1] - fx;
-  if (lw < MIN_WIDTH || rw < MIN_WIDTH) { lw = segs[i].width / 2; rw = segs[i].width / 2; } // 너무 얇으면 반반
-  const e = segs[i].energy;                          // 좌 구간은 원 에너지 유지
-  const nextE = i + 1 < segs.length ? segs[i + 1].energy : e;
-  const newE = clamp01(+(((e + nextE) / 2).toFixed(2))); // 신규(우) 구간 = 앞뒤 값의 평균(사용자 검수)
-  segs.splice(i, 1, { energy: e, width: lw }, { energy: newE, width: rw });
-  stageTouched = true; // 사용자가 아크를 직접 구성 → 이후 요청에 이 아크 적용
-  renderStageGraph();
-}
-
-function removeSegmentAt(i) {
-  if (!stageModel) return;
-  const segs = stageModel.segments;
-  if (segs.length <= MIN_SEGMENTS) { showGraphNotice("구간은 최소 2개가 필요해요!"); return; }
-  const w = segs[i].width;
-  segs.splice(i, 1);
-  // 제거된 구간의 폭은 인접 구간이 흡수하고, 에너지는 '다음 구간' 값으로 대표(마지막이면 이전 구간).
-  const j = i < segs.length ? i : segs.length - 1;
-  segs[j].width += w;
-  stageTouched = true;
-  renderStageGraph();
-}
-
-let graphNoticeTimer = null;
-function showGraphNotice(msg) {
-  const hint = stageEditorEl.querySelector(".graph-hint");
-  if (!hint) return;
-  hint.classList.add("notice");
-  hint.textContent = msg;
-  if (graphNoticeTimer) clearTimeout(graphNoticeTimer);
-  graphNoticeTimer = setTimeout(() => {
-    const h = stageEditorEl.querySelector(".graph-hint");
-    if (h) { h.classList.remove("notice"); h.textContent = GRAPH_HINT_TEXT; }
-  }, 2200);
-}
-
-function elDiv(cls) { const d = document.createElement("div"); d.className = cls; return d; }
-function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-function clamp01(v) { return Math.max(0, Math.min(1, v)); }
-function clampInt(raw, lo, hi, dflt) { const n = parseInt(raw, 10); return Number.isNaN(n) ? dflt : Math.max(lo, Math.min(hi, n)); }
-
-// 응답 후 그래프를 LLM 해석 아크로 동기화(사용자가 드래그로 조정하기 전까지만).
-// → 그래프가 요청을 '반영'만 하고 간섭하지 않는다(코멘트 #1 대안 2).
-// stages(백엔드가 실제로 곡 선곡에 쓴 단계별 energy_target — stage_energies 비단조 아크 반영)가
-// 있으면 그대로 쓴다. params.start_energy/end_energy만으로 재선형보간하면 피크·비단조 아크가
-// 직선으로 뭉개져 실제 선곡과 그래프가 어긋난다(버그 — stages 응답 도입 후 그래프 동기화 누락).
 function syncGraphToParams(params, stages) {
   if (stageTouched || !params) return;
   const total = params.target_minutes || (stageModel ? stageModel.totalMinutes : 60);
@@ -598,25 +744,87 @@ function syncGraphToParams(params, stages) {
     const n = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, stages.length));
     segments = stages.slice(0, n).map((s) => {
       const e = typeof s.energy_target === "number" ? s.energy_target : 0.4;
-      return { energy: clamp01(+e.toFixed(2)), width: 1 / n };
+      return {
+        energy: clamp01(+e.toFixed(2)),
+        width: 1 / n,
+        valence: 0.5,
+        lufs_integrated: 0.5,
+        lra: 0.5,
+        danceability_norm: 0.5,
+        instr_stem_ratio: 0.5,
+        speech_median: 0.5,
+      };
     });
   } else {
-    // stages 응답이 없을 때만(구버전 백엔드 등) start/end 선형보간으로 폴백.
     const n = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, params.stage_count || 3));
     const start = typeof params.start_energy === "number" ? params.start_energy : 0.3;
     const end = typeof params.end_energy === "number" ? params.end_energy : 0.7;
     segments = [];
     for (let i = 0; i < n; i++) {
       const energy = n === 1 ? start : start + ((end - start) * i) / (n - 1);
-      segments.push({ energy: clamp01(+energy.toFixed(2)), width: 1 / n });
+      segments.push({
+        energy: clamp01(+energy.toFixed(2)),
+        width: 1 / n,
+        valence: 0.5,
+        lufs_integrated: 0.5,
+        lra: 0.5,
+        danceability_norm: 0.5,
+        instr_stem_ratio: 0.5,
+        speech_median: 0.5,
+      });
     }
   }
   stageModel = { totalMinutes: total, segments };
   renderStageGraph();
 }
 
+function clampInt(raw, lo, hi, dflt) { const n = parseInt(raw, 10); return Number.isNaN(n) ? dflt : Math.max(lo, Math.min(hi, n)); }
+
+// 세부설정 버튼 이벤트 — 정적 버튼에 한 번만 붙인다(renderStageGraph()는 다시 그릴 때마다 호출되므로)
+function initStageControls() {
+  // 배경 토글
+  const bgToggleButtons = bgToggleEl.querySelectorAll("button");
+  bgToggleButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      mapPadEl.classList.remove("bg-current", "bg-quadrant", "bg-emoi");
+      mapPadEl.classList.add(`bg-${btn.dataset.bg}`);
+      bgToggleButtons.forEach((b) => b.classList.toggle("on", b === btn));
+    });
+  });
+
+  // 구간 수 증가
+  stagePlusBtn.addEventListener("click", () => {
+    if (!stageModel || stageModel.segments.length >= MAX_SEGMENTS) return;
+    const last = stageModel.segments[stageModel.segments.length - 1];
+    const shrink = last.width / 2;
+    last.width -= shrink;
+    stageModel.segments.push({
+      width: shrink,
+      valence: clamp01(last.valence + 0.05),
+      energy: clamp01(last.energy - 0.1),
+      lufs_integrated: last.lufs_integrated,
+      lra: last.lra,
+      danceability_norm: last.danceability_norm,
+      instr_stem_ratio: last.instr_stem_ratio,
+      speech_median: last.speech_median,
+    });
+    stageTouched = true;
+    renderStageGraph();
+  });
+
+  // 구간 수 감소
+  stageMinusBtn.addEventListener("click", () => {
+    if (!stageModel || stageModel.segments.length <= MIN_SEGMENTS) return;
+    const removed = stageModel.segments.pop();
+    stageModel.segments[stageModel.segments.length - 1].width += removed.width;
+    stageTouched = true;
+    renderStageGraph();
+  });
+}
+
 loadBands();
 initStageModel();
+initStageControls(); // 버튼 이벤트 한 번 붙이기
 renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
 
 // 메뉴 안 버전 표기 = "v메인버전 - 커밋SHA". 배포 프론트는 빌드시 __COMMIT__을 SHA로,
@@ -1435,9 +1643,28 @@ function syncGraphToEdited() {
   for (let i = 0; i < n; i++) {
     const startIdx = Math.floor((i * picks.length) / n);
     const endIdx = Math.floor(((i + 1) * picks.length) / n);
-    const slice = picks.slice(startIdx, Math.max(endIdx, startIdx + 1));
-    const mean = slice.reduce((a, p) => a + (typeof p.energy === "number" ? p.energy : 0), 0) / slice.length;
-    segments.push({ energy: clamp01(+mean.toFixed(2)), width: (endIdx - startIdx) / picks.length });
+    const origSlice = stageModel.segments.slice(startIdx, Math.max(endIdx, startIdx + 1));
+    const pickSlice = picks.slice(startIdx, Math.max(endIdx, startIdx + 1));
+
+    // energy: 원래 선택된 곡들의 평균
+    const energyMean = pickSlice.reduce((a, p) => a + (typeof p.energy === "number" ? p.energy : 0), 0) / pickSlice.length;
+
+    // 나머지 6개 필드: 해당 구간의 원래 stage 값들의 평균 (또는 없으면 0.5)
+    const getFieldMean = (fieldName) => {
+      if (!origSlice.length) return 0.5;
+      return origSlice.reduce((a, s) => a + (typeof s[fieldName] === "number" ? s[fieldName] : 0.5), 0) / origSlice.length;
+    };
+
+    segments.push({
+      energy: clamp01(+energyMean.toFixed(2)),
+      width: (endIdx - startIdx) / picks.length,
+      valence: clamp01(+getFieldMean("valence").toFixed(2)),
+      lufs_integrated: clamp01(+getFieldMean("lufs_integrated").toFixed(2)),
+      lra: clamp01(+getFieldMean("lra").toFixed(2)),
+      danceability_norm: clamp01(+getFieldMean("danceability_norm").toFixed(2)),
+      instr_stem_ratio: clamp01(+getFieldMean("instr_stem_ratio").toFixed(2)),
+      speech_median: clamp01(+getFieldMean("speech_median").toFixed(2)),
+    });
   }
   const wsum = segments.reduce((a, s) => a + s.width, 0) || 1;
   segments.forEach((s) => (s.width = s.width / wsum));
