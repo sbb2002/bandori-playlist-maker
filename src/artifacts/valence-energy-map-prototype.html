@@ -108,19 +108,64 @@
   .stage-count button:disabled { color: var(--muted); cursor: default; opacity: 0.5; }
   .stage-count .n { min-width: 46px; text-align: center; align-self: center; font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-  /* 2D 정서 지도 */
+  /* 2D 정서 지도 배경 — 3가지 시안을 토글로 비교(.bg-toggle). 셋 다 시안 확정 전이라 나란히
+     실험용으로 남겨둔다. 최종 채택안이 정해지면 나머지 두 세트는 지운다. */
+  .bg-toggle-row { display: flex; justify-content: center; margin-bottom: 12px; }
+  .bg-toggle { display: inline-flex; background: var(--card-2); border-radius: 999px; padding: 3px; gap: 2px; }
+  .bg-toggle button {
+    border: none; background: none; color: var(--muted); font-size: 0.76rem; font-weight: 600;
+    padding: 6px 12px; border-radius: 999px; cursor: pointer; font-family: inherit;
+  }
+  .bg-toggle button.on { background: var(--accent); color: #fff; }
+  .bg-toggle button:hover:not(.on) { background: rgba(255,255,255,0.08); color: var(--text); }
+
   .map-stage { display: flex; justify-content: center; }
   .map-wrap { position: relative; width: 100%; max-width: 420px; }
   .map-pad {
     position: relative; width: 100%; aspect-ratio: 1 / 1;
     border-radius: 12px; overflow: hidden; touch-action: none; user-select: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: background 0.2s ease;
+  }
+  /* 1안 — 현재(기존 프로토타입 그대로): accent/accent-2 코너 라디얼 */
+  .map-pad.bg-current {
     background:
       radial-gradient(circle at 100% 0%, rgba(255,108,196,0.16), transparent 60%),
       radial-gradient(circle at 0% 0%, rgba(124,108,255,0.16), transparent 60%),
       radial-gradient(circle at 100% 100%, rgba(255,108,196,0.07), transparent 60%),
       radial-gradient(circle at 0% 100%, rgba(124,108,255,0.07), transparent 60%),
       var(--card-2);
-    border: 1px solid rgba(255,255,255,0.1);
+  }
+  /* 2안 — 사분면 4색: 1사분면(우상)=노랑, 2사분면(좌상)=빨강, 3사분면(좌하)=파랑, 4사분면(우하)=초록 */
+  .map-pad.bg-quadrant {
+    background:
+      radial-gradient(circle at 100% 0%, rgba(250,204,21,0.32), transparent 62%),
+      radial-gradient(circle at 0% 0%, rgba(239,68,68,0.30), transparent 62%),
+      radial-gradient(circle at 0% 100%, rgba(59,130,246,0.30), transparent 62%),
+      radial-gradient(circle at 100% 100%, rgba(34,197,94,0.30), transparent 62%),
+      var(--card-2);
+  }
+  .map-pad.bg-quadrant .quadrant-label {
+    color: rgba(255,255,255,0.92); text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  }
+  /* 3안 — 형제 프로젝트 EMOI-MAP 톤(딥스페이스 + 별/성운)을 가볍게 재현한 예시.
+     실제 EMOI-MAP은 canvas 기반 반짝임/BPM 펄스 애니메이션까지 있으나, 여기서는 배경
+     "느낌"만 정적 CSS로 비교하기 위한 것 — 애니메이션은 넣지 않았다. */
+  .map-pad.bg-emoi {
+    background:
+      radial-gradient(1.6px 1.6px at 12% 18%, #fff, transparent 100%),
+      radial-gradient(1.2px 1.2px at 26% 62%, #fff, transparent 100%),
+      radial-gradient(1.8px 1.8px at 40% 30%, #fff, transparent 100%),
+      radial-gradient(1.2px 1.2px at 55% 76%, #fff, transparent 100%),
+      radial-gradient(1.4px 1.4px at 68% 22%, #fff, transparent 100%),
+      radial-gradient(1.2px 1.2px at 78% 58%, #fff, transparent 100%),
+      radial-gradient(1.6px 1.6px at 88% 14%, #fff, transparent 100%),
+      radial-gradient(1.2px 1.2px at 15% 85%, #fff, transparent 100%),
+      radial-gradient(1.4px 1.4px at 92% 80%, #fff, transparent 100%),
+      radial-gradient(1.2px 1.2px at 48% 8%, #fff, transparent 100%),
+      radial-gradient(60% 45% at 70% 75%, rgba(80,120,200,0.28), transparent 70%),
+      radial-gradient(55% 40% at 20% 20%, rgba(130,70,180,0.24), transparent 70%),
+      radial-gradient(125% 95% at 50% 12%, #10141f 0%, #0a0b13 48%, #05050a 100%);
   }
   .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   .map-grid { stroke: rgba(255,255,255,0.07); stroke-width: 1; vector-effect: non-scaling-stroke; }
@@ -336,9 +381,16 @@
           </div>
         </div>
 
+        <div class="bg-toggle-row">
+          <div class="bg-toggle" id="bg-toggle">
+            <button type="button" data-bg="current">1) 현재</button>
+            <button type="button" data-bg="quadrant">2) 사분면 4색</button>
+            <button type="button" data-bg="emoi">3) EMOI-MAP풍</button>
+          </div>
+        </div>
         <div class="map-stage">
           <div class="map-wrap">
-            <div class="map-pad" id="map-pad">
+            <div class="map-pad bg-current" id="map-pad">
               <svg class="map-svg" id="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <!-- 그리드는 JS가 채움 -->
               </svg>
@@ -513,6 +565,20 @@
     manualBands.clear();
     document.querySelectorAll(".band-cb").forEach((cb) => { cb.checked = false; });
   });
+
+  // ── 정서 지도 배경 시안 토글(비교용, 확정 아님) ───────────────────────
+  {
+    const toggleEl = document.getElementById("bg-toggle");
+    const mapPadEl = document.getElementById("map-pad");
+    toggleEl.querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        mapPadEl.classList.remove("bg-current", "bg-quadrant", "bg-emoi");
+        mapPadEl.classList.add(`bg-${btn.dataset.bg}`);
+        toggleEl.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === btn));
+      });
+    });
+    toggleEl.querySelector('[data-bg="current"]').classList.add("on");
+  }
 
   const mapPad = document.getElementById("map-pad");
   const mapSvg = document.getElementById("map-svg");
