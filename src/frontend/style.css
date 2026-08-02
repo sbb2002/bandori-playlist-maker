@@ -248,6 +248,8 @@ input[type="number"] { -moz-appearance: textfield; }
    모든 그래프(정서 지도 + 아래 고급 설정 그래프들)가 이 경계를 공유한다. */
 .timebar-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; margin-bottom: 6px; }
 .timebar-label-row span { font-size: 0.75rem; color: var(--muted); }
+.timebar-label-actions { display: flex; align-items: baseline; gap: 10px; }
+.timebar-label-actions .link-btn { font-size: 0.72rem; padding: 0; }
 .timebar {
   position: relative; height: 22px; border-radius: 999px;
   background: var(--card-2); border: 1px solid rgba(255,255,255,0.1);

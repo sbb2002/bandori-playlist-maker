@@ -124,7 +124,13 @@
           </div>
           <p class="map-hint">드래그해서 구간별 분위기를 조정하세요. 점 위에 커서를 올리면 현재 값이 보입니다.</p>
 
-          <div class="timebar-label-row"><span>시간 배분</span><span id="timebar-total-label"></span></div>
+          <div class="timebar-label-row">
+            <span>시간 배분</span>
+            <div class="timebar-label-actions">
+              <button type="button" id="timebar-equalize" class="link-btn">모두 균일하게</button>
+              <span id="timebar-total-label"></span>
+            </div>
+          </div>
           <div class="timebar" id="timebar"></div>
           <div class="timebar-ticks" id="timebar-ticks"></div>
           <p class="timebar-hint">①은 시작점(0분)에 고정돼요. ②부터는 순번 동그라미를 좌우로 끌어 그 구간의 시작 시각을 옮기면 재생시간이 조절돼요. 최소 1분.</p>

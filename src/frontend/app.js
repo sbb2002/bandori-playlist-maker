@@ -863,6 +863,18 @@ function initStageControls() {
     stageTouched = true;
     renderStageGraph();
   });
+
+  // 시간 배분 균일화 — 구간별 재생시간(width)만 똑같이 맞추고, 정서 궤적·고급 설정 값은 그대로 둔다.
+  const timebarEqualizeBtn = $("timebar-equalize");
+  if (timebarEqualizeBtn) {
+    timebarEqualizeBtn.addEventListener("click", () => {
+      if (!stageModel) return;
+      const n = stageModel.segments.length;
+      stageModel.segments.forEach((s) => { s.width = 1 / n; });
+      stageTouched = true;
+      renderStageGraph();
+    });
+  }
 }
 
 // ── 모드 전환 ─────────────────────────────────────────────────────────────────
