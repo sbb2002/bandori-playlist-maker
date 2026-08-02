@@ -53,20 +53,34 @@ input[type="text"], input[type="number"] {
 }
 input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 
-/* 모드 토글: AI모드 vs 커스텀모드 */
+/* 모드 토글: AI모드 ↔ 커스텀모드 — 손잡이가 좌우로 슬라이드하는 스위치 형태.
+   두 상태뿐이라 버튼 하나(role=switch)로 전체를 감싸고 클릭할 때마다 반대 모드로 전환한다. */
 .mode-switch {
-  display: flex; gap: 10px; margin-bottom: 16px;
-}
-.mode-btn {
-  flex: 1; padding: 10px 14px; border-radius: 10px;
+  position: relative; display: flex; width: 100%; margin-bottom: 16px;
+  padding: 4px; border-radius: 999px;
   background: var(--card-2); border: 1px solid rgba(255,255,255,0.1);
-  color: var(--muted); font-size: 0.9rem; cursor: pointer;
-  transition: border-color 0.12s, background 0.12s, color 0.12s;
-  font-family: inherit; font-weight: 600;
+  cursor: pointer; font-family: inherit;
 }
-.mode-btn:hover { border-color: rgba(124,108,255,0.45); }
-.mode-btn[aria-selected="true"] {
-  background: var(--accent); border-color: var(--accent); color: white;
+.mode-switch:hover { border-color: rgba(124,108,255,0.45); }
+.mode-switch-thumb {
+  position: absolute; top: 4px; bottom: 4px; left: 4px;
+  width: calc(50% - 4px); border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: transform 0.22s cubic-bezier(.4, 0, .2, 1);
+}
+.mode-switch[aria-checked="true"] .mode-switch-thumb { transform: translateX(100%); }
+.mode-switch-label {
+  position: relative; z-index: 1; flex: 1;
+  padding: 10px 14px; text-align: center;
+  font-size: 0.9rem; font-weight: 600; color: var(--muted);
+  transition: color 0.18s;
+}
+.mode-switch[aria-checked="false"] .mode-switch-label[data-mode="ai"],
+.mode-switch[aria-checked="true"] .mode-switch-label[data-mode="custom"] {
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mode-switch-thumb { transition: none; }
 }
 
 .options { margin: 14px 0; }

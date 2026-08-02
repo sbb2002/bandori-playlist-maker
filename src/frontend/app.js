@@ -870,10 +870,9 @@ function setMode(mode) {
   currentMode = mode;
   const isAi = mode === "ai";
 
-  // 버튼 상태 업데이트
-  document.querySelectorAll(".mode-btn").forEach((btn) => {
-    btn.setAttribute("aria-selected", btn.dataset.mode === mode ? "true" : "false");
-  });
+  // 스위치 손잡이 위치(체크 상태) 업데이트
+  const modeSwitch = $("mode-switch");
+  if (modeSwitch) modeSwitch.setAttribute("aria-checked", isAi ? "false" : "true");
 
   // 프롬프트 필드 표시/숨김. required도 함께 꺼야 한다 — 켜진 채로 두면 커스텀 모드에서
   // 빈 프롬프트input이 네이티브 HTML5 검증에 걸려 submit 이벤트 자체가 발생하지 않는다
@@ -940,12 +939,13 @@ loadBands();
 initStageModel();
 initStageControls(); // 버튼 이벤트 한 번 붙이기
 
-// 모드 스위치 버튼 리스너 (한 번만 붙이기)
-document.querySelectorAll(".mode-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    setMode(btn.dataset.mode);
+// 모드 스위치 리스너 (한 번만 붙이기) — 두 상태뿐이라 클릭할 때마다 반대 모드로 토글
+const modeSwitchEl = $("mode-switch");
+if (modeSwitchEl) {
+  modeSwitchEl.addEventListener("click", () => {
+    setMode(currentMode === "ai" ? "custom" : "ai");
   });
-});
+}
 
 renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
 

@@ -52,10 +52,11 @@
     </header>
 
     <form id="request-form" class="card">
-      <div class="mode-switch" id="mode-switch">
-        <button type="button" class="mode-btn" data-mode="ai" aria-selected="true">AI 모드</button>
-        <button type="button" class="mode-btn" data-mode="custom">커스텀 모드</button>
-      </div>
+      <button type="button" class="mode-switch" id="mode-switch" role="switch" aria-checked="false" aria-label="생성 모드 전환 — AI 모드 또는 커스텀 모드">
+        <span class="mode-switch-thumb" aria-hidden="true"></span>
+        <span class="mode-switch-label" data-mode="ai">AI 모드</span>
+        <span class="mode-switch-label" data-mode="custom">커스텀 모드</span>
+      </button>
 
       <label class="field" id="prompt-field">
         <span class="field-label">어떤 플레이리스트를 원하세요?</span>
