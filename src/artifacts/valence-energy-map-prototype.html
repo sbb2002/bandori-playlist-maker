@@ -84,7 +84,6 @@
     fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
   }
-  .map-arrow { fill: var(--accent-2); opacity: 0.9; }
 
   .quadrant-label {
     position: absolute; font-size: 0.68rem; color: var(--muted); line-height: 1.35;
@@ -125,16 +124,113 @@
 
   .map-hint { margin: 34px 0 0; font-size: 0.75rem; color: var(--muted); }
 
-  /* 타임라인(구간별 분량) */
-  .timeline-row { display: flex; gap: 2px; margin-top: 18px; height: 34px; }
-  .timeline-seg {
-    position: relative; border-radius: 8px; background: var(--card-2);
-    border: 1px solid rgba(255,255,255,0.08);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums;
-    transition: border-color 0.12s, background 0.12s, color 0.12s;
+  /* 시간 배분 바 — 구간 경계를 직접 드래그(생산 코드의 bound-handle과 동일한 개념).
+     모든 그래프(정서 지도 + 아래 고급 설정 그래프들)가 이 경계를 공유한다. */
+  .timebar-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; margin-bottom: 6px; }
+  .timebar-label-row span { font-size: 0.75rem; color: var(--muted); }
+  /* 프로그레스 바 스타일 — 구간 안에는 텍스트를 넣지 않는다(좁아지면 줄바꿈되어 세로로
+     보이던 문제 원인). 시간 숫자는 바 아래 별도 눈금 줄(.timebar-ticks)에 표시. */
+  .timebar {
+    position: relative; height: 22px; border-radius: 999px;
+    background: var(--card-2); border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden; touch-action: none; user-select: none;
   }
-  .timeline-seg.linked { border-color: var(--accent); background: rgba(124,108,255,0.16); color: var(--text); }
+  .timebar-track {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    opacity: 0.55;
+  }
+  .timebar-seg {
+    position: absolute; top: 0; height: 100%;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    background: transparent;
+    transition: background 0.12s;
+  }
+  .timebar-seg:last-child { border-right: none; }
+  .timebar-seg.linked { background: rgba(255,255,255,0.16); }
+  /* 구간 중심 숫자 — 정서 지도 점(.stage-node)과 같은 동그라미 배지 스타일로, 순번을
+     공유해 두 UI의 같은 구간을 한눈에 대응시킨다. */
+  .timebar-num {
+    position: absolute; top: 50%; z-index: 1;
+    transform: translate(-50%, -50%);
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--accent); border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    font-size: 0.62rem; font-weight: 700; color: #fff;
+    pointer-events: none; font-variant-numeric: tabular-nums;
+    transition: background 0.12s;
+  }
+  .timebar-num.linked { background: var(--accent-2); }
+  .timebar-handle {
+    position: absolute; z-index: 2; top: 0; height: 100%; width: 22px; margin-left: -11px;
+    cursor: ew-resize; touch-action: none;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .timebar-handle::after {
+    content: ""; width: 15px; height: 15px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--accent-2);
+    box-shadow: 0 1px 5px rgba(0,0,0,0.5);
+    transition: border-color 0.12s, transform 0.12s;
+  }
+  .timebar-handle:hover::after { transform: scale(1.1); }
+  .timebar-handle.dragging::after { border-color: var(--accent); transform: scale(1.2); }
+  .timebar-ticks { position: relative; height: 16px; margin-top: 4px; }
+  .timebar-tick {
+    position: absolute; top: 0; transform: translateX(-50%);
+    font-size: 0.68rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .timebar-unit { position: absolute; right: -14px; top: 0; font-size: 0.68rem; color: var(--muted); }
+  .timebar-hint { margin: 8px 0 0; font-size: 0.72rem; color: var(--muted); }
+
+  /* 고급 설정 — 접이식이 아니라 항상 펼쳐둠(이 화면 전체가 이미 세부설정 진입 화면이라
+     한 번 더 접을 필요가 없음). 나머지 지표는 기존 시간구간 그래프 UI를 그대로 재사용. */
+  .options-section {
+    margin-top: 20px; padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .options-heading { margin: 0; font-size: 0.9rem; color: var(--muted); font-weight: 600; }
+  .options-body { margin-top: 6px; }
+  .options-guide { color: var(--muted); font-size: 0.74rem; line-height: 1.55; margin: 4px 0 16px; }
+
+  .param-graph { margin-bottom: 20px; }
+  .param-graph:last-child { margin-bottom: 0; }
+  .param-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .param-head strong { font-size: 0.85rem; }
+  .param-head .param-unit { font-size: 0.72rem; color: var(--muted); }
+  .plot-row { display: flex; gap: 6px; }
+  .y-axis {
+    width: 34px; flex: 0 0 34px; display: flex; flex-direction: column;
+    justify-content: space-between; align-items: flex-end; padding: 2px 4px 2px 0;
+  }
+  .y-tick { font-size: 0.65rem; color: var(--muted); }
+  .plot {
+    position: relative; flex: 1; height: 84px; background: var(--card-2);
+    border-left: 1px solid rgba(255,255,255,0.16); border-bottom: 1px solid rgba(255,255,255,0.16);
+    border-radius: 0 8px 0 0; overflow: visible; touch-action: none; user-select: none;
+  }
+  .graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .grid { stroke: rgba(255,255,255,0.06); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .grid-edge { stroke: rgba(255,255,255,0.12); }
+  .grid-boundary { stroke: rgba(255,255,255,0.14); stroke-dasharray: 3 3; }
+  .graph-area { fill: rgba(124,108,255,0.16); stroke: none; }
+  .graph-curve { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+  /* 정서 지도(.stage-node)·시간 배분 바(.timebar-num)와 같은 동그라미 순번 배지 스타일 */
+  .param-dot {
+    position: absolute; z-index: 3; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+    border-radius: 50%; background: var(--accent); border: 2px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums;
+    cursor: ns-resize; box-shadow: 0 2px 6px rgba(0,0,0,0.4); touch-action: none;
+  }
+  .param-dot.dragging { background: var(--accent-2); }
+  .param-dot-val {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    font-size: 0.64rem; color: var(--text); background: rgba(0,0,0,0.6);
+    padding: 1px 5px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+    opacity: 0; transition: opacity 0.12s;
+  }
+  .param-dot:hover .param-dot-val, .param-dot.dragging .param-dot-val { opacity: 1; }
 
   /* 요약 미리보기 */
   .preview-line { font-size: 0.92rem; margin: 0; }
@@ -158,7 +254,8 @@
     <h2>정서 지도</h2>
     <p class="card-note">
       가로 = 밝기(우울↔경쾌), 세로 = 격렬함(잔잔↔격렬). 번호가 매겨진 점은 재생 순서이며,
-      점을 드래그하면 해당 구간의 분위기가 바뀝니다.
+      점을 드래그하면 해당 구간의 분위기가 바뀝니다. 아래 시간 배분 바는 모든 그래프가
+      공유합니다 — 경계(◆)를 끌면 구간 길이가 달라집니다.
     </p>
 
     <div class="controls-row">
@@ -192,7 +289,22 @@
     </div>
     <p class="map-hint">드래그해서 구간별 분위기를 조정하세요. 점 위에 커서를 올리면 현재 값이 보입니다.</p>
 
-    <div class="timeline-row" id="timeline-row"></div>
+    <div class="timebar-label-row"><span>시간 배분</span><span id="timebar-total-label"></span></div>
+    <div class="timebar" id="timebar"></div>
+    <div class="timebar-ticks" id="timebar-ticks"></div>
+    <p class="timebar-hint">동그란 버튼을 좌우로 끌면 구간별 재생시간을 조절할 수 있습니다. 최소 1분.</p>
+
+    <div class="options-section">
+      <h3 class="options-heading">고급 설정 — 라우드니스 · 다이내믹 · 리듬감 · 보컬 비중 · 음절밀도</h3>
+      <div class="options-body">
+        <p class="options-guide">
+          research 브랜치 report_final.md가 "백분위 슬라이더"로 분류한 나머지 5개 지표입니다.
+          단일 슬라이더 대신, 위 시간 배분과 같은 구간에 대해 지금의 에너지 그래프와 동일한
+          방식(구간별 점을 위아래로 드래그)으로 조절합니다. 값은 모두 0~100 백분위입니다.
+        </p>
+        <div id="param-graphs"></div>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -202,9 +314,12 @@
 
   <p class="footnote">
     이 프로토타입은 <code>research</code> 브랜치
-    <code>topic/20260731_audio_feats_revised/report_final.md</code>에서 채택한
-    <code>m5-arousal_median</code>(에너지) · <code>m6-valence_median</code>(정서 밝기) 두 지표를
-    0~100 백분위 축으로 표현합니다(상관 r=+0.417). 실제 앱 반영은
+    <code>topic/20260731_audio_feats_revised/report_final.md</code>에서 채택한 9개 파라미터 중
+    2D 지도로 승격된 <code>m5-arousal_median</code>(에너지) · <code>m6-valence_median</code>(정서
+    밝기)와, "고급 설정"에 배치한 나머지 5개 백분위 지표(<code>m4-lufs_integrated</code>,
+    <code>m4-lra</code>, <code>m7-danceability_norm</code>, <code>m9-instr_stem_ratio</code>,
+    <code>m11-speech_median</code>)를 함께 보여줍니다. <code>m8-acoustic_median</code>(토글)·
+    <code>m3-mode</code>(필터)는 그래프형이 아니라 이 프로토타입 범위 밖입니다. 실제 앱 반영은
     <code>docs/WIP_epic-improved-playlist-maker.md</code> 2단계에서 진행 예정이며, 이 화면은
     UX 검증용 목업이라 백엔드 연동은 없습니다.
   </p>
@@ -212,62 +327,90 @@
 
 <script>
 (() => {
-  const PAD = 8; // 상하좌우 여백(%) — 점이 가장자리에서 잘리지 않게
+  // 드래그 도중에는 절대 DOM을 재생성하지 않는다(innerHTML 초기화 등) — 드래그 중인 노드가
+  // pointer capture를 쥔 채로 제거되면 브라우저가 캡처를 해제해 이후 pointermove가 끊긴다
+  // (이전 버전의 "시간 배분이 거의 안 움직인다" 버그 원인). 구조(구간 개수)가 바뀔 때만
+  // build*()로 다시 만들고, 드래그 중에는 update*()로 위치/값만 갱신한다.
+  const SVG_NS = "http://www.w3.org/2000/svg";
   const clamp01 = (v) => Math.max(0, Math.min(1, v));
-  const toPct = (frac) => PAD + frac * (100 - PAD * 2);
-  const fromPct = (pct) => clamp01((pct - PAD) / (100 - PAD * 2));
 
   const MIN_STAGES = 3, MAX_STAGES = 8;
+  const MIN_WIDTH_MIN = 1; // 구간 최소 길이(분)
+
+  // 지도용 여백(%) — 점이 가장자리에서 잘리지 않게
+  const MAP_PAD = 8;
+  const toMapPct = (frac) => MAP_PAD + frac * (100 - MAP_PAD * 2);
+  const fromMapPct = (pct) => clamp01((pct - MAP_PAD) / (100 - MAP_PAD * 2));
+
+  const PARAM_DEFS = [
+    { key: "lufs", label: "라우드니스", col: "m4-lufs_integrated" },
+    { key: "lra", label: "다이내믹 범위", col: "m4-lra" },
+    { key: "dance", label: "리듬감", col: "m7-danceability_norm" },
+    { key: "instr", label: "보컬/악기 비중", col: "m9-instr_stem_ratio" },
+    { key: "speech", label: "음절밀도", col: "m11-speech_median" },
+  ];
+
+  // 데모용 초기 궤적 — 실데이터 아님, UX 검증용 임의값
   const SAMPLE_ARC = [
-    { valence: 0.28, energy: 0.32 },
-    { valence: 0.40, energy: 0.55 },
-    { valence: 0.62, energy: 0.78 },
-    { valence: 0.74, energy: 0.60 },
-    { valence: 0.58, energy: 0.34 },
+    { width: 0.16, valence: 0.28, energy: 0.32, lufs: 0.30, lra: 0.62, dance: 0.35, instr: 0.70, speech: 0.25 },
+    { width: 0.22, valence: 0.40, energy: 0.55, lufs: 0.48, lra: 0.55, dance: 0.55, instr: 0.60, speech: 0.40 },
+    { width: 0.24, valence: 0.62, energy: 0.78, lufs: 0.72, lra: 0.40, dance: 0.80, instr: 0.45, speech: 0.62 },
+    { width: 0.20, valence: 0.74, energy: 0.60, lufs: 0.60, lra: 0.48, dance: 0.65, instr: 0.50, speech: 0.55 },
+    { width: 0.18, valence: 0.58, energy: 0.34, lufs: 0.35, lra: 0.58, dance: 0.40, instr: 0.68, speech: 0.30 },
   ];
 
   let stages = SAMPLE_ARC.map((s) => ({ ...s }));
   let totalMinutes = 60;
 
-  const pad = document.getElementById("map-pad");
-  const svg = document.getElementById("map-svg");
-  const timelineRow = document.getElementById("timeline-row");
+  const mapPad = document.getElementById("map-pad");
+  const mapSvg = document.getElementById("map-svg");
+  const timebar = document.getElementById("timebar");
+  const timebarTicksEl = document.getElementById("timebar-ticks");
+  const timebarTotalLabel = document.getElementById("timebar-total-label");
   const stageNEl = document.getElementById("stage-n");
   const previewEl = document.getElementById("preview-line");
   const totalMinInput = document.getElementById("total-min");
+  const paramGraphsEl = document.getElementById("param-graphs");
 
-  function buildGrid() {
-    svg.innerHTML = "";
-    const gridG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  function centers() {
+    const cum = [0];
+    stages.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
+    return { cum, mid: stages.map((s, i) => (cum[i] + cum[i + 1]) / 2) };
+  }
+
+  // ── 2D 정서 지도 ──────────────────────────────────────────────────────
+  function buildMapGrid() {
+    mapSvg.innerHTML = "";
+    const gridG = document.createElementNS(SVG_NS, "g");
     [0, 25, 50, 75, 100].forEach((p) => {
-      const v = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      const v = document.createElementNS(SVG_NS, "line");
       v.setAttribute("x1", p); v.setAttribute("x2", p); v.setAttribute("y1", 0); v.setAttribute("y2", 100);
       v.setAttribute("class", "map-grid" + (p === 50 ? " mid" : ""));
-      const h = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      const h = document.createElementNS(SVG_NS, "line");
       h.setAttribute("y1", p); h.setAttribute("y2", p); h.setAttribute("x1", 0); h.setAttribute("x2", 100);
       h.setAttribute("class", "map-grid" + (p === 50 ? " mid" : ""));
       gridG.append(v, h);
     });
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    const path = document.createElementNS(SVG_NS, "path");
     path.setAttribute("class", "map-path");
     path.setAttribute("id", "map-path-line");
-    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-    const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    const defs = document.createElementNS(SVG_NS, "defs");
+    const grad = document.createElementNS(SVG_NS, "linearGradient");
     grad.setAttribute("id", "path-grad");
     grad.setAttribute("x1", "0%"); grad.setAttribute("x2", "100%");
-    const s1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    const s1 = document.createElementNS(SVG_NS, "stop");
     s1.setAttribute("offset", "0%"); s1.setAttribute("stop-color", "#7c6cff");
-    const s2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    const s2 = document.createElementNS(SVG_NS, "stop");
     s2.setAttribute("offset", "100%"); s2.setAttribute("stop-color", "#ff6cc4");
     grad.append(s1, s2);
     defs.append(grad);
     path.setAttribute("stroke", "url(#path-grad)");
-    svg.append(defs, gridG, path);
+    mapSvg.append(defs, gridG, path);
   }
 
-  function toXY(s) { return { x: toPct(s.valence), y: toPct(1 - s.energy) }; }
+  function toXY(s) { return { x: toMapPct(s.valence), y: toMapPct(1 - s.energy) }; }
 
-  function updatePath() {
+  function updateMapPath() {
     const path = document.getElementById("map-path-line");
     const pts = stages.map(toXY);
     let d = `M ${pts[0].x} ${pts[0].y}`;
@@ -275,18 +418,18 @@
     path.setAttribute("d", d);
   }
 
-  let nodeEls = [];
-  function buildNodes() {
-    pad.querySelectorAll(".stage-node").forEach((n) => n.remove());
-    nodeEls = stages.map((s, i) => {
+  let mapNodeEls = [];
+  function buildMapNodes() {
+    mapPad.querySelectorAll(".stage-node").forEach((n) => n.remove());
+    mapNodeEls = stages.map((s, i) => {
       const node = document.createElement("div");
       node.className = "stage-node";
       node.textContent = String(i + 1);
       const val = document.createElement("span");
       val.className = "node-val";
       node.append(val);
-      pad.appendChild(node);
-      bindDrag(node, i);
+      mapPad.appendChild(node);
+      bindMapDrag(node, i);
       node.addEventListener("pointerenter", () => setLinked(i));
       node.addEventListener("pointerleave", () => setLinked(-1));
       return node;
@@ -294,14 +437,15 @@
   }
 
   function setLinked(i) {
-    nodeEls.forEach((n, j) => n.classList.toggle("linked", j === i));
-    [...timelineRow.children].forEach((seg, j) => seg.classList.toggle("linked", j === i));
+    mapNodeEls.forEach((n, j) => n.classList.toggle("linked", j === i));
+    timebarSegEls.forEach((seg, j) => seg.classList.toggle("linked", j === i));
+    timebarNumEls.forEach((num, j) => num.classList.toggle("linked", j === i));
   }
 
-  function updateNodes() {
+  function updateMapNodes() {
     stages.forEach((s, i) => {
       const { x, y } = toXY(s);
-      const node = nodeEls[i];
+      const node = mapNodeEls[i];
       node.style.left = `${x}%`;
       node.style.top = `${y}%`;
       node.querySelector(".node-val").textContent =
@@ -309,19 +453,19 @@
     });
   }
 
-  function bindDrag(node, i) {
+  function bindMapDrag(node, i) {
     node.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       node.setPointerCapture(e.pointerId);
       node.classList.add("dragging");
       const move = (ev) => {
-        const r = pad.getBoundingClientRect();
-        const fx = fromPct(((ev.clientX - r.left) / r.width) * 100);
-        const fy = fromPct(((ev.clientY - r.top) / r.height) * 100);
+        const r = mapPad.getBoundingClientRect();
+        const fx = fromMapPct(((ev.clientX - r.left) / r.width) * 100);
+        const fy = fromMapPct(((ev.clientY - r.top) / r.height) * 100);
         stages[i].valence = fx;
         stages[i].energy = clamp01(1 - fy);
-        updateNodes();
-        updatePath();
+        updateMapNodes();
+        updateMapPath();
         renderPreview();
       };
       const up = () => {
@@ -334,20 +478,243 @@
     });
   }
 
-  function renderTimeline() {
-    timelineRow.innerHTML = "";
-    const each = totalMinutes / stages.length;
-    stages.forEach((s, i) => {
+  // ── 시간 배분 바(모든 그래프 공유) ────────────────────────────────────
+  // build: 구간 개수가 바뀔 때만 DOM을 새로 만든다. update: 드래그 중 위치/라벨만 갱신.
+  // 프로그레스 바 + 드래그 버튼 디자인 — 구간 안에는 텍스트를 넣지 않고, 누적 시간 숫자는
+  // 바 아래 별도 눈금 줄에 표시한다(좁은 구간에서 글자가 줄바꿈되던 문제를 근본적으로 피함).
+  let timebarSegEls = [], timebarHandleEls = [], timebarTickEls = [], timebarNumEls = [];
+
+  function buildTimebar() {
+    timebar.innerHTML = "";
+    const track = document.createElement("div");
+    track.className = "timebar-track";
+    timebar.appendChild(track);
+
+    timebarSegEls = stages.map((_, i) => {
       const seg = document.createElement("div");
-      seg.className = "timeline-seg";
-      seg.style.flex = "1 1 0";
-      seg.textContent = `${i + 1} · ${Math.round(each)}분`;
+      seg.className = "timebar-seg";
       seg.addEventListener("pointerenter", () => setLinked(i));
       seg.addEventListener("pointerleave", () => setLinked(-1));
-      timelineRow.appendChild(seg);
+      timebar.appendChild(seg);
+      return seg;
+    });
+    timebarNumEls = stages.map((_, i) => {
+      const num = document.createElement("span");
+      num.className = "timebar-num";
+      num.textContent = String(i + 1);
+      timebar.appendChild(num);
+      return num;
+    });
+    timebarHandleEls = stages.slice(1).map((_, j) => {
+      const handle = document.createElement("div");
+      handle.className = "timebar-handle";
+      bindBoundaryDrag(handle, j);
+      timebar.appendChild(handle);
+      return handle;
+    });
+
+    timebarTicksEl.innerHTML = "";
+    timebarTickEls = stages.map((_, i) => {
+      const tick = document.createElement("span");
+      tick.className = "timebar-tick";
+      timebarTicksEl.appendChild(tick);
+      return tick;
+    });
+    const lastTick = document.createElement("span");
+    lastTick.className = "timebar-tick";
+    timebarTicksEl.appendChild(lastTick);
+    timebarTickEls.push(lastTick);
+    const unit = document.createElement("span");
+    unit.className = "timebar-unit";
+    unit.textContent = "분";
+    timebarTicksEl.appendChild(unit);
+
+    updateTimebar();
+  }
+
+  function updateTimebar() {
+    timebarTotalLabel.textContent = `총 ${totalMinutes}분`;
+    const { cum, mid } = centers();
+    stages.forEach((s, i) => {
+      const seg = timebarSegEls[i];
+      seg.style.left = `${cum[i] * 100}%`;
+      seg.style.width = `${s.width * 100}%`;
+      timebarNumEls[i].style.left = `${mid[i] * 100}%`;
+    });
+    timebarHandleEls.forEach((handle, j) => { handle.style.left = `${cum[j + 1] * 100}%`; });
+    cum.forEach((c, i) => {
+      const tick = timebarTickEls[i];
+      tick.style.left = `${c * 100}%`;
+      tick.style.transform = i === 0 ? "translateX(0)" : i === cum.length - 1 ? "translateX(-100%)" : "translateX(-50%)";
+      tick.textContent = String(Math.round(c * totalMinutes));
     });
   }
 
+  function bindBoundaryDrag(handle, j) {
+    handle.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add("dragging");
+      const move = (ev) => {
+        const minFrac = MIN_WIDTH_MIN / totalMinutes;
+        const r = timebar.getBoundingClientRect();
+        const fx = clamp01((ev.clientX - r.left) / r.width);
+        const leftFixed = stages.slice(0, j).reduce((a, s) => a + s.width, 0);
+        const rightFixed = stages.slice(j + 2).reduce((a, s) => a + s.width, 0);
+        const b = Math.max(leftFixed + minFrac, Math.min(fx, 1 - rightFixed - minFrac));
+        stages[j].width = b - leftFixed;
+        stages[j + 1].width = 1 - rightFixed - b;
+        updateTimebar();
+        updateAllParamCharts();
+      };
+      const up = () => {
+        handle.classList.remove("dragging");
+        handle.removeEventListener("pointermove", move);
+        handle.removeEventListener("pointerup", up);
+      };
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", up);
+    });
+  }
+
+  // ── 고급 설정: 나머지 5개 지표(기존 에너지 그래프와 동일한 방식) ──────
+  const PAD_TOP = 10, PAD_BOTTOM = 6;
+  function valToY(v) { return PAD_TOP + (1 - v) * (100 - PAD_TOP - PAD_BOTTOM); }
+  function yToVal(fracY) { return clamp01(1 - (fracY * 100 - PAD_TOP) / (100 - PAD_TOP - PAD_BOTTOM)); }
+
+  function smoothPath(pts) {
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      const c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+      const c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
+    }
+    return d;
+  }
+
+  // build: 구간 개수가 바뀔 때만 DOM을 새로 만든다. updateAllParamCharts: 경계 드래그로 폭이
+  // 바뀔 때 전 차트의 x위치만 갱신. 값 드래그(위아래)는 해당 차트 하나만 갱신한다.
+  let paramCharts = [];
+
+  function buildParamGraphs() {
+    paramGraphsEl.innerHTML = "";
+    paramCharts = PARAM_DEFS.map(({ key, label, col }) => {
+      const wrap = document.createElement("div");
+      wrap.className = "param-graph";
+
+      const head = document.createElement("div");
+      head.className = "param-head";
+      const strong = document.createElement("strong");
+      strong.textContent = label;
+      const unit = document.createElement("span");
+      unit.className = "param-unit";
+      unit.textContent = col;
+      head.append(strong, unit);
+
+      const plotRow = document.createElement("div");
+      plotRow.className = "plot-row";
+      const yAxis = document.createElement("div");
+      yAxis.className = "y-axis";
+      const yTop = document.createElement("span"); yTop.className = "y-tick"; yTop.textContent = "100";
+      const yBot = document.createElement("span"); yBot.className = "y-tick"; yBot.textContent = "0";
+      yAxis.append(yTop, yBot);
+
+      const plot = document.createElement("div");
+      plot.className = "plot";
+      const svg = document.createElementNS(SVG_NS, "svg");
+      svg.setAttribute("viewBox", "0 0 100 100");
+      svg.setAttribute("preserveAspectRatio", "none");
+      svg.setAttribute("class", "graph-svg");
+      const gridG = document.createElementNS(SVG_NS, "g");
+      [0, 0.5, 1].forEach((v) => {
+        const ln = document.createElementNS(SVG_NS, "line");
+        const y = valToY(v);
+        ln.setAttribute("x1", "0"); ln.setAttribute("x2", "100");
+        ln.setAttribute("y1", String(y)); ln.setAttribute("y2", String(y));
+        ln.setAttribute("class", v === 0 || v === 1 ? "grid grid-edge" : "grid");
+        gridG.append(ln);
+      });
+      const boundaryG = document.createElementNS(SVG_NS, "g");
+      const boundaryLines = stages.slice(1).map(() => {
+        const ln = document.createElementNS(SVG_NS, "line");
+        ln.setAttribute("y1", "0"); ln.setAttribute("y2", "100");
+        ln.setAttribute("class", "grid-boundary");
+        boundaryG.append(ln);
+        return ln;
+      });
+      const area = document.createElementNS(SVG_NS, "path"); area.setAttribute("class", "graph-area");
+      const curve = document.createElementNS(SVG_NS, "path"); curve.setAttribute("class", "graph-curve");
+      svg.append(gridG, boundaryG, area, curve);
+      plot.append(svg);
+
+      const dotEls = stages.map((_, i) => {
+        const dot = document.createElement("div");
+        dot.className = "param-dot";
+        dot.append(document.createTextNode(String(i + 1)));
+        const val = document.createElement("span");
+        val.className = "param-dot-val";
+        dot.append(val);
+        plot.appendChild(dot);
+        return dot;
+      });
+
+      plotRow.append(yAxis, plot);
+      wrap.append(head, plotRow);
+      paramGraphsEl.appendChild(wrap);
+
+      const chart = { key, plot, curve, area, boundaryLines, dotEls };
+      dotEls.forEach((dot, i) => bindParamDotDrag(dot, chart, i));
+      return chart;
+    });
+    updateAllParamCharts();
+  }
+
+  function updateParamChart(chart) {
+    const { key, curve, area, boundaryLines, dotEls } = chart;
+    const { cum, mid } = centers();
+    const pts = [{ x: 0, y: valToY(stages[0][key]) }];
+    stages.forEach((s, i) => pts.push({ x: mid[i] * 100, y: valToY(s[key]) }));
+    pts.push({ x: 100, y: valToY(stages[stages.length - 1][key]) });
+    const d = smoothPath(pts);
+    curve.setAttribute("d", d);
+    area.setAttribute("d", `${d} L 100 100 L 0 100 Z`);
+
+    dotEls.forEach((dot, i) => {
+      dot.style.left = `${mid[i] * 100}%`;
+      dot.style.top = `${valToY(stages[i][key])}%`;
+      dot.querySelector(".param-dot-val").textContent = Math.round(stages[i][key] * 100);
+    });
+    boundaryLines.forEach((ln, j) => {
+      ln.setAttribute("x1", String(cum[j + 1] * 100));
+      ln.setAttribute("x2", String(cum[j + 1] * 100));
+    });
+  }
+
+  function updateAllParamCharts() { paramCharts.forEach(updateParamChart); }
+
+  function bindParamDotDrag(dot, chart, i) {
+    dot.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      dot.setPointerCapture(e.pointerId);
+      dot.classList.add("dragging");
+      const move = (ev) => {
+        const r = chart.plot.getBoundingClientRect();
+        const fy = clamp01((ev.clientY - r.top) / r.height);
+        stages[i][chart.key] = yToVal(fy);
+        updateParamChart(chart);
+      };
+      const up = () => {
+        dot.classList.remove("dragging");
+        dot.removeEventListener("pointermove", move);
+        dot.removeEventListener("pointerup", up);
+      };
+      dot.addEventListener("pointermove", move);
+      dot.addEventListener("pointerup", up);
+    });
+  }
+
+  // ── 요약 미리보기 ─────────────────────────────────────────────────────
   function moodWord(s) {
     const bright = s.valence >= 0.5, hot = s.energy >= 0.5;
     if (bright && hot) return "밝고 신나는";
@@ -367,11 +734,12 @@
   }
 
   function renderAll() {
-    buildGrid();
-    buildNodes();
-    updateNodes();
-    updatePath();
-    renderTimeline();
+    buildMapGrid();
+    buildMapNodes();
+    updateMapNodes();
+    updateMapPath();
+    buildTimebar();
+    buildParamGraphs();
     renderPreview();
     stageNEl.textContent = `${stages.length}구간`;
     document.getElementById("stage-minus").disabled = stages.length <= MIN_STAGES;
@@ -381,18 +749,25 @@
   document.getElementById("stage-plus").addEventListener("click", () => {
     if (stages.length >= MAX_STAGES) return;
     const last = stages[stages.length - 1];
-    stages.push({ valence: clamp01(last.valence + 0.05), energy: clamp01(last.energy - 0.1) });
+    const shrink = last.width / 2;
+    last.width -= shrink;
+    stages.push({
+      width: shrink,
+      valence: clamp01(last.valence + 0.05), energy: clamp01(last.energy - 0.1),
+      lufs: last.lufs, lra: last.lra, dance: last.dance, instr: last.instr, speech: last.speech,
+    });
     renderAll();
   });
   document.getElementById("stage-minus").addEventListener("click", () => {
     if (stages.length <= MIN_STAGES) return;
-    stages.pop();
+    const removed = stages.pop();
+    stages[stages.length - 1].width += removed.width;
     renderAll();
   });
   totalMinInput.addEventListener("input", () => {
     const v = parseInt(totalMinInput.value, 10);
     totalMinutes = Number.isFinite(v) ? Math.max(10, Math.min(180, v)) : 60;
-    renderTimeline();
+    updateTimebar();
     renderPreview();
   });
 
