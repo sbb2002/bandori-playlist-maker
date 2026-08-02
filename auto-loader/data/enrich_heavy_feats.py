@@ -66,16 +66,23 @@ except ImportError:
     pass
 
 # --- 경로 ---
-_MASTER_CSV = REPO_ROOT / "data" / "songs_master.csv"
+# 주의: songs_master.csv는 이 저장소(bpm-tools) 안에 없다 — data/ 디렉토리는 별도
+# `data` 브랜치 워크트리(예: bpm-data-branch)에만 존재한다(run_autoloader.py의
+# --repo-root와 동일한 사정). 아래 기본값은 형제 디렉토리 관례를 따른 추정치이고,
+# main()의 --repo-root/--audio-dir/--stem-dir 인자로 덮어쓸 수 있다.
+_MYPROJECTS_ROOT = REPO_ROOT.parent
+_MASTER_CSV = _MYPROJECTS_ROOT / "bpm-data-branch" / "data" / "songs_master.csv"
 _AUDIO_DIR = (
-    REPO_ROOT.parent
+    _MYPROJECTS_ROOT
     / "bandori-song-sorter"
     / "src" / "content" / "cluster" / "audio_full"
 )
 
-# 보컬 스템 디렉토리 (method-9, method-11 용)
+# 보컬 스템 디렉토리 (method-9, method-11 용) — mfcc_analysis 연구는
+# bandori-playlist-maker 저장소에 있다(bpm-tools 아님, 경로 정정).
 _VOCAL_STEM_DIR = (
-    REPO_ROOT
+    _MYPROJECTS_ROOT
+    / "bandori-playlist-maker"
     / "topic" / "mfcc_analysis" / "stems" / "htdemucs"
 )
 
@@ -107,8 +114,13 @@ def _check_dependencies() -> bool:
     return True
 
 
-def _find_master_rows_needing_enrichment() -> list[dict]:
-    """songs_master.csv를 읽어 m6/m9/m11 중 하나라도 비어있는 행 반환."""
+def _find_master_rows_needing_enrichment(limit: int | None = None,
+                                         only_idx: set[int] | None = None
+                                         ) -> list[dict]:
+    """songs_master.csv를 읽어 m6/m9/m11 중 하나라도 비어있는 행 반환.
+
+    limit: 앞에서부터 N개만(스모크테스트용). only_idx: 지정된 idx만(스모크테스트용).
+    """
     if not _MASTER_CSV.exists():
         print(f"[ERROR] {_MASTER_CSV} 파일 없음")
         return []
@@ -121,8 +133,13 @@ def _find_master_rows_needing_enrichment() -> list[dict]:
             m9 = (r.get("m9-instr_stem_ratio") or "").strip()
             m11 = (r.get("m11-speech_median") or "").strip()
             # 셋 중 하나라도 비어있으면 대상
-            if idx and (not m6 or not m9 or not m11):
-                rows.append(r)
+            if not (idx and (not m6 or not m9 or not m11)):
+                continue
+            if only_idx is not None and int(idx) not in only_idx:
+                continue
+            rows.append(r)
+            if limit is not None and len(rows) >= limit:
+                break
 
     return rows
 
@@ -420,7 +437,36 @@ def patch_csv(updates: dict[int, dict[str, str]]) -> bool:
         return False
 
 
+def _parse_args():
+    import argparse
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--repo-root", type=Path, default=None,
+                   help="data/songs_master.csv를 담은 data 브랜치 워크트리 경로 "
+                        "(기본: 형제 디렉토리 bpm-data-branch)")
+    p.add_argument("--audio-dir", type=Path, default=None,
+                   help="전곡 wav 캐시 디렉토리 (기본: 형제 bandori-song-sorter의 audio_full)")
+    p.add_argument("--stem-dir", type=Path, default=None,
+                   help="보컬/악기 스템 디렉토리 (기본: 형제 bandori-playlist-maker의 "
+                        "topic/mfcc_analysis/stems/htdemucs)")
+    p.add_argument("--limit", type=int, default=None,
+                   help="스모크테스트용: 보강 대상 앞에서부터 N개만 처리")
+    p.add_argument("--idx", type=str, default=None,
+                   help="스모크테스트용: 쉼표로 구분한 idx만 처리(예: --idx 24,25)")
+    return p.parse_args()
+
+
 def main():
+    global _MASTER_CSV, _AUDIO_DIR, _VOCAL_STEM_DIR
+
+    args = _parse_args()
+    if args.repo_root is not None:
+        _MASTER_CSV = args.repo_root / "data" / "songs_master.csv"
+    if args.audio_dir is not None:
+        _AUDIO_DIR = args.audio_dir
+    if args.stem_dir is not None:
+        _VOCAL_STEM_DIR = args.stem_dir
+    only_idx = {int(x) for x in args.idx.split(",")} if args.idx else None
+
     # 인코딩 설정
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -433,9 +479,10 @@ def main():
         sys.exit(1)
 
     print("[OK] essentia, librosa, scipy 모두 available")
+    print(f"[경로] master={_MASTER_CSV}  audio={_AUDIO_DIR}  stems={_VOCAL_STEM_DIR}")
 
     print("\n[2/4] 보강 대상 행 탐지...")
-    target_rows = _find_master_rows_needing_enrichment()
+    target_rows = _find_master_rows_needing_enrichment(limit=args.limit, only_idx=only_idx)
     if not target_rows:
         print("[OK] 보강 대상 없음")
         sys.exit(0)
