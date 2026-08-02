@@ -37,3 +37,8 @@ src/backend/.cache/
 # env / secrets
 .env
 secret*.json
+*.key
+
+# 로컬 R&D 스크래치 작업 폴더(연구 산출물·오디오 원본·API 키 등 혼재, main에 커밋 대상 아님).
+# 파일 자체는 지우지 않고 로컬에만 보존 — 진행 중/인계 대기 연구 기록이 섞여 있음(메모리 참고).
+topic/
