@@ -916,14 +916,32 @@ function prefillCustomFromLast() {
     // lastStages가 없으면 현재 stageModel로 초기화
     lastStages = stageModel?.segments.map(s => ({ ...s })) || [];
   }
-
-  if (lastStages.length > 0) {
-    // stageModel을 lastStages로 복사
-    if (!stageModel) initStageModel(lastStages.length);
-    else {
-      stageModel.segments = lastStages.map(s => ({ ...s }));
-    }
+  if (lastStages.length === 0) {
+    stageTouched = false;
+    renderStageGraph();
+    return;
   }
+
+  // lastStages는 두 출처를 가질 수 있어 형태가 다르다:
+  //  (a) 위 폴백처럼 stageModel.segments를 그대로 복사한 경우 — energy/width 등 이미 정상 형태.
+  //  (b) AI 모드 응답의 setlist.stages 에코 — 필드명이 energy_target(energy 아님)이고
+  //      width가 아예 없으며, 신규 6개 파라미터는 AI가 채우지 않아 전부 null.
+  //  (b)를 그대로 복사하면 energy/width가 undefined가 되고 신규 필드가 null인 채로 남아,
+  //  이후 collectStagesForCustomMode()의 .toFixed() 호출이 크래시한다(실사용 버그로 발견됨).
+  const n = lastStages.length;
+  const mapped = lastStages.map((s) => ({
+    width: s.width != null ? s.width : 1 / n,
+    energy: s.energy != null ? s.energy : (s.energy_target != null ? s.energy_target : 0.5),
+    valence: s.valence != null ? s.valence : 0.5,
+    lufs_integrated: s.lufs_integrated != null ? s.lufs_integrated : 0.5,
+    lra: s.lra != null ? s.lra : 0.5,
+    danceability_norm: s.danceability_norm != null ? s.danceability_norm : 0.5,
+    instr_stem_ratio: s.instr_stem_ratio != null ? s.instr_stem_ratio : 0.5,
+    speech_median: s.speech_median != null ? s.speech_median : 0.5,
+  }));
+
+  if (!stageModel) initStageModel(n);
+  stageModel.segments = mapped;
 
   stageTouched = false;
   renderStageGraph();
