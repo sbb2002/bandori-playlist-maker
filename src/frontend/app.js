@@ -48,7 +48,10 @@ let playbackStarted = false; // 첫 PLAYING 이후 true — 편집 시 cue(정�
 // 통합 되돌리기 스택(Ctrl+Z): {kind:'edit', picks, current} | {kind:'preset-delete', preset, index}.
 // 'edit'은 새 플레이리스트 생성 시 리셋, 'preset-delete'는 유지.
 const undoStack = [];
-// 프리셋 자동저장용 최신 스냅샷(renderResult에서 갱신).
+
+// ── 모드 상태 ─────────────────────────────────────────────────────────────────
+let currentMode = "ai"; // "ai" | "custom"
+// 프리셋 자동저장용 최신 스냅샷(renderResult에서 갱신). lastStages는 커스텀 모드의 기본값용.
 let lastParams = {};
 let lastAppliedBands = [];
 let lastStages = [];
@@ -78,25 +81,50 @@ promptEl.addEventListener("input", () => {
 // ── 요청 ─────────────────────────────────────────────────────────────────────
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const prompt = $("prompt").value.trim();
-  if (!prompt) return;
 
-  const body = { prompt };
-  // 직전 회차 요청을 함께 보내 백엔드가 '의도 동일성'을 판정하게 한다(핫픽스). 의도가 같으면 아래
-  // 사용자 override를 존중하고, 프롬프트를 새 내용으로 바꾸면 백엔드가 override를 무시하고 자동 해석한다.
-  if (previousPrompt) body.previous_prompt = previousPrompt;
-  if (minutesTouched) {
-    const minutes = parseInt($("target-minutes").value, 10);
-    if (!Number.isNaN(minutes)) body.target_minutes = minutes;
-  }
+  const body = {};
 
-  const bands = collectBands();
-  if (bands.length) body.bands = bands;
-  const customStages = collectStages();
-  if (customStages) body.stages = customStages;
-  // 커버/오리지널은 사용자가 직접 버튼을 건드렸을 때만 전송(아니면 LLM이 판단).
-  if (coverTouched) {
-    Object.assign(body, typeToFlags(settingsType));
+  if (currentMode === "ai") {
+    // ── AI 모드: 프롬프트 필수 ──
+    const prompt = $("prompt").value.trim();
+    if (!prompt) return;
+    body.prompt = prompt;
+    body.mode = "ai";
+
+    // 직전 회차 요청을 함께 보내 백엔드가 '의도 동일성'을 판정하게 한다(핫픽스).
+    if (previousPrompt) body.previous_prompt = previousPrompt;
+    if (minutesTouched) {
+      const minutes = parseInt($("target-minutes").value, 10);
+      if (!Number.isNaN(minutes)) body.target_minutes = minutes;
+    }
+
+    const bands = collectBands();
+    if (bands.length) body.bands = bands;
+    const customStages = collectStages();
+    if (customStages) body.stages = customStages;
+    if (coverTouched) {
+      Object.assign(body, typeToFlags(settingsType));
+    }
+  } else {
+    // ── 커스텀 모드: 직접 구성한 stages 전송 ──
+    body.mode = "custom";
+    const customStages = collectStagesForCustomMode();
+    if (!customStages || customStages.length === 0) {
+      showError("구간 설정을 해 주세요.");
+      return;
+    }
+    body.stages = customStages;
+
+    if (minutesTouched) {
+      const minutes = parseInt($("target-minutes").value, 10);
+      if (!Number.isNaN(minutes)) body.target_minutes = minutes;
+    }
+
+    const bands = collectBands();
+    if (bands.length) body.bands = bands;
+    if (coverTouched) {
+      Object.assign(body, typeToFlags(settingsType));
+    }
   }
 
   showLoading(true);
@@ -115,9 +143,13 @@ form.addEventListener("submit", async (e) => {
       throw new Error(msg);
     }
     renderResult(data);
-    previousPrompt = prompt; // 성공 생성분만 다음 요청의 '직전 프롬프트' 기준으로 기억
+    if (currentMode === "ai") {
+      previousPrompt = $("prompt").value.trim();
+      // 성공한 AI 결과를 lastStages에 저장(커스텀 모드에서 기본값으로 사용)
+      lastStages = data.stages?.map(s => ({ ...s })) || [];
+    }
   } catch (err) {
-    const offline = err instanceof TypeError; // fetch 자체 실패(네트워크/CORS)
+    const offline = err instanceof TypeError;
     showError(offline
       ? "백엔드에 연결하지 못했어요. 서버가 켜져 있는지, API 주소가 맞는지 확인해 주세요."
       : err.message);
@@ -245,6 +277,11 @@ $("band-clear").addEventListener("click", () => {
   manualBands.clear();
   document.querySelectorAll(".band-cb:checked").forEach((c) => (c.checked = false));
 });
+
+// 범용 유틸(트랙리스트·프리셋·플레이바 등 여러 곳에서 공유) — 2D 정서 지도 이식 과정에서
+// 실수로 함께 지워졌던 것을 복원(elDiv/clamp 누락으로 결과 렌더링·재생바가 ReferenceError로 깨졌음).
+function elDiv(cls) { const d = document.createElement("div"); d.className = cls; return d; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
 // 2D 정서 지도 + 시간 배분 + 고급 설정 편집기 (§5-1a)
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -822,9 +859,87 @@ function initStageControls() {
   });
 }
 
+// ── 모드 전환 ─────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  currentMode = mode;
+  const isAi = mode === "ai";
+
+  // 버튼 상태 업데이트
+  document.querySelectorAll(".mode-btn").forEach((btn) => {
+    btn.setAttribute("aria-selected", btn.dataset.mode === mode ? "true" : "false");
+  });
+
+  // 프롬프트 필드 표시/숨김. required도 함께 꺼야 한다 — 켜진 채로 두면 커스텀 모드에서
+  // 빈 프롬프트input이 네이티브 HTML5 검증에 걸려 submit 이벤트 자체가 발생하지 않는다
+  // (콘솔 에러도 안 남아 겉으로는 아무 반응도 없는 것처럼 보이는 버그였음).
+  const promptField = $("prompt-field");
+  if (promptField) {
+    promptField.style.display = isAi ? "" : "none";
+  }
+  promptEl.required = isAi;
+
+  // 옵션 강제 펼침(커스텀 모드) 또는 해제(AI 모드)
+  const optionsDetails = $("options-details");
+  if (optionsDetails) {
+    if (isAi) {
+      // AI 모드로 돌아올 때는 force-open만 제거하고, 사용자가 열어놨으면 열린 채로 둔다
+      optionsDetails.classList.remove("force-open");
+    } else {
+      optionsDetails.classList.add("force-open");
+      optionsDetails.open = true;
+      prefillCustomFromLast();
+    }
+  }
+}
+
+function prefillCustomFromLast() {
+  // 마지막 AI 생성 결과(lastStages)가 있으면 그것으로, 없으면 기본 0.5로.
+  if (!lastStages || lastStages.length === 0) {
+    // lastStages가 없으면 현재 stageModel로 초기화
+    lastStages = stageModel?.segments.map(s => ({ ...s })) || [];
+  }
+
+  if (lastStages.length > 0) {
+    // stageModel을 lastStages로 복사
+    if (!stageModel) initStageModel(lastStages.length);
+    else {
+      stageModel.segments = lastStages.map(s => ({ ...s }));
+    }
+  }
+
+  stageTouched = false;
+  renderStageGraph();
+}
+
+function collectStagesForCustomMode() {
+  // 커스텀 모드: stageTouched 체크 없이 항상 모든 segments 반환
+  // (사용자가 그대로 제출해도 정상 동작)
+  if (!stageModel) return null;
+  const total = stageModel.totalMinutes;
+  return stageModel.segments.map((s) => ({
+    energy: +s.energy.toFixed(3),
+    minutes: Math.max(1, Math.round(s.width * total)),
+    valence: +s.valence.toFixed(3),
+    lufs_integrated: +s.lufs_integrated.toFixed(3),
+    lra: +s.lra.toFixed(3),
+    danceability_norm: +s.danceability_norm.toFixed(3),
+    instr_stem_ratio: +s.instr_stem_ratio.toFixed(3),
+    speech_median: +s.speech_median.toFixed(3),
+  }));
+}
+
+// ── 초기화 ─────────────────────────────────────────────────────────────────────
 loadBands();
 initStageModel();
 initStageControls(); // 버튼 이벤트 한 번 붙이기
+
+// 모드 스위치 버튼 리스너 (한 번만 붙이기)
+document.querySelectorAll(".mode-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setMode(btn.dataset.mode);
+  });
+});
+
 renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
 
 // 메뉴 안 버전 표기 = "v메인버전 - 커밋SHA". 배포 프론트는 빌드시 __COMMIT__을 SHA로,

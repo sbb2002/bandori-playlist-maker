@@ -52,14 +52,19 @@
     </header>
 
     <form id="request-form" class="card">
-      <label class="field">
+      <div class="mode-switch" id="mode-switch">
+        <button type="button" class="mode-btn" data-mode="ai" aria-selected="true">AI 모드</button>
+        <button type="button" class="mode-btn" data-mode="custom">커스텀 모드</button>
+      </div>
+
+      <label class="field" id="prompt-field">
         <span class="field-label">어떤 플레이리스트를 원하세요?</span>
         <input id="prompt" name="prompt" type="text" maxlength="500" autocomplete="off"
                placeholder="예) 퇴근하고 주말 시작! 기분이 절로 좋아지는 1시간 플레이리스트" required />
         <span id="prompt-hint" class="field-hint" aria-live="polite"></span>
       </label>
 
-      <details class="options">
+      <details class="options" id="options-details">
         <summary>세부 설정 (선택)</summary>
         <p class="options-guide">여기서 플레이리스트를 직접 다듬을 수 있어요. 바꾼 설정은 같은 요청에서 유지되고, 프롬프트를 새 내용으로 바꾸면 다시 자동으로 맞춰드려요.</p>
         <div class="options-grid">

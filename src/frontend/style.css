@@ -53,8 +53,25 @@ input[type="text"], input[type="number"] {
 }
 input:focus { outline: 2px solid var(--accent); border-color: transparent; }
 
+/* 모드 토글: AI모드 vs 커스텀모드 */
+.mode-switch {
+  display: flex; gap: 10px; margin-bottom: 16px;
+}
+.mode-btn {
+  flex: 1; padding: 10px 14px; border-radius: 10px;
+  background: var(--card-2); border: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted); font-size: 0.9rem; cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  font-family: inherit; font-weight: 600;
+}
+.mode-btn:hover { border-color: rgba(124,108,255,0.45); }
+.mode-btn[aria-selected="true"] {
+  background: var(--accent); border-color: var(--accent); color: white;
+}
+
 .options { margin: 14px 0; }
 .options summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
+.options.force-open summary { display: none; }
 .options-guide {
   margin: 12px 0 4px; color: var(--muted); font-size: 0.72rem; line-height: 1.55;
 }
