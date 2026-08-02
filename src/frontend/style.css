@@ -259,7 +259,10 @@ input:focus { outline: 2px solid var(--accent); border-color: transparent; }
   font-variant-numeric: tabular-nums;
   transition: background 0.12s, transform 0.12s;
 }
-.timebar-num.fixed { pointer-events: none; }
+/* (1)은 실제로는 0%(=timebar 왼쪽 끝) 위치가 맞지만, 원 그대로 두면 .timebar의
+   overflow:hidden에 절반이 잘려 보인다. 판정용 좌표(left:0%)는 그대로 두고, 시각적으로만
+   translate를 절반만큼 덜 당겨 원이 바 안쪽에 온전히 보이도록 보정한다. */
+.timebar-num.fixed { pointer-events: none; transform: translate(0, -50%); }
 .timebar-num.draggable { cursor: ew-resize; touch-action: none; }
 .timebar-num.draggable:hover { transform: translate(-50%, -50%) scale(1.12); }
 .timebar-num.draggable.dragging {
