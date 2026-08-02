@@ -75,3 +75,47 @@ python autoloader/run_autoloader.py --soft     # 부분 wav 환경 긴급 반영
   원격 fetch하므로(`main`의 `src/backend/app/repo/remote_source.py`) main 병합 자체가
   애초에 불필요하다.
 - 재실행 안전: video_id 기준 감별이라 멱등, 실패 곡은 다음 실행에서 자동 재시도.
+
+## data/ — 수동/반자동 보강 스크립트
+
+라이브 오토로더(`autoloader/`)가 처리하기엔 의존성이 너무 무거운 작업들을 모아 둔 폴더.
+대부분은 **전곡 처리가 필요 없고**, 필요할 때만 로컬에서 수동 트리거한다.
+
+### enrich_heavy_feats.py — 무거운 3개 지표 주기적 보강
+
+**목표**: `songs_master.csv`의 `m6-valence_median`, `m9-instr_stem_ratio`, 
+`m11-speech_median` (감정 밝기, 보컬/악기 비중, 음절 밀도)을 주기적으로 실측값으로 보강.
+
+**의존성**: essentia-tensorflow, librosa, scipy (WSL2 필요)
+  - 없으면 명확한 안내 후 조용히 종료(fail-soft).
+
+**실행**:
+```bash
+cd auto-loader
+python data/enrich_heavy_feats.py
+```
+
+**동작**:
+  1. `songs_master.csv`에서 3개 지표 중 하나라도 빈 행 탐지.
+  2. 로컬 오디오 캐시(`bandori-song-sorter/src/content/cluster/audio_full/`)에서 wav 찾기.
+  3. 각 곡별로 3개 파이프라인 실행:
+     - `m6-valence_median`: essentia emoMusic 2단계 모델 (모델 경로는 환경변수 `ESSENTIA_EMBEDDING_MODEL`, 
+       `ESSENTIA_EMOMUSIC_MODEL` 또는 생략 — 이 환경에 보통 없음).
+     - `m9-instr_stem_ratio`: 보컬 스템 에너지비 (스템 없으면 자동 스킵).
+     - `m11-speech_median`: Scheirer-Slaney 4Hz 변조 에너지 (스템 기반, 스템 없으면 스킵).
+  4. CSV 안전한 부분-패치 (merge_data.patch_intensity_rows 패턴 모방, 실패 시 자동 롤백).
+
+**주의**:
+  - 보컬 스템이 아직 전체 카탈로그에 없음 (약 30곡만, 2026-07-15 기준) → m9/m11은 대부분 스킵됨.
+  - m6(valence) 추출은 이 환경(bandori-playlist-maker 로컬)에서 보통 모델 없어 스킵.
+    WSL2 또는 bpm-research 로컬에서만 가능.
+  - 환경별 모델 경로 설정: `export ESSENTIA_EMBEDDING_MODEL=/path/to/msd-musicnn-1.pb`
+    (자세한 경로는 `bpm-research/topic/20260731_audio_feats_revised/method-6-valence/` 참고).
+  - 기존 빈 행은 보강, 이미 값이 있는 행은 건드리지 않음 (멱등).
+  - 곡별 예외는 로그하지 않고 스킵 (다른 곡은 계속 진행).
+
+**산출**:
+  - `songs_master.csv` 직접 수정 (스냅샷 유지, 실패 시 자동 복원).
+  - 로그: 처리 건수, 보강된 값 개수, 스킵 사유.
+
+기타 스크립트들 (`build_master.py`, `merge_audio_feats.py` 등)은 README 생략.
