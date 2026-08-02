@@ -52,9 +52,15 @@ def band_eligibility(songs_full_rows: list[dict]) -> dict[str, bool]:
 
 def assemble_master_row(master_idx: int, cand: dict, excerpt: dict, proxies: dict,
                         audio_entry: dict, energy_full: float,
-                        intensity: dict, eligible: bool, shape: str) -> dict:
-    """songs_master.csv 1행(23컬럼) 조립. 포맷은 기존 빌드 스크립트들과 동일:
+                        intensity: dict, eligible: bool, shape: str,
+                        audio_feats: dict | None = None) -> dict:
+    """songs_master.csv 1행 조립. 포맷은 기존 빌드 스크립트들과 동일:
     tempo_excerpt·mode_score=r5, proxy=full float, energy_full='%.6f', i_*='%.5f'.
+
+    2026-08-02: 9개 신규 오디오 지표 컬럼 추가 (report_final.md 기준):
+    m3-mode, m4-lufs_integrated, m4-lra, m5-arousal_median, m6-valence_median,
+    m7-danceability_norm, m8-acoustic_median, m9-instr_stem_ratio, m11-speech_median.
+    audio_feats dict를 받으면 이들을 채우고, 없으면 None으로 둔다.
 
     shape는 상류(norms.compute_shape)가 우리 발췌 특징에서 직접 계산한 값을 받는다
     — 형제 audio_map의 신곡 엔트리에는 shape 키가 없어(2026-07-15 확인) audio_entry에
@@ -66,6 +72,8 @@ def assemble_master_row(master_idx: int, cand: dict, excerpt: dict, proxies: dic
     wav 캐시 파일명·형제 audio_map 조회 등 형제 저장소 쪽 참조에만 계속 쓰인다."""
     key = excerpt["key"]
     camelot = to_camelot(key)   # 매핑 누락 시 ValueError → 상위에서 롤백
+    if audio_feats is None:
+        audio_feats = {}
     row = {
         "idx": master_idx,
         "band": cand["band"],
@@ -86,6 +94,16 @@ def assemble_master_row(master_idx: int, cand: dict, excerpt: dict, proxies: dic
         "energy_full": f"{energy_full:.6f}",
         **{k: intensity[k] for k in
            ("i_mean", "i_std", "i_max", "i_min", "i_start", "i_end")},
+        # 2026-08-02 신규: 9개 오디오 지표
+        "m3-mode": audio_feats.get("m3-mode"),
+        "m4-lufs_integrated": audio_feats.get("m4-lufs_integrated"),
+        "m4-lra": audio_feats.get("m4-lra"),
+        "m5-arousal_median": audio_feats.get("m5-arousal_median"),
+        "m6-valence_median": audio_feats.get("m6-valence_median"),
+        "m7-danceability_norm": audio_feats.get("m7-danceability_norm"),
+        "m8-acoustic_median": audio_feats.get("m8-acoustic_median"),
+        "m9-instr_stem_ratio": audio_feats.get("m9-instr_stem_ratio"),
+        "m11-speech_median": audio_feats.get("m11-speech_median"),
     }
     return row
 

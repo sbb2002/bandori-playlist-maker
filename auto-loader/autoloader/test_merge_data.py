@@ -15,7 +15,9 @@ import merge_data  # noqa: E402
 
 MASTER_HEADER = ("idx,band,song,url,video_id,key,camelot,tempo_excerpt,energy_proxy,"
                  "mode_score,acousticness_proxy,instrumentalness_proxy,bpm,energy,shape,"
-                 "eligible_band,energy_full,i_mean,i_std,i_max,i_min,i_start,i_end")
+                 "eligible_band,energy_full,i_mean,i_std,i_max,i_min,i_start,i_end,"
+                 "m3-mode,m4-lufs_integrated,m4-lra,m5-arousal_median,m6-valence_median,"
+                 "m7-danceability_norm,m8-acoustic_median,m9-instr_stem_ratio,m11-speech_median")
 
 
 def _landed(idx: int, band: str = "mygo", vid: str = "NEWVID00000") -> dict:
