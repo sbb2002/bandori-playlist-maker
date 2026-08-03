@@ -1,0 +1,1274 @@
+{
+  "records": [
+    {
+      "prompt_idx": 0,
+      "prompt": "더운 저녁을 식혀주는 5단계 노래. 마지막에 차분한 구간을 길게 해줘.",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 5,
+      "brightness": 0.3,
+      "start_energy": 0.5,
+      "end_energy": 0.2,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.6,
+          "lufs_integrated": 0.7,
+          "lra": 0.2,
+          "danceability_norm": 0.6,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        },
+        {
+          "valence": 0.55,
+          "lufs_integrated": 0.65,
+          "lra": 0.25,
+          "danceability_norm": 0.55,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.28
+        },
+        {
+          "valence": 0.5,
+          "lufs_integrated": 0.6,
+          "lra": 0.3,
+          "danceability_norm": 0.5,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.26
+        },
+        {
+          "valence": 0.45,
+          "lufs_integrated": 0.55,
+          "lra": 0.35,
+          "danceability_norm": 0.45,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.24
+        },
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.5,
+          "lra": 0.4,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.22
+        }
+      ],
+      "stage_minutes": [
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        20.0
+      ]
+    },
+    {
+      "prompt_idx": 0,
+      "prompt": "더운 저녁을 식혀주는 5단계 노래. 마지막에 차분한 구간을 길게 해줘.",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 5,
+      "brightness": 0.3,
+      "start_energy": 0.4,
+      "end_energy": 0.2,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.55,
+          "lufs_integrated": 0.85,
+          "lra": 0.12,
+          "danceability_norm": 0.55,
+          "instr_stem_ratio": 0.65,
+          "speech_median": 0.38
+        },
+        {
+          "valence": 0.58,
+          "lufs_integrated": 0.88,
+          "lra": 0.11,
+          "danceability_norm": 0.6,
+          "instr_stem_ratio": 0.66,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.6,
+          "lufs_integrated": 0.9,
+          "lra": 0.1,
+          "danceability_norm": 0.65,
+          "instr_stem_ratio": 0.67,
+          "speech_median": 0.42
+        },
+        {
+          "valence": 0.55,
+          "lufs_integrated": 0.85,
+          "lra": 0.12,
+          "danceability_norm": 0.55,
+          "instr_stem_ratio": 0.65,
+          "speech_median": 0.38
+        },
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.7,
+          "lra": 0.15,
+          "danceability_norm": 0.35,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        }
+      ],
+      "stage_minutes": [
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        13.0
+      ]
+    },
+    {
+      "prompt_idx": 0,
+      "prompt": "더운 저녁을 식혀주는 5단계 노래. 마지막에 차분한 구간을 길게 해줘.",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 5,
+      "brightness": 0.3,
+      "start_energy": 0.6,
+      "end_energy": 0.2,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.6,
+          "lufs_integrated": 0.8,
+          "lra": 0.08,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.65,
+          "speech_median": 0.25
+        },
+        {
+          "valence": 0.58,
+          "lufs_integrated": 0.78,
+          "lra": 0.07,
+          "danceability_norm": 0.38,
+          "instr_stem_ratio": 0.66,
+          "speech_median": 0.24
+        },
+        {
+          "valence": 0.56,
+          "lufs_integrated": 0.76,
+          "lra": 0.06,
+          "danceability_norm": 0.36,
+          "instr_stem_ratio": 0.67,
+          "speech_median": 0.23
+        },
+        {
+          "valence": 0.54,
+          "lufs_integrated": 0.74,
+          "lra": 0.05,
+          "danceability_norm": 0.34,
+          "instr_stem_ratio": 0.68,
+          "speech_median": 0.22
+        },
+        {
+          "valence": 0.52,
+          "lufs_integrated": 0.72,
+          "lra": 0.04,
+          "danceability_norm": 0.32,
+          "instr_stem_ratio": 0.69,
+          "speech_median": 0.21
+        }
+      ],
+      "stage_minutes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        20.0
+      ]
+    },
+    {
+      "prompt_idx": 1,
+      "prompt": "신나는 파티, 텐션 최고조로 끌어올려줘 60분",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 4,
+      "brightness": 0.8,
+      "start_energy": 0.6,
+      "end_energy": 0.85,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.75,
+          "lufs_integrated": 0.85,
+          "lra": 0.05,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.5
+        },
+        {
+          "valence": 0.8,
+          "lufs_integrated": 0.9,
+          "lra": 0.04,
+          "danceability_norm": 0.8,
+          "instr_stem_ratio": 0.75,
+          "speech_median": 0.55
+        },
+        {
+          "valence": 0.85,
+          "lufs_integrated": 0.92,
+          "lra": 0.03,
+          "danceability_norm": 0.85,
+          "instr_stem_ratio": 0.8,
+          "speech_median": 0.6
+        },
+        {
+          "valence": 0.9,
+          "lufs_integrated": 0.95,
+          "lra": 0.02,
+          "danceability_norm": 0.9,
+          "instr_stem_ratio": 0.85,
+          "speech_median": 0.65
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0,
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 1,
+      "prompt": "신나는 파티, 텐션 최고조로 끌어올려줘 60분",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.8,
+      "start_energy": 0.6,
+      "end_energy": 0.9,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.7,
+          "lufs_integrated": 0.8,
+          "lra": 0.1,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.35
+        },
+        {
+          "valence": 0.85,
+          "lufs_integrated": 0.9,
+          "lra": 0.05,
+          "danceability_norm": 0.85,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.95,
+          "lufs_integrated": 0.95,
+          "lra": 0.02,
+          "danceability_norm": 0.9,
+          "instr_stem_ratio": 0.75,
+          "speech_median": 0.45
+        }
+      ],
+      "stage_minutes": [
+        10.0,
+        40.0,
+        10.0
+      ]
+    },
+    {
+      "prompt_idx": 1,
+      "prompt": "신나는 파티, 텐션 최고조로 끌어올려줘 60분",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.8,
+      "start_energy": 0.6,
+      "end_energy": 0.9,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.7,
+          "lufs_integrated": 0.85,
+          "lra": 0.15,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.8,
+          "lufs_integrated": 0.9,
+          "lra": 0.12,
+          "danceability_norm": 0.8,
+          "instr_stem_ratio": 0.75,
+          "speech_median": 0.5
+        },
+        {
+          "valence": 0.9,
+          "lufs_integrated": 0.95,
+          "lra": 0.08,
+          "danceability_norm": 0.9,
+          "instr_stem_ratio": 0.8,
+          "speech_median": 0.6
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        30.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 2,
+      "prompt": "우울하고 무거운 밤, 조용히 침잠하는 발라드만",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 2,
+      "brightness": -0.7,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.3,
+          "lufs_integrated": 0.2,
+          "lra": 0.4,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.3,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.25,
+          "lufs_integrated": 0.18,
+          "lra": 0.45,
+          "danceability_norm": 0.18,
+          "instr_stem_ratio": 0.28,
+          "speech_median": 0.18
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 2,
+      "prompt": "우울하고 무거운 밤, 조용히 침잠하는 발라드만",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 2,
+      "brightness": -0.5,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.2,
+          "lufs_integrated": 0.2,
+          "lra": 0.8,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.4,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.2,
+          "lufs_integrated": 0.2,
+          "lra": 0.8,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.4,
+          "speech_median": 0.2
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 2,
+      "prompt": "우울하고 무거운 밤, 조용히 침잠하는 발라드만",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 2,
+      "brightness": -0.6,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.3,
+          "lufs_integrated": 0.3,
+          "lra": 0.2,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.3,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.3,
+          "lufs_integrated": 0.3,
+          "lra": 0.2,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.3,
+          "speech_median": 0.2
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 3,
+      "prompt": "아침 조깅용 30분, 점점 빨라지는 흐름",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.5,
+      "start_energy": 0.2,
+      "end_energy": 0.7,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.5,
+          "lufs_integrated": 0.7,
+          "lra": 0.2,
+          "danceability_norm": 0.5,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.7,
+          "lufs_integrated": 0.8,
+          "lra": 0.15,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.65,
+          "speech_median": 0.5
+        },
+        {
+          "valence": 0.85,
+          "lufs_integrated": 0.9,
+          "lra": 0.1,
+          "danceability_norm": 0.85,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.6
+        }
+      ],
+      "stage_minutes": [
+        10.0,
+        10.0,
+        10.0
+      ]
+    },
+    {
+      "prompt_idx": 3,
+      "prompt": "아침 조깅용 30분, 점점 빨라지는 흐름",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 4,
+      "brightness": 0.4,
+      "start_energy": 0.2,
+      "end_energy": 0.8,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.5,
+          "lufs_integrated": 0.75,
+          "lra": 0.12,
+          "danceability_norm": 0.45,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        },
+        {
+          "valence": 0.6,
+          "lufs_integrated": 0.8,
+          "lra": 0.13,
+          "danceability_norm": 0.55,
+          "instr_stem_ratio": 0.65,
+          "speech_median": 0.35
+        },
+        {
+          "valence": 0.7,
+          "lufs_integrated": 0.85,
+          "lra": 0.14,
+          "danceability_norm": 0.65,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.8,
+          "lufs_integrated": 0.9,
+          "lra": 0.15,
+          "danceability_norm": 0.75,
+          "instr_stem_ratio": 0.75,
+          "speech_median": 0.45
+        }
+      ],
+      "stage_minutes": [
+        7.5,
+        7.5,
+        7.5,
+        7.5
+      ]
+    },
+    {
+      "prompt_idx": 3,
+      "prompt": "아침 조깅용 30분, 점점 빨라지는 흐름",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 4,
+      "brightness": 0.3,
+      "start_energy": 0.3,
+      "end_energy": 0.85,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.7,
+          "lra": 0.2,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.3
+        },
+        {
+          "valence": 0.5,
+          "lufs_integrated": 0.8,
+          "lra": 0.15,
+          "danceability_norm": 0.5,
+          "instr_stem_ratio": 0.75,
+          "speech_median": 0.35
+        },
+        {
+          "valence": 0.6,
+          "lufs_integrated": 0.85,
+          "lra": 0.1,
+          "danceability_norm": 0.6,
+          "instr_stem_ratio": 0.8,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.7,
+          "lufs_integrated": 0.9,
+          "lra": 0.05,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.85,
+          "speech_median": 0.45
+        }
+      ],
+      "stage_minutes": [
+        7.5,
+        7.5,
+        7.5,
+        7.5
+      ]
+    },
+    {
+      "prompt_idx": 4,
+      "prompt": "주말 드라이브에 어울리는 밝은 플레이리스트 45분",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.6,
+      "start_energy": 0.5,
+      "end_energy": 0.5,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.75,
+          "lufs_integrated": 0.9,
+          "lra": 0.1,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.75,
+          "lufs_integrated": 0.9,
+          "lra": 0.1,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.75,
+          "lufs_integrated": 0.9,
+          "lra": 0.1,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 4,
+      "prompt": "주말 드라이브에 어울리는 밝은 플레이리스트 45분",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.7,
+      "start_energy": 0.5,
+      "end_energy": 0.5,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.7,
+          "lufs_integrated": 0.8,
+          "lra": 0.15,
+          "danceability_norm": 0.6,
+          "instr_stem_ratio": 0.68,
+          "speech_median": 0.38
+        },
+        {
+          "valence": 0.75,
+          "lufs_integrated": 0.85,
+          "lra": 0.16,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.8,
+          "lufs_integrated": 0.9,
+          "lra": 0.17,
+          "danceability_norm": 0.8,
+          "instr_stem_ratio": 0.72,
+          "speech_median": 0.42
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 4,
+      "prompt": "주말 드라이브에 어울리는 밝은 플레이리스트 45분",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.6,
+      "start_energy": 0.5,
+      "end_energy": 0.5,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.68,
+          "lufs_integrated": 0.88,
+          "lra": 0.04,
+          "danceability_norm": 0.68,
+          "instr_stem_ratio": 0.68,
+          "speech_median": 0.38
+        },
+        {
+          "valence": 0.72,
+          "lufs_integrated": 0.92,
+          "lra": 0.03,
+          "danceability_norm": 0.72,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.7,
+          "lufs_integrated": 0.9,
+          "lra": 0.05,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.69,
+          "speech_median": 0.39
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 5,
+      "prompt": "시험공부 집중용 잔잔한 배경음악 90분",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": -0.2,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.45,
+          "lufs_integrated": 0.7,
+          "lra": 0.15,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        },
+        {
+          "valence": 0.45,
+          "lufs_integrated": 0.7,
+          "lra": 0.15,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        },
+        {
+          "valence": 0.45,
+          "lufs_integrated": 0.7,
+          "lra": 0.15,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        }
+      ],
+      "stage_minutes": [
+        30.0,
+        30.0,
+        30.0
+      ]
+    },
+    {
+      "prompt_idx": 5,
+      "prompt": "시험공부 집중용 잔잔한 배경음악 90분",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.1,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.35,
+          "lufs_integrated": 0.25,
+          "lra": 0.15,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.5,
+          "speech_median": 0.15
+        },
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.3,
+          "lra": 0.2,
+          "danceability_norm": 0.25,
+          "instr_stem_ratio": 0.5,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.35,
+          "lufs_integrated": 0.25,
+          "lra": 0.15,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.5,
+          "speech_median": 0.15
+        }
+      ],
+      "stage_minutes": [
+        30.0,
+        30.0,
+        30.0
+      ]
+    },
+    {
+      "prompt_idx": 5,
+      "prompt": "시험공부 집중용 잔잔한 배경음악 90분",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": -0.3,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.45,
+          "lufs_integrated": 0.7,
+          "lra": 0.1,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        },
+        {
+          "valence": 0.45,
+          "lufs_integrated": 0.7,
+          "lra": 0.1,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        },
+        {
+          "valence": 0.45,
+          "lufs_integrated": 0.7,
+          "lra": 0.1,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        }
+      ],
+      "stage_minutes": [
+        30.0,
+        30.0,
+        30.0
+      ]
+    },
+    {
+      "prompt_idx": 6,
+      "prompt": "잠들기 직전 듣는 아주 조용한 곡",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 2,
+      "brightness": -0.5,
+      "start_energy": 0.1,
+      "end_energy": 0.1,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.2,
+          "lufs_integrated": 0.2,
+          "lra": 0.05,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.3,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.2,
+          "lufs_integrated": 0.2,
+          "lra": 0.05,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.3,
+          "speech_median": 0.2
+        }
+      ],
+      "stage_minutes": [
+        10.0,
+        10.0
+      ]
+    },
+    {
+      "prompt_idx": 6,
+      "prompt": "잠들기 직전 듣는 아주 조용한 곡",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 2,
+      "brightness": -0.4,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.2,
+          "lra": 0.2,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.4,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.2,
+          "lra": 0.2,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.4,
+          "speech_median": 0.2
+        }
+      ],
+      "stage_minutes": [
+        10.0,
+        10.0
+      ]
+    },
+    {
+      "prompt_idx": 6,
+      "prompt": "잠들기 직전 듣는 아주 조용한 곡",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 2,
+      "brightness": -0.8,
+      "start_energy": 0.1,
+      "end_energy": 0.1,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.18,
+          "lufs_integrated": 0.28,
+          "lra": 0.04,
+          "danceability_norm": 0.18,
+          "instr_stem_ratio": 0.28,
+          "speech_median": 0.18
+        },
+        {
+          "valence": 0.22,
+          "lufs_integrated": 0.32,
+          "lra": 0.06,
+          "danceability_norm": 0.22,
+          "instr_stem_ratio": 0.32,
+          "speech_median": 0.22
+        }
+      ],
+      "stage_minutes": [
+        8.0,
+        7.0
+      ]
+    },
+    {
+      "prompt_idx": 7,
+      "prompt": "비 오는 날 창밖 보며 듣는 잔잔한 노래",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": -0.3,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.5,
+          "lra": 0.2,
+          "danceability_norm": 0.3,
+          "instr_stem_ratio": 0.4,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.5,
+          "lra": 0.2,
+          "danceability_norm": 0.3,
+          "instr_stem_ratio": 0.4,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.5,
+          "lra": 0.2,
+          "danceability_norm": 0.3,
+          "instr_stem_ratio": 0.4,
+          "speech_median": 0.2
+        }
+      ],
+      "stage_minutes": [
+        10.0,
+        10.0,
+        10.0
+      ]
+    },
+    {
+      "prompt_idx": 7,
+      "prompt": "비 오는 날 창밖 보며 듣는 잔잔한 노래",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 2,
+      "brightness": -0.25,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.6,
+          "lra": 0.05,
+          "danceability_norm": 0.2,
+          "instr_stem_ratio": 0.4,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.45,
+          "lufs_integrated": 0.55,
+          "lra": 0.07,
+          "danceability_norm": 0.18,
+          "instr_stem_ratio": 0.38,
+          "speech_median": 0.18
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 7,
+      "prompt": "비 오는 날 창밖 보며 듣는 잔잔한 노래",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 2,
+      "brightness": -0.3,
+      "start_energy": 0.15,
+      "end_energy": 0.15,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.45,
+          "lufs_integrated": 0.55,
+          "lra": 0.05,
+          "danceability_norm": 0.3,
+          "instr_stem_ratio": 0.5,
+          "speech_median": 0.2
+        },
+        {
+          "valence": 0.5,
+          "lufs_integrated": 0.6,
+          "lra": 0.07,
+          "danceability_norm": 0.35,
+          "instr_stem_ratio": 0.55,
+          "speech_median": 0.25
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 8,
+      "prompt": "혼자 청소하면서 듣는 무난한 배경음악",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.0,
+      "start_energy": 0.35,
+      "end_energy": 0.35,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.55,
+          "lufs_integrated": 0.78,
+          "lra": 0.12,
+          "danceability_norm": 0.48,
+          "instr_stem_ratio": 0.62,
+          "speech_median": 0.34
+        },
+        {
+          "valence": 0.6,
+          "lufs_integrated": 0.82,
+          "lra": 0.14,
+          "danceability_norm": 0.53,
+          "instr_stem_ratio": 0.68,
+          "speech_median": 0.38
+        },
+        {
+          "valence": 0.58,
+          "lufs_integrated": 0.8,
+          "lra": 0.13,
+          "danceability_norm": 0.5,
+          "instr_stem_ratio": 0.66,
+          "speech_median": 0.36
+        }
+      ],
+      "stage_minutes": [
+        10.0,
+        10.0,
+        10.0
+      ]
+    },
+    {
+      "prompt_idx": 8,
+      "prompt": "혼자 청소하면서 듣는 무난한 배경음악",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 2,
+      "brightness": 0.1,
+      "start_energy": 0.4,
+      "end_energy": 0.4,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.55,
+          "lufs_integrated": 0.78,
+          "lra": 0.14,
+          "danceability_norm": 0.48,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.35
+        },
+        {
+          "valence": 0.58,
+          "lufs_integrated": 0.82,
+          "lra": 0.12,
+          "danceability_norm": 0.52,
+          "instr_stem_ratio": 0.62,
+          "speech_median": 0.36
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 8,
+      "prompt": "혼자 청소하면서 듣는 무난한 배경음악",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.1,
+      "start_energy": 0.3,
+      "end_energy": 0.3,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.55,
+          "lufs_integrated": 0.78,
+          "lra": 0.15,
+          "danceability_norm": 0.5,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.35
+        },
+        {
+          "valence": 0.57,
+          "lufs_integrated": 0.8,
+          "lra": 0.14,
+          "danceability_norm": 0.52,
+          "instr_stem_ratio": 0.62,
+          "speech_median": 0.36
+        },
+        {
+          "valence": 0.56,
+          "lufs_integrated": 0.79,
+          "lra": 0.16,
+          "danceability_norm": 0.51,
+          "instr_stem_ratio": 0.61,
+          "speech_median": 0.35
+        }
+      ],
+      "stage_minutes": [
+        13.33,
+        13.33,
+        13.34
+      ]
+    },
+    {
+      "prompt_idx": 9,
+      "prompt": "유산소 운동 마무리, 격렬했다가 서서히 식는 흐름 40분",
+      "attempt": 0,
+      "ok": true,
+      "stage_count": 4,
+      "brightness": 0.3,
+      "start_energy": 0.8,
+      "end_energy": 0.4,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.8,
+          "lufs_integrated": 0.9,
+          "lra": 0.2,
+          "danceability_norm": 0.8,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.7,
+          "lufs_integrated": 0.8,
+          "lra": 0.25,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.65,
+          "speech_median": 0.35
+        },
+        {
+          "valence": 0.6,
+          "lufs_integrated": 0.7,
+          "lra": 0.3,
+          "danceability_norm": 0.6,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.3
+        },
+        {
+          "valence": 0.5,
+          "lufs_integrated": 0.6,
+          "lra": 0.35,
+          "danceability_norm": 0.5,
+          "instr_stem_ratio": 0.55,
+          "speech_median": 0.25
+        }
+      ],
+      "stage_minutes": [
+        12.0,
+        10.0,
+        8.0,
+        10.0
+      ]
+    },
+    {
+      "prompt_idx": 9,
+      "prompt": "유산소 운동 마무리, 격렬했다가 서서히 식는 흐름 40분",
+      "attempt": 1,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.4,
+      "start_energy": 0.8,
+      "end_energy": 0.4,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.8,
+          "lufs_integrated": 0.9,
+          "lra": 0.05,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.8,
+          "speech_median": 0.5
+        },
+        {
+          "valence": 0.6,
+          "lufs_integrated": 0.8,
+          "lra": 0.1,
+          "danceability_norm": 0.6,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.6,
+          "lra": 0.2,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.5,
+          "speech_median": 0.3
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        10.0,
+        15.0
+      ]
+    },
+    {
+      "prompt_idx": 9,
+      "prompt": "유산소 운동 마무리, 격렬했다가 서서히 식는 흐름 40분",
+      "attempt": 2,
+      "ok": true,
+      "stage_count": 3,
+      "brightness": 0.3,
+      "start_energy": 0.8,
+      "end_energy": 0.3,
+      "stage_params_present": true,
+      "stage_params": [
+        {
+          "valence": 0.75,
+          "lufs_integrated": 0.9,
+          "lra": 0.05,
+          "danceability_norm": 0.7,
+          "instr_stem_ratio": 0.7,
+          "speech_median": 0.4
+        },
+        {
+          "valence": 0.55,
+          "lufs_integrated": 0.75,
+          "lra": 0.1,
+          "danceability_norm": 0.6,
+          "instr_stem_ratio": 0.6,
+          "speech_median": 0.35
+        },
+        {
+          "valence": 0.4,
+          "lufs_integrated": 0.6,
+          "lra": 0.2,
+          "danceability_norm": 0.4,
+          "instr_stem_ratio": 0.5,
+          "speech_median": 0.3
+        }
+      ],
+      "stage_minutes": [
+        15.0,
+        15.0,
+        10.0
+      ]
+    }
+  ],
+  "rate_limit_events": 0
+}
