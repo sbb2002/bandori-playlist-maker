@@ -977,6 +977,8 @@ if (modeSwitchEl) {
   });
 }
 
+setMode(currentMode); // 초기 모드 상태 적용 — 안 하면 AI 모드인데 세부설정이 보인다
+
 renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
 
 // 메뉴 안 버전 표기 = "v메인버전 - 커밋SHA". 배포 프론트는 빌드시 __COMMIT__을 SHA로,
