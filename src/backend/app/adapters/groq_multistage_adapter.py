@@ -351,6 +351,7 @@ class GroqMultistageMoodInterpreter:
     def interpret(
         self, prompt: str, previous_prompt: str | None = None,
         energy_stats: dict | None = None,
+        feature_stats: dict | None = None,  # 미사용 — 다단계 어댑터는 stage_params 미지원(포트 시그니처 준수용)
     ) -> MoodParameters:
         target_minutes = self._stage1_minutes(prompt)
         stages = self._stage2_stages(prompt, target_minutes)

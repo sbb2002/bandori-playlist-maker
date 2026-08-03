@@ -70,10 +70,17 @@ SYSTEM_PROMPT = (
     "  · lra: 다이내믹 범위(낮음=음량이 일정, 높음=조용한 부분과 큰 부분 격차가 큼). 발라드·클래식풍은 높게, "
     "일렉트로닉/파티는 낮게.\n"
     "  · danceability_norm: 리듬감(낮음=리듬이 불규칙/약함, 높음=규칙적이고 춤추기 좋음). energy와 비슷하게 움직임.\n"
-    "  · instr_stem_ratio: 악기 비중(낮음=보컬 위주, 높음=연주/악기 비중이 큼). 특별한 언급 없으면 0.5 근처.\n"
+    "  · instr_stem_ratio: 악기 비중(낮음=보컬 위주, 높음=연주/악기 비중이 큼). 특별한 언급 없으면 "
+    "[지표 분포 통계]의 median 부근.\n"
     "  · speech_median: 가사 밀도(낮음=여백이 많고 느긋한 가창, 높음=가사가 빽빽하고 빠른 딕션). 랩/힙합은 높게, "
-    "발라드는 낮게, 특별한 언급 없으면 0.4~0.6.\n"
+    "발라드는 낮게, 특별한 언급 없으면 [지표 분포 통계]의 median 부근.\n"
+    "  시스템 메시지 끝에 [지표 분포 통계](후보 곡 풀의 전체·밴드별 min/max/mean/median/std, 같은 스케일)가 "
+    "제공되면 **각 값을 반드시 그 분포에 근거해 골라라**: 의도한 무드가 분포에서 어느 위치인지 짚어, 낮추려면 "
+    "min~median 사이, 높이려면 median~max 사이의 실제로 구분되는 값을 쓴다. 특정 밴드 위주 요청이면 그 밴드 "
+    "행을 우선 참고. 분포를 무시한 관성적 0.5 금지.\n"
     "  6개 키 전부 채워라(정말 판단 근거가 없는 키만 예외적으로 생략). "
+    "아래 예시의 숫자는 **JSON 형식을 보여주는 자리표시자일 뿐이다 — 그대로 베끼지 말고** 반드시 "
+    "[지표 분포 통계]의 실제 분포에서 값을 골라라. "
     "예: 조용한 발라드 2단계→[{\"valence\":0.3,\"lufs_integrated\":0.25,\"lra\":0.7,\"danceability_norm\":0.2,"
     "\"instr_stem_ratio\":0.45,\"speech_median\":0.35},{\"valence\":0.35,\"lufs_integrated\":0.3,\"lra\":0.65,"
     "\"danceability_norm\":0.25,\"instr_stem_ratio\":0.45,\"speech_median\":0.4}], "
@@ -147,12 +154,35 @@ RESPONSE_JSON_SCHEMA = {
 }
 
 
-def build_messages(user_prompt: str, previous_prompt: str | None = None) -> list[dict]:
+def _format_feature_stats(feature_stats: dict) -> str:
+    """feature_stats({"전체"|밴드명: {지표: {min,max,mean,median,std}}})를 프롬프트 블록으로.
+
+    한 그룹당 한 줄, 지표당 min/max/mean/median/std 5개 값(소수 2자리) — LLM이 stage_params를
+    실제 분포에 근거해 고르게 하는 재료(시스템 프롬프트의 [지표 분포 통계] 참조 지시와 짝).
+    """
+    lines = [
+        "[지표 분포 통계] 후보 곡 풀의 오디오 지표 분포(stage_params와 동일한 전체 minmax "
+        "스케일 0~1). 형식: 지표=min/max/mean/median/std."
+    ]
+    for group, metrics in feature_stats.items():
+        parts = [
+            f"{name}={s['min']:.2f}/{s['max']:.2f}/{s['mean']:.2f}/{s['median']:.2f}/{s['std']:.2f}"
+            for name, s in metrics.items()
+        ]
+        lines.append(f"{group}: " + " · ".join(parts))
+    return "\n".join(lines)
+
+
+def build_messages(
+    user_prompt: str, previous_prompt: str | None = None,
+    feature_stats: dict | None = None,
+) -> list[dict]:
     """OpenRouter/Groq chat/completions messages 배열을 만든다.
 
     previous_prompt가 주어지면(2회차+ 요청) 직전 요청과 현재 요청을 함께 제시하고, 두 요청이
     '본질적으로 같은 의도'인지 same_as_previous로 판정하게 한다(핫픽스: 세부설정 우선순위 결정).
     파라미터는 항상 '현재 요청' 기준으로 산출한다.
+    feature_stats가 주어지면 시스템 메시지 끝에 [지표 분포 통계] 블록을 덧붙인다.
     """
     if previous_prompt and previous_prompt.strip():
         user_content = (
@@ -162,8 +192,11 @@ def build_messages(user_prompt: str, previous_prompt: str | None = None) -> list
         )
     else:
         user_content = user_prompt
+    system_content = SYSTEM_PROMPT
+    if feature_stats:
+        system_content += "\n\n" + _format_feature_stats(feature_stats)
     return [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": system_content},
         {"role": "user", "content": user_content},
     ]
 

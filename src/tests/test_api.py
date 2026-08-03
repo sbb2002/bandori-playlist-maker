@@ -385,7 +385,7 @@ def test_custom_mode_skips_llm_interpreter(client, monkeypatch):
     """커스텀 모드에서는 LLM interpreter.interpret이 호출되지 않아야 한다."""
     calls = []
 
-    def fake_interpret(prompt, previous_prompt=None, energy_stats=None):
+    def fake_interpret(prompt, previous_prompt=None, energy_stats=None, feature_stats=None):
         calls.append((prompt, previous_prompt))
         raise RuntimeError("interpreter.interpret should not be called in custom mode")
 
@@ -402,7 +402,7 @@ def test_ai_mode_stage_params_flow_to_response(client, monkeypatch):
     """3단계: AI 모드 첫 요청도(honor 무관) LLM이 채운 stage_params가 응답 stages에 실려야 한다."""
     from app.domain.models import MoodParameters
 
-    def fake_interpret(self, prompt, previous_prompt=None, energy_stats=None):
+    def fake_interpret(self, prompt, previous_prompt=None, energy_stats=None, feature_stats=None):
         return MoodParameters(
             brightness=0.5, start_energy=0.4, end_energy=0.4, stage_count=2,
             target_minutes=20, interpretation_summary="test",

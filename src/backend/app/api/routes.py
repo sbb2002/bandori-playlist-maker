@@ -15,6 +15,7 @@ from fastapi import APIRouter, Header, HTTPException, Request, Response
 
 from ..domain.models import MoodParameters, StageSpec
 from ..domain.selection import DEFAULT_AVG_SONG_SECONDS, build_setlist
+from ..repo.song_repo import AUDIO_FEATURE_COLS
 from .band_aliases import detect_bands
 from .schemas import SetlistRequest, serialize_setlist
 
@@ -22,6 +23,40 @@ router = APIRouter()
 
 _DEFAULT_TARGET_MINUTES = 60
 _MAX_TARGET_MINUTES = 180  # 최장 3시간 — 사용자 입력·LLM·단계 그래프 어느 경로로 와도 이 값으로 고정
+
+
+def _feature_stats(pool) -> dict | None:
+    """오디오 지표 6종의 분포 통계(전체 + 밴드별 min/max/mean/median/std).
+
+    LLM이 stage_params 값을 실제 곡 분포에 근거해 고르게 하는 프롬프트 재료
+    (관찰된 문제: 분포 정보가 없으면 중앙값 근처에 소극적으로 안주). 값은 Song에
+    적재된 minmax 스케일(0~1) 그대로 — UI 슬라이더·stage_params와 동일 스케일.
+    지표 컬럼이 없는 데이터(구 스냅샷·테스트 픽스처)면 None.
+    """
+    def _group(songs) -> dict[str, dict[str, float]]:
+        out = {}
+        for field in AUDIO_FEATURE_COLS:
+            values = [v for s in songs if (v := getattr(s, field)) is not None]
+            if not values:
+                continue
+            out[field] = {
+                "min": min(values),
+                "max": max(values),
+                "mean": statistics.fmean(values),
+                "median": statistics.median(values),
+                "std": statistics.pstdev(values) if len(values) > 1 else 0.0,
+            }
+        return out
+
+    total = _group(pool)
+    if not total:
+        return None
+    stats = {"전체": total}
+    for band in sorted({s.band for s in pool}):
+        band_stats = _group([s for s in pool if s.band == band])
+        if band_stats:
+            stats[band] = band_stats
+    return stats
 
 
 def _is_cover(song) -> bool:
@@ -151,7 +186,10 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
         else:
             energy_stats = None
 
-        params = interpreter.interpret(payload.prompt, payload.previous_prompt, energy_stats=energy_stats)
+        params = interpreter.interpret(
+            payload.prompt, payload.previous_prompt,
+            energy_stats=energy_stats, feature_stats=_feature_stats(pool),
+        )
 
         # DEPRECATED(2026-08-03, 3단계): 예전엔 'honor'를 "직전 요청과 의도가 같은가"
         # (params.same_as_previous)로 판정해, 같을 때만 사용자가 건드린 세부설정(에너지
