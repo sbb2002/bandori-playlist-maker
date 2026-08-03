@@ -248,6 +248,25 @@ def test_build_messages_without_previous_is_plain():
     assert build_messages("현재 요청 텍스트")[-1]["content"] == "현재 요청 텍스트"
 
 
+# ── 예시 숫자 jitter(3.5단계 함정 수정: 모델이 프롬프트 예시를 그대로 복사하던 문제) ──────────
+
+def test_dynamic_examples_are_jittered_across_calls():
+    """예시 stage_params 숫자가 매 호출마다 달라야 모델이 그대로 베끼는 걸 막을 수 있다."""
+    from app.adapters.prompt import build_messages
+    system_a = build_messages("x")[0]["content"]
+    system_b = build_messages("x")[0]["content"]
+    assert system_a != system_b
+
+
+def test_jitter_stage_params_stays_in_bounds():
+    from app.adapters.prompt import _BALLAD_EXAMPLE_TEMPLATE, _jitter_stage_params
+    import random
+    rng = random.Random(0)
+    for _ in range(50):
+        jittered = _jitter_stage_params(_BALLAD_EXAMPLE_TEMPLATE, rng)
+        assert all(0.0 <= v <= 1.0 for v in jittered.values())
+
+
 def test_parse_mood_same_as_previous_extracted():
     from app.adapters.prompt import parse_mood
     p = parse_mood('{"brightness":0,"start_energy":0.4,"end_energy":0.4,"stage_count":3,'

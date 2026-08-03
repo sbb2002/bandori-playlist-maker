@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import json
+import random
 
 from ..domain.models import MoodParameters
 from ..domain.tags import ensure_min_tags
@@ -28,6 +29,57 @@ _STAGE_PARAM_KEYS = (
     "valence", "lufs_integrated", "lra",
     "danceability_norm", "instr_stem_ratio", "speech_median",
 )
+
+# 3.5단계(2026-08-03) 함정 수정: 아래 stage_params/stage_minutes 예시에 고정 숫자를 쓰면
+# 모델이 실제 분포를 계산하지 않고 예시 숫자를 그대로(또는 거의 그대로) 복사해버리는 현상이
+# 실측에서 확인됨(예: "신나는 파티"류 요청마다 매번 예시와 소수점까지 동일한 값 반환).
+# 그래서 예시 숫자를 요청마다 약간씩(±0.06) jitter해 새로 만든다 — 모델이 패턴을 그대로
+# 베낄 수 없게 해, "그대로 베끼지 말라"는 지시문이 실제로 강제되도록 한다.
+_BALLAD_EXAMPLE_TEMPLATE = {
+    "valence": 0.3, "lufs_integrated": 0.25, "lra": 0.7,
+    "danceability_norm": 0.2, "instr_stem_ratio": 0.45, "speech_median": 0.35,
+}
+_PARTY_EXAMPLE_TEMPLATE = {
+    "valence": 0.85, "lufs_integrated": 0.8, "lra": 0.25,
+    "danceability_norm": 0.85, "instr_stem_ratio": 0.55, "speech_median": 0.5,
+}
+_DRIVE_EXAMPLE_STAGE_TEMPLATES = [
+    {"valence": 0.55, "lufs_integrated": 0.4, "lra": 0.55,
+     "danceability_norm": 0.4, "instr_stem_ratio": 0.5, "speech_median": 0.45},
+    {"valence": 0.7, "lufs_integrated": 0.65, "lra": 0.4,
+     "danceability_norm": 0.65, "instr_stem_ratio": 0.5, "speech_median": 0.5},
+    {"valence": 0.85, "lufs_integrated": 0.8, "lra": 0.3,
+     "danceability_norm": 0.8, "instr_stem_ratio": 0.55, "speech_median": 0.55},
+]
+
+
+def _jitter_stage_params(template: dict[str, float], rng: random.Random, spread: float = 0.06) -> dict[str, float]:
+    return {k: round(_clamp(v + rng.uniform(-spread, spread), 0.0, 1.0), 2) for k, v in template.items()}
+
+
+def _build_dynamic_examples(rng: random.Random) -> str:
+    """stage_params/stage_minutes 예시 문구를 요청마다 jitter된 새 숫자로 생성한다."""
+    ballad2 = [_jitter_stage_params(_BALLAD_EXAMPLE_TEMPLATE, rng) for _ in range(2)]
+    party1 = _jitter_stage_params(_PARTY_EXAMPLE_TEMPLATE, rng)
+    drive_stages = [_jitter_stage_params(t, rng) for t in _DRIVE_EXAMPLE_STAGE_TEMPLATES]
+    ballad_json = json.dumps(ballad2, ensure_ascii=False)
+    party_json = json.dumps(party1, ensure_ascii=False)
+    drive_stage_minutes = [20, 20, 20]
+    full_example = {
+        "brightness": 0.7, "start_energy": 0.35, "end_energy": 0.85, "stage_count": 3,
+        "target_minutes": 60, "interpretation_summary": "주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",
+        "tags": ["드라이브", "설렘", "주말", "고조되는"], "song_type": "all", "same_as_previous": False,
+        "stage_minutes": drive_stage_minutes, "stage_params": drive_stages,
+    }
+    return (
+        "  아래 예시의 숫자는 매 요청마다 무작위로 바뀌는 **자리표시자일 뿐이다 — 그대로 베끼거나 "
+        "패턴만 흉내내지 말고** 반드시 [지표 분포 통계]의 실제 분포에서 값을 골라라(같은 카테고리 "
+        "요청이라도 곡 풀·분포가 다르면 값도 달라져야 정상이다). "
+        f"예: 조용한 발라드 2단계→{ballad_json}, "
+        f"신나는 파티 1단계 예시 객체→{party_json}.\n\n"
+        f"예: {json.dumps(full_example, ensure_ascii=False)}"
+    )
+
 
 SYSTEM_PROMPT = (
     "너는 뱅드림(BanG Dream!) 음악 세트리스트 생성기의 무드 해석기다. "
@@ -87,23 +139,7 @@ SYSTEM_PROMPT = (
     "제공되면 **각 값을 반드시 그 분포에 근거해 골라라**: 의도한 무드가 분포에서 어느 위치인지 짚어, 낮추려면 "
     "min~median 사이, 높이려면 median~max 사이의 실제로 구분되는 값을 쓴다. 특정 밴드 위주 요청이면 그 밴드 "
     "행을 우선 참고. 분포를 무시한 관성적 0.5 금지.\n"
-    "  6개 키 전부 채워라(정말 판단 근거가 없는 키만 예외적으로 생략). "
-    "아래 예시의 숫자는 **JSON 형식을 보여주는 자리표시자일 뿐이다 — 그대로 베끼지 말고** 반드시 "
-    "[지표 분포 통계]의 실제 분포에서 값을 골라라. "
-    "예: 조용한 발라드 2단계→[{\"valence\":0.3,\"lufs_integrated\":0.25,\"lra\":0.7,\"danceability_norm\":0.2,"
-    "\"instr_stem_ratio\":0.45,\"speech_median\":0.35},{\"valence\":0.35,\"lufs_integrated\":0.3,\"lra\":0.65,"
-    "\"danceability_norm\":0.25,\"instr_stem_ratio\":0.45,\"speech_median\":0.4}], "
-    "신나는 파티 1단계 예시 객체→{\"valence\":0.85,\"lufs_integrated\":0.8,\"lra\":0.25,\"danceability_norm\":0.85,"
-    "\"instr_stem_ratio\":0.55,\"speech_median\":0.5}.\n\n"
-    '예: {"brightness":0.7,"start_energy":0.35,"end_energy":0.85,"stage_count":3,'
-    '"target_minutes":60,"interpretation_summary":"주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",'
-    '"tags":["드라이브","설렘","주말","고조되는"],"song_type":"all","same_as_previous":false,'
-    '"stage_minutes":[20,20,20],'
-    '"stage_params":['
-    '{"valence":0.55,"lufs_integrated":0.4,"lra":0.55,"danceability_norm":0.4,"instr_stem_ratio":0.5,"speech_median":0.45},'
-    '{"valence":0.7,"lufs_integrated":0.65,"lra":0.4,"danceability_norm":0.65,"instr_stem_ratio":0.5,"speech_median":0.5},'
-    '{"valence":0.85,"lufs_integrated":0.8,"lra":0.3,"danceability_norm":0.8,"instr_stem_ratio":0.55,"speech_median":0.55}'
-    ']}'
+    "  6개 키 전부 채워라(정말 판단 근거가 없는 키만 예외적으로 생략).\n"
 )
 
 # OpenRouter response_format용 JSON 스키마(structured output 지원 모델에서 사용).
@@ -204,7 +240,8 @@ def build_messages(
         )
     else:
         user_content = user_prompt
-    system_content = SYSTEM_PROMPT
+    # 예시 숫자를 요청마다 새로 jitter(모델의 예시-그대로-복사 방지, 위 _build_dynamic_examples 참고).
+    system_content = SYSTEM_PROMPT + "\n" + _build_dynamic_examples(random.Random())
     if feature_stats:
         system_content += "\n\n" + _format_feature_stats(feature_stats)
     return [
