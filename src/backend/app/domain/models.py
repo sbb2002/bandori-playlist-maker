@@ -76,8 +76,8 @@ class MoodParameters:
     # 길이는 stage_count와 같아야 하며, 각 dict의 키는 StageSpec/Stage와 동일: valence·
     # lufs_integrated·lra·danceability_norm·instr_stem_ratio·speech_median(전부 0.0~1.0,
     # 개별 키가 없거나 None이면 그 값만 미상). selection.py가 stage_specs 없을 때(AI 모드
-    # 첫 요청 등) 이 값을 Stage에 반영한다 — 선곡 매칭 가중치엔 아직 안 씀(echo 전용, 2단계
-    # "배관만" 결정 계승).
+    # 첫 요청 등) 이 값을 Stage에 반영한다 — 3.5단계(2026-08-04)부터 선곡 매칭에도 3순위
+    # 타이브레이커로 쓰인다(에너지 하드 필터·밝기 소프트에 이어, Song에 값이 없으면 무력화).
     stage_params: list[dict[str, float | None]] | None = None
     # 3.5단계: 단계별 길이(분) 의도(선택). 주어지면(길이==stage_count) 곡 수를 균등분배 대신
     # 이 분 비율로 배분한다(selection.py의 _stage_targets_and_counts) — "마지막 5분은

@@ -303,8 +303,11 @@ def test_stage_specs_take_priority_over_stage_params():
     assert setlist.stages[0].lra == 0.5
 
 
-def test_new_fields_do_not_affect_selection():
-    """신규 필드(valence 등)의 유무가 선곡 결과에 영향을 주지 않음(에너지만 매칭에 사용)."""
+def test_new_fields_do_not_affect_selection_when_songs_lack_them():
+    """3.5단계: 곡 풀에 신규 지표(Song.valence 등)가 없으면(이 파일의 _songs() 픽스처처럼
+    전부 None) stage_specs/stage_params에 값을 줘도 거리가 0으로 무력화돼 선곡이 안 바뀐다
+    — 기존 스냅샷·테스트 픽스처와의 하위호환. 지표가 실제로 있을 때 선곡에 반영되는지는
+    test_stage_params_valence_influences_pick_when_available 참고."""
     # valence가 다르지만 energy_target이 같은 두 개의 specs
     specs_without_valence = [
         StageSpec(energy_target=0.3, song_count=3),
@@ -321,3 +324,44 @@ def test_new_fields_do_not_affect_selection():
     picks1 = {p.idx for p in setlist1.picks}
     picks2 = {p.idx for p in setlist2.picks}
     assert picks1 == picks2, "신규 필드의 유무가 선곡 결과를 변경해서는 안 됨"
+
+
+def test_stage_params_valence_influences_pick_when_available():
+    """3.5단계: 곡에 실제 valence 값이 있으면 stage_specs.valence가 Stage A 3순위
+    타이브레이커로 반영돼 다른 곡이 뽑힌다(에너지·밝기는 전부 동일하게 맞춰 valence만 변수로)."""
+    songs = [
+        Song(idx=i, band="a", song=f"s{i}", video_id=f"vid{i:07d}0", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True, valence=v)
+        for i, v in enumerate([0.1, 0.3, 0.5, 0.7, 0.9])
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    spec_low = [StageSpec(energy_target=0.5, song_count=1, valence=0.1)]
+    spec_high = [StageSpec(energy_target=0.5, song_count=1, valence=0.9)]
+    low = build_setlist(songs, params, target_seconds=999, stage_specs=spec_low, rng=random.Random(0))
+    high = build_setlist(songs, params, target_seconds=999, stage_specs=spec_high, rng=random.Random(0))
+    picked_low = next(s for s in songs if s.idx == low.picks[0].idx)
+    picked_high = next(s for s in songs if s.idx == high.picks[0].idx)
+    assert picked_low.idx != picked_high.idx
+    assert picked_low.valence < picked_high.valence
+
+
+def test_stage_params_multi_field_distance_picks_closest_overall():
+    """valence·lra 두 지표를 동시에 지정하면 평균 거리가 가장 가까운 곡이 뽑힌다."""
+    songs = [
+        Song(idx=0, band="a", song="s0", video_id="vid0000000", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+             valence=0.2, lra=0.8),  # valence 거리 0.6, lra 거리 0.1 → 평균 0.35
+        Song(idx=1, band="a", song="s1", video_id="vid0000001", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+             valence=0.75, lra=0.75),  # valence 거리 0.05, lra 거리 0.05 → 평균 0.05
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    spec = [StageSpec(energy_target=0.5, song_count=1, valence=0.8, lra=0.7)]
+    setlist = build_setlist(songs, params, target_seconds=999, stage_specs=spec, rng=random.Random(0))
+    assert setlist.picks[0].idx == 1

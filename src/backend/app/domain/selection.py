@@ -43,6 +43,15 @@ _SHAPE_BRIGHTNESS: dict[str, float] = {
 # duration 데이터 부재 시 곡 길이 플레이스홀더(architecture.md §④-2, 초 단위).
 DEFAULT_AVG_SONG_SECONDS = 213
 
+# 3.5단계(2026-08-04): stage_specs/stage_params의 신규 오디오 지표 6종(연구 채택,
+# audio_feats_revised) — 지금까지 echo 전용이었으나, 이제 Stage A 소프트 매칭에도 반영한다.
+# Song에 해당 컬럼이 없는(구 스냅샷·테스트 픽스처) 곡·요청은 값이 None이라 자동으로 무시된다
+# (에너지 하드 필터·밝기 소프트 정렬은 그대로 유지 — 이 지표들은 그 다음 3순위 타이브레이커).
+_NEW_STAGE_PARAM_FIELDS = (
+    "valence", "lufs_integrated", "lra",
+    "danceability_norm", "instr_stem_ratio", "speech_median",
+)
+
 # 2단계 엔진 파라미터(R&D §4.2 권장 기본값). 파일럿 후 실사용 피드백으로 튜닝.
 _TOL = 0.08              # Stage A 강도 허용창(목표에서 이 이내만 후보)
 # 완충 노드(4-5단계 사이, hotfix/boundary-tension 논의): 허용창 밖으로 폴백된 픽 중에서도
@@ -226,6 +235,44 @@ def _make_reason(
     )
 
 
+def _resolve_stage_target_params(
+    stage_index: int,
+    stage_specs: list[StageSpec] | None,
+    params: MoodParameters,
+) -> dict[str, float | None]:
+    """스테이지 하나의 신규 지표 6종 목표값을 결정한다(스펙 우선, 그다음 LLM stage_params).
+
+    Stage A(선곡)·Stage 리포트(echo) 양쪽에서 동일한 우선순위 규칙을 쓰기 위해 분리(이전엔
+    build_setlist 안의 클로저 `_field()`가 리포트 용도로만 있었다 — 이제 선곡에도 같은 값을
+    써야 하므로 루프 시작 전에 한 번만 계산해 재사용한다).
+    """
+    spec = stage_specs[stage_index] if stage_specs else None
+    llm_stage = (
+        params.stage_params[stage_index]
+        if params.stage_params and stage_index < len(params.stage_params)
+        else None
+    )
+    resolved: dict[str, float | None] = {}
+    for field in _NEW_STAGE_PARAM_FIELDS:
+        value = getattr(spec, field) if spec is not None else None
+        if value is None and llm_stage is not None:
+            value = llm_stage.get(field)
+        resolved[field] = value
+    return resolved
+
+
+def _stage_param_distance(song: Song, target: dict[str, float | None]) -> float:
+    """곡의 신규 지표 6종과 목표값의 평균 절대거리(사용 가능한 필드만, 없으면 0=중립)."""
+    diffs = []
+    for field in _NEW_STAGE_PARAM_FIELDS:
+        t = target.get(field)
+        v = getattr(song, field)
+        if t is None or v is None:
+            continue
+        diffs.append(abs(v - t))
+    return sum(diffs) / len(diffs) if diffs else 0.0
+
+
 def _stage_targets_and_counts(
     params: MoodParameters,
     target_seconds: int,
@@ -295,6 +342,11 @@ def build_setlist(
     targets, counts = _stage_targets_and_counts(
         params, target_seconds, avg_song_seconds, len(pool), stage_specs
     )
+    # 3.5단계: 스테이지별 신규 지표 6종 목표값을 미리 한 번 계산(Stage A 매칭 + Stage 리포트
+    # 양쪽에서 재사용 — 우선순위 규칙 이원화 방지).
+    stage_target_params = [
+        _resolve_stage_target_params(i, stage_specs, params) for i in range(len(targets))
+    ]
 
     # ── Stage A: SELECT — 곡 하나하나를 스테이지 경계에서 부드럽게 흐르는 목표에 매칭 ──
     # feature/energy-stream: 스테이지 전체에 flat 목표 하나만 쓰던 기존 방식 대신, 곡
@@ -306,8 +358,9 @@ def build_setlist(
     stage_members: list[list[Song]] = []
     degraded_idx: set[int] = set()  # 허용창 밖이지만 채택된 픽(완충 노드가 표시만 하는 케이스)
     slot = 0
-    for count in counts:
+    for stage_index, count in enumerate(counts):
         chosen: list[Song] = []
+        target_params = stage_target_params[stage_index]
         for _ in range(count):
             if not remaining:
                 break
@@ -316,9 +369,14 @@ def build_setlist(
             cand = sorted(remaining.values(), key=lambda s: (abs(s.energy - slot_target), s.idx))
             window = [s for s in cand if abs(s.energy - slot_target) <= _TOL]
             if window:
-                # 허용창 내 곡은 모두 무드 부합 → rng 셔플로 변주 후 밝기 버킷 근접 우선(재현적).
+                # 허용창 내 곡은 모두 무드 부합 → rng 셔플로 변주 후 밝기 버킷 근접 우선(재현적),
+                # 그다음 신규 지표 6종(valence 등) 거리로 타이브레이크(3.5단계 — 지표 없는
+                # 곡/요청이면 거리 0이라 이 tiebreak는 자동으로 무력화되고 기존 동작 그대로).
                 rng.shuffle(window)
-                window.sort(key=lambda s: round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET))
+                window.sort(key=lambda s: (
+                    round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET),
+                    _stage_param_distance(s, target_params),
+                ))
                 pick = window[0]
             else:
                 # 완충 노드: 허용창 밖 최근접 후보. 이탈이 _HARD_TOL을 넘으면 억지로 채우지
@@ -342,33 +400,18 @@ def build_setlist(
     slot_cursor = 0  # slot_targets에서 이 스테이지가 차지하는 구간 추적(Stage A와 동일 순서)
 
     for stage_index, (target, members) in enumerate(zip(targets, stage_members)):
-        # stage_specs(사용자 지정, 커스텀 모드 등)가 최우선. 없으면 3단계: LLM이 AI 모드
-        # 단일 응답으로 함께 채운 params.stage_params를 단계별로 폴백 사용(둘 다 없으면 None).
-        spec = stage_specs[stage_index] if stage_specs else None
-        llm_stage = (
-            params.stage_params[stage_index]
-            if params.stage_params and stage_index < len(params.stage_params)
-            else None
-        )
-
-        def _field(name: str) -> float | None:
-            if spec is not None:
-                v = getattr(spec, name)
-                if v is not None:
-                    return v
-            if llm_stage is not None:
-                return llm_stage.get(name)
-            return None
-
+        # stage_specs(사용자 지정, 커스텀 모드 등)가 최우선, 없으면 LLM stage_params 폴백 —
+        # Stage A에서 이미 쓴 것과 동일한 stage_target_params[stage_index]를 그대로 echo.
+        target_params = stage_target_params[stage_index]
         stages_out.append(Stage(
             index=stage_index,
             energy_target=round(target, 4),
-            valence=_field("valence"),
-            lufs_integrated=_field("lufs_integrated"),
-            lra=_field("lra"),
-            danceability_norm=_field("danceability_norm"),
-            instr_stem_ratio=_field("instr_stem_ratio"),
-            speech_median=_field("speech_median"),
+            valence=target_params["valence"],
+            lufs_integrated=target_params["lufs_integrated"],
+            lra=target_params["lra"],
+            danceability_norm=target_params["danceability_norm"],
+            instr_stem_ratio=target_params["instr_stem_ratio"],
+            speech_median=target_params["speech_median"],
         ))
         if not members:
             continue
