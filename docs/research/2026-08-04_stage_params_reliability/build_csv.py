@@ -96,14 +96,35 @@ for p_idx in sorted(prompts_seen):
             "min": round(min(vals), 4),
             "max": round(max(vals), 4),
             "mean": round(statistics.fmean(vals), 4),
+            "median": round(statistics.median(vals), 4),
             "std": round(statistics.pstdev(vals), 4) if len(vals) > 1 else 0.0,
         })
 
 with open(os.path.join(_DIR, "per_prompt_stats.csv"), "w", newline="", encoding="utf-8-sig") as f:
-    w = csv.DictWriter(f, fieldnames=["prompt_idx", "prompt", "field", "n", "min", "max", "mean", "std"])
+    w = csv.DictWriter(f, fieldnames=["prompt_idx", "prompt", "field", "n", "min", "max", "mean", "median", "std"])
     w.writeheader()
     w.writerows(per_prompt_rows)
+
+# 프롬프트별 stage_count/stage_minutes 변동성(참고) — 같은 프롬프트 3회 반복 시 구조 자체가
+# 얼마나 안정적인지(단계 수 고정 여부, 구간 길이 편차).
+meta_rows = []
+for p_idx in sorted(prompts_seen):
+    calls = [r for r in call_rows if r["prompt_idx"] == p_idx]
+    stage_counts = [c["stage_count"] for c in calls if c["stage_count"] != ""]
+    meta_rows.append({
+        "prompt_idx": p_idx,
+        "prompt": prompts_seen[p_idx],
+        "n_calls": len(calls),
+        "stage_counts": ",".join(str(c) for c in stage_counts),
+        "stage_minutes_per_call": " | ".join(c["stage_minutes"] for c in calls if c["stage_minutes"]),
+    })
+with open(os.path.join(_DIR, "per_prompt_structure.csv"), "w", newline="", encoding="utf-8-sig") as f:
+    w = csv.DictWriter(f, fieldnames=["prompt_idx", "prompt", "n_calls", "stage_counts", "stage_minutes_per_call"])
+    w.writeheader()
+    w.writerows(meta_rows)
 
 print("call_summary.csv rows:", len(call_rows))
 print("stage_detail.csv rows:", len(stage_rows))
 print("stats_summary.csv rows:", len(stats_rows))
+print("per_prompt_stats.csv rows:", len(per_prompt_rows))
+print("per_prompt_structure.csv rows:", len(meta_rows))
