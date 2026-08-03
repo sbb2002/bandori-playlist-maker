@@ -13,7 +13,13 @@ from __future__ import annotations
 
 import random
 
-from .energy import continuous_slot_targets, distribute_counts, stage_energy_targets, total_song_count
+from .energy import (
+    continuous_slot_targets,
+    distribute_counts,
+    distribute_counts_by_weights,
+    stage_energy_targets,
+    total_song_count,
+)
 from .harmonic import harmonic_label, is_compatible
 from .models import (
     MoodParameters,
@@ -232,14 +238,22 @@ def _stage_targets_and_counts(
         counts = [max(1, s.song_count) for s in stage_specs]
         return targets, counts
     if params.stage_energies:
-        # 비단조 아크(LLM 산출): 단계별 에너지 배열을 그대로 목표로. 곡 수는 균등 분배.
+        # 비단조 아크(LLM 산출): 단계별 에너지 배열을 그대로 목표로.
         targets = [_clamp(e, 0.0, 1.0) for e in params.stage_energies]
         n = len(targets)
         total = min(total_song_count(target_seconds, avg_song_seconds, n), pool_size)
+        # 3.5단계: 단계별 길이(분) 의도가 있으면 곡 수를 그 비율로 배분("마지막 5분은
+        # 릴랙스" 같은 요청이 균등분배로 뭉개지지 않도록). 길이가 안 맞으면(모델이 배열
+        # 길이를 못 맞춤) 신뢰하지 않고 기존 균등분배로 폴백.
+        if params.stage_minutes and len(params.stage_minutes) == n:
+            return targets, distribute_counts_by_weights(total, params.stage_minutes)
         return targets, distribute_counts(total, n)
     targets = stage_energy_targets(params.start_energy, params.end_energy, params.stage_count)
     total = min(total_song_count(target_seconds, avg_song_seconds, params.stage_count), pool_size)
-    counts = distribute_counts(total, params.stage_count)
+    if params.stage_minutes and len(params.stage_minutes) == params.stage_count:
+        counts = distribute_counts_by_weights(total, params.stage_minutes)
+    else:
+        counts = distribute_counts(total, params.stage_count)
     return targets, counts
 
 

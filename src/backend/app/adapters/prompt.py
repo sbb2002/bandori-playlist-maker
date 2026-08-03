@@ -18,6 +18,7 @@ _ENERGY_RANGE = (0.0, 1.0)
 _STAGE_RANGE = (2, 5)
 _MINUTES_RANGE = (10, 180)
 _SUMMARY_MAX = 120
+_MIN_STAGE_MINUTES = 3.0  # 프론트 app.js MIN_WIDTH_MIN과 동일 하한(구간이 너무 촘촘해지는 것 방지)
 
 DEFAULT_BRIGHTNESS = 0.0
 DEFAULT_START_ENERGY = 0.4
@@ -49,6 +50,14 @@ SYSTEM_PROMPT = (
     "활동은 **반드시** 자연스러운 아크를 단계별로 담아라. 예: 러닝=[0.3,0.7,0.85,0.5](준비→가속→유지→마무리), "
     "유산소=[0.3,0.85,0.85,0.4]. 주면 start_energy/end_energy/stage_count보다 우선한다. 단순 상승/하강/일정만 "
     "생략하고 start/end로.\n"
+    "- stage_minutes: **반드시** 길이가 stage_count와 정확히 같은 실수 배열로 채워라(stage_params와 "
+    "마찬가지로 비워도 되는 선택 필드가 아니다 — null 금지). 합계는 target_minutes와 대략 같아야 "
+    "한다. **사용자가 특정 구간의 길이를 명시/암시하면(예: '마지막 5분은 릴랙스', '초반 10분 "
+    "워밍업만 짧게', '마지막에 차분한 구간을 길게') 그 구간만 다른 길이로 반드시 반영하라** — "
+    "균등분배(전 구간 동일 길이)로 뭉개면 안 된다. 예: 러닝(60분, 4단계, 마지막은 정리운동으로 "
+    "짧게)이면 [15,20,15,10]. 구간 길이에 대한 언급이 전혀 없으면 target_minutes를 stage_count로 "
+    "균등하게 나눈 값을 그대로 배열로 채운다(예: 40분 5단계면 [8,8,8,8,8]) — 이 경우에도 배열 "
+    "자체는 반드시 채우고 null을 반환하지 말 것.\n"
     "- target_minutes: 10~180 정수. 발화에 시간이 있으면 그대로. 없어도 **활동·상황이 암시하는 재생시간을 "
     "상식적 평균으로 reasonable하게 추정**해 넣어라(예: 5km 러닝≈40분, 공부 1세션≈50분, 낮잠≈20분, "
     "출퇴근≈40분, 파티≈120분). 정말 아무 단서도 없을 때만 null.\n"
@@ -89,6 +98,7 @@ SYSTEM_PROMPT = (
     '예: {"brightness":0.7,"start_energy":0.35,"end_energy":0.85,"stage_count":3,'
     '"target_minutes":60,"interpretation_summary":"주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",'
     '"tags":["드라이브","설렘","주말","고조되는"],"song_type":"all","same_as_previous":false,'
+    '"stage_minutes":[20,20,20],'
     '"stage_params":['
     '{"valence":0.55,"lufs_integrated":0.4,"lra":0.55,"danceability_norm":0.4,"instr_stem_ratio":0.5,"speech_median":0.45},'
     '{"valence":0.7,"lufs_integrated":0.65,"lra":0.4,"danceability_norm":0.65,"instr_stem_ratio":0.5,"speech_median":0.5},'
@@ -111,6 +121,7 @@ RESPONSE_JSON_SCHEMA = {
                 "end_energy": {"type": "number"},
                 "stage_count": {"type": "integer"},
                 "stage_energies": {"type": ["array", "null"], "items": {"type": "number"}},
+                "stage_minutes": {"type": ["array", "null"], "items": {"type": "number"}},
                 "stage_params": {
                     "type": ["array", "null"],
                     "items": {
@@ -142,6 +153,7 @@ RESPONSE_JSON_SCHEMA = {
                 "end_energy",
                 "stage_count",
                 "stage_energies",
+                "stage_minutes",
                 "stage_params",
                 "target_minutes",
                 "interpretation_summary",
@@ -273,6 +285,17 @@ def parse_mood(raw_text: str) -> MoodParameters:
     else:
         stage_energies = None
 
+    # 3.5단계: 단계별 길이(분) 의도(선택). 길이가 stage_count와 다르면(모델이 배열 길이를
+    # 못 맞춤) 신뢰하지 않고 None으로 폴백(선곡 엔진이 균등분배로 되돌아간다).
+    stage_minutes = obj.get("stage_minutes")
+    if isinstance(stage_minutes, list) and len(stage_minutes) == stage_count:
+        try:
+            stage_minutes = [max(_MIN_STAGE_MINUTES, float(m)) for m in stage_minutes]
+        except (TypeError, ValueError):
+            stage_minutes = None
+    else:
+        stage_minutes = None
+
     # 3단계: 단계별 신규 오디오 파라미터(선택). 배열 길이가 stage_count와 다르면(모델이 단계
     # 수를 안 맞췄거나 통째로 이상하면) 신뢰할 수 없다고 보고 전체를 None으로 폴백한다.
     # 개별 항목 안에서는 필드 하나가 이상해도 그 필드만 None 처리하고 나머지는 살린다.
@@ -329,6 +352,7 @@ def parse_mood(raw_text: str) -> MoodParameters:
         song_type=song_type,
         same_as_previous=same_as_previous,
         stage_params=stage_params,
+        stage_minutes=stage_minutes,
     )
 
 

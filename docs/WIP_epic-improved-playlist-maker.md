@@ -75,9 +75,30 @@ UI 적용 방향(백분위 슬라이더 7개 + ON/OFF 토글 1개 + 필터/태�
       갱신. PR #51(순차분리)은 재설계 필요 판단으로 이번엔 재사용 안 함 — 순차/다단계
       제어는 아직 미착수, 필요성 확인되면 별도 진행. **완료로 간주하되 아래 "알려진
       제약" 참고 — 4) 청취 중 다시 불거지면 별도 라운드로 착수.**)
-- [ ] 3.5) 단일응답 어댑터 — 버려지는 파라미터(구간별 길이) 해소 — **다음 작업
-      (메인 로컬/새 세션으로 인계, 2026-08-03)**
-- [ ] 4) 청취감 비교 및 머지 판단 — 3.5) 완료 후 착수
+- [x] 3.5) 단일응답 어댑터 — 버려지는 파라미터(구간별 길이) 해소 (2026-08-03, 메인 로컬에서
+      착수·완료)
+      (`MoodParameters.stage_minutes` 필드 신설(길이==stage_count 검증 + 3분 하한 클램프,
+      `prompt.py`) + `domain/energy.py`에 `distribute_counts_by_weights()`(largest-remainder
+      비율 배분) 신규 + `domain/selection.py._stage_targets_and_counts()`에 stage_minutes
+      있으면 균등분배 대신 이 비율로 곡 수 배분하는 분기 추가(stage_energies 유무 양쪽
+      경로 모두). SYSTEM_PROMPT·RESPONSE_JSON_SCHEMA도 갱신. 신규 테스트 10개 추가(전체
+      216 그린). `architecture.md` 스키마1 표 갱신. 로컬 테스트(백엔드 127.0.0.1:8000 +
+      프론트 127.0.0.1:5500, 실제 Groq 어댑터)에서 코드 검증 중 발견된 작업이라 실측
+      청취 테스트는 아직 별도.
+      **실측 중 발견·수정한 함정 2건(2026-08-03)**:
+      (a) 프롬프트가 처음엔 "선택, 언급 없으면 null" 조건부 톤이었더니 모델이 사용자가
+      명시적으로 구간 길이를 요청해도 계속 null 반환 — stage_params 도입 때와 같은 패턴
+      ([[feedback-llm-prompt-optional-field-omission]]). "**반드시** 배열로 채워라(null
+      금지, 언급 없으면 균등분배값을 배열로)" 톤 + 예시 JSON의 `stage_minutes:null`을
+      실제 배열로 교체하고서야 정상 반영됨.
+      (b) 백엔드가 stage_minutes를 정상 반영해도(picks의 stage_index별 곡 수가 실제로
+      불균등해짐) `app.js`의 AI→커스텀 모드 프리필(`prefillCustomFromLast`)이 항상
+      균등폭(1/n)으로 돌아가는 별개 버그 발견 — API 응답의 `stages` 에코엔애초에 폭/곡수
+      정보가 없어서(echo 전용 필드), 커스텀 모드로 넘어오면 "마지막 구간만 길게"가
+      사라져 보였음. `renderResult()`에서 `picks`의 stage_index 개수로 실제 배분 비율을
+      계산해 `lastStages[i].width`에 채워 넣도록 수정(제출 핸들러의 중복 `lastStages`
+      재할당은 이 width를 지워버려서 함께 제거).)
+- [ ] 4) 청취감 비교 및 머지 판단 — 3.5) 완료, 이제 착수 가능
 - [ ] (조건부, 3.5) 이후 청취감이 여전히 별로일 때만) 3) multistage로 어댑터 교체
       (단일응답 방식을 대체하는 별개 구현으로 갈아탄다 — 병행/폴백이 아님)
 

@@ -145,8 +145,8 @@ form.addEventListener("submit", async (e) => {
     renderResult(data);
     if (currentMode === "ai") {
       previousPrompt = $("prompt").value.trim();
-      // 성공한 AI 결과를 lastStages에 저장(커스텀 모드에서 기본값으로 사용)
-      lastStages = data.stages?.map(s => ({ ...s })) || [];
+      // lastStages(width 포함)는 renderResult가 이미 채워둔다 — 여기서 다시 덮어쓰면
+      // width 계산이 유실된다(재도입 금지).
     }
   } catch (err) {
     const offline = err instanceof TypeError;
@@ -924,8 +924,10 @@ function prefillCustomFromLast() {
 
   // lastStages는 두 출처를 가질 수 있어 형태가 다르다:
   //  (a) 위 폴백처럼 stageModel.segments를 그대로 복사한 경우 — energy/width 등 이미 정상 형태.
-  //  (b) AI 모드 응답의 setlist.stages 에코 — 필드명이 energy_target(energy 아님)이고
-  //      width가 아예 없으며, 신규 6개 파라미터는 AI가 채우지 않아 전부 null.
+  //  (b) AI 모드 응답의 setlist.stages 에코 — 필드명이 energy_target(energy 아님)이고,
+  //      신규 6개 파라미터는 AI가 채우지 않으면 전부 null. width는 renderResult가 실제
+  //      곡 배정 비율(picks의 stage_index 개수)로 미리 채워두지만, 곡이 0개인 구간처럼
+  //      드문 경우엔 없을 수 있어 그때만 균등폭(1/n)으로 폴백한다.
   //  (b)를 그대로 복사하면 energy/width가 undefined가 되고 신규 필드가 null인 채로 남아,
   //  이후 collectStagesForCustomMode()의 .toFixed() 호출이 크래시한다(실사용 버그로 발견됨).
   const n = lastStages.length;
@@ -1052,7 +1054,15 @@ function renderResult(data) {
 
   lastParams = data.params || {};
   lastAppliedBands = data.applied_bands || [];
-  lastStages = data.stages || [];
+  // AI 모드 응답은 stage_minutes 등 실제 배분 근거를 params/stages에 에코하지 않는다(echo 전용
+  // 필드가 아니라 선곡 엔진 내부에서만 소비됨) — 대신 실제 곡 배정 결과(picks의 stage_index별
+  // 개수)가 백엔드가 실제로 적용한 구간 길이 비율의 유일한 증거다. 여기서 width를 계산해두지
+  // 않으면 커스텀 모드 프리필(prefillCustomFromLast)이 항상 균등폭(1/n)으로 되돌아가
+  // "마지막 구간만 길게" 같은 요청이 커스텀 모드로 넘어오면서 사라져 보인다(실사용 버그로 발견).
+  lastStages = (data.stages || []).map((s, i) => {
+    const count = picks.filter((p) => p.stage_index === i).length;
+    return count > 0 ? { ...s, width: count / picks.length } : { ...s };
+  });
 
   // 백엔드가 재생 형태 override를 존중하지 않았다면(1회차·의도 변경 → honored_overrides=false) 사용자가
   // 만졌던 '재생 형태' 플래그를 풀어, 그래프·재생시간이 새 해석을 반영하도록 한다(고착 방지). 밴드·커버는

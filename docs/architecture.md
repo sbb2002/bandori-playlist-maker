@@ -93,6 +93,7 @@ composition root로 어댑터를 포트 자리에 주입. `domain/`은 `adapters
 | `interpretation_summary` | string ≤120자 | "" | 설명 전용(로직 무영향) |
 | `same_as_previous` | boolean\|null | null | **DEPRECATED(2026-08-03)** — 직전 요청과 의도가 같은지 LLM이 판정하던 필드. AI 모드/커스텀 모드가 명확히 분리된 뒤로는 라우팅에 쓰이지 않는다(§5-1 옛 핫픽스, 아래 스키마3 참고). 필드 자체는 하위호환을 위해 남아 있음(계속 파싱·전달되지만 무시됨) |
 | `stage_params` | array<object>\|null | null | 3단계(2026-08-03): AI 모드 단일 응답이 단계별로 함께 채우는 신규 오디오 지표. 길이는 `stage_count`와 같아야 함(안 맞으면 통째로 null 폴백). 각 객체 키는 `valence`·`lufs_integrated`·`lra`·`danceability_norm`·`instr_stem_ratio`·`speech_median`(전부 0.0~1.0, 개별 키 생략/null 허용). `stage_specs`(사용자 지정, 있으면 최우선)가 없을 때만 `Stage`에 반영됨(`selection.py`). **선곡 매칭 가중치엔 아직 미반영 — echo 전용**(energy만 매칭에 씀, §7 미해결 질문과 동일 선상) |
+| `stage_minutes` | array<number>\|null | null | 3.5단계(2026-08-03): 단계별 길이(분) 의도. 길이는 `stage_count`와 같아야 함(안 맞으면 통째로 null 폴백), 개별 값은 3분 하한 클램프(프론트 `MIN_WIDTH_MIN`과 동일 기준). 있으면 `_stage_targets_and_counts()`(`selection.py`)가 곡 수를 균등분배 대신 이 분 비율로 배분(`distribute_counts_by_weights`, largest-remainder). 없으면 기존 `distribute_counts` 균등분배(하위호환) — "마지막 5분은 릴랙스"처럼 특정 구간만 길이가 다른 요청을 곡 개수에도 반영하기 위한 필드 |
 
 검증 실패: 누락 필드 기본값 주입 / 완전 파싱 불가 시 `MoodInterpretationError`(재시도 없음, §7).
 

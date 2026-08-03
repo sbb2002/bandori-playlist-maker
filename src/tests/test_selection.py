@@ -186,6 +186,51 @@ def test_stage_energies_produce_nonmonotonic_arc():
     assert [s.energy_target for s in setlist.stages] == [0.2, 0.9, 0.3]
 
 
+def test_stage_minutes_skews_song_counts_with_stage_energies():
+    # 3.5단계: stage_energies + stage_minutes 조합 — 가운데 단계가 훨씬 길면 곡도 더 많이 배정.
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=3,
+        target_minutes=None, interpretation_summary="", stage_energies=[0.2, 0.9, 0.3],
+        stage_minutes=[10.0, 40.0, 10.0],
+    )
+    setlist = build_setlist(_songs(), params, target_seconds=9 * 213, rng=random.Random(0))
+    counts = [sum(1 for p in setlist.picks if p.stage_index == i) for i in range(3)]
+    assert counts[1] > counts[0]
+    assert counts[1] > counts[2]
+    assert sum(counts) == len(setlist.picks)
+
+
+def test_stage_minutes_skews_song_counts_without_stage_energies():
+    # stage_energies 없이 start/end 선형 아크만 있어도 stage_minutes는 반영돼야 한다.
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.2, end_energy=0.9, stage_count=3,
+        target_minutes=None, interpretation_summary="", stage_minutes=[5.0, 5.0, 40.0],
+    )
+    setlist = build_setlist(_songs(), params, target_seconds=9 * 213, rng=random.Random(0))
+    counts = [sum(1 for p in setlist.picks if p.stage_index == i) for i in range(3)]
+    assert counts[2] > counts[0]
+    assert counts[2] > counts[1]
+
+
+def test_stage_minutes_ignored_when_length_mismatches_stage_count():
+    # 배열 길이가 stage_count와 다르면(모델 실수) 신뢰하지 않고 균등분배로 폴백 —
+    # stage_minutes가 아예 없을 때와 결과(단계별 곡 수)가 완전히 같아야 한다.
+    base_params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=3,
+        target_minutes=None, interpretation_summary="", stage_energies=[0.2, 0.9, 0.3],
+    )
+    mismatched_params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=3,
+        target_minutes=None, interpretation_summary="", stage_energies=[0.2, 0.9, 0.3],
+        stage_minutes=[10.0, 40.0],  # 길이 2 != stage_count 3
+    )
+    setlist_base = build_setlist(_songs(), base_params, target_seconds=9 * 213, rng=random.Random(0))
+    setlist_mismatched = build_setlist(_songs(), mismatched_params, target_seconds=9 * 213, rng=random.Random(0))
+    counts_base = [sum(1 for p in setlist_base.picks if p.stage_index == i) for i in range(3)]
+    counts_mismatched = [sum(1 for p in setlist_mismatched.picks if p.stage_index == i) for i in range(3)]
+    assert counts_mismatched == counts_base
+
+
 def test_stage_specs_energy_clamped():
     specs = [StageSpec(energy_target=5.0, song_count=1), StageSpec(energy_target=-3.0, song_count=1)]
     setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs, rng=random.Random(0))

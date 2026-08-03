@@ -79,6 +79,11 @@ class MoodParameters:
     # 첫 요청 등) 이 값을 Stage에 반영한다 — 선곡 매칭 가중치엔 아직 안 씀(echo 전용, 2단계
     # "배관만" 결정 계승).
     stage_params: list[dict[str, float | None]] | None = None
+    # 3.5단계: 단계별 길이(분) 의도(선택). 주어지면(길이==stage_count) 곡 수를 균등분배 대신
+    # 이 분 비율로 배분한다(selection.py의 _stage_targets_and_counts) — "마지막 5분은
+    # 릴랙스"처럼 특정 구간만 짧게/길게 요청한 의도가 곡 개수에도 반영되도록. None이면 기존
+    # 균등분배(distribute_counts) 그대로 — 하위호환.
+    stage_minutes: list[float] | None = None
 
 
 @dataclass(frozen=True)
