@@ -347,6 +347,15 @@ input[type="number"] { -moz-appearance: textfield; }
 .impression-input::placeholder { color: var(--muted); }
 .impression-input:focus { outline: none; border-color: var(--accent); }
 .impression-input.linked { background: rgba(255,255,255,0.16); border-color: var(--accent-2); }
+/* 구간별 밴드 셀렉터 — 감성 설정 텍스트박스 오른쪽(전역 밴드 필터와 별개, 이 구간만 고정). */
+.impression-band-select {
+  flex: 0 0 auto; max-width: 88px; min-width: 0;
+  font-size: 0.72rem; padding: 5px 6px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.14); background: var(--card-2); color: var(--text);
+  font-family: inherit; transition: border-color 0.12s, background 0.12s;
+}
+.impression-band-select:focus { outline: none; border-color: var(--accent); }
+.impression-band-select.linked { background: rgba(255,255,255,0.16); border-color: var(--accent-2); }
 
 /* 고급 설정 — 접이식이 아니라 항상 펼쳐둠(이 화면 전체가 이미 세부설정 진입 화면이라
    한 번 더 접을 필요가 없음). 나머지 지표는 기존 시간구간 그래프 UI를 그대로 재사용. */

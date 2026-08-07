@@ -288,6 +288,7 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
                 instr_stem_ratio=st.instr_stem_ratio,
                 speech_median=st.speech_median,
                 impression=st.impression,
+                band=st.band,
             )
             for st in payload.stages
         ]

@@ -113,6 +113,9 @@ class Stage:
     # 프로토타입(다중 파라미터 체제 위 가사 감상 매칭): 이 스테이지의 가사 정서 텍스트(리포트용,
     # 사용자 비노출·디버그 전용). LLM stage_params[i].impression에서 옴 — selection.py가 채운다.
     impression: str | None = None
+    # 프로토타입: 이 스테이지에 실제로 적용된 고정 밴드(리포트용). resolve_stage_band()의
+    # 결과를 selection.py가 그대로 echo — 사용자 비노출, 디버그 스냅샷 전용.
+    band: str | None = None
     # TODO(data-pipeline): songs_master.csv에 컬럼 추가 후 domain/selection.py 매칭에 반영
 
 

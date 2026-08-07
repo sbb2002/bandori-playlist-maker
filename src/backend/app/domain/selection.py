@@ -500,6 +500,7 @@ def build_setlist(
             instr_stem_ratio=target_params["instr_stem_ratio"],
             speech_median=target_params["speech_median"],
             impression=target_params["impression"],
+            band=stage_bands_resolved[stage_index],
         ))
         if not members:
             continue
