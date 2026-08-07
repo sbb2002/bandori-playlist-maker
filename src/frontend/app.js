@@ -232,6 +232,21 @@ const manualBands = new Set();
 // 감성 설정 구간별 밴드 셀렉터(#impression-row) 옵션 채우기용 — loadBands()가 채운다.
 let cachedBands = [];
 
+// bandori-song-sorter와 동일한 밴드 나열 순서(아이콘 애셋은 assets/bands/<band>.png, 미포함은
+// 뒤). renderStageGraph()가 페이지 로드 시 동기적으로 한 번 실행되며 구간별 밴드 셀렉터를
+// 채우려고 이 함수를 곧바로 호출하므로, 파일 하단에 두면 TDZ(const 초기화 전 접근)로
+// ReferenceError가 나 스크립트 전체가 중단된다(실사용 버그로 발견) — 반드시 최상단에 둘 것.
+const BAND_ORDER = [
+  "poppin_party", "afterglow", "pastel_palettes", "roselia",
+  "hello_happy_world", "morfonica", "raise_a_suilen", "mygo",
+  "ave_mujica", "mugendai_mutype", "millsage", "ikka_dumb_rock",
+];
+function bandsInSelectorOrder(present) {
+  const ordered = BAND_ORDER.filter((b) => present.includes(b));
+  const rest = present.filter((b) => !BAND_ORDER.includes(b)).sort();
+  return [...ordered, ...rest];
+}
+
 async function loadBands() {
   try {
     const res = await fetch(`${API_BASE}/api/bands`);
@@ -2137,19 +2152,7 @@ function isCoverSong(song) {
   return song.song.toLowerCase().includes("(cover)");
 }
 
-// bandori-song-sorter와 동일한 밴드 나열 순서 + 아이콘 애셋(assets/bands/<band>.png, 미포함은 뒤).
-const BAND_ORDER = [
-  "poppin_party", "afterglow", "pastel_palettes", "roselia",
-  "hello_happy_world", "morfonica", "raise_a_suilen", "mygo",
-  "ave_mujica", "mugendai_mutype", "millsage", "ikka_dumb_rock",
-];
 const BAND_ICON_BASE = "assets/bands";
-
-function bandsInSelectorOrder(present) {
-  const ordered = BAND_ORDER.filter((b) => present.includes(b));
-  const rest = present.filter((b) => !BAND_ORDER.includes(b)).sort();
-  return [...ordered, ...rest];
-}
 
 // 밴드 아이콘 img(로드 실패 시 _fallback로 1회 대체). bandori-song-sorter 애셋 재사용.
 function makeBandIcon(band, cls) {
