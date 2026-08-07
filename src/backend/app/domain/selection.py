@@ -486,6 +486,12 @@ def build_setlist(
                     energy=s.energy,
                     stage_index=stage_index,
                     reason=reason,
+                    valence=s.valence,
+                    lufs_integrated=s.lufs_integrated,
+                    lra=s.lra,
+                    danceability_norm=s.danceability_norm,
+                    instr_stem_ratio=s.instr_stem_ratio,
+                    speech_median=s.speech_median,
                 )
             )
             prev = s

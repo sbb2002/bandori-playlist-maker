@@ -117,6 +117,12 @@ def serialize_setlist(setlist: Setlist) -> dict:
                 "camelot": p.camelot,
                 "energy": p.energy,
                 "stage_index": p.stage_index,
+                "valence": p.valence,
+                "lufs_integrated": p.lufs_integrated,
+                "lra": p.lra,
+                "danceability_norm": p.danceability_norm,
+                "instr_stem_ratio": p.instr_stem_ratio,
+                "speech_median": p.speech_median,
                 "reason": {
                     "stage_energy_target": p.reason.stage_energy_target,
                     "matched_energy": p.reason.matched_energy,

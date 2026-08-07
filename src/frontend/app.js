@@ -297,11 +297,11 @@ const MIN_WIDTH_MIN = 3; // 구간 최소 길이(분) — 구간이 너무 촘�
 
 // 고급 설정 그래프 5개
 const PARAM_DEFS = [
-  { key: "lufs_integrated", label: "라우드니스", col: "m4-lufs_integrated" },
-  { key: "lra", label: "다이내믹 범위", col: "m4-lra" },
-  { key: "danceability_norm", label: "리듬감", col: "m7-danceability_norm" },
-  { key: "instr_stem_ratio", label: "보컬/악기 비중", col: "m9-instr_stem_ratio" },
-  { key: "speech_median", label: "음절밀도", col: "m11-speech_median" },
+  { key: "lufs_integrated", label: "라우드니스", desc: "높을수록 크고 힘있는 곡이, 낮을수록 조용한 곡이 선택됩니다." },
+  { key: "lra", label: "다이내믹 범위", desc: "높을수록 벅차는 느낌의 곡이, 낮을수록 일정한 느낌의 곡이 선택됩니다." },
+  { key: "danceability_norm", label: "리듬감", desc: "높을수록 리드미컬한 곡이, 낮을수록 변칙적인 리듬의 곡이 선택됩니다." },
+  { key: "instr_stem_ratio", label: "악기 비중", desc: "높을수록 악기 비중이 높은 곡이, 낮을수록 보컬 비중이 높은 곡이 선택됩니다." },
+  { key: "speech_median", label: "음절밀도", desc: "높을수록 랩 성향의 곡이, 낮을수록 랩이 아닌 곡이 선택됩니다." },
 ];
 
 // 고급 설정 그래프용 여백
@@ -571,7 +571,6 @@ function renderStageGraph() {
   }
 
   function updateTimebar() {
-    timebarTotalLabelEl.textContent = `총 ${stageModel.totalMinutes}분`;
     const { cum } = centers();
     stageModel.segments.forEach((s, i) => {
       const seg = timebarSegEls[i];
@@ -631,6 +630,15 @@ function renderStageGraph() {
   // 타임바(.timebar-num)와 같은 동그라미 순번 스타일(.impression-badge)을 재사용.
   let impressionInputEls = [];
   let impressionBadgeEls = [];
+  // placeholder용 예시 문구 — 빈 입력창이 "가사 감상(선택)"처럼 막연하지 않고, 어떤 식으로
+  // 적으면 되는지 감이 오도록 구간 순서대로 다른 예시를 보여준다.
+  const IMPRESSION_PLACEHOLDER_EXAMPLES = [
+    "설레고 두근거리는 마음",
+    "지치고 무거운 마음을 다독이는 위로",
+    "터질 듯한 흥분과 해방감",
+    "쓸쓸하고 애틋한 그리움",
+    "작은 희망을 붙잡는 담담한 의지",
+  ];
 
   function buildImpressionRow() {
     impressionRowEl.innerHTML = "";
@@ -649,7 +657,7 @@ function renderStageGraph() {
       input.type = "text";
       input.className = "impression-input";
       input.maxLength = 100;
-      input.placeholder = "가사 감상(선택)";
+      input.placeholder = `ex. ${IMPRESSION_PLACEHOLDER_EXAMPLES[i % IMPRESSION_PLACEHOLDER_EXAMPLES.length]}`;
       input.value = s.impression || "";
       input.addEventListener("input", () => {
         stageTouched = true;
@@ -677,7 +685,7 @@ function renderStageGraph() {
 
   function buildParamGraphs() {
     paramGraphsEl.innerHTML = "";
-    paramCharts = PARAM_DEFS.map(({ key, label, col }) => {
+    paramCharts = PARAM_DEFS.map(({ key, label, desc }) => {
       const wrap = document.createElement("div");
       wrap.className = "param-graph";
 
@@ -685,10 +693,13 @@ function renderStageGraph() {
       head.className = "param-head";
       const strong = document.createElement("strong");
       strong.textContent = label;
-      const unit = document.createElement("span");
-      unit.className = "param-unit";
-      unit.textContent = col;
-      head.append(strong, unit);
+      head.append(strong);
+
+      const descEl = document.createElement("ul");
+      descEl.className = "field-note";
+      const descLi = document.createElement("li");
+      descLi.textContent = desc;
+      descEl.appendChild(descLi);
 
       const plotRow = document.createElement("div");
       plotRow.className = "plot-row";
@@ -738,7 +749,7 @@ function renderStageGraph() {
       });
 
       plotRow.append(yAxis, plot);
-      wrap.append(head, plotRow);
+      wrap.append(head, descEl, plotRow);
       paramGraphsEl.appendChild(wrap);
 
       const chart = { key, plot, curve, area, boundaryLines, dotEls };
@@ -1224,18 +1235,16 @@ function renderTracklist(list) {
     band.className = "band";
     band.textContent = prettyBand(p.band);
 
-    const reason = document.createElement("div");
-    reason.className = "reason";
-    reason.textContent = (p.reason && p.reason.text) || "";
-
     const badges = document.createElement("div");
     badges.className = "badges";
     const h = p.reason ? p.reason.harmonic : "";
     badges.appendChild(makeBadge(h, harmonicLabelKo(h), harmonicTooltipKo(h)));
-    badges.appendChild(makeEnergyBadge(p.energy));
-    badges.appendChild(makeBadge("key", keyLabel(p.camelot)));
+    badges.appendChild(makeBadge("key", keyLabel(p.camelot), "조성(Camelot " + (p.camelot || "") + ")"));
+    for (const { key, label } of PICK_PARAM_DEFS) {
+      if (typeof p[key] === "number") badges.appendChild(makeParamBadge(label, p[key]));
+    }
 
-    bodyEl.append(title, band, reason, badges);
+    bodyEl.append(title, band, badges);
     attachTrackLongPress(bodyEl, i); // 우클릭·길게누름 → "다음 곡 추가"/"현재 곡 제거" 메뉴
     li.append(pos, bodyEl, makeTrackActions(li, i));
     li.appendChild(makeInserter(i + 1)); // 이 트랙 '다음'(배열 index i+1) 삽입점
@@ -1564,23 +1573,6 @@ document.addEventListener(
   },
   true,
 );
-
-// 에너지 배지 — 미니 가로 바 + 숫자(디자인 검토 아티팩트 "A안" 채택분).
-function makeEnergyBadge(energy) {
-  const b = document.createElement("span");
-  b.className = "badge badge-energy";
-  const track = document.createElement("span");
-  track.className = "bar-track";
-  const fill = document.createElement("span");
-  fill.className = "bar-fill";
-  fill.style.width = `${Math.round(clamp01(energy) * 100)}%`;
-  track.appendChild(fill);
-  const num = document.createElement("span");
-  num.className = "num";
-  num.textContent = fmtNum(energy);
-  b.append(track, num);
-  return b;
-}
 
 function makeBadge(kind, label, tooltip) {
   const b = document.createElement("span");
@@ -2899,6 +2891,34 @@ const CAMELOT_TO_KEY_LABEL = {
 };
 function keyLabel(camelot) {
   return CAMELOT_TO_KEY_LABEL[camelot] || camelot;
+}
+// 트랙 리스트의 곡별 파라미터 태그 — 6개 오디오 지표(PARAM_DEFS + 밝기)를 짧은 배지로.
+const PICK_PARAM_DEFS = [
+  { key: "valence", label: "밝기" },
+  { key: "lufs_integrated", label: "라우드" },
+  { key: "lra", label: "다이내믹" },
+  { key: "danceability_norm", label: "리듬감" },
+  { key: "instr_stem_ratio", label: "악기" },
+  { key: "speech_median", label: "음절" },
+];
+// 곡별 파라미터 배지 — 예전 에너지 배지(미니 바 + 숫자)와 동일한 표현, 라벨만 앞에 붙인다.
+function makeParamBadge(label, value) {
+  const b = document.createElement("span");
+  b.className = "badge badge-param";
+  const lb = document.createElement("span");
+  lb.className = "label";
+  lb.textContent = label;
+  const track = document.createElement("span");
+  track.className = "bar-track";
+  const fill = document.createElement("span");
+  fill.className = "bar-fill";
+  fill.style.width = `${Math.round(clamp01(value) * 100)}%`;
+  track.appendChild(fill);
+  const num = document.createElement("span");
+  num.className = "num";
+  num.textContent = String(Math.round(clamp01(value) * 100));
+  b.append(lb, track, num);
+  return b;
 }
 function harmonicLabelKo(h) {
   return { seed: "시작곡", same: "동일조성", adjacent: "하모닉인접", non_harmonic: "조성전환", added: "추가한 곡" }[h] || h;

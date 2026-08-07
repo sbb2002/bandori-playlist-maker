@@ -163,6 +163,14 @@ class Pick:
     energy: float
     stage_index: int
     reason: PickReason
+    # 곡 자체의 오디오 지표 6종(Song에서 그대로 복사) — 트랙 리스트 태그 UI가 스테이지
+    # 목표가 아니라 "이 곡"의 실제 값을 보여주는 데 씀. 컬럼 없는 곡/스냅샷이면 None.
+    valence: float | None = None
+    lufs_integrated: float | None = None
+    lra: float | None = None
+    danceability_norm: float | None = None
+    instr_stem_ratio: float | None = None
+    speech_median: float | None = None
 
 
 @dataclass(frozen=True)
