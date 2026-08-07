@@ -6670,6 +6670,14 @@
             "x": 33.5,
             "y": -10.87,
             "bpm": 143.6
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "一番のひかり",
+            "url": "https://youtu.be/9YjehFo3hAw",
+            "x": 30.81,
+            "y": 22.01,
+            "bpm": 117.5
         }
     ],
     "centroids": [
@@ -6711,9 +6719,9 @@
         },
         {
             "band": "mugendai_mutype",
-            "n": 71,
-            "x": 3.75,
-            "y": 7.75
+            "n": 72,
+            "x": 4.12,
+            "y": 7.94
         },
         {
             "band": "mygo",
@@ -6757,7 +6765,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 732,
+        "n": 733,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
