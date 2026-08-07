@@ -368,7 +368,7 @@ input[type="number"] { -moz-appearance: textfield; }
    동일한 디자인을 그대로 재사용하되, 카드 위에 뜨는 패널이라 배경·그림자·스크롤을 추가. */
 .impression-band-popup {
   position: absolute; z-index: 30; top: 50%; left: calc(100% + 8px); transform: translateY(-50%);
-  width: 220px; max-height: 220px; overflow-y: auto;
+  width: 220px;
   background: var(--card); border: 1px solid rgba(255,255,255,0.14); border-radius: 10px;
   padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.45);
 }
