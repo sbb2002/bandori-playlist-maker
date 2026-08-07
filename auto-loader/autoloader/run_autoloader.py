@@ -43,6 +43,7 @@ from __future__ import annotations
 import argparse
 import httpx
 import json
+import numpy as np
 import os
 import subprocess
 import sys
@@ -273,7 +274,7 @@ def _prepare_norms(repo_root: Path, master_rows: list[dict], audio_dir: Path,
                             "method-7-danceability" / "out" / "csv" / "danceability_raw.csv")
         else:
             # Try sibling directory relative to this repo
-            potential = (repo_root.parents[1] / "bpm-research" / "topic" / "20260731_audio_feats_revised" /
+            potential = (repo_root.parent / "bpm-research" / "topic" / "20260731_audio_feats_revised" /
                         "method-7-danceability" / "out" / "csv" / "danceability_raw.csv")
             if potential.exists():
                 dance_raw_csv = potential
@@ -538,7 +539,7 @@ def main(argv=None) -> int:
     # ③ 동결 norm(soft-run이면 intensity_norm 실패를 흡수)
     p_norms, ef, (med, mad), shape_norms, df, intensity_ready = _prepare_norms(
         repo_root, master_rows, audio_dir, a.workers, soft=a.soft,
-        bpm_research_root=Path(a.sorter_repo).parent.parent)
+        bpm_research_root=Path(a.sorter_repo).parent)
 
     # ④ 정상(비-soft) run이면, 먼저 이전 soft-run이 남긴 provisional i_*를 백필
     if not a.soft and intensity_ready and not a.dry:
