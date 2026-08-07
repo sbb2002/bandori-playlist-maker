@@ -24,6 +24,17 @@ class StageInput(BaseModel):
     danceability_norm: float | None = Field(default=None, ge=0.0, le=1.0, description="리듬감 0~1")
     instr_stem_ratio: float | None = Field(default=None, ge=0.0, le=1.0, description="악기 비율 0~1")
     speech_median: float | None = Field(default=None, ge=0.0, le=1.0, description="음절 밀도 0~1")
+    # 프로토타입: 커스텀 모드에서 사용자가 직접 입력하는 가사 감상(선택). 비우면 기존과 동일하게
+    # 가사 유사도 타이브레이크가 중립(비활성) 처리된다.
+    impression: str | None = Field(default=None, max_length=100, description="이 단계의 가사 감상(선택)")
+
+    @field_validator("impression")
+    @classmethod
+    def _blank_impression_to_none(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        return v or None
 
     @model_validator(mode="after")
     def _require_size(self) -> "StageInput":
@@ -74,6 +85,12 @@ def serialize_setlist(setlist: Setlist) -> dict:
             "interpretation_summary": setlist.params.interpretation_summary,
             "tags": setlist.params.tags or [],
             "song_type": setlist.params.song_type,
+            # 디버그 전용 노출(일반 UI는 안 읽음, "현재 상태 복사" 스냅샷용) — AI가 실제로
+            # 산출한 원시 파라미터를 빠짐없이 확인하려는 목적. stage_params(6개 수치+
+            # impression)는 이미 stages[]에 스테이지별로 echo되므로 여기선 생략.
+            "stage_energies": setlist.params.stage_energies,
+            "stage_minutes": setlist.params.stage_minutes,
+            "same_as_previous": setlist.params.same_as_previous,
         },
         "stages": [
             {
@@ -85,6 +102,7 @@ def serialize_setlist(setlist: Setlist) -> dict:
                 "danceability_norm": s.danceability_norm,
                 "instr_stem_ratio": s.instr_stem_ratio,
                 "speech_median": s.speech_median,
+                "impression": s.impression,
             }
             for s in setlist.stages
         ],

@@ -239,12 +239,18 @@ def _resolve_stage_target_params(
     stage_index: int,
     stage_specs: list[StageSpec] | None,
     params: MoodParameters,
-) -> dict[str, float | None]:
-    """스테이지 하나의 신규 지표 6종 목표값을 결정한다(스펙 우선, 그다음 LLM stage_params).
+) -> dict[str, float | str | None]:
+    """스테이지 하나의 신규 지표 6종 + 가사 감상(impression) 목표값을 결정한다(스펙 우선,
+    그다음 LLM stage_params).
 
     Stage A(선곡)·Stage 리포트(echo) 양쪽에서 동일한 우선순위 규칙을 쓰기 위해 분리(이전엔
     build_setlist 안의 클로저 `_field()`가 리포트 용도로만 있었다 — 이제 선곡에도 같은 값을
     써야 하므로 루프 시작 전에 한 번만 계산해 재사용한다).
+
+    `impression`도 6개 수치와 동일한 우선순위(스펙 우선 → LLM stage_params 폴백)를 따른다 —
+    커스텀 모드 사용자가 직접 입력한 텍스트가 있으면 그걸 쓰고, 없으면 AI 모드 해석 결과를 쓴다.
+    `_stage_param_distance`는 `_NEW_STAGE_PARAM_FIELDS`(수치 6종)만 순회하므로 이 키가 섞여
+    있어도 안전하게 무시된다.
     """
     spec = stage_specs[stage_index] if stage_specs else None
     llm_stage = (
@@ -252,13 +258,31 @@ def _resolve_stage_target_params(
         if params.stage_params and stage_index < len(params.stage_params)
         else None
     )
-    resolved: dict[str, float | None] = {}
+    resolved: dict[str, float | str | None] = {}
     for field in _NEW_STAGE_PARAM_FIELDS:
         value = getattr(spec, field) if spec is not None else None
         if value is None and llm_stage is not None:
             value = llm_stage.get(field)
         resolved[field] = value
+    spec_impression = getattr(spec, "impression", None) if spec is not None else None
+    resolved["impression"] = spec_impression or (
+        llm_stage.get("impression") if llm_stage is not None else None
+    )
     return resolved
+
+
+def resolve_stage_impression_text(
+    stage_index: int,
+    stage_specs: list[StageSpec] | None,
+    params: MoodParameters,
+) -> str | None:
+    """스테이지 하나의 가사 감상 텍스트를 우선순위 규칙대로 해석한다(공개 API).
+
+    라우트가 `build_setlist()` 호출 전에 이 텍스트를 임베딩 어댑터로 벡터화해 넘겨야 하므로
+    (도메인은 임베딩 모델을 모름), `_resolve_stage_target_params`와 동일한 규칙을 노출하는
+    얇은 래퍼 — 로직 중복 없이 라우트가 재사용한다.
+    """
+    return _resolve_stage_target_params(stage_index, stage_specs, params)["impression"]
 
 
 def _stage_param_distance(song: Song, target: dict[str, float | None]) -> float:
@@ -271,6 +295,19 @@ def _stage_param_distance(song: Song, target: dict[str, float | None]) -> float:
             continue
         diffs.append(abs(v - t))
     return sum(diffs) / len(diffs) if diffs else 0.0
+
+
+def _lyric_similarity(song: Song, target_vec: list[float] | None) -> float:
+    """곡의 가사 감상 임베딩과 스테이지 목표 임베딩의 코사인 유사도(프로토타입, 4순위 타이브레이크).
+
+    둘 다 사전 L2-정규화되어 있다고 가정(어댑터·오프라인 스크립트가 보장) — 그러면 코사인
+    유사도는 단순 내적과 같다. `song.lyric_vec`나 `target_vec` 중 하나라도 없으면(가사
+    매칭 데이터 없는 곡, LLM이 impression을 못 채운 경우) `0.0`(중립) — 기존 3개 우선순위
+    (energy 하드필터·밝기·6개 수치 지표)만으로 동작하던 기존 흐름을 그대로 보존한다.
+    """
+    if song.lyric_vec is None or target_vec is None:
+        return 0.0
+    return sum(a * b for a, b in zip(song.lyric_vec, target_vec))
 
 
 def _stage_targets_and_counts(
@@ -312,6 +349,7 @@ def build_setlist(
     band_filter: set[str] | None = None,
     stage_specs: list[StageSpec] | None = None,
     rng: random.Random | None = None,
+    stage_impression_vectors: list[list[float] | None] | None = None,
 ) -> Setlist:
     """무드/에너지 파라미터로 세트리스트를 구성한다(2단계 SELECT→SEQUENCE).
 
@@ -323,6 +361,11 @@ def build_setlist(
         band_filter: 밴드 화이트리스트(설정 기능 §5-1b, 기본 None=ALL).
         stage_specs: 사용자 지정 단계 스펙(설정 기능 §5-1a).
         rng: Stage A 후보 셔플 RNG. None이면 매 호출 새 시드(운영: 변주). 동일 시드 → 재현.
+        stage_impression_vectors: 스테이지별 가사 감상 목표 임베딩(프로토타입). 라우트가
+            `MoodParameters.stage_params[i]["impression"]`을 임베딩 어댑터로 미리 벡터화해
+            넘긴다(도메인은 임베딩 모델을 직접 호출하지 않음 — 클린 아키텍처 불변식). 길이는
+            stage_count와 같아야 하며, 인덱스가 벗어나거나 항목이 None이면 그 스테이지는
+            가사 유사도 타이브레이크 없이(중립) 기존 동작 그대로.
 
     Returns:
         Setlist(단계·추정시간·곡 순서·선곡 이유 포함).
@@ -361,6 +404,11 @@ def build_setlist(
     for stage_index, count in enumerate(counts):
         chosen: list[Song] = []
         target_params = stage_target_params[stage_index]
+        stage_target_vec = (
+            stage_impression_vectors[stage_index]
+            if stage_impression_vectors and stage_index < len(stage_impression_vectors)
+            else None
+        )
         for _ in range(count):
             if not remaining:
                 break
@@ -371,11 +419,13 @@ def build_setlist(
             if window:
                 # 허용창 내 곡은 모두 무드 부합 → rng 셔플로 변주 후 밝기 버킷 근접 우선(재현적),
                 # 그다음 신규 지표 6종(valence 등) 거리로 타이브레이크(3.5단계 — 지표 없는
-                # 곡/요청이면 거리 0이라 이 tiebreak는 자동으로 무력화되고 기존 동작 그대로).
+                # 곡/요청이면 거리 0이라 이 tiebreak는 자동으로 무력화되고 기존 동작 그대로),
+                # 마지막으로 가사 감상 임베딩 유사도(프로토타입, 4순위 — 벡터 없으면 0.0 중립).
                 rng.shuffle(window)
                 window.sort(key=lambda s: (
                     round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET),
-                    _stage_param_distance(s, target_params),
+                    round(_stage_param_distance(s, target_params), 4),
+                    -_lyric_similarity(s, stage_target_vec),
                 ))
                 pick = window[0]
             else:
@@ -412,6 +462,7 @@ def build_setlist(
             danceability_norm=target_params["danceability_norm"],
             instr_stem_ratio=target_params["instr_stem_ratio"],
             speech_median=target_params["speech_median"],
+            impression=target_params["impression"],
         ))
         if not members:
             continue

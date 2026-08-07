@@ -211,6 +211,7 @@ const mapSvgEl = $("map-svg");
 const timebarEl = $("timebar");
 const timebarTicksEl = $("timebar-ticks");
 const timebarTotalLabelEl = $("timebar-total-label");
+const impressionRowEl = $("impression-row");
 const stageNEl = $("stage-n");
 const paramGraphsEl = $("param-graphs");
 const bgToggleEl = $("bg-toggle");
@@ -394,6 +395,7 @@ function initStageModel(n = DEFAULT_STAGE_COUNT) {
       danceability_norm: 0.5,
       instr_stem_ratio: 0.5,
       speech_median: 0.5,
+      impression: "",
     });
   }
   stageModel = { totalMinutes: total, segments };
@@ -405,6 +407,7 @@ function renderStageGraph() {
   function buildAllGraphics() {
     buildMap();
     buildTimebar();
+    buildImpressionRow();
     buildParamGraphs();
     updateAllGraphics();
   }
@@ -412,6 +415,7 @@ function renderStageGraph() {
   function updateAllGraphics() {
     updateMap();
     updateTimebar();
+    updateImpressionRow();
     updateAllParamCharts();
     stageNEl.textContent = `${stageModel.segments.length}구간`;
     stageMinusBtn.disabled = stageModel.segments.length <= MIN_SEGMENTS;
@@ -618,6 +622,54 @@ function renderStageGraph() {
     mapNodeEls.forEach((n, j) => n.classList.toggle("linked", j === i));
     timebarSegEls.forEach((seg, j) => seg.classList.toggle("linked", j === i));
     timebarNumEls.forEach((num, j) => num.classList.toggle("linked", j === i));
+    impressionInputEls.forEach((el, j) => el.classList.toggle("linked", j === i));
+    impressionBadgeEls.forEach((el, j) => el.classList.toggle("linked", j === i));
+  }
+
+  // ── 구간별 가사 감상(선택, 프로토타입) ──────────────────────────────────────
+  // "[①] 구간 [입력창]" 형태로 구간마다 한 줄씩 세로로 나열. 배지는 정서 지도(.stage-node)·
+  // 타임바(.timebar-num)와 같은 동그라미 순번 스타일(.impression-badge)을 재사용.
+  let impressionInputEls = [];
+  let impressionBadgeEls = [];
+
+  function buildImpressionRow() {
+    impressionRowEl.innerHTML = "";
+    impressionBadgeEls = [];
+    impressionInputEls = stageModel.segments.map((s, i) => {
+      const item = document.createElement("div");
+      item.className = "impression-item";
+      const badge = document.createElement("span");
+      badge.className = "impression-badge";
+      badge.textContent = String(i + 1);
+      impressionBadgeEls.push(badge);
+      const label = document.createElement("span");
+      label.className = "impression-item-label";
+      label.textContent = "구간";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "impression-input";
+      input.maxLength = 100;
+      input.placeholder = "가사 감상(선택)";
+      input.value = s.impression || "";
+      input.addEventListener("input", () => {
+        stageTouched = true;
+        stageModel.segments[i].impression = input.value;
+      });
+      input.addEventListener("pointerenter", () => setLinked(i));
+      input.addEventListener("pointerleave", () => setLinked(-1));
+      item.append(badge, label, input);
+      impressionRowEl.appendChild(item);
+      return input;
+    });
+  }
+
+  function updateImpressionRow() {
+    stageModel.segments.forEach((s, i) => {
+      // 입력 중(포커스)인 칸은 값을 되쓰지 않는다 — 드래그 등으로 다시 그려질 때 커서 위치 보존.
+      if (document.activeElement !== impressionInputEls[i]) {
+        impressionInputEls[i].value = s.impression || "";
+      }
+    });
   }
 
   // ── 고급 설정 그래프 ──────────────────────────────────────────────────────
@@ -776,6 +828,7 @@ function collectStages() {
     danceability_norm: +s.danceability_norm.toFixed(3),
     instr_stem_ratio: +s.instr_stem_ratio.toFixed(3),
     speech_median: +s.speech_median.toFixed(3),
+    impression: (s.impression || "").trim() || null,
   }));
 }
 
@@ -796,6 +849,7 @@ function syncGraphToParams(params, stages) {
         danceability_norm: 0.5,
         instr_stem_ratio: 0.5,
         speech_median: 0.5,
+        impression: "",
       };
     });
   } else {
@@ -814,6 +868,7 @@ function syncGraphToParams(params, stages) {
         danceability_norm: 0.5,
         instr_stem_ratio: 0.5,
         speech_median: 0.5,
+        impression: "",
       });
     }
   }
@@ -850,6 +905,7 @@ function initStageControls() {
       danceability_norm: last.danceability_norm,
       instr_stem_ratio: last.instr_stem_ratio,
       speech_median: last.speech_median,
+      impression: "", // 새 구간은 빈 값(직전 구간 텍스트를 복사하면 오해를 살 수 있음)
     });
     stageTouched = true;
     renderStageGraph();
@@ -940,6 +996,7 @@ function prefillCustomFromLast() {
     danceability_norm: s.danceability_norm != null ? s.danceability_norm : 0.5,
     instr_stem_ratio: s.instr_stem_ratio != null ? s.instr_stem_ratio : 0.5,
     speech_median: s.speech_median != null ? s.speech_median : 0.5,
+    impression: s.impression || "",
   }));
 
   if (!stageModel) initStageModel(n);
@@ -963,6 +1020,7 @@ function collectStagesForCustomMode() {
     danceability_norm: +s.danceability_norm.toFixed(3),
     instr_stem_ratio: +s.instr_stem_ratio.toFixed(3),
     speech_median: +s.speech_median.toFixed(3),
+    impression: (s.impression || "").trim() || null,
   }));
 }
 
@@ -1054,11 +1112,11 @@ function renderResult(data) {
 
   lastParams = data.params || {};
   lastAppliedBands = data.applied_bands || [];
-  // AI 모드 응답은 stage_minutes 등 실제 배분 근거를 params/stages에 에코하지 않는다(echo 전용
-  // 필드가 아니라 선곡 엔진 내부에서만 소비됨) — 대신 실제 곡 배정 결과(picks의 stage_index별
-  // 개수)가 백엔드가 실제로 적용한 구간 길이 비율의 유일한 증거다. 여기서 width를 계산해두지
-  // 않으면 커스텀 모드 프리필(prefillCustomFromLast)이 항상 균등폭(1/n)으로 되돌아가
-  // "마지막 구간만 길게" 같은 요청이 커스텀 모드로 넘어오면서 사라져 보인다(실사용 버그로 발견).
+  // data.params.stage_minutes는 LLM의 '의도'일 뿐, 실제 적용 결과(완충 노드로 슬롯이 건너뛰어질
+  // 수 있음 등)와 다를 수 있다 — 그래서 width는 여기서 실제 곡 배정 결과(picks의 stage_index별
+  // 개수)로 직접 계산한다. 이렇게 안 하면 커스텀 모드 프리필(prefillCustomFromLast)이 항상
+  // 균등폭(1/n)으로 되돌아가 "마지막 구간만 길게" 같은 요청이 커스텀 모드로 넘어오면서 사라져
+  // 보인다(실사용 버그로 발견). stage_minutes 자체는 디버그 스냅샷(last_ai_params)에서 확인 가능.
   lastStages = (data.stages || []).map((s, i) => {
     const count = picks.filter((p) => p.stage_index === i).length;
     return count > 0 ? { ...s, width: count / picks.length } : { ...s };

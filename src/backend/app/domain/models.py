@@ -39,6 +39,10 @@ class Song:
     danceability_norm: float | None = None
     instr_stem_ratio: float | None = None
     speech_median: float | None = None
+    # 가사 감상(요약) 임베딩 — data/lyric_impressions.json(오프라인 산출, e5-small 384차원,
+    # L2정규화)을 (band, song) 텍스트 매칭으로 song_repo가 부여. 매칭 안 되면 None(중립 처리 —
+    # selection.py의 _lyric_similarity가 None이면 0.0 반환). 프로토타입 범위(636/733곡).
+    lyric_vec: list[float] | None = None
     # 검색 보조용(원문 CSV엔 없음 — song_repo가 로드 시 pykakasi/hanja로 1회 계산해 캐싱).
     # 일본어를 모르는 사용자가 '곡 추가' 미니 브라우저에서 검색할 수 있도록 로마자/한글 음차 제공.
     song_romaji: str = ""
@@ -78,7 +82,9 @@ class MoodParameters:
     # 개별 키가 없거나 None이면 그 값만 미상). selection.py가 stage_specs 없을 때(AI 모드
     # 첫 요청 등) 이 값을 Stage에 반영한다 — 3.5단계(2026-08-04)부터 선곡 매칭에도 3순위
     # 타이브레이커로 쓰인다(에너지 하드 필터·밝기 소프트에 이어, Song에 값이 없으면 무력화).
-    stage_params: list[dict[str, float | None]] | None = None
+    # 프로토타입(다중 파라미터 체제 위 가사 감상 매칭): 각 dict에 "impression"(문자열, 가사
+    # 정서 요약) 키도 추가됨 — 6개 수치와 별도로 취급(selection.py가 4순위 타이브레이크로 사용).
+    stage_params: list[dict[str, float | str | None]] | None = None
     # 3.5단계: 단계별 길이(분) 의도(선택). 주어지면(길이==stage_count) 곡 수를 균등분배 대신
     # 이 분 비율로 배분한다(selection.py의 _stage_targets_and_counts) — "마지막 5분은
     # 릴랙스"처럼 특정 구간만 짧게/길게 요청한 의도가 곡 개수에도 반영되도록. None이면 기존
@@ -98,6 +104,9 @@ class Stage:
     danceability_norm: float | None = None
     instr_stem_ratio: float | None = None
     speech_median: float | None = None
+    # 프로토타입(다중 파라미터 체제 위 가사 감상 매칭): 이 스테이지의 가사 정서 텍스트(리포트용,
+    # 사용자 비노출·디버그 전용). LLM stage_params[i].impression에서 옴 — selection.py가 채운다.
+    impression: str | None = None
     # TODO(data-pipeline): songs_master.csv에 컬럼 추가 후 domain/selection.py 매칭에 반영
 
 
@@ -117,6 +126,9 @@ class StageSpec:
     danceability_norm: float | None = None
     instr_stem_ratio: float | None = None
     speech_median: float | None = None
+    # 프로토타입: 커스텀 모드 사용자가 직접 입력한 가사 감상(선택). 6개 수치와 동일하게
+    # selection.py의 _resolve_stage_target_params에서 스펙 우선 → LLM stage_params 폴백.
+    impression: str | None = None
     # TODO(data-pipeline): songs_master.csv에 컬럼 추가 후 domain/selection.py 매칭에 반영
 
 

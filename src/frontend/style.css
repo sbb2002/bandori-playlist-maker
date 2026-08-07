@@ -307,6 +307,32 @@ input[type="number"] { -moz-appearance: textfield; }
 .timebar-unit { position: absolute; right: -14px; top: 0; font-size: 0.68rem; color: var(--muted); }
 .timebar-hint { margin: 8px 0 0; font-size: 0.72rem; color: var(--muted); }
 
+/* 구간별 가사 감상(선택) — "[①] 구간 [입력창]" 형태로 한 줄씩 세로 나열. */
+.impression-row { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.impression-item { display: flex; align-items: center; gap: 8px; }
+/* 정서 지도(.stage-node)·타임바(.timebar-num)와 같은 동그라미 순번 배지 스타일(정적, 드래그 불가). */
+.impression-badge {
+  flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  font-size: 0.64rem; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.12s;
+}
+.impression-badge.linked { background: var(--accent-2); }
+.impression-item-label { flex: 0 0 auto; font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.impression-input {
+  flex: 1 1 auto; min-width: 0; /* flex 아이템이 내용 길이로 넘치지 않게 */
+  font-size: 0.72rem; padding: 5px 7px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.14); background: var(--card-2); color: var(--text);
+  font-family: inherit; transition: border-color 0.12s, background 0.12s;
+}
+.impression-input::placeholder { color: var(--muted); }
+.impression-input:focus { outline: none; border-color: var(--accent); }
+.impression-input.linked { background: rgba(255,255,255,0.16); border-color: var(--accent-2); }
+.impression-hint { margin: 6px 0 0; font-size: 0.72rem; color: var(--muted); }
+
 /* 고급 설정 — 접이식이 아니라 항상 펼쳐둠(이 화면 전체가 이미 세부설정 진입 화면이라
    한 번 더 접을 필요가 없음). 나머지 지표는 기존 시간구간 그래프 UI를 그대로 재사용. */
 .param-graph { margin-bottom: 20px; }

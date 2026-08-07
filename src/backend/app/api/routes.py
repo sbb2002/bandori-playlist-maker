@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import secrets
 import statistics
@@ -14,12 +15,13 @@ from dataclasses import replace
 from fastapi import APIRouter, Header, HTTPException, Request, Response
 
 from ..domain.models import MoodParameters, StageSpec
-from ..domain.selection import DEFAULT_AVG_SONG_SECONDS, build_setlist
+from ..domain.selection import DEFAULT_AVG_SONG_SECONDS, build_setlist, resolve_stage_impression_text
 from ..repo.song_repo import AUDIO_FEATURE_COLS
 from .band_aliases import detect_bands
 from .schemas import SetlistRequest, serialize_setlist
 
 router = APIRouter()
+logger = logging.getLogger("setlist_maker")
 
 _DEFAULT_TARGET_MINUTES = 60
 _MAX_TARGET_MINUTES = 180  # 최장 3시간 — 사용자 입력·LLM·단계 그래프 어느 경로로 와도 이 값으로 고정
@@ -57,6 +59,30 @@ def _feature_stats(pool) -> dict | None:
         if band_stats:
             stats[band] = band_stats
     return stats
+
+
+def _build_stage_impression_vectors(embedder, impression_texts: list[str | None]) -> list[list[float] | None] | None:
+    """스테이지별 가사 감상 텍스트(우선순위 해석 완료)를 임베딩 어댑터로 벡터화한다(프로토타입).
+
+    텍스트는 `domain.selection.resolve_stage_impression_text()`로 이미 스펙 우선/LLM 폴백
+    규칙을 거친 최종값 — AI 모드(LLM stage_params)든 커스텀 모드(사용자 수동 입력)든 동일하게
+    처리된다. 도메인(`build_setlist`)은 임베딩 모델을 직접 호출하지 않는다는 원칙에 따라
+    라우트(조립 지점)에서 미리 계산해 넘긴다. 임베딩 실패(모델 로드 실패 등)는 이 신호 없이
+    (중립) 계속 진행 — 가사 유사도는 4순위 타이브레이크일 뿐이라 실패해도 선곡 자체는 막히지 않는다.
+    """
+    if not impression_texts or not any(impression_texts):
+        return None
+    vectors: list[list[float] | None] = []
+    for text in impression_texts:
+        if not text:
+            vectors.append(None)
+            continue
+        try:
+            vectors.append(embedder.embed(text))
+        except Exception:  # noqa: BLE001 — 임베딩 실패는 이 스테이지만 중립 처리하고 계속
+            logger.warning("스테이지 impression 임베딩 실패 — 이 스테이지는 가사 유사도 없이 진행.", exc_info=True)
+            vectors.append(None)
+    return vectors
 
 
 def _is_cover(song) -> bool:
@@ -226,6 +252,7 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
                 danceability_norm=st.danceability_norm,
                 instr_stem_ratio=st.instr_stem_ratio,
                 speech_median=st.speech_median,
+                impression=st.impression,
             )
             for st in payload.stages
         ]
@@ -250,9 +277,18 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
         minutes = max(10, min(_MAX_TARGET_MINUTES, minutes))
 
     effective = replace(params, stage_count=stage_count, target_minutes=minutes)
+    # 프로토타입: 스테이지별 impression 텍스트(스펙 우선 → LLM 폴백, AI/커스텀 모드 공통 규칙)를
+    # 임베딩(있을 때만) — 도메인은 임베딩 모델을 모르므로 조립 지점(라우트)에서 미리 벡터화해 넘긴다.
+    stage_impression_texts = [
+        resolve_stage_impression_text(i, stage_specs, effective) for i in range(effective.stage_count)
+    ]
+    stage_impression_vectors = _build_stage_impression_vectors(
+        request.app.state.embedder, stage_impression_texts
+    )
     setlist = build_setlist(
         songs, effective, target_seconds=minutes * 60,
         band_filter=band_filter, stage_specs=stage_specs,
+        stage_impression_vectors=stage_impression_vectors,
     )
     result = serialize_setlist(setlist)
     # 실제 적용된 밴드 필터(프롬프트 자동감지 포함) — 프론트가 체크박스 동기화에 사용.

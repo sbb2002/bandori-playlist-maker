@@ -100,10 +100,38 @@ def test_parse_stage_params_matching_length_kept_and_clamped():
     )
     assert p.stage_params == [
         {"valence": 0.8, "lufs_integrated": 1.0, "lra": None,
-         "danceability_norm": None, "instr_stem_ratio": None, "speech_median": None},
+         "danceability_norm": None, "instr_stem_ratio": None, "speech_median": None,
+         "impression": None},
         {"valence": 0.0, "lufs_integrated": None, "lra": None,
-         "danceability_norm": None, "instr_stem_ratio": 0.4, "speech_median": None},
+         "danceability_norm": None, "instr_stem_ratio": 0.4, "speech_median": None,
+         "impression": None},
     ]
+
+
+def test_parse_stage_params_impression_kept_and_truncated():
+    """프로토타입: impression은 6개 수치와 별도로 파싱되고, 최대 길이를 넘으면 잘린다."""
+    from app.adapters.prompt import _IMPRESSION_MAX_LEN, parse_mood
+    long_text = "가" * (_IMPRESSION_MAX_LEN + 20)
+    p = parse_mood(
+        '{"brightness":0.3,"start_energy":0.3,"end_energy":0.4,"stage_count":2,'
+        '"stage_params":['
+        '{"valence":0.5,"impression":"  차분하고 그리운 정서  "},'
+        '{"valence":0.5,"impression":"' + long_text + '"}'
+        '],"target_minutes":45,"interpretation_summary":""}'
+    )
+    assert p.stage_params[0]["impression"] == "차분하고 그리운 정서"  # 앞뒤 공백 정리
+    assert p.stage_params[1]["impression"] == long_text[:_IMPRESSION_MAX_LEN]
+
+
+def test_parse_stage_params_impression_blank_or_missing_is_none():
+    from app.adapters.prompt import parse_mood
+    p = parse_mood(
+        '{"brightness":0,"start_energy":0.4,"end_energy":0.4,"stage_count":2,'
+        '"stage_params":[{"valence":0.5,"impression":"   "},{"valence":0.5}],'
+        '"target_minutes":null,"interpretation_summary":""}'
+    )
+    assert p.stage_params[0]["impression"] is None
+    assert p.stage_params[1]["impression"] is None
 
 
 def test_parse_stage_params_length_mismatch_dropped():

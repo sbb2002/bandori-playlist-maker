@@ -45,6 +45,7 @@ from .ports.mood_port import (
 from .ports.notify_port import Notifier, NoopNotifier
 from .repo import remote_source
 from .repo.song_repo import load_songs
+from .adapters.embedding_adapter import SentenceTransformerEmbedder
 
 logger = logging.getLogger("setlist_maker")
 
@@ -283,9 +284,10 @@ class InflightLimitMiddleware:
 
 
 def _load_current_songs(*, force: bool = False) -> list:
-    """`data` 브랜치에서 songs_master.csv를 fetch(또는 캐시 재사용)해 적재한다."""
+    """`data` 브랜치에서 songs_master.csv(+가사 감상 임베딩)를 fetch(또는 캐시 재사용)해 적재한다."""
     path = remote_source.ensure_songs_csv(force=force)
-    return load_songs(path)
+    lyric_path = remote_source.ensure_lyric_json(force=force)  # 없어도(None) load_songs가 정상 동작.
+    return load_songs(path, lyric_path)
 
 
 @asynccontextmanager
@@ -339,6 +341,7 @@ def create_app() -> FastAPI:
     app.state.interpreter = _build_interpreter()
     app.state.interpreter_name = type(app.state.interpreter).__name__  # /api/health 진단(stub|groq 확인)
     app.state.notifier = _build_notifier()
+    app.state.embedder = SentenceTransformerEmbedder()  # 지연 로드 — 실제 모델은 첫 embed() 호출 시.
     app.state.songs = _load_current_songs()
     app.state.refresh_songs = _load_current_songs  # 관리자 강제 리프레시 엔드포인트가 재사용
     logger.info("곡 %d건 적재 완료.", len(app.state.songs))

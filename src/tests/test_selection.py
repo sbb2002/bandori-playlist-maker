@@ -365,3 +365,97 @@ def test_stage_params_multi_field_distance_picks_closest_overall():
     spec = [StageSpec(energy_target=0.5, song_count=1, valence=0.8, lra=0.7)]
     setlist = build_setlist(songs, params, target_seconds=999, stage_specs=spec, rng=random.Random(0))
     assert setlist.picks[0].idx == 1
+
+
+# ── 가사 감상 임베딩 매칭(프로토타입, 4순위 타이브레이크) ──────────────────────────────
+
+def test_resolve_stage_target_params_includes_impression_from_llm():
+    from app.domain.selection import _resolve_stage_target_params
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[{"valence": 0.5, "impression": "차분하고 그리운 정서"}],
+    )
+    resolved = _resolve_stage_target_params(0, None, params)
+    assert resolved["impression"] == "차분하고 그리운 정서"
+
+
+def test_resolve_stage_target_params_impression_none_when_no_llm_stage_params():
+    from app.domain.selection import _resolve_stage_target_params
+    params = _params(stage_count=1)
+    resolved = _resolve_stage_target_params(0, None, params)
+    assert resolved["impression"] is None
+
+
+def test_resolve_stage_impression_text_spec_takes_priority_over_llm():
+    """커스텀 모드(StageSpec.impression) 사용자 입력이 AI 모드 LLM stage_params보다 우선한다."""
+    from app.domain.selection import resolve_stage_impression_text
+    specs = [StageSpec(energy_target=0.5, song_count=1, impression="사용자 직접 입력")]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[{"impression": "LLM이 뽑은 감상"}],
+    )
+    assert resolve_stage_impression_text(0, specs, params) == "사용자 직접 입력"
+
+
+def test_resolve_stage_impression_text_falls_back_to_llm_when_spec_has_none():
+    from app.domain.selection import resolve_stage_impression_text
+    specs = [StageSpec(energy_target=0.5, song_count=1)]  # impression 미지정
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[{"impression": "LLM이 뽑은 감상"}],
+    )
+    assert resolve_stage_impression_text(0, specs, params) == "LLM이 뽑은 감상"
+
+
+def test_lyric_similarity_neutral_when_either_side_missing():
+    from app.domain.selection import _lyric_similarity
+    song = Song(idx=0, band="a", song="s0", video_id="vid0000000", camelot="8A",
+                energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+                lyric_vec=[1.0, 0.0])
+    song_no_vec = Song(idx=1, band="a", song="s1", video_id="vid0000001", camelot="8A",
+                        energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True)
+    assert _lyric_similarity(song, None) == 0.0
+    assert _lyric_similarity(song_no_vec, [1.0, 0.0]) == 0.0
+    assert _lyric_similarity(song, [1.0, 0.0]) == 1.0
+    assert _lyric_similarity(song, [0.0, 1.0]) == 0.0
+
+
+def test_build_setlist_lyric_similarity_breaks_tie_when_numeric_params_equal():
+    """energy·밝기·6개 수치 지표가 모두 동률인 두 후보 중 1곡만 뽑아야 하는 상황에서,
+    가사 감상 임베딩이 더 유사한 쪽이 선택돼야 한다(4순위 타이브레이크, 프로토타입).
+    target_seconds를 곡 1개분(avg_song_seconds)으로 맞춰 후보 2곡 중 1곡만 채택되게 한다
+    — 그래야 Stage A의 선택 자체(둘 다 채택되는 게 아니라)가 검증된다."""
+    songs = [
+        Song(idx=0, band="a", song="s0", video_id="vid0000000", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+             lyric_vec=[0.0, 1.0]),  # target과 직교(유사도 0)
+        Song(idx=1, band="a", song="s1", video_id="vid0000001", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+             lyric_vec=[1.0, 0.0]),  # target과 완전 일치(유사도 1)
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    setlist = build_setlist(
+        songs, params, target_seconds=213, rng=random.Random(0),
+        stage_impression_vectors=[[1.0, 0.0]],
+    )
+    assert len(setlist.picks) == 1
+    assert setlist.picks[0].idx == 1
+
+
+def test_build_setlist_missing_impression_vector_keeps_existing_behavior():
+    """스테이지 impression 벡터가 없으면(프로토타입 신호 부재) 기존 동작 그대로 —
+    가사 유사도 타이브레이크가 결과에 영향을 주지 않는다(크래시도 안 남)."""
+    songs = [
+        Song(idx=i, band="a", song=f"s{i}", video_id=f"vid{i:07d}0", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True)
+        for i in range(3)
+    ]
+    params = _params(stage_count=1, start=0.5, end=0.5)
+    setlist = build_setlist(songs, params, target_seconds=999, rng=random.Random(0))
+    assert len(setlist.picks) >= 1

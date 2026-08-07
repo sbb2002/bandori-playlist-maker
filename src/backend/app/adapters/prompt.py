@@ -24,11 +24,27 @@ _MIN_STAGE_MINUTES = 3.0  # 프론트 app.js MIN_WIDTH_MIN과 동일 하한(구�
 DEFAULT_BRIGHTNESS = 0.0
 DEFAULT_START_ENERGY = 0.4
 DEFAULT_STAGE_COUNT = 3
-# 3단계: MoodParameters.stage_params 항목의 키(StageSpec/Stage와 동일 이름, 전부 0.0~1.0).
+# 3단계: MoodParameters.stage_params 항목의 수치 키(StageSpec/Stage와 동일 이름, 전부 0.0~1.0).
 _STAGE_PARAM_KEYS = (
     "valence", "lufs_integrated", "lra",
     "danceability_norm", "instr_stem_ratio", "speech_median",
 )
+# 프로토타입(epic/improved-playlist-maker, 다중 파라미터 체제 위 가사 감상 매칭): 6개 수치와
+# 별도로 자유 텍스트 1개. 곡 쪽 가사 감상 임베딩(data/lyric_impressions.json)과 코사인 유사도로
+# 비교해 Stage A 4순위 타이브레이크에 쓴다(selection.py._lyric_similarity).
+_IMPRESSION_KEY = "impression"
+_IMPRESSION_MAX_LEN = 100
+
+# impression 예시 문장 풀 — 숫자 지터와 같은 문제의식(고정 예시 리터럴 복사 방지)을 텍스트에
+# 적용: 콜마다 다른 문장을 순환시켜 모델이 예시를 그대로 베끼지 못하게 한다.
+_IMPRESSION_EXAMPLE_POOL = [
+    "안도와 위로 속에서도 옅은 그리움이 남는 잔잔한 정서",
+    "설렘과 확신이 뒤섞인 채 앞으로 나아가려는 밝은 다짐",
+    "지치고 무거운 마음을 다독이며 조용히 스스로를 추스르는 정서",
+    "터질 듯한 흥분과 해방감으로 가득한 들뜬 정서",
+    "쓸쓸함과 그리움이 배어나는 애틋하고 차분한 정서",
+    "작은 희망을 붙잡고 앞으로 걸어가려는 담담한 의지",
+]
 
 # 3.5단계(2026-08-03) 함정 수정: 아래 stage_params/stage_minutes 예시에 고정 숫자를 쓰면
 # 모델이 실제 분포를 계산하지 않고 예시 숫자를 그대로(또는 거의 그대로) 복사해버리는 현상이
@@ -62,6 +78,11 @@ def _build_dynamic_examples(rng: random.Random) -> str:
     ballad2 = [_jitter_stage_params(_BALLAD_EXAMPLE_TEMPLATE, rng) for _ in range(2)]
     party1 = _jitter_stage_params(_PARTY_EXAMPLE_TEMPLATE, rng)
     drive_stages = [_jitter_stage_params(t, rng) for t in _DRIVE_EXAMPLE_STAGE_TEMPLATES]
+    # impression도 숫자와 같은 이유로 매 콜마다 다른 예시 문장을 순환시켜 그대로 복사 방지.
+    impression_pool = list(_IMPRESSION_EXAMPLE_POOL)
+    rng.shuffle(impression_pool)
+    for stage, text in zip(drive_stages, impression_pool):
+        stage[_IMPRESSION_KEY] = text
     ballad_json = json.dumps(ballad2, ensure_ascii=False)
     party_json = json.dumps(party1, ensure_ascii=False)
     drive_stage_minutes = [20, 20, 20]
@@ -140,6 +161,10 @@ SYSTEM_PROMPT = (
     "min~median 사이, 높이려면 median~max 사이의 실제로 구분되는 값을 쓴다. 특정 밴드 위주 요청이면 그 밴드 "
     "행을 우선 참고. 분포를 무시한 관성적 0.5 금지.\n"
     "  6개 키 전부 채워라(정말 판단 근거가 없는 키만 예외적으로 생략).\n"
+    "  · impression: **반드시** 위 6개 수치와 별개로 채워야 하는 한국어 자유 텍스트(40자 이내, "
+    "1문장). 이 단계 구간에 어울리는 곡의 '가사 정서'를 요약한다 — 수치가 아니라 감정의 색을 "
+    "말로 표현하는 것이다(예: '지치고 무거운 마음을 다독이며 조용히 스스로를 추스르는 정서'). "
+    "빈 문자열이나 null 금지, 반드시 의미 있는 문장으로 채운다.\n"
 )
 
 # OpenRouter response_format용 JSON 스키마(structured output 지원 모델에서 사용).
@@ -170,10 +195,12 @@ RESPONSE_JSON_SCHEMA = {
                             "danceability_norm": {"type": ["number", "null"]},
                             "instr_stem_ratio": {"type": ["number", "null"]},
                             "speech_median": {"type": ["number", "null"]},
+                            "impression": {"type": ["string", "null"]},
                         },
                         "required": [
                             "valence", "lufs_integrated", "lra",
                             "danceability_norm", "instr_stem_ratio", "speech_median",
+                            "impression",
                         ],
                     },
                 },
@@ -343,7 +370,7 @@ def parse_mood(raw_text: str) -> MoodParameters:
             if not isinstance(entry, dict):
                 parsed_stage_params.append({})
                 continue
-            row: dict[str, float | None] = {}
+            row: dict[str, float | str | None] = {}
             for key in _STAGE_PARAM_KEYS:
                 v = entry.get(key)
                 if v is None:
@@ -353,6 +380,12 @@ def parse_mood(raw_text: str) -> MoodParameters:
                     row[key] = _clamp(float(v), *_ENERGY_RANGE)
                 except (TypeError, ValueError):
                     row[key] = None
+            # impression은 수치 6개와 별도 분기(문자열, clamp 대상 아님) — 공백만이면 None.
+            impression_raw = entry.get(_IMPRESSION_KEY)
+            if isinstance(impression_raw, str) and impression_raw.strip():
+                row[_IMPRESSION_KEY] = impression_raw.strip()[:_IMPRESSION_MAX_LEN]
+            else:
+                row[_IMPRESSION_KEY] = None
             parsed_stage_params.append(row)
         stage_params = parsed_stage_params
     else:
