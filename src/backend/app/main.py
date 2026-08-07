@@ -324,6 +324,8 @@ async def _lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     _load_dotenv()  # 어댑터·CORS가 env를 읽기 전에 .env 주입.
+    # TODO(오너 결정, 2026-08-08): epic/improved-playlist-maker(PR #62) 머지 시 2.0.0부터
+    # 버저닝 시작하기로 함 — 그 머지 커밋에서 이 문자열을 "2.0.0"으로 올릴 것.
     app = FastAPI(title="setlist-maker", version="0.1.0-pilot", lifespan=_lifespan)
 
     # 입장제어(in-flight 상한) — CORS보다 먼저 add해 CORS가 바깥에서 감싸도록(거절 응답에도 CORS 헤더).

@@ -1,3 +1,11 @@
+> **⚠️ 2026-08-08 종결(구현 안 함)**: 이 문서가 전제로 삼은 조건("단일응답 stage_params로
+> 부족하면 multistage로 전환")이 발생하지 않았다 — `epic/improved-playlist-maker`(PR #62)의
+> 4단계 청취 비교에서 단일응답 어댑터(`groq_adapter.py`)에 `stage_minutes`·stage_params 6종·
+> 가사 감상 임베딩 매칭·스테이지별 밴드 고정까지 반영한 결과가 청취상 충분해, multistage로
+> 갈아탈 필요 자체가 없어졌다. 이 문서의 차용 방안은 미구현 상태로 보류하며, 짝이었던
+> PR #61("2회차 요청 파라미터 재계산 스킵")도 같은 이유로 닫았다. 향후 multistage 채택이
+> 다시 논의되면 이 문서를 참고 자료로 재검토할 것 — 지금은 실행 계획으로 취급하지 말 것.
+
 # WIP: multistage 노드 구조를 AI 모드 stage_params에 차용하는 계획 (임시 문서)
 
 **목적**: AI 모드 실측(2026-08-03, `epic/improved-playlist-maker` 브랜치)에서 발견된
