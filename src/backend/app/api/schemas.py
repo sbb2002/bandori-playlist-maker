@@ -27,11 +27,12 @@ class StageInput(BaseModel):
     # 프로토타입: 커스텀 모드에서 사용자가 직접 입력하는 가사 감상(선택). 비우면 기존과 동일하게
     # 가사 유사도 타이브레이크가 중립(비활성) 처리된다.
     impression: str | None = Field(default=None, max_length=100, description="이 단계의 가사 감상(선택)")
-    # 프로토타입: 커스텀 모드에서 이 단계를 특정 밴드로만 고정(선택). songs_master.csv의 band
-    # 값이어야 하며, 아니면 selection.py에서 후보가 0건이 돼 그 슬롯이 자동으로 건너뛰어진다
-    # (검증은 라우트가 아니라 도메인의 자연스러운 결과에 맡김 — AI 모드 stage_bands와 달리
-    # 사용자가 셀렉터에서 직접 고르므로 오탈자·할루시네이션 걱정이 없다).
-    band: str | None = Field(default=None, description="이 단계를 고정할 밴드(선택)")
+    # 프로토타입: 커스텀 모드에서 이 단계를 특정 밴드 목록으로만 고정(선택, 1개 이상 동시
+    # 지정 가능). songs_master.csv의 band 값이어야 하며, 아니면 selection.py에서 후보가
+    # 0건이 돼 그 슬롯이 자동으로 건너뛰어진다(검증은 라우트가 아니라 도메인의 자연스러운
+    # 결과에 맡김 — AI 모드 stage_bands와 달리 사용자가 팝업에서 직접 고르므로 오탈자·
+    # 할루시네이션 걱정이 없다). 빈 배열/None = 제한 없음(전역 밴드 필터만 적용).
+    bands: list[str] | None = Field(default=None, description="이 단계를 고정할 밴드 목록(선택)")
 
     @field_validator("impression")
     @classmethod
@@ -108,7 +109,7 @@ def serialize_setlist(setlist: Setlist) -> dict:
                 "instr_stem_ratio": s.instr_stem_ratio,
                 "speech_median": s.speech_median,
                 "impression": s.impression,
-                "band": s.band,
+                "bands": list(s.bands) if s.bands else None,
             }
             for s in setlist.stages
         ],

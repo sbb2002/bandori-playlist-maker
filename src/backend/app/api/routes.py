@@ -18,7 +18,7 @@ from ..domain.models import MoodParameters, StageSpec
 from ..domain.selection import (
     DEFAULT_AVG_SONG_SECONDS,
     build_setlist,
-    resolve_stage_band,
+    resolve_stage_bands,
     resolve_stage_impression_text,
 )
 from ..repo.song_repo import AUDIO_FEATURE_COLS
@@ -288,7 +288,7 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
                 instr_stem_ratio=st.instr_stem_ratio,
                 speech_median=st.speech_median,
                 impression=st.impression,
-                band=st.band,
+                bands=tuple(st.bands) if st.bands else None,
             )
             for st in payload.stages
         ]

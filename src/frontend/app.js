@@ -232,6 +232,74 @@ const manualBands = new Set();
 // 감성 설정 구간별 밴드 셀렉터(#impression-row) 옵션 채우기용 — loadBands()가 채운다.
 let cachedBands = [];
 
+// 구간별 "밴드 고정" 팝업 상태 — buildImpressionRow()가 매 렌더마다 다시 채우지만, 열림
+// 상태 추적과 바깥 클릭 감지는 재렌더에도 살아남아야 해서 최상위(모듈 스코프)에 둔다.
+let impressionBandToggleEls = [];
+let impressionBandPopupEls = [];
+let openBandPopupIndex = -1;
+
+function closeBandPopup() {
+  if (openBandPopupIndex !== -1 && impressionBandPopupEls[openBandPopupIndex]) {
+    impressionBandPopupEls[openBandPopupIndex].classList.add("hidden");
+  }
+  openBandPopupIndex = -1;
+}
+document.addEventListener("click", (e) => {
+  if (openBandPopupIndex === -1) return;
+  const popup = impressionBandPopupEls[openBandPopupIndex];
+  const toggle = impressionBandToggleEls[openBandPopupIndex];
+  if (popup && !popup.contains(e.target) && toggle && !toggle.contains(e.target)) {
+    closeBandPopup();
+  }
+});
+
+// 구간별 밴드 고정 팝업에 보여줄 밴드 목록 — 전역 밴드 필터에서 수동 선택한 것이 있으면
+// 그것만, 없으면(=전체) 전체 밴드. "전역에서 선택한 모든 밴드"라는 사용자 요구사항 그대로.
+function effectiveGlobalBandChoices() {
+  const present = manualBands.size > 0 ? [...manualBands] : cachedBands.map((b) => b.band);
+  return bandsInSelectorOrder(present);
+}
+
+// 구간별 밴드 고정 팝업 내용 채우기 — 전역 밴드 필터와 동일한 디자인(.band-list/.band-item)
+// 재사용. 다중 선택(체크박스)이라 전역 필터와 달리 label에 이름을 병기하지 않고 아이콘+
+// 곡수만(공간 절약, 툴팁으로 이름 확인) — 전역 밴드 필터와 동일한 관례.
+function renderBandPopupOptions(popupEl, i) {
+  popupEl.replaceChildren();
+  const list = document.createElement("div");
+  list.className = "band-list";
+  const countByBand = new Map(cachedBands.map((b) => [b.band, b.count]));
+  const seg = stageModel.segments[i];
+  for (const band of effectiveGlobalBandChoices()) {
+    const label = document.createElement("label");
+    label.className = "band-item";
+    label.title = prettyBand(band);
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.className = "band-cb";
+    cb.checked = (seg.bands || []).includes(band);
+    cb.addEventListener("change", () => {
+      stageTouched = true;
+      const cur = new Set(stageModel.segments[i].bands || []);
+      if (cb.checked) cur.add(band); else cur.delete(band);
+      stageModel.segments[i].bands = [...cur];
+      updateBandToggleIndicator(i);
+    });
+    const icon = makeBandIcon(band, "band-item-icon");
+    const count = document.createElement("span");
+    count.className = "band-item-count";
+    count.textContent = countByBand.get(band) ?? "";
+    label.append(cb, icon, count);
+    list.appendChild(label);
+  }
+  popupEl.appendChild(list);
+}
+
+function updateBandToggleIndicator(i) {
+  const btn = impressionBandToggleEls[i];
+  if (!btn || !stageModel.segments[i]) return;
+  btn.classList.toggle("on", (stageModel.segments[i].bands || []).length > 0);
+}
+
 // bandori-song-sorter와 동일한 밴드 나열 순서(아이콘 애셋은 assets/bands/<band>.png, 미포함은
 // 뒤). renderStageGraph()가 페이지 로드 시 동기적으로 한 번 실행되며 구간별 밴드 셀렉터를
 // 채우려고 이 함수를 곧바로 호출하므로, 파일 하단에 두면 TDZ(const 초기화 전 접근)로
@@ -278,6 +346,7 @@ function renderBands(bands) {
     cb.addEventListener("change", () => {
       if (cb.checked) manualBands.add(cb.value);
       else manualBands.delete(cb.value);
+      syncStageBandsToGlobalFilter();
     });
     const icon = makeBandIcon(band, "band-item-icon");
     const count = document.createElement("span");
@@ -297,7 +366,25 @@ function collectBands() {
 $("band-clear").addEventListener("click", () => {
   manualBands.clear();
   document.querySelectorAll(".band-cb:checked").forEach((c) => (c.checked = false));
+  syncStageBandsToGlobalFilter();
 });
+
+// 전역 밴드 필터가 바뀌면(체크·해제·전체 해제) 구간별 "밴드 고정" 선택도 즉시 반영한다
+// (사용자 요구사항) — 더 이상 전역에서 유효하지 않은 구간별 선택은 정리하고, 열려 있는
+// 팝업이 있으면 새 옵션으로 다시 그린다.
+function syncStageBandsToGlobalFilter() {
+  if (!stageModel) return;
+  const allowed = new Set(effectiveGlobalBandChoices());
+  stageModel.segments.forEach((s, i) => {
+    if (s.bands && s.bands.length) {
+      s.bands = s.bands.filter((b) => allowed.has(b));
+    }
+    updateBandToggleIndicator(i);
+  });
+  if (openBandPopupIndex !== -1 && impressionBandPopupEls[openBandPopupIndex]) {
+    renderBandPopupOptions(impressionBandPopupEls[openBandPopupIndex], openBandPopupIndex);
+  }
+}
 
 // 범용 유틸(트랙리스트·프리셋·플레이바 등 여러 곳에서 공유) — 2D 정서 지도 이식 과정에서
 // 실수로 함께 지워졌던 것을 복원(elDiv/clamp 누락으로 결과 렌더링·재생바가 ReferenceError로 깨졌음).
@@ -416,7 +503,7 @@ function initStageModel(n = DEFAULT_STAGE_COUNT) {
       instr_stem_ratio: 0.5,
       speech_median: 0.5,
       impression: "",
-      band: null,
+      bands: [],
     });
   }
   stageModel = { totalMinutes: total, segments };
@@ -644,7 +731,7 @@ function renderStageGraph() {
     timebarNumEls.forEach((num, j) => num.classList.toggle("linked", j === i));
     impressionInputEls.forEach((el, j) => el.classList.toggle("linked", j === i));
     impressionBadgeEls.forEach((el, j) => el.classList.toggle("linked", j === i));
-    impressionBandSelectEls.forEach((el, j) => el.classList.toggle("linked", j === i));
+    impressionBandToggleEls.forEach((el, j) => el.classList.toggle("linked", j === i));
   }
 
   // ── 구간별 가사 감상(선택, 프로토타입) ──────────────────────────────────────
@@ -652,7 +739,6 @@ function renderStageGraph() {
   // 타임바(.timebar-num)와 같은 동그라미 순번 스타일(.impression-badge)을 재사용.
   let impressionInputEls = [];
   let impressionBadgeEls = [];
-  let impressionBandSelectEls = [];
   // placeholder용 예시 문구 — 빈 입력창이 "가사 감상(선택)"처럼 막연하지 않고, 어떤 식으로
   // 적으면 되는지 감이 오도록 구간 순서대로 다른 예시를 보여준다.
   const IMPRESSION_PLACEHOLDER_EXAMPLES = [
@@ -666,7 +752,9 @@ function renderStageGraph() {
   function buildImpressionRow() {
     impressionRowEl.innerHTML = "";
     impressionBadgeEls = [];
-    impressionBandSelectEls = [];
+    impressionBandToggleEls = [];
+    impressionBandPopupEls = [];
+    openBandPopupIndex = -1; // 재렌더(구간 추가/삭제 등) 시 이전 열림 상태는 무의미해짐
     impressionInputEls = stageModel.segments.map((s, i) => {
       const item = document.createElement("div");
       item.className = "impression-item";
@@ -689,39 +777,41 @@ function renderStageGraph() {
       });
       input.addEventListener("pointerenter", () => setLinked(i));
       input.addEventListener("pointerleave", () => setLinked(-1));
-      // 구간별 밴드 셀렉터 — 감성 설정 텍스트박스 오른쪽에 배치(사용자 제안). 전역 밴드
-      // 필터와 별개로, 이 구간만 특정 밴드로 고정하고 싶을 때 쓴다(선택, 기본 "전체").
-      const bandSelect = document.createElement("select");
-      bandSelect.className = "impression-band-select";
-      renderImpressionBandOptions(bandSelect, s.band);
-      bandSelect.addEventListener("change", () => {
-        stageTouched = true;
-        stageModel.segments[i].band = bandSelect.value || null;
+
+      // 구간별 "밴드 고정" 토글+팝업 — 감성 설정 텍스트박스 오른쪽에 배치(사용자 제안).
+      // 전역 밴드 필터와 별개로, 이 구간만 특정 밴드(1개 이상)로 고정하고 싶을 때 쓴다.
+      const bandWrap = document.createElement("div");
+      bandWrap.className = "impression-band-wrap";
+      const bandToggle = document.createElement("button");
+      bandToggle.type = "button";
+      bandToggle.className = "impression-band-toggle";
+      bandToggle.classList.toggle("on", (s.bands || []).length > 0);
+      const dot = document.createElement("span");
+      dot.className = "indicator-dot";
+      bandToggle.append(dot, document.createTextNode("밴드 고정"));
+      const popup = document.createElement("div");
+      popup.className = "impression-band-popup hidden";
+      renderBandPopupOptions(popup, i);
+      bandToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const wasOpen = openBandPopupIndex === i;
+        closeBandPopup();
+        if (!wasOpen) {
+          renderBandPopupOptions(popup, i); // 팝업 열 때마다 최신 전역 필터 반영해 다시 그림
+          popup.classList.remove("hidden");
+          openBandPopupIndex = i;
+        }
       });
-      bandSelect.addEventListener("pointerenter", () => setLinked(i));
-      bandSelect.addEventListener("pointerleave", () => setLinked(-1));
-      impressionBandSelectEls.push(bandSelect);
-      item.append(badge, label, input, bandSelect);
+      bandToggle.addEventListener("pointerenter", () => setLinked(i));
+      bandToggle.addEventListener("pointerleave", () => setLinked(-1));
+      bandWrap.append(bandToggle, popup);
+      impressionBandToggleEls.push(bandToggle);
+      impressionBandPopupEls.push(popup);
+
+      item.append(badge, label, input, bandWrap);
       impressionRowEl.appendChild(item);
       return input;
     });
-  }
-
-  // 밴드 셀렉터 옵션 채우기 — cachedBands가 비동기로 나중에 도착할 수 있어 별도 함수로 분리
-  // (loadBands() 응답 도착 시 renderStageGraph() 재호출로 다시 채워짐).
-  function renderImpressionBandOptions(select, selectedBand) {
-    select.replaceChildren();
-    const allOpt = document.createElement("option");
-    allOpt.value = "";
-    allOpt.textContent = "전체";
-    select.appendChild(allOpt);
-    for (const band of bandsInSelectorOrder(cachedBands.map((b) => b.band))) {
-      const opt = document.createElement("option");
-      opt.value = band;
-      opt.textContent = prettyBand(band);
-      select.appendChild(opt);
-    }
-    select.value = selectedBand || "";
   }
 
   function updateImpressionRow() {
@@ -730,9 +820,7 @@ function renderStageGraph() {
       if (document.activeElement !== impressionInputEls[i]) {
         impressionInputEls[i].value = s.impression || "";
       }
-      if (impressionBandSelectEls[i] && document.activeElement !== impressionBandSelectEls[i]) {
-        impressionBandSelectEls[i].value = s.band || "";
-      }
+      updateBandToggleIndicator(i);
     });
   }
 
@@ -896,7 +984,7 @@ function collectStages() {
     instr_stem_ratio: +s.instr_stem_ratio.toFixed(3),
     speech_median: +s.speech_median.toFixed(3),
     impression: (s.impression || "").trim() || null,
-    band: s.band || null,
+    bands: s.bands && s.bands.length ? s.bands : null,
   }));
 }
 
@@ -918,7 +1006,7 @@ function syncGraphToParams(params, stages) {
         instr_stem_ratio: 0.5,
         speech_median: 0.5,
         impression: "",
-        band: s.band || null,
+        bands: s.bands && s.bands.length ? s.bands : [],
       };
     });
   } else {
@@ -938,7 +1026,7 @@ function syncGraphToParams(params, stages) {
         instr_stem_ratio: 0.5,
         speech_median: 0.5,
         impression: "",
-        band: null,
+        bands: [],
       });
     }
   }
@@ -976,7 +1064,7 @@ function initStageControls() {
       instr_stem_ratio: last.instr_stem_ratio,
       speech_median: last.speech_median,
       impression: "", // 새 구간은 빈 값(직전 구간 텍스트를 복사하면 오해를 살 수 있음)
-      band: null, // 밴드도 마찬가지로 직전 구간 값을 복사하지 않음
+      bands: [], // 밴드도 마찬가지로 직전 구간 값을 복사하지 않음
     });
     stageTouched = true;
     renderStageGraph();
@@ -1068,7 +1156,7 @@ function prefillCustomFromLast() {
     instr_stem_ratio: s.instr_stem_ratio != null ? s.instr_stem_ratio : 0.5,
     speech_median: s.speech_median != null ? s.speech_median : 0.5,
     impression: s.impression || "",
-    band: s.band || null,
+    bands: s.bands && s.bands.length ? s.bands : [],
   }));
 
   if (!stageModel) initStageModel(n);
@@ -1093,7 +1181,7 @@ function collectStagesForCustomMode() {
     instr_stem_ratio: +s.instr_stem_ratio.toFixed(3),
     speech_median: +s.speech_median.toFixed(3),
     impression: (s.impression || "").trim() || null,
-    band: s.band || null,
+    bands: s.bands && s.bands.length ? s.bands : null,
   }));
 }
 

@@ -5,7 +5,7 @@ import random
 import pytest
 
 from app.domain.models import MoodParameters, NoSetlistError, Song, StageSpec
-from app.domain.selection import _local_refine_order, _stage_sequence_cost, build_setlist, resolve_stage_band
+from app.domain.selection import _local_refine_order, _stage_sequence_cost, build_setlist, resolve_stage_bands
 
 
 def _songs() -> list[Song]:
@@ -463,28 +463,28 @@ def test_build_setlist_missing_impression_vector_keeps_existing_behavior():
 
 # ── 스테이지별 고정 밴드(프로토타입) ────────────────────────────────────────────
 
-def test_resolve_stage_band_spec_takes_priority_over_llm():
-    specs = [StageSpec(energy_target=0.5, song_count=1, band="roselia")]
+def test_resolve_stage_bands_spec_takes_priority_over_llm():
+    specs = [StageSpec(energy_target=0.5, song_count=1, bands=("roselia", "mygo"))]
     params = MoodParameters(
         brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
         target_minutes=None, interpretation_summary="test",
-        stage_bands=["mygo"],
+        stage_bands=["ave_mujica"],
     )
-    assert resolve_stage_band(0, specs, params) == "roselia"
+    assert resolve_stage_bands(0, specs, params) == frozenset({"roselia", "mygo"})
 
 
-def test_resolve_stage_band_falls_back_to_llm_when_spec_has_none():
+def test_resolve_stage_bands_falls_back_to_llm_when_spec_has_none():
     specs = [StageSpec(energy_target=0.5, song_count=1)]
     params = MoodParameters(
         brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
         target_minutes=None, interpretation_summary="test",
         stage_bands=["mygo"],
     )
-    assert resolve_stage_band(0, specs, params) == "mygo"
+    assert resolve_stage_bands(0, specs, params) == frozenset({"mygo"})
 
 
-def test_resolve_stage_band_none_when_neither_set():
-    assert resolve_stage_band(0, None, _params(stage_count=1)) is None
+def test_resolve_stage_bands_none_when_neither_set():
+    assert resolve_stage_bands(0, None, _params(stage_count=1)) is None
 
 
 def test_build_setlist_stage_bands_hard_filters_per_stage():

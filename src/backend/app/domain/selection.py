@@ -285,25 +285,29 @@ def resolve_stage_impression_text(
     return _resolve_stage_target_params(stage_index, stage_specs, params)["impression"]
 
 
-def resolve_stage_band(
+def resolve_stage_bands(
     stage_index: int,
     stage_specs: list[StageSpec] | None,
     params: MoodParameters,
-) -> str | None:
-    """스테이지 하나의 고정 밴드를 우선순위 규칙(스펙 우선 → LLM stage_bands 폴백)대로 해석한다.
+) -> frozenset[str] | None:
+    """스테이지 하나의 고정 밴드 집합을 우선순위 규칙(스펙 우선 → LLM stage_bands 폴백)대로
+    해석한다(1개 이상 동시 지정 가능).
 
-    "모르포니카가 30분, 개유노가 30분"처럼 여러 밴드가 시간 분할과 함께 언급된 요청에서만
-    쓰인다 — 값이 있으면 Stage A가 그 스테이지의 후보를 해당 밴드로만 하드필터링한다(에너지
-    허용창보다 먼저 적용). 라우트가 `build_setlist()` 호출 전에 `params.stage_bands`의 각
-    값이 실제로 프롬프트에서 감지된 밴드인지 검증(무효화)해뒀다고 가정 — 여기선 형태 우선순위
-    해석만 담당.
+    "모르포니카가 30분, 개유노가 30분"처럼 여러 밴드가 시간 분할과 함께 언급된 요청(LLM,
+    스테이지당 밴드 1개)이나, 커스텀 모드에서 사용자가 "밴드 고정" 팝업으로 이 스테이지에
+    직접 여러 밴드를 고른 경우(스펙, 스테이지당 밴드 1개 이상)에 쓰인다 — 값이 있으면
+    Stage A가 그 스테이지의 후보를 이 집합에 속한 밴드로만 하드필터링한다(에너지 허용창보다
+    먼저 적용). 라우트가 `build_setlist()` 호출 전에 `params.stage_bands`의 각 값이 실제로
+    프롬프트에서 감지된 밴드인지 검증(무효화)해뒀다고 가정 — 여기선 형태·우선순위 해석만 담당.
     """
     spec = stage_specs[stage_index] if stage_specs else None
-    spec_band = getattr(spec, "band", None) if spec is not None else None
-    if spec_band:
-        return spec_band
+    spec_bands = getattr(spec, "bands", None) if spec is not None else None
+    if spec_bands:
+        return frozenset(spec_bands)
     if params.stage_bands and stage_index < len(params.stage_bands):
-        return params.stage_bands[stage_index]
+        llm_band = params.stage_bands[stage_index]
+        if llm_band:
+            return frozenset({llm_band})
     return None
 
 
@@ -412,9 +416,10 @@ def build_setlist(
     stage_target_params = [
         _resolve_stage_target_params(i, stage_specs, params) for i in range(len(targets))
     ]
-    # 프로토타입: 스테이지별 고정 밴드(선택) — Stage A 하드필터에 쓴다(에너지 허용창보다 먼저).
+    # 프로토타입: 스테이지별 고정 밴드 집합(선택, 1개 이상) — Stage A 하드필터에 쓴다
+    # (에너지 허용창보다 먼저).
     stage_bands_resolved = [
-        resolve_stage_band(i, stage_specs, params) for i in range(len(targets))
+        resolve_stage_bands(i, stage_specs, params) for i in range(len(targets))
     ]
 
     # ── Stage A: SELECT — 곡 하나하나를 스테이지 경계에서 부드럽게 흐르는 목표에 매칭 ──
@@ -430,7 +435,7 @@ def build_setlist(
     for stage_index, count in enumerate(counts):
         chosen: list[Song] = []
         target_params = stage_target_params[stage_index]
-        stage_band = stage_bands_resolved[stage_index]
+        stage_bands_for_slot = stage_bands_resolved[stage_index]
         stage_target_vec = (
             stage_impression_vectors[stage_index]
             if stage_impression_vectors and stage_index < len(stage_impression_vectors)
@@ -446,8 +451,8 @@ def build_setlist(
             # 채우지 않고 슬롯을 건너뛴다 — "이 스테이지는 이 밴드만"이라는 사용자 의도를
             # energy 허용창 완충 로직보다 더 엄격하게 지킨다.
             band_pool = (
-                {idx: s for idx, s in remaining.items() if s.band == stage_band}
-                if stage_band else remaining
+                {idx: s for idx, s in remaining.items() if s.band in stage_bands_for_slot}
+                if stage_bands_for_slot else remaining
             )
             if not band_pool:
                 continue
@@ -500,7 +505,10 @@ def build_setlist(
             instr_stem_ratio=target_params["instr_stem_ratio"],
             speech_median=target_params["speech_median"],
             impression=target_params["impression"],
-            band=stage_bands_resolved[stage_index],
+            bands=(
+                tuple(sorted(stage_bands_resolved[stage_index]))
+                if stage_bands_resolved[stage_index] else None
+            ),
         ))
         if not members:
             continue
