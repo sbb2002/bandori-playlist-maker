@@ -208,6 +208,28 @@ def test_prompt_band_name_auto_filters(client):
     assert body["applied_bands"] == ["raise_a_suilen"]  # 프론트 체크박스 동기화용
 
 
+# ── 스테이지별 고정 밴드 검증(프로토타입, LLM이 지어낸 값 무효화) ──────────────────
+
+def test_validate_stage_bands_keeps_values_within_detected_set():
+    from app.api.routes import _validate_stage_bands
+    detected = {"morfonica", "mugendai_mutype"}
+    raw = ["모르포니카", "개유노"]
+    assert _validate_stage_bands(raw, detected) == ["morfonica", "mugendai_mutype"]
+
+
+def test_validate_stage_bands_nulls_hallucinated_band():
+    from app.api.routes import _validate_stage_bands
+    detected = {"morfonica"}  # 프롬프트에 mygo는 언급 안 됨
+    raw = ["모르포니카", "마이고"]
+    assert _validate_stage_bands(raw, detected) == ["morfonica", None]
+
+
+def test_validate_stage_bands_none_and_empty_list_passthrough():
+    from app.api.routes import _validate_stage_bands
+    assert _validate_stage_bands(None, {"morfonica"}) is None
+    assert _validate_stage_bands([], {"morfonica"}) == []
+
+
 def test_empty_bands_is_all(client):
     r = client.post("/api/setlist", json={"prompt": "신나는 곡", "bands": []})
     assert r.status_code == 200

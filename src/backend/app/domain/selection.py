@@ -285,6 +285,28 @@ def resolve_stage_impression_text(
     return _resolve_stage_target_params(stage_index, stage_specs, params)["impression"]
 
 
+def resolve_stage_band(
+    stage_index: int,
+    stage_specs: list[StageSpec] | None,
+    params: MoodParameters,
+) -> str | None:
+    """스테이지 하나의 고정 밴드를 우선순위 규칙(스펙 우선 → LLM stage_bands 폴백)대로 해석한다.
+
+    "모르포니카가 30분, 개유노가 30분"처럼 여러 밴드가 시간 분할과 함께 언급된 요청에서만
+    쓰인다 — 값이 있으면 Stage A가 그 스테이지의 후보를 해당 밴드로만 하드필터링한다(에너지
+    허용창보다 먼저 적용). 라우트가 `build_setlist()` 호출 전에 `params.stage_bands`의 각
+    값이 실제로 프롬프트에서 감지된 밴드인지 검증(무효화)해뒀다고 가정 — 여기선 형태 우선순위
+    해석만 담당.
+    """
+    spec = stage_specs[stage_index] if stage_specs else None
+    spec_band = getattr(spec, "band", None) if spec is not None else None
+    if spec_band:
+        return spec_band
+    if params.stage_bands and stage_index < len(params.stage_bands):
+        return params.stage_bands[stage_index]
+    return None
+
+
 def _stage_param_distance(song: Song, target: dict[str, float | None]) -> float:
     """곡의 신규 지표 6종과 목표값의 평균 절대거리(사용 가능한 필드만, 없으면 0=중립)."""
     diffs = []
@@ -390,6 +412,10 @@ def build_setlist(
     stage_target_params = [
         _resolve_stage_target_params(i, stage_specs, params) for i in range(len(targets))
     ]
+    # 프로토타입: 스테이지별 고정 밴드(선택) — Stage A 하드필터에 쓴다(에너지 허용창보다 먼저).
+    stage_bands_resolved = [
+        resolve_stage_band(i, stage_specs, params) for i in range(len(targets))
+    ]
 
     # ── Stage A: SELECT — 곡 하나하나를 스테이지 경계에서 부드럽게 흐르는 목표에 매칭 ──
     # feature/energy-stream: 스테이지 전체에 flat 목표 하나만 쓰던 기존 방식 대신, 곡
@@ -404,6 +430,7 @@ def build_setlist(
     for stage_index, count in enumerate(counts):
         chosen: list[Song] = []
         target_params = stage_target_params[stage_index]
+        stage_band = stage_bands_resolved[stage_index]
         stage_target_vec = (
             stage_impression_vectors[stage_index]
             if stage_impression_vectors and stage_index < len(stage_impression_vectors)
@@ -414,7 +441,17 @@ def build_setlist(
                 break
             slot_target = slot_targets[slot]
             slot += 1
-            cand = sorted(remaining.values(), key=lambda s: (abs(s.energy - slot_target), s.idx))
+            # 스테이지 고정 밴드(프로토타입) — 에너지 허용창보다 먼저 적용하는 최우선 하드필터.
+            # 이 밴드의 후보가 이미 소진됐으면(다른 스테이지가 다 가져감 등) 억지로 다른 밴드를
+            # 채우지 않고 슬롯을 건너뛴다 — "이 스테이지는 이 밴드만"이라는 사용자 의도를
+            # energy 허용창 완충 로직보다 더 엄격하게 지킨다.
+            band_pool = (
+                {idx: s for idx, s in remaining.items() if s.band == stage_band}
+                if stage_band else remaining
+            )
+            if not band_pool:
+                continue
+            cand = sorted(band_pool.values(), key=lambda s: (abs(s.energy - slot_target), s.idx))
             window = [s for s in cand if abs(s.energy - slot_target) <= _TOL]
             if window:
                 # 허용창 내 곡은 모두 무드 부합 → rng 셔플로 변주 후 밝기 버킷 근접 우선(재현적),

@@ -131,6 +131,12 @@ SYSTEM_PROMPT = (
     "짧게)이면 [15,20,15,10]. 구간 길이에 대한 언급이 전혀 없으면 target_minutes를 stage_count로 "
     "균등하게 나눈 값을 그대로 배열로 채운다(예: 40분 5단계면 [8,8,8,8,8]) — 이 경우에도 배열 "
     "자체는 반드시 채우고 null을 반환하지 말 것.\n"
+    "- stage_bands: (선택) 길이가 stage_count와 같은 문자열|null 배열. **사용자가 여러 밴드를 언급하며 "
+    "시간을 나눠 배정했을 때만**(예: '모르포니카가 30분, 개유노가 30분', 'A밴드 다음 B밴드 순서로') "
+    "채운다 — 각 원소는 그 단계에 배정된 밴드 이름을 **사용자가 쓴 표현 그대로**(밴드 정식명이든 별명이든 "
+    "상관없음, 예: \"모르포니카\", \"개유노\") 적는다. 밴드가 특정되지 않은 단계는 null. **밴드 언급이 "
+    "없거나 단일 밴드 요청이면 전체를 null로 채우거나 필드 자체를 생략한다 — 언급되지 않은 밴드를 "
+    "지어내지 말 것.**\n"
     "- target_minutes: 10~180 정수. 발화에 시간이 있으면 그대로. 없어도 **활동·상황이 암시하는 재생시간을 "
     "상식적 평균으로 reasonable하게 추정**해 넣어라(예: 5km 러닝≈40분, 공부 1세션≈50분, 낮잠≈20분, "
     "출퇴근≈40분, 파티≈120분). 정말 아무 단서도 없을 때만 null.\n"
@@ -183,6 +189,7 @@ RESPONSE_JSON_SCHEMA = {
                 "stage_count": {"type": "integer"},
                 "stage_energies": {"type": ["array", "null"], "items": {"type": "number"}},
                 "stage_minutes": {"type": ["array", "null"], "items": {"type": "number"}},
+                "stage_bands": {"type": ["array", "null"], "items": {"type": ["string", "null"]}},
                 "stage_params": {
                     "type": ["array", "null"],
                     "items": {
@@ -217,6 +224,7 @@ RESPONSE_JSON_SCHEMA = {
                 "stage_count",
                 "stage_energies",
                 "stage_minutes",
+                "stage_bands",
                 "stage_params",
                 "target_minutes",
                 "interpretation_summary",
@@ -360,6 +368,15 @@ def parse_mood(raw_text: str) -> MoodParameters:
     else:
         stage_minutes = None
 
+    # 프로토타입: 단계별 밴드 고정(선택). 길이가 stage_count와 다르면(모델이 배열 길이를 못
+    # 맞춤) 신뢰하지 않고 None으로 폴백. 실제로 프롬프트에서 언급된 밴드인지의 검증(라우트가
+    # detect_bands()와 대조)은 여기서 하지 않는다 — 여기선 형태만 정리.
+    stage_bands = obj.get("stage_bands")
+    if isinstance(stage_bands, list) and len(stage_bands) == stage_count:
+        stage_bands = [b.strip() if isinstance(b, str) and b.strip() else None for b in stage_bands]
+    else:
+        stage_bands = None
+
     # 3단계: 단계별 신규 오디오 파라미터(선택). 배열 길이가 stage_count와 다르면(모델이 단계
     # 수를 안 맞췄거나 통째로 이상하면) 신뢰할 수 없다고 보고 전체를 None으로 폴백한다.
     # 개별 항목 안에서는 필드 하나가 이상해도 그 필드만 None 처리하고 나머지는 살린다.
@@ -423,6 +440,7 @@ def parse_mood(raw_text: str) -> MoodParameters:
         same_as_previous=same_as_previous,
         stage_params=stage_params,
         stage_minutes=stage_minutes,
+        stage_bands=stage_bands,
     )
 
 

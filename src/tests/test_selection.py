@@ -5,7 +5,7 @@ import random
 import pytest
 
 from app.domain.models import MoodParameters, NoSetlistError, Song, StageSpec
-from app.domain.selection import _local_refine_order, _stage_sequence_cost, build_setlist
+from app.domain.selection import _local_refine_order, _stage_sequence_cost, build_setlist, resolve_stage_band
 
 
 def _songs() -> list[Song]:
@@ -459,3 +459,77 @@ def test_build_setlist_missing_impression_vector_keeps_existing_behavior():
     params = _params(stage_count=1, start=0.5, end=0.5)
     setlist = build_setlist(songs, params, target_seconds=999, rng=random.Random(0))
     assert len(setlist.picks) >= 1
+
+
+# ── 스테이지별 고정 밴드(프로토타입) ────────────────────────────────────────────
+
+def test_resolve_stage_band_spec_takes_priority_over_llm():
+    specs = [StageSpec(energy_target=0.5, song_count=1, band="roselia")]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_bands=["mygo"],
+    )
+    assert resolve_stage_band(0, specs, params) == "roselia"
+
+
+def test_resolve_stage_band_falls_back_to_llm_when_spec_has_none():
+    specs = [StageSpec(energy_target=0.5, song_count=1)]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_bands=["mygo"],
+    )
+    assert resolve_stage_band(0, specs, params) == "mygo"
+
+
+def test_resolve_stage_band_none_when_neither_set():
+    assert resolve_stage_band(0, None, _params(stage_count=1)) is None
+
+
+def test_build_setlist_stage_bands_hard_filters_per_stage():
+    """두 밴드가 섞인 풀에서 stage_bands로 스테이지별 밴드를 고정하면, 각 스테이지는
+    오직 그 밴드 곡만 뽑는다(에너지 하드필터보다 우선하는 최상위 필터)."""
+    songs = [
+        Song(idx=i, band="morfonica", song=f"morf{i}", video_id=f"vidm{i:06d}", camelot="8A",
+             energy=e, mode_score=0.0, shape="neutral", eligible_band=True)
+        for i, e in enumerate([0.2, 0.3, 0.7, 0.8])
+    ] + [
+        Song(idx=100 + i, band="mugendai_mutype", song=f"mm{i}", video_id=f"vidu{i:06d}", camelot="8A",
+             energy=e, mode_score=0.0, shape="neutral", eligible_band=True)
+        for i, e in enumerate([0.2, 0.3, 0.7, 0.8])
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.25, end_energy=0.75, stage_count=2,
+        target_minutes=None, interpretation_summary="test",
+        stage_energies=[0.25, 0.75],
+        stage_bands=["morfonica", "mugendai_mutype"],
+    )
+    setlist = build_setlist(songs, params, target_seconds=2 * 213, rng=random.Random(0))
+    by_idx = {s.idx: s for s in songs}
+    stage0_bands = {by_idx[p.idx].band for p in setlist.picks if p.stage_index == 0}
+    stage1_bands = {by_idx[p.idx].band for p in setlist.picks if p.stage_index == 1}
+    assert stage0_bands == {"morfonica"}
+    assert stage1_bands == {"mugendai_mutype"}
+
+
+def test_build_setlist_stage_band_skips_slot_when_band_pool_exhausted():
+    """지정된 밴드의 후보가 소진되면(곡 부족), 억지로 다른 밴드를 채우지 않고 슬롯을
+    건너뛴다 — 곡 수가 자동으로 줄어든다."""
+    songs = [
+        Song(idx=0, band="morfonica", song="only", video_id="vidm0000000", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True),
+    ] + [
+        Song(idx=100 + i, band="mygo", song=f"mygo{i}", video_id=f"vidg{i:06d}", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True)
+        for i in range(5)
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_bands=["morfonica"],
+    )
+    # 3곡 분량을 요청해도 morfonica 후보가 1곡뿐이라 1곡만 채택돼야 한다(mygo로 채우지 않음).
+    setlist = build_setlist(songs, params, target_seconds=3 * 213, rng=random.Random(0))
+    assert len(setlist.picks) == 1
+    assert setlist.picks[0].idx == 0

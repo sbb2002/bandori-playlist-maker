@@ -15,7 +15,12 @@ from dataclasses import replace
 from fastapi import APIRouter, Header, HTTPException, Request, Response
 
 from ..domain.models import MoodParameters, StageSpec
-from ..domain.selection import DEFAULT_AVG_SONG_SECONDS, build_setlist, resolve_stage_impression_text
+from ..domain.selection import (
+    DEFAULT_AVG_SONG_SECONDS,
+    build_setlist,
+    resolve_stage_band,
+    resolve_stage_impression_text,
+)
 from ..repo.song_repo import AUDIO_FEATURE_COLS
 from .band_aliases import detect_bands
 from .schemas import SetlistRequest, serialize_setlist
@@ -83,6 +88,33 @@ def _build_stage_impression_vectors(embedder, impression_texts: list[str | None]
             logger.warning("스테이지 impression 임베딩 실패 — 이 스테이지는 가사 유사도 없이 진행.", exc_info=True)
             vectors.append(None)
     return vectors
+
+
+def _validate_stage_bands(
+    stage_bands: list[str | None] | None, detected_bands: set[str]
+) -> list[str | None] | None:
+    """LLM이 산출한 stage_bands 값을 실제로 이 요청에서 감지된 밴드로만 제한한다(프로토타입).
+
+    각 원소는 LLM이 사용자 표현 그대로(별명 포함) 적은 자유 텍스트일 수 있으므로, 그 텍스트를
+    다시 `detect_bands()`(band_aliases.py의 결정적 별명 매칭)에 통과시켜 정규 밴드 id로
+    바꾼다. 정확히 밴드 1개로 좁혀지지 않거나, 그 밴드가 `detected_bands`(이 프롬프트에서
+    실제로 언급된 밴드 집합 — band_filter의 근거와 동일)에 없으면 무조건 None으로 무효화한다.
+    LLM이 언급되지 않은 밴드를 지어내거나 애매하게 적어도 그 스테이지는 밴드 제한 없이(중립)
+    진행되도록 하는 안전장치.
+    """
+    if not stage_bands:
+        return stage_bands
+    validated: list[str | None] = []
+    for raw in stage_bands:
+        band: str | None = None
+        if raw:
+            resolved = detect_bands(raw)
+            if len(resolved) == 1:
+                candidate = next(iter(resolved))
+                if candidate in detected_bands:
+                    band = candidate
+        validated.append(band)
+    return validated
 
 
 def _is_cover(song) -> bool:
@@ -216,6 +248,9 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
             payload.prompt, payload.previous_prompt,
             energy_stats=energy_stats, feature_stats=_feature_stats(pool),
         )
+        # 프로토타입: LLM이 지어낸 stage_bands 값을 이 프롬프트에서 실제로 감지된 밴드로만
+        # 제한(band_names는 위에서 이미 detect_bands(payload.prompt)를 포함해 계산됨).
+        params = replace(params, stage_bands=_validate_stage_bands(params.stage_bands, band_names))
 
         # DEPRECATED(2026-08-03, 3단계): 예전엔 'honor'를 "직전 요청과 의도가 같은가"
         # (params.same_as_previous)로 판정해, 같을 때만 사용자가 건드린 세부설정(에너지

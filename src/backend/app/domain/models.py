@@ -90,6 +90,12 @@ class MoodParameters:
     # 릴랙스"처럼 특정 구간만 짧게/길게 요청한 의도가 곡 개수에도 반영되도록. None이면 기존
     # 균등분배(distribute_counts) 그대로 — 하위호환.
     stage_minutes: list[float] | None = None
+    # 프로토타입: 단계별 밴드 고정(선택). "모르포니카가 30분, 개유노가 30분"처럼 여러 밴드가
+    # 시간 분할과 함께 언급될 때만 채워진다(그 외엔 전부 None). 각 값은 이 요청에서 실제로
+    # `band_aliases.detect_bands()`가 프롬프트에서 찾아낸 밴드여야 하고, 아니면 라우트가
+    # None으로 무효화한다(LLM이 언급 안 된 밴드를 지어내는 것 방지) — selection.py가
+    # stage_specs 없을 때 이 값을 스테이지별 최우선(에너지보다 먼저) 하드필터로 쓴다.
+    stage_bands: list[str | None] | None = None
 
 
 @dataclass(frozen=True)
@@ -129,6 +135,9 @@ class StageSpec:
     # 프로토타입: 커스텀 모드 사용자가 직접 입력한 가사 감상(선택). 6개 수치와 동일하게
     # selection.py의 _resolve_stage_target_params에서 스펙 우선 → LLM stage_params 폴백.
     impression: str | None = None
+    # 프로토타입: 이 스테이지를 특정 밴드로만 고정(선택). MoodParameters.stage_bands와 동일
+    # 우선순위 규칙(스펙 우선 → LLM 폴백)을 따른다.
+    band: str | None = None
     # TODO(data-pipeline): songs_master.csv에 컬럼 추가 후 domain/selection.py 매칭에 반영
 
 
