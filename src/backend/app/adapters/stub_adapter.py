@@ -80,6 +80,7 @@ class StubMoodInterpreter:
     def interpret(
         self, prompt: str, previous_prompt: str | None = None,
         energy_stats: dict | None = None,
+        feature_stats: dict | None = None,  # 미사용 — 포트 시그니처 준수용
     ) -> MoodParameters:
         text = prompt.lower()
 

@@ -5,6 +5,7 @@ import pytest
 from app.domain.energy import (
     continuous_slot_targets,
     distribute_counts,
+    distribute_counts_by_weights,
     stage_energy_targets,
     total_song_count,
 )
@@ -47,6 +48,30 @@ def test_distribute_even_with_remainder():
 def test_distribute_min_one_per_stage():
     counts = distribute_counts(3, 3)
     assert counts == [1, 1, 1]
+
+
+# ── distribute_counts_by_weights (3.5단계: 구간별 길이 의도 반영) ──────────────────
+
+def test_distribute_by_weights_proportional():
+    # 60분 4구간(15/20/15/10) 비율 → 총 17곡이 그 비율에 가깝게 배분돼야 함.
+    counts = distribute_counts_by_weights(17, [15, 20, 15, 10])
+    assert sum(counts) == 17
+    assert counts[1] > counts[0] == counts[2] > counts[3]
+
+
+def test_distribute_by_weights_equal_weights_matches_even_split():
+    assert distribute_counts_by_weights(17, [1, 1, 1]) == distribute_counts(17, 3)
+
+
+def test_distribute_by_weights_min_one_per_stage():
+    # 극단적으로 치우친 가중치라도 각 단계 최소 1곡은 보장.
+    counts = distribute_counts_by_weights(5, [100, 1, 1, 1, 1])
+    assert all(c >= 1 for c in counts)
+    assert sum(counts) == 5
+
+
+def test_distribute_by_weights_falls_back_when_all_zero():
+    assert distribute_counts_by_weights(9, [0, 0, 0]) == distribute_counts(9, 3)
 
 
 # ── continuous_slot_targets (feature/energy-stream §b) ────────────────────────

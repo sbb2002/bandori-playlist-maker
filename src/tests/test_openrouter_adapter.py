@@ -88,6 +88,92 @@ def test_parse_stage_energies_nonmonotonic():
     assert p.stage_energies == [0.3, 0.85, 0.85, 0.4]
 
 
+def test_parse_stage_params_matching_length_kept_and_clamped():
+    """3단계: stage_count와 길이가 같으면 stage_params를 살리고, 범위 밖 값은 클램프한다."""
+    from app.adapters.prompt import parse_mood
+    p = parse_mood(
+        '{"brightness":0.3,"start_energy":0.3,"end_energy":0.4,"stage_count":2,'
+        '"stage_params":['
+        '{"valence":0.8,"lufs_integrated":5,"lra":null},'
+        '{"valence":-1,"instr_stem_ratio":0.4}'
+        '],"target_minutes":45,"interpretation_summary":""}'
+    )
+    assert p.stage_params == [
+        {"valence": 0.8, "lufs_integrated": 1.0, "lra": None,
+         "danceability_norm": None, "instr_stem_ratio": None, "speech_median": None,
+         "impression": None},
+        {"valence": 0.0, "lufs_integrated": None, "lra": None,
+         "danceability_norm": None, "instr_stem_ratio": 0.4, "speech_median": None,
+         "impression": None},
+    ]
+
+
+def test_parse_stage_params_impression_kept_and_truncated():
+    """프로토타입: impression은 6개 수치와 별도로 파싱되고, 최대 길이를 넘으면 잘린다."""
+    from app.adapters.prompt import _IMPRESSION_MAX_LEN, parse_mood
+    long_text = "가" * (_IMPRESSION_MAX_LEN + 20)
+    p = parse_mood(
+        '{"brightness":0.3,"start_energy":0.3,"end_energy":0.4,"stage_count":2,'
+        '"stage_params":['
+        '{"valence":0.5,"impression":"  차분하고 그리운 정서  "},'
+        '{"valence":0.5,"impression":"' + long_text + '"}'
+        '],"target_minutes":45,"interpretation_summary":""}'
+    )
+    assert p.stage_params[0]["impression"] == "차분하고 그리운 정서"  # 앞뒤 공백 정리
+    assert p.stage_params[1]["impression"] == long_text[:_IMPRESSION_MAX_LEN]
+
+
+def test_parse_stage_params_impression_blank_or_missing_is_none():
+    from app.adapters.prompt import parse_mood
+    p = parse_mood(
+        '{"brightness":0,"start_energy":0.4,"end_energy":0.4,"stage_count":2,'
+        '"stage_params":[{"valence":0.5,"impression":"   "},{"valence":0.5}],'
+        '"target_minutes":null,"interpretation_summary":""}'
+    )
+    assert p.stage_params[0]["impression"] is None
+    assert p.stage_params[1]["impression"] is None
+
+
+def test_parse_stage_params_length_mismatch_dropped():
+    """stage_count(3)와 배열 길이(2)가 안 맞으면 통째로 None 폴백(부분 신뢰 안 함)."""
+    from app.adapters.prompt import parse_mood
+    p = parse_mood(
+        '{"brightness":0,"start_energy":0.4,"end_energy":0.4,"stage_count":3,'
+        '"stage_params":[{"valence":0.5},{"valence":0.6}],'
+        '"target_minutes":null,"interpretation_summary":""}'
+    )
+    assert p.stage_params is None
+
+
+def test_parse_stage_params_absent_is_none():
+    from app.adapters.prompt import parse_mood
+    assert parse_mood(_OK_JSON).stage_params is None
+
+
+def test_parse_stage_minutes_matching_length_kept_and_floored():
+    """3.5단계: stage_count와 길이가 같으면 유지, 하한(3분) 아래 값은 올림 클램프."""
+    from app.adapters.prompt import parse_mood
+    p = parse_mood(
+        '{"brightness":0,"start_energy":0.4,"end_energy":0.4,"stage_count":3,'
+        '"stage_minutes":[1,20,15],"target_minutes":40,"interpretation_summary":""}'
+    )
+    assert p.stage_minutes == [3.0, 20.0, 15.0]
+
+
+def test_parse_stage_minutes_length_mismatch_dropped():
+    from app.adapters.prompt import parse_mood
+    p = parse_mood(
+        '{"brightness":0,"start_energy":0.4,"end_energy":0.4,"stage_count":3,'
+        '"stage_minutes":[10,20],"target_minutes":40,"interpretation_summary":""}'
+    )
+    assert p.stage_minutes is None
+
+
+def test_parse_stage_minutes_absent_is_none():
+    from app.adapters.prompt import parse_mood
+    assert parse_mood(_OK_JSON).stage_minutes is None
+
+
 def test_out_of_range_values_clamped():
     content = ('{"brightness":5,"start_energy":-2,"end_energy":9,'
                '"stage_count":99,"target_minutes":9999,"interpretation_summary":""}')
@@ -188,6 +274,25 @@ def test_build_messages_includes_previous_prompt():
 def test_build_messages_without_previous_is_plain():
     from app.adapters.prompt import build_messages
     assert build_messages("현재 요청 텍스트")[-1]["content"] == "현재 요청 텍스트"
+
+
+# ── 예시 숫자 jitter(3.5단계 함정 수정: 모델이 프롬프트 예시를 그대로 복사하던 문제) ──────────
+
+def test_dynamic_examples_are_jittered_across_calls():
+    """예시 stage_params 숫자가 매 호출마다 달라야 모델이 그대로 베끼는 걸 막을 수 있다."""
+    from app.adapters.prompt import build_messages
+    system_a = build_messages("x")[0]["content"]
+    system_b = build_messages("x")[0]["content"]
+    assert system_a != system_b
+
+
+def test_jitter_stage_params_stays_in_bounds():
+    from app.adapters.prompt import _BALLAD_EXAMPLE_TEMPLATE, _jitter_stage_params
+    import random
+    rng = random.Random(0)
+    for _ in range(50):
+        jittered = _jitter_stage_params(_BALLAD_EXAMPLE_TEMPLATE, rng)
+        assert all(0.0 <= v <= 1.0 for v in jittered.values())
 
 
 def test_parse_mood_same_as_previous_extracted():

@@ -29,7 +29,7 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -45,6 +45,7 @@ from .ports.mood_port import (
 from .ports.notify_port import Notifier, NoopNotifier
 from .repo import remote_source
 from .repo.song_repo import load_songs
+from .adapters.embedding_adapter import SentenceTransformerEmbedder
 
 logger = logging.getLogger("setlist_maker")
 
@@ -283,9 +284,10 @@ class InflightLimitMiddleware:
 
 
 def _load_current_songs(*, force: bool = False) -> list:
-    """`data` 브랜치에서 songs_master.csv를 fetch(또는 캐시 재사용)해 적재한다."""
+    """`data` 브랜치에서 songs_master.csv(+가사 감상 임베딩)를 fetch(또는 캐시 재사용)해 적재한다."""
     path = remote_source.ensure_songs_csv(force=force)
-    return load_songs(path)
+    lyric_path = remote_source.ensure_lyric_json(force=force)  # 없어도(None) load_songs가 정상 동작.
+    return load_songs(path, lyric_path)
 
 
 @asynccontextmanager
@@ -322,6 +324,8 @@ async def _lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     _load_dotenv()  # 어댑터·CORS가 env를 읽기 전에 .env 주입.
+    # TODO(오너 결정, 2026-08-08): epic/improved-playlist-maker(PR #62) 머지 시 2.0.0부터
+    # 버저닝 시작하기로 함 — 그 머지 커밋에서 이 문자열을 "2.0.0"으로 올릴 것.
     app = FastAPI(title="setlist-maker", version="0.1.0-pilot", lifespan=_lifespan)
 
     # 입장제어(in-flight 상한) — CORS보다 먼저 add해 CORS가 바깥에서 감싸도록(거절 응답에도 CORS 헤더).
@@ -339,6 +343,7 @@ def create_app() -> FastAPI:
     app.state.interpreter = _build_interpreter()
     app.state.interpreter_name = type(app.state.interpreter).__name__  # /api/health 진단(stub|groq 확인)
     app.state.notifier = _build_notifier()
+    app.state.embedder = SentenceTransformerEmbedder()  # 지연 로드 — 실제 모델은 첫 embed() 호출 시.
     app.state.songs = _load_current_songs()
     app.state.refresh_songs = _load_current_songs  # 관리자 강제 리프레시 엔드포인트가 재사용
     logger.info("곡 %d건 적재 완료.", len(app.state.songs))
@@ -352,6 +357,14 @@ def _register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(RequestValidationError)
     async def _on_validation(_: Request, exc: RequestValidationError) -> JSONResponse:
         return _error_response(400, "INVALID_REQUEST", "요청 형식이 올바르지 않습니다.")
+
+    @app.exception_handler(HTTPException)
+    async def _on_http_exception(_: Request, exc: HTTPException) -> JSONResponse:
+        # HTTPException의 detail이 dict인 경우 {error: {code, message}} 형식으로 처리
+        if isinstance(exc.detail, dict) and "error" in exc.detail:
+            return JSONResponse(status_code=exc.status_code, content=exc.detail)
+        # 그 외의 경우는 기본 메시지로 처리
+        return _error_response(exc.status_code, "HTTP_ERROR", str(exc.detail) if exc.detail else "요청에 오류가 있습니다.")
 
     @app.exception_handler(MoodInterpretationError)
     async def _on_mood(_: Request, exc: MoodInterpretationError) -> JSONResponse:

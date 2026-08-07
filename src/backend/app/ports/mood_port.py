@@ -32,6 +32,7 @@ class MoodInterpreter(Protocol):
     def interpret(
         self, prompt: str, previous_prompt: str | None = None,
         energy_stats: dict | None = None,
+        feature_stats: dict | None = None,
     ) -> MoodParameters:
         """자연어 발화를 검증된 MoodParameters로 변환한다.
 
@@ -42,6 +43,9 @@ class MoodInterpreter(Protocol):
             energy_stats: 현재 필터(밴드 등)에 해당하는 곡 풀의 에너지 분포 통계
                 ({"min":.., "max":.., "mean":.., "std":..}, float 값들). 구현이 이 값을 실제로
                 쓸지는 어댑터 자유(현재는 groq_multistage_adapter만 사용). None이면 통계 없음.
+            feature_stats: 오디오 지표 6종(stage_params와 동일 키·동일 minmax 스케일)의 분포
+                통계({"전체": {지표: {min,max,mean,median,std}}, 밴드명: {...}}). LLM이
+                stage_params 값을 실제 곡 분포에 근거해 고르게 하는 재료. None이면 통계 없음.
 
         Raises:
             MoodInterpretationError: 응답을 해석할 수 없는 경우(재시도 없음, PRD §7).

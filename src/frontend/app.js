@@ -48,7 +48,10 @@ let playbackStarted = false; // 첫 PLAYING 이후 true — 편집 시 cue(정�
 // 통합 되돌리기 스택(Ctrl+Z): {kind:'edit', picks, current} | {kind:'preset-delete', preset, index}.
 // 'edit'은 새 플레이리스트 생성 시 리셋, 'preset-delete'는 유지.
 const undoStack = [];
-// 프리셋 자동저장용 최신 스냅샷(renderResult에서 갱신).
+
+// ── 모드 상태 ─────────────────────────────────────────────────────────────────
+let currentMode = "ai"; // "ai" | "custom"
+// 프리셋 자동저장용 최신 스냅샷(renderResult에서 갱신). lastStages는 커스텀 모드의 기본값용.
 let lastParams = {};
 let lastAppliedBands = [];
 let lastStages = [];
@@ -78,25 +81,50 @@ promptEl.addEventListener("input", () => {
 // ── 요청 ─────────────────────────────────────────────────────────────────────
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const prompt = $("prompt").value.trim();
-  if (!prompt) return;
 
-  const body = { prompt };
-  // 직전 회차 요청을 함께 보내 백엔드가 '의도 동일성'을 판정하게 한다(핫픽스). 의도가 같으면 아래
-  // 사용자 override를 존중하고, 프롬프트를 새 내용으로 바꾸면 백엔드가 override를 무시하고 자동 해석한다.
-  if (previousPrompt) body.previous_prompt = previousPrompt;
-  if (minutesTouched) {
-    const minutes = parseInt($("target-minutes").value, 10);
-    if (!Number.isNaN(minutes)) body.target_minutes = minutes;
-  }
+  const body = {};
 
-  const bands = collectBands();
-  if (bands.length) body.bands = bands;
-  const customStages = collectStages();
-  if (customStages) body.stages = customStages;
-  // 커버/오리지널은 사용자가 직접 버튼을 건드렸을 때만 전송(아니면 LLM이 판단).
-  if (coverTouched) {
-    Object.assign(body, typeToFlags(settingsType));
+  if (currentMode === "ai") {
+    // ── AI 모드: 프롬프트 필수 ──
+    const prompt = $("prompt").value.trim();
+    if (!prompt) return;
+    body.prompt = prompt;
+    body.mode = "ai";
+
+    // 직전 회차 요청을 함께 보내 백엔드가 '의도 동일성'을 판정하게 한다(핫픽스).
+    if (previousPrompt) body.previous_prompt = previousPrompt;
+    if (minutesTouched) {
+      const minutes = parseInt($("target-minutes").value, 10);
+      if (!Number.isNaN(minutes)) body.target_minutes = minutes;
+    }
+
+    const bands = collectBands();
+    if (bands.length) body.bands = bands;
+    const customStages = collectStages();
+    if (customStages) body.stages = customStages;
+    if (coverTouched) {
+      Object.assign(body, typeToFlags(settingsType));
+    }
+  } else {
+    // ── 커스텀 모드: 직접 구성한 stages 전송 ──
+    body.mode = "custom";
+    const customStages = collectStagesForCustomMode();
+    if (!customStages || customStages.length === 0) {
+      showError("구간 설정을 해 주세요.");
+      return;
+    }
+    body.stages = customStages;
+
+    if (minutesTouched) {
+      const minutes = parseInt($("target-minutes").value, 10);
+      if (!Number.isNaN(minutes)) body.target_minutes = minutes;
+    }
+
+    const bands = collectBands();
+    if (bands.length) body.bands = bands;
+    if (coverTouched) {
+      Object.assign(body, typeToFlags(settingsType));
+    }
   }
 
   showLoading(true);
@@ -115,9 +143,13 @@ form.addEventListener("submit", async (e) => {
       throw new Error(msg);
     }
     renderResult(data);
-    previousPrompt = prompt; // 성공 생성분만 다음 요청의 '직전 프롬프트' 기준으로 기억
+    if (currentMode === "ai") {
+      previousPrompt = $("prompt").value.trim();
+      // lastStages(width 포함)는 renderResult가 이미 채워둔다 — 여기서 다시 덮어쓰면
+      // width 계산이 유실된다(재도입 금지).
+    }
   } catch (err) {
-    const offline = err instanceof TypeError; // fetch 자체 실패(네트워크/CORS)
+    const offline = err instanceof TypeError;
     showError(offline
       ? "백엔드에 연결하지 못했어요. 서버가 켜져 있는지, API 주소가 맞는지 확인해 주세요."
       : err.message);
@@ -174,7 +206,17 @@ function showError(message) {
 
 // ── 설정: 밴드 필터 · 단계 직접 지정 (§5-1) ────────────────────────────────────
 const bandListEl = $("band-list");
-const stageEditorEl = $("stage-editor");
+const mapPadEl = $("map-pad");
+const mapSvgEl = $("map-svg");
+const timebarEl = $("timebar");
+const timebarTicksEl = $("timebar-ticks");
+const timebarTotalLabelEl = $("timebar-total-label");
+const impressionRowEl = $("impression-row");
+const stageNEl = $("stage-n");
+const paramGraphsEl = $("param-graphs");
+const bgToggleEl = $("bg-toggle");
+const stagePlusBtn = $("stage-plus");
+const stageMinusBtn = $("stage-minus");
 let stageTouched = false; // 사용자가 그래프를 조정했는지 — 조정 전엔 LLM 에너지 자동 사용
 // 사용자가 직접 건드린 설정만 요청에 override로 싣는다. 안 건드린 값은 생략 → LLM이 결정하고,
 // 응답 후 그 값을 UI에 '반영'만 한다(다음 요청에 강제되지 않게 — 밴드 필터 패턴과 동일).
@@ -187,12 +229,100 @@ let settingsType = "all"; // "all" | "original" | "cover" — 세 개 중 항상
 // 이 집합은 오직 사용자의 change 이벤트로만 갱신 — 프로그램적 .checked 대입은 change를 발생시키지
 // 않으므로 syncBandChecks가 여기 섞이지 않는다(요청 간 밴드 누적 버그의 근본 차단).
 const manualBands = new Set();
+// 감성 설정 구간별 밴드 셀렉터(#impression-row) 옵션 채우기용 — loadBands()가 채운다.
+let cachedBands = [];
+
+// 구간별 "밴드 고정" 팝업 상태 — buildImpressionRow()가 매 렌더마다 다시 채우지만, 열림
+// 상태 추적과 바깥 클릭 감지는 재렌더에도 살아남아야 해서 최상위(모듈 스코프)에 둔다.
+let impressionBandToggleEls = [];
+let impressionBandPopupEls = [];
+let openBandPopupIndex = -1;
+
+function closeBandPopup() {
+  if (openBandPopupIndex !== -1 && impressionBandPopupEls[openBandPopupIndex]) {
+    impressionBandPopupEls[openBandPopupIndex].classList.add("hidden");
+  }
+  openBandPopupIndex = -1;
+}
+document.addEventListener("click", (e) => {
+  if (openBandPopupIndex === -1) return;
+  const popup = impressionBandPopupEls[openBandPopupIndex];
+  const toggle = impressionBandToggleEls[openBandPopupIndex];
+  if (popup && !popup.contains(e.target) && toggle && !toggle.contains(e.target)) {
+    closeBandPopup();
+  }
+});
+
+// 구간별 밴드 고정 팝업에 보여줄 밴드 목록 — 전역 밴드 필터에서 수동 선택한 것이 있으면
+// 그것만, 없으면(=전체) 전체 밴드. "전역에서 선택한 모든 밴드"라는 사용자 요구사항 그대로.
+function effectiveGlobalBandChoices() {
+  const present = manualBands.size > 0 ? [...manualBands] : cachedBands.map((b) => b.band);
+  return bandsInSelectorOrder(present);
+}
+
+// 구간별 밴드 고정 팝업 내용 채우기 — 전역 밴드 필터와 동일한 디자인(.band-list/.band-item)
+// 재사용. 다중 선택(체크박스)이라 전역 필터와 달리 label에 이름을 병기하지 않고 아이콘+
+// 곡수만(공간 절약, 툴팁으로 이름 확인) — 전역 밴드 필터와 동일한 관례.
+function renderBandPopupOptions(popupEl, i) {
+  popupEl.replaceChildren();
+  const list = document.createElement("div");
+  list.className = "band-list";
+  const countByBand = new Map(cachedBands.map((b) => [b.band, b.count]));
+  const seg = stageModel.segments[i];
+  for (const band of effectiveGlobalBandChoices()) {
+    const label = document.createElement("label");
+    label.className = "band-item";
+    label.title = prettyBand(band);
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.className = "band-cb";
+    cb.checked = (seg.bands || []).includes(band);
+    cb.addEventListener("change", () => {
+      stageTouched = true;
+      const cur = new Set(stageModel.segments[i].bands || []);
+      if (cb.checked) cur.add(band); else cur.delete(band);
+      stageModel.segments[i].bands = [...cur];
+      updateBandToggleIndicator(i);
+    });
+    const icon = makeBandIcon(band, "band-item-icon");
+    const count = document.createElement("span");
+    count.className = "band-item-count";
+    count.textContent = countByBand.get(band) ?? "";
+    label.append(cb, icon, count);
+    list.appendChild(label);
+  }
+  popupEl.appendChild(list);
+}
+
+function updateBandToggleIndicator(i) {
+  const btn = impressionBandToggleEls[i];
+  if (!btn || !stageModel.segments[i]) return;
+  btn.classList.toggle("on", (stageModel.segments[i].bands || []).length > 0);
+}
+
+// bandori-song-sorter와 동일한 밴드 나열 순서(아이콘 애셋은 assets/bands/<band>.png, 미포함은
+// 뒤). renderStageGraph()가 페이지 로드 시 동기적으로 한 번 실행되며 구간별 밴드 셀렉터를
+// 채우려고 이 함수를 곧바로 호출하므로, 파일 하단에 두면 TDZ(const 초기화 전 접근)로
+// ReferenceError가 나 스크립트 전체가 중단된다(실사용 버그로 발견) — 반드시 최상단에 둘 것.
+const BAND_ORDER = [
+  "poppin_party", "afterglow", "pastel_palettes", "roselia",
+  "hello_happy_world", "morfonica", "raise_a_suilen", "mygo",
+  "ave_mujica", "mugendai_mutype", "millsage", "ikka_dumb_rock",
+];
+function bandsInSelectorOrder(present) {
+  const ordered = BAND_ORDER.filter((b) => present.includes(b));
+  const rest = present.filter((b) => !BAND_ORDER.includes(b)).sort();
+  return [...ordered, ...rest];
+}
 
 async function loadBands() {
   try {
     const res = await fetch(`${API_BASE}/api/bands`);
     const data = await res.json();
-    renderBands(data.bands || []);
+    cachedBands = data.bands || [];
+    renderBands(cachedBands);
+    // 구간별 밴드 셀렉터는 이 응답이 오기 전에 이미 그려졌을 수 있어(비동기), 도착 즉시 갱신.
+    if (stageModel) renderStageGraph();
   } catch (_) {
     bandListEl.textContent = "밴드 목록을 불러오지 못했어요 (백엔드가 켜져 있는지 확인).";
   }
@@ -216,6 +346,7 @@ function renderBands(bands) {
     cb.addEventListener("change", () => {
       if (cb.checked) manualBands.add(cb.value);
       else manualBands.delete(cb.value);
+      syncStageBandsToGlobalFilter();
     });
     const icon = makeBandIcon(band, "band-item-icon");
     const count = document.createElement("span");
@@ -235,20 +366,59 @@ function collectBands() {
 $("band-clear").addEventListener("click", () => {
   manualBands.clear();
   document.querySelectorAll(".band-cb:checked").forEach((c) => (c.checked = false));
+  syncStageBandsToGlobalFilter();
 });
 
-// 시간×에너지 텐션 그래프 편집기 (§5-1a). 점=에너지(상하 드래그), 경계=구간 길이(좌우 드래그).
-const SVG_NS = "http://www.w3.org/2000/svg";
-const PAD_TOP = 10;      // 그래프 상하 여백(뷰박스 0~100 기준)
-const PAD_BOTTOM = 12;
-const MIN_WIDTH = 0.08;  // 구간 최소 폭(전체 대비)
-const MIN_SEGMENTS = 2;  // 구간 최소 개수
-const MAX_SEGMENTS = 11; // 구간 최대 개수(= 분리선 최대 10개, 핫픽스 제안2)
-const DEFAULT_STAGE_COUNT = 3; // 단계 수 텍스트박스 제거 후 기본 구간 수
-const LONGPRESS_MS = 1000;     // 모바일 길게누름(1초) → 구간 추가/제거 메뉴 (우클릭 대체)
-const GRAPH_HINT_TEXT = "● 점 위·아래 = 에너지  ·  ◆ 경계 좌·우 = 구간 길이  ·  우클릭/길게눌러 구간 추가·제거";
+// 전역 밴드 필터가 바뀌면(체크·해제·전체 해제) 구간별 "밴드 고정" 선택도 즉시 반영한다
+// (사용자 요구사항) — 더 이상 전역에서 유효하지 않은 구간별 선택은 정리하고, 열려 있는
+// 팝업이 있으면 새 옵션으로 다시 그린다.
+function syncStageBandsToGlobalFilter() {
+  if (!stageModel) return;
+  const allowed = new Set(effectiveGlobalBandChoices());
+  stageModel.segments.forEach((s, i) => {
+    if (s.bands && s.bands.length) {
+      s.bands = s.bands.filter((b) => allowed.has(b));
+    }
+    updateBandToggleIndicator(i);
+  });
+  if (openBandPopupIndex !== -1 && impressionBandPopupEls[openBandPopupIndex]) {
+    renderBandPopupOptions(impressionBandPopupEls[openBandPopupIndex], openBandPopupIndex);
+  }
+}
 
-let stageModel = null; // { totalMinutes, segments: [{energy(0~1), width(합=1)}] }
+// 범용 유틸(트랙리스트·프리셋·플레이바 등 여러 곳에서 공유) — 2D 정서 지도 이식 과정에서
+// 실수로 함께 지워졌던 것을 복원(elDiv/clamp 누락으로 결과 렌더링·재생바가 ReferenceError로 깨졌음).
+function elDiv(cls) { const d = document.createElement("div"); d.className = cls; return d; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// 2D 정서 지도 + 시간 배분 + 고급 설정 편집기 (§5-1a)
+const SVG_NS = "http://www.w3.org/2000/svg";
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+const MAP_PAD = 8; // 지도 여백(%)
+const toMapPct = (frac) => MAP_PAD + frac * (100 - MAP_PAD * 2);
+const fromMapPct = (pct) => clamp01((pct - MAP_PAD) / (100 - MAP_PAD * 2));
+const MIN_SEGMENTS = 2;  // 구간 최소 개수
+const MAX_SEGMENTS = 11; // 구간 최대 개수
+const DEFAULT_STAGE_COUNT = 3; // 기본 구간 수
+const MIN_WIDTH_MIN = 3; // 구간 최소 길이(분) — 구간이 너무 촘촘해지면 곡 배정이 어색해짐
+
+// 고급 설정 그래프 5개
+const PARAM_DEFS = [
+  { key: "lufs_integrated", label: "라우드니스", desc: "높을수록 크고 힘있는 곡이, 낮을수록 조용한 곡이 선택됩니다." },
+  { key: "lra", label: "다이내믹 범위", desc: "높을수록 벅차는 느낌의 곡이, 낮을수록 일정한 느낌의 곡이 선택됩니다." },
+  { key: "danceability_norm", label: "리듬감", desc: "높을수록 리드미컬한 곡이, 낮을수록 변칙적인 리듬의 곡이 선택됩니다." },
+  { key: "instr_stem_ratio", label: "악기 비중", desc: "높을수록 악기 비중이 높은 곡이, 낮을수록 보컬 비중이 높은 곡이 선택됩니다." },
+  { key: "speech_median", label: "음절밀도", desc: "높을수록 랩 성향의 곡이, 낮을수록 랩이 아닌 곡이 선택됩니다." },
+];
+
+// 고급 설정 그래프용 여백
+const PAD_TOP = 10;      // 그래프 상하 여백(뷰박스 0~100 기준)
+const PAD_BOTTOM = 6;
+const valToY = (v) => PAD_TOP + (1 - v) * (100 - PAD_TOP - PAD_BOTTOM);
+const yToVal = (fracY) => clamp01(1 - (fracY * 100 - PAD_TOP) / (100 - PAD_TOP - PAD_BOTTOM));
+
+// stageModel: { totalMinutes, segments: [{energy, width, valence, lufs_integrated, lra, danceability_norm, instr_stem_ratio, speech_median}] }
+let stageModel = null;
 
 // 백엔드도 180분(3시간) 하드캡을 두지만(routes.py _MAX_TARGET_MINUTES), 여기서도 넘긴 순간
 // 180으로 되돌리고 안내한다(number input의 native max는 스핀 버튼만 막고 타이핑은 안 막음).
@@ -299,18 +469,13 @@ function renderSettingsTypeFilter() {
 }
 renderSettingsTypeFilter();
 
-function initStageModel(n = DEFAULT_STAGE_COUNT) {
-  const count = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, n));
-  const total = clampInt($("target-minutes").value, 10, 180, 60);
-  const segments = [];
-  for (let i = 0; i < count; i++) {
-    segments.push({ energy: +(0.3 + (0.55 * i) / (count - 1)).toFixed(2), width: 1 / count });
-  }
-  stageModel = { totalMinutes: total, segments };
+// 2D 정서 지도 + 시간 배분 + 고급 설정 그래프들
+function centers() {
+  if (!stageModel) return { cum: [0], mid: [] };
+  const cum = [0];
+  stageModel.segments.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
+  return { cum, mid: stageModel.segments.map((s, i) => (cum[i] + cum[i + 1]) / 2) };
 }
-
-function energyToY(energy) { return PAD_TOP + (1 - energy) * (100 - PAD_TOP - PAD_BOTTOM); }
-function yToEnergy(frac) { return clamp01(1 - (frac * 100 - PAD_TOP) / (100 - PAD_TOP - PAD_BOTTOM)); }
 
 function smoothPath(pts) {
   let d = `M ${pts[0].x} ${pts[0].y}`;
@@ -323,105 +488,467 @@ function smoothPath(pts) {
   return d;
 }
 
+function initStageModel(n = DEFAULT_STAGE_COUNT) {
+  const count = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, n));
+  const total = clampInt($("target-minutes").value, 10, 180, 60);
+  const segments = [];
+  for (let i = 0; i < count; i++) {
+    segments.push({
+      width: 1 / count,
+      valence: 0.5,
+      energy: +(0.3 + (0.55 * i) / (count - 1)).toFixed(2),
+      lufs_integrated: 0.5,
+      lra: 0.5,
+      danceability_norm: 0.5,
+      instr_stem_ratio: 0.5,
+      speech_median: 0.5,
+      impression: "",
+      bands: [],
+    });
+  }
+  stageModel = { totalMinutes: total, segments };
+}
+
 function renderStageGraph() {
   if (!stageModel) initStageModel();
-  stageEditorEl.replaceChildren();
 
-  // 축 프레임: [Y축 라벨][플롯] / [여백][X축 시간 라벨]
-  const plotRow = elDiv("plot-row");
-  const yAxis = elDiv("y-axis");
-  const yTop = elDiv("y-tick"); yTop.textContent = "높음";
-  const yTitle = elDiv("y-axis-title"); yTitle.textContent = "에너지";
-  const yBot = elDiv("y-tick"); yBot.textContent = "낮음";
-  yAxis.append(yTop, yTitle, yBot);
+  function buildAllGraphics() {
+    buildMap();
+    buildTimebar();
+    buildImpressionRow();
+    buildParamGraphs();
+    updateAllGraphics();
+  }
 
-  const plot = elDiv("plot");
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("viewBox", "0 0 100 100");
-  svg.setAttribute("preserveAspectRatio", "none");
-  svg.setAttribute("class", "graph-svg");
-  const gridG = document.createElementNS(SVG_NS, "g");
-  [0, 0.25, 0.5, 0.75, 1].forEach((e) => {
-    const ln = document.createElementNS(SVG_NS, "line");
-    const y = energyToY(e);
-    ln.setAttribute("x1", "0"); ln.setAttribute("x2", "100");
-    ln.setAttribute("y1", String(y)); ln.setAttribute("y2", String(y));
-    ln.setAttribute("class", e === 0 || e === 1 ? "grid grid-edge" : "grid");
-    gridG.append(ln);
-  });
-  const area = document.createElementNS(SVG_NS, "path"); area.setAttribute("class", "graph-area");
-  const curve = document.createElementNS(SVG_NS, "path"); curve.setAttribute("class", "graph-curve");
-  svg.append(gridG, area, curve);
-  plot.append(svg);
+  function updateAllGraphics() {
+    updateMap();
+    updateTimebar();
+    updateImpressionRow();
+    updateAllParamCharts();
+    stageNEl.textContent = `${stageModel.segments.length}구간`;
+    stageMinusBtn.disabled = stageModel.segments.length <= MIN_SEGMENTS;
+    stagePlusBtn.disabled = stageModel.segments.length >= MAX_SEGMENTS;
+  }
 
-  const dots = stageModel.segments.map(() => {
-    const dot = elDiv("energy-dot");
-    dot.append(elDiv("dot-val"));
-    return plot.appendChild(dot);
-  });
-  const handles = stageModel.segments.slice(1).map(() => plot.appendChild(elDiv("bound-handle")));
-  plotRow.append(yAxis, plot);
+  // ── 2D 정서 지도 ──────────────────────────────────────────────────────────
+  let mapNodeEls = [];
 
-  const xRow = elDiv("x-axis-row");
-  xRow.append(elDiv("x-spacer"));
-  const xAxis = elDiv("x-axis");
-  xRow.append(xAxis);
+  function buildMap() {
+    mapSvgEl.innerHTML = "";
+    const gridG = document.createElementNS(SVG_NS, "g");
+    [0, 25, 50, 75, 100].forEach((p) => {
+      const v = document.createElementNS(SVG_NS, "line");
+      v.setAttribute("x1", p); v.setAttribute("x2", p); v.setAttribute("y1", 0); v.setAttribute("y2", 100);
+      v.setAttribute("class", "map-grid" + (p === 50 ? " mid" : ""));
+      const h = document.createElementNS(SVG_NS, "line");
+      h.setAttribute("y1", p); h.setAttribute("y2", p); h.setAttribute("x1", 0); h.setAttribute("x2", 100);
+      h.setAttribute("class", "map-grid" + (p === 50 ? " mid" : ""));
+      gridG.append(v, h);
+    });
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("class", "map-path");
+    path.setAttribute("id", "map-path-line");
+    const defs = document.createElementNS(SVG_NS, "defs");
+    const grad = document.createElementNS(SVG_NS, "linearGradient");
+    grad.setAttribute("id", "path-grad");
+    // userSpaceOnUse + viewBox 좌표(0~100)로 고정 — 기본(objectBoundingBox)은 경로가 완전히
+    // 수직/수평이면(바운딩박스 폭 또는 높이가 0) 그라디언트가 특이(degenerate)해져 선 자체가
+    // 안 보이는 버그가 있었다(정서 궤적 기본값이 전부 밝기 50%라 세로 직선이 되는 케이스).
+    grad.setAttribute("gradientUnits", "userSpaceOnUse");
+    grad.setAttribute("x1", "0"); grad.setAttribute("x2", "100");
+    grad.setAttribute("y1", "0"); grad.setAttribute("y2", "0");
+    const s1 = document.createElementNS(SVG_NS, "stop");
+    s1.setAttribute("offset", "0%"); s1.setAttribute("stop-color", "#7c6cff");
+    const s2 = document.createElementNS(SVG_NS, "stop");
+    s2.setAttribute("offset", "100%"); s2.setAttribute("stop-color", "#ff6cc4");
+    grad.append(s1, s2);
+    defs.append(grad);
+    path.setAttribute("stroke", "url(#path-grad)");
+    mapSvgEl.append(defs, gridG, path);
 
-  const hint = elDiv("graph-hint");
-  hint.textContent = GRAPH_HINT_TEXT;
-  stageEditorEl.append(plotRow, xRow, hint);
+    mapPadEl.querySelectorAll(".stage-node").forEach((n) => n.remove());
+    mapNodeEls = stageModel.segments.map((s, i) => {
+      const node = document.createElement("div");
+      node.className = "stage-node";
+      node.textContent = String(i + 1);
+      const val = document.createElement("span");
+      val.className = "node-val";
+      node.append(val);
+      mapPadEl.appendChild(node);
+      bindMapDrag(node, i);
+      node.addEventListener("pointerenter", () => setLinked(i));
+      node.addEventListener("pointerleave", () => setLinked(-1));
+      return node;
+    });
+  }
 
-  // 우클릭(데스크톱)·길게누름(모바일)으로 구간 추가/제거(핫픽스 제안2).
-  attachGraphMenu(plot);
+  function toXY(s) {
+    return { x: toMapPct(s.valence), y: toMapPct(1 - s.energy) };
+  }
 
-  function update() {
-    const segs = stageModel.segments, n = segs.length, total = stageModel.totalMinutes;
-    const cum = [0];
-    segs.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
-    const centers = segs.map((s, i) => (cum[i] + cum[i + 1]) / 2);
+  function updateMap() {
+    const path = document.getElementById("map-path-line");
+    const pts = stageModel.segments.map(toXY);
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) d += ` L ${pts[i].x} ${pts[i].y}`;
+    path.setAttribute("d", d);
 
-    const pts = [{ x: 0, y: energyToY(segs[0].energy) }];
-    segs.forEach((s, i) => pts.push({ x: centers[i] * 100, y: energyToY(s.energy) }));
-    pts.push({ x: 100, y: energyToY(segs[n - 1].energy) });
+    stageModel.segments.forEach((s, i) => {
+      const { x, y } = toXY(s);
+      const node = mapNodeEls[i];
+      node.style.left = `${x}%`;
+      node.style.top = `${y}%`;
+      node.querySelector(".node-val").textContent =
+        `밝기 ${Math.round(s.valence * 100)} · 에너지 ${Math.round(s.energy * 100)}`;
+    });
+  }
+
+  function bindMapDrag(node, i) {
+    node.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      node.setPointerCapture(e.pointerId);
+      node.classList.add("dragging");
+      const move = (ev) => {
+        stageTouched = true;
+        const r = mapPadEl.getBoundingClientRect();
+        const fx = fromMapPct(((ev.clientX - r.left) / r.width) * 100);
+        const fy = fromMapPct(((ev.clientY - r.top) / r.height) * 100);
+        stageModel.segments[i].valence = fx;
+        stageModel.segments[i].energy = clamp01(1 - fy);
+        updateMap();
+      };
+      const up = () => {
+        node.classList.remove("dragging");
+        node.removeEventListener("pointermove", move);
+        node.removeEventListener("pointerup", up);
+      };
+      node.addEventListener("pointermove", move);
+      node.addEventListener("pointerup", up);
+    });
+  }
+
+  // ── 시간 배분 바 ──────────────────────────────────────────────────────────
+  // "(1)-----(2)----(3)---" 형태: 구간 순번 동그라미 자체가 그 구간의 시작 경계에
+  // 놓이고, 그 동그라미를 좌우로 끄는 것이 곧 경계 이동이다. (1)은 항상 0분(맨 앞)
+  // 고정이라 드래그되지 않고, (2)부터는 바로 앞 구간과의 경계를 옮기는 핸들을 겸한다.
+  let timebarSegEls = [], timebarNumEls = [];
+
+  function buildTimebar() {
+    timebarEl.innerHTML = "";
+    const track = document.createElement("div");
+    track.className = "timebar-track";
+    timebarEl.appendChild(track);
+
+    timebarSegEls = stageModel.segments.map((_, i) => {
+      const seg = document.createElement("div");
+      seg.className = "timebar-seg";
+      seg.addEventListener("pointerenter", () => setLinked(i));
+      seg.addEventListener("pointerleave", () => setLinked(-1));
+      timebarEl.appendChild(seg);
+      return seg;
+    });
+    timebarNumEls = stageModel.segments.map((_, i) => {
+      const num = document.createElement("span");
+      num.className = "timebar-num";
+      num.textContent = String(i + 1);
+      if (i === 0) {
+        num.classList.add("fixed");
+      } else {
+        num.classList.add("draggable");
+        bindBoundaryDrag(num, i - 1);
+      }
+      timebarEl.appendChild(num);
+      return num;
+    });
+
+    timebarTicksEl.innerHTML = "";
+    const timebarTickEls = stageModel.segments.map((_, i) => {
+      const tick = document.createElement("span");
+      tick.className = "timebar-tick";
+      timebarTicksEl.appendChild(tick);
+      return tick;
+    });
+    const lastTick = document.createElement("span");
+    lastTick.className = "timebar-tick";
+    timebarTicksEl.appendChild(lastTick);
+    timebarTickEls.push(lastTick);
+    const unit = document.createElement("span");
+    unit.className = "timebar-unit";
+    unit.textContent = "분";
+    timebarTicksEl.appendChild(unit);
+  }
+
+  function updateTimebar() {
+    const { cum } = centers();
+    stageModel.segments.forEach((s, i) => {
+      const seg = timebarSegEls[i];
+      seg.style.left = `${cum[i] * 100}%`;
+      seg.style.width = `${s.width * 100}%`;
+      timebarNumEls[i].style.left = `${cum[i] * 100}%`;
+    });
+
+    const timebarTickEls = timebarTicksEl.querySelectorAll(".timebar-tick");
+    cum.forEach((c, i) => {
+      const tick = timebarTickEls[i];
+      tick.style.left = `${c * 100}%`;
+      tick.style.transform = i === 0 ? "translateX(0)" : i === cum.length - 1 ? "translateX(-100%)" : "translateX(-50%)";
+      tick.textContent = String(Math.round(c * stageModel.totalMinutes));
+    });
+  }
+
+  function bindBoundaryDrag(handle, j) {
+    handle.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add("dragging");
+      const move = (ev) => {
+        stageTouched = true;
+        const minFrac = MIN_WIDTH_MIN / stageModel.totalMinutes;
+        const r = timebarEl.getBoundingClientRect();
+        const fx = clamp01((ev.clientX - r.left) / r.width);
+        const segs = stageModel.segments;
+        const leftFixed = segs.slice(0, j).reduce((a, s) => a + s.width, 0);
+        const rightFixed = segs.slice(j + 2).reduce((a, s) => a + s.width, 0);
+        const b = Math.max(leftFixed + minFrac, Math.min(fx, 1 - rightFixed - minFrac));
+        segs[j].width = b - leftFixed;
+        segs[j + 1].width = 1 - rightFixed - b;
+        updateAllParamCharts();
+        updateTimebar();
+      };
+      const up = () => {
+        handle.classList.remove("dragging");
+        handle.removeEventListener("pointermove", move);
+        handle.removeEventListener("pointerup", up);
+      };
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", up);
+    });
+  }
+
+  function setLinked(i) {
+    mapNodeEls.forEach((n, j) => n.classList.toggle("linked", j === i));
+    timebarSegEls.forEach((seg, j) => seg.classList.toggle("linked", j === i));
+    timebarNumEls.forEach((num, j) => num.classList.toggle("linked", j === i));
+    impressionInputEls.forEach((el, j) => el.classList.toggle("linked", j === i));
+    impressionBadgeEls.forEach((el, j) => el.classList.toggle("linked", j === i));
+    impressionBandToggleEls.forEach((el, j) => el.classList.toggle("linked", j === i));
+  }
+
+  // ── 구간별 가사 감상(선택, 프로토타입) ──────────────────────────────────────
+  // "[①] 구간 [입력창]" 형태로 구간마다 한 줄씩 세로로 나열. 배지는 정서 지도(.stage-node)·
+  // 타임바(.timebar-num)와 같은 동그라미 순번 스타일(.impression-badge)을 재사용.
+  let impressionInputEls = [];
+  let impressionBadgeEls = [];
+  // placeholder용 예시 문구 — 빈 입력창이 "가사 감상(선택)"처럼 막연하지 않고, 어떤 식으로
+  // 적으면 되는지 감이 오도록 구간 순서대로 다른 예시를 보여준다.
+  const IMPRESSION_PLACEHOLDER_EXAMPLES = [
+    "설레고 두근거리는 마음",
+    "지치고 무거운 마음을 다독이는 위로",
+    "터질 듯한 흥분과 해방감",
+    "쓸쓸하고 애틋한 그리움",
+    "작은 희망을 붙잡는 담담한 의지",
+  ];
+
+  function buildImpressionRow() {
+    impressionRowEl.innerHTML = "";
+    impressionBadgeEls = [];
+    impressionBandToggleEls = [];
+    impressionBandPopupEls = [];
+    openBandPopupIndex = -1; // 재렌더(구간 추가/삭제 등) 시 이전 열림 상태는 무의미해짐
+    impressionInputEls = stageModel.segments.map((s, i) => {
+      const item = document.createElement("div");
+      item.className = "impression-item";
+      const badge = document.createElement("span");
+      badge.className = "impression-badge";
+      badge.textContent = String(i + 1);
+      impressionBadgeEls.push(badge);
+      const label = document.createElement("span");
+      label.className = "impression-item-label";
+      label.textContent = "구간";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "impression-input";
+      input.maxLength = 100;
+      input.placeholder = `ex. ${IMPRESSION_PLACEHOLDER_EXAMPLES[i % IMPRESSION_PLACEHOLDER_EXAMPLES.length]}`;
+      input.value = s.impression || "";
+      input.addEventListener("input", () => {
+        stageTouched = true;
+        stageModel.segments[i].impression = input.value;
+      });
+      input.addEventListener("pointerenter", () => setLinked(i));
+      input.addEventListener("pointerleave", () => setLinked(-1));
+
+      // 구간별 "밴드 고정" 토글+팝업 — 감성 설정 텍스트박스 오른쪽에 배치(사용자 제안).
+      // 전역 밴드 필터와 별개로, 이 구간만 특정 밴드(1개 이상)로 고정하고 싶을 때 쓴다.
+      const bandWrap = document.createElement("div");
+      bandWrap.className = "impression-band-wrap";
+      const bandToggle = document.createElement("button");
+      bandToggle.type = "button";
+      bandToggle.className = "impression-band-toggle";
+      bandToggle.classList.toggle("on", (s.bands || []).length > 0);
+      const dot = document.createElement("span");
+      dot.className = "indicator-dot";
+      bandToggle.append(dot, document.createTextNode("밴드 고정"));
+      const popup = document.createElement("div");
+      popup.className = "impression-band-popup hidden";
+      renderBandPopupOptions(popup, i);
+      bandToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const wasOpen = openBandPopupIndex === i;
+        closeBandPopup();
+        if (!wasOpen) {
+          renderBandPopupOptions(popup, i); // 팝업 열 때마다 최신 전역 필터 반영해 다시 그림
+          popup.classList.remove("hidden");
+          openBandPopupIndex = i;
+        }
+      });
+      bandToggle.addEventListener("pointerenter", () => setLinked(i));
+      bandToggle.addEventListener("pointerleave", () => setLinked(-1));
+      bandWrap.append(bandToggle, popup);
+      impressionBandToggleEls.push(bandToggle);
+      impressionBandPopupEls.push(popup);
+
+      item.append(badge, label, input, bandWrap);
+      impressionRowEl.appendChild(item);
+      return input;
+    });
+  }
+
+  function updateImpressionRow() {
+    stageModel.segments.forEach((s, i) => {
+      // 입력 중(포커스)인 칸은 값을 되쓰지 않는다 — 드래그 등으로 다시 그려질 때 커서 위치 보존.
+      if (document.activeElement !== impressionInputEls[i]) {
+        impressionInputEls[i].value = s.impression || "";
+      }
+      updateBandToggleIndicator(i);
+    });
+  }
+
+  // ── 고급 설정 그래프 ──────────────────────────────────────────────────────
+  let paramCharts = [];
+
+  function buildParamGraphs() {
+    paramGraphsEl.innerHTML = "";
+    paramCharts = PARAM_DEFS.map(({ key, label, desc }) => {
+      const wrap = document.createElement("div");
+      wrap.className = "param-graph";
+
+      const head = document.createElement("div");
+      head.className = "param-head";
+      const strong = document.createElement("strong");
+      strong.textContent = label;
+      head.append(strong);
+
+      const descEl = document.createElement("ul");
+      descEl.className = "field-note";
+      const descLi = document.createElement("li");
+      descLi.textContent = desc;
+      descEl.appendChild(descLi);
+
+      const plotRow = document.createElement("div");
+      plotRow.className = "plot-row";
+      const yAxis = document.createElement("div");
+      yAxis.className = "y-axis";
+      const yTop = document.createElement("span"); yTop.className = "y-tick"; yTop.textContent = "100";
+      const yBot = document.createElement("span"); yBot.className = "y-tick"; yBot.textContent = "0";
+      yAxis.append(yTop, yBot);
+
+      const plot = document.createElement("div");
+      plot.className = "plot";
+      const svg = document.createElementNS(SVG_NS, "svg");
+      svg.setAttribute("viewBox", "0 0 100 100");
+      svg.setAttribute("preserveAspectRatio", "none");
+      svg.setAttribute("class", "graph-svg");
+      const gridG = document.createElementNS(SVG_NS, "g");
+      [0, 0.5, 1].forEach((v) => {
+        const ln = document.createElementNS(SVG_NS, "line");
+        const y = valToY(v);
+        ln.setAttribute("x1", "0"); ln.setAttribute("x2", "100");
+        ln.setAttribute("y1", String(y)); ln.setAttribute("y2", String(y));
+        ln.setAttribute("class", v === 0 || v === 1 ? "grid grid-edge" : "grid");
+        gridG.append(ln);
+      });
+      const boundaryG = document.createElementNS(SVG_NS, "g");
+      const boundaryLines = stageModel.segments.slice(1).map(() => {
+        const ln = document.createElementNS(SVG_NS, "line");
+        ln.setAttribute("y1", "0"); ln.setAttribute("y2", "100");
+        ln.setAttribute("class", "grid-boundary");
+        boundaryG.append(ln);
+        return ln;
+      });
+      const area = document.createElementNS(SVG_NS, "path"); area.setAttribute("class", "graph-area");
+      const curve = document.createElementNS(SVG_NS, "path"); curve.setAttribute("class", "graph-curve");
+      svg.append(gridG, boundaryG, area, curve);
+      plot.append(svg);
+
+      const dotEls = stageModel.segments.map((_, i) => {
+        const dot = document.createElement("div");
+        dot.className = "param-dot";
+        dot.append(document.createTextNode(String(i + 1)));
+        const val = document.createElement("span");
+        val.className = "param-dot-val";
+        dot.append(val);
+        plot.appendChild(dot);
+        return dot;
+      });
+
+      plotRow.append(yAxis, plot);
+      wrap.append(head, descEl, plotRow);
+      paramGraphsEl.appendChild(wrap);
+
+      const chart = { key, plot, curve, area, boundaryLines, dotEls };
+      dotEls.forEach((dot, i) => bindParamDotDrag(dot, chart, i));
+      return chart;
+    });
+  }
+
+  function updateParamChart(chart) {
+    const { key, curve, area, boundaryLines, dotEls } = chart;
+    const { cum, mid } = centers();
+    const pts = [{ x: 0, y: valToY(stageModel.segments[0][key]) }];
+    stageModel.segments.forEach((s, i) => pts.push({ x: mid[i] * 100, y: valToY(s[key]) }));
+    pts.push({ x: 100, y: valToY(stageModel.segments[stageModel.segments.length - 1][key]) });
     const d = smoothPath(pts);
     curve.setAttribute("d", d);
     area.setAttribute("d", `${d} L 100 100 L 0 100 Z`);
 
-    dots.forEach((dot, i) => {
-      dot.style.left = `${centers[i] * 100}%`;
-      dot.style.top = `${energyToY(segs[i].energy)}%`;
-      dot.firstChild.textContent = segs[i].energy.toFixed(2);
+    dotEls.forEach((dot, i) => {
+      dot.style.left = `${mid[i] * 100}%`;
+      dot.style.top = `${valToY(stageModel.segments[i][key])}%`;
+      dot.querySelector(".param-dot-val").textContent = Math.round(stageModel.segments[i][key] * 100);
     });
-    handles.forEach((h, j) => { h.style.left = `${cum[j + 1] * 100}%`; });
-
-    // X축 시간 눈금(구간 경계 = 누적 분)
-    xAxis.replaceChildren();
-    cum.forEach((c, i) => {
-      const tick = elDiv("x-tick");
-      tick.style.left = `${c * 100}%`;
-      if (i === 0) tick.style.transform = "translateX(0)";
-      else if (i === cum.length - 1) tick.style.transform = "translateX(-100%)";
-      tick.textContent = String(Math.round(c * total));
-      xAxis.append(tick);
+    boundaryLines.forEach((ln, j) => {
+      ln.setAttribute("x1", String(cum[j + 1] * 100));
+      ln.setAttribute("x2", String(cum[j + 1] * 100));
     });
-    const unit = elDiv("x-unit"); unit.textContent = "분"; xAxis.append(unit);
   }
 
-  dots.forEach((dot, i) => bindDrag(dot, plot, (fx, fy) => {
-    stageModel.segments[i].energy = yToEnergy(fy);
-    update();
-  }));
-  handles.forEach((handle, j) => bindDrag(handle, plot, (fx) => {
-    const segs = stageModel.segments;
-    const leftFixed = segs.slice(0, j).reduce((a, s) => a + s.width, 0);
-    const rightFixed = segs.slice(j + 2).reduce((a, s) => a + s.width, 0);
-    const b = clamp(fx, leftFixed + MIN_WIDTH, 1 - rightFixed - MIN_WIDTH);
-    segs[j].width = b - leftFixed;
-    segs[j + 1].width = 1 - rightFixed - b;
-    update();
-  }));
+  function updateAllParamCharts() { paramCharts.forEach(updateParamChart); }
 
-  update();
+  function bindParamDotDrag(dot, chart, i) {
+    dot.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      dot.setPointerCapture(e.pointerId);
+      dot.classList.add("dragging");
+      const move = (ev) => {
+        stageTouched = true;
+        const r = chart.plot.getBoundingClientRect();
+        const fy = clamp01((ev.clientY - r.top) / r.height);
+        stageModel.segments[i][chart.key] = yToVal(fy);
+        updateParamChart(chart);
+      };
+      const up = () => {
+        dot.classList.remove("dragging");
+        dot.removeEventListener("pointermove", move);
+        dot.removeEventListener("pointerup", up);
+      };
+      dot.addEventListener("pointermove", move);
+      dot.addEventListener("pointerup", up);
+    });
+  }
+
+  // 모든 내부 함수·변수 정의 후, 마지막에 그래프 렌더링 호출
+  buildAllGraphics();
 }
 
 function bindDrag(node, graph, onMove) {
@@ -430,7 +957,7 @@ function bindDrag(node, graph, onMove) {
     node.setPointerCapture(e.pointerId);
     node.classList.add("dragging");
     const move = (ev) => {
-      stageTouched = true; // 사용자가 그래프를 조정함 → 이후 요청에 이 아크를 적용
+      stageTouched = true;
       const r = graph.getBoundingClientRect();
       onMove(clamp01((ev.clientX - r.left) / r.width), clamp01((ev.clientY - r.top) / r.height));
     };
@@ -449,147 +976,18 @@ function collectStages() {
   const total = stageModel.totalMinutes;
   return stageModel.segments.map((s) => ({
     energy: +s.energy.toFixed(3),
-    minutes: Math.max(1, Math.round(s.width * total)),
+    minutes: Math.max(MIN_WIDTH_MIN, Math.round(s.width * total)),
+    valence: +s.valence.toFixed(3),
+    lufs_integrated: +s.lufs_integrated.toFixed(3),
+    lra: +s.lra.toFixed(3),
+    danceability_norm: +s.danceability_norm.toFixed(3),
+    instr_stem_ratio: +s.instr_stem_ratio.toFixed(3),
+    speech_median: +s.speech_median.toFixed(3),
+    impression: (s.impression || "").trim() || null,
+    bands: s.bands && s.bands.length ? s.bands : null,
   }));
 }
 
-// ── 에너지 그래프 구간 추가/제거 + 컨텍스트 메뉴 (핫픽스 제안2) ───────────────────────────
-// 우클릭(데스크톱)·길게누름(모바일)으로 그래프 빈 곳에 구간을 추가하거나 마름모 포인트의 구간을
-// 제거한다. 구간 최소 2·최대 11(= 분리선 최대 10). 조작 시 stageTouched=true로 사용자 아크로 전환.
-let graphMenuEl = null;
-
-function closeGraphMenu() {
-  if (graphMenuEl) { graphMenuEl.remove(); graphMenuEl = null; }
-}
-
-function openGraphMenu(clientX, clientY, items) {
-  closeGraphMenu();
-  const menu = elDiv("graph-menu");
-  for (const it of items) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "graph-menu-item";
-    b.textContent = it.label;
-    if (it.disabled) b.disabled = true;
-    else b.addEventListener("click", () => { closeGraphMenu(); it.onClick(); });
-    menu.appendChild(b);
-  }
-  menu.style.visibility = "hidden"; // 측정 후 위치 보정
-  document.body.appendChild(menu);
-  const r = menu.getBoundingClientRect();
-  menu.style.left = `${Math.max(8, Math.min(clientX, window.innerWidth - r.width - 8))}px`;
-  menu.style.top = `${Math.max(8, Math.min(clientY, window.innerHeight - r.height - 8))}px`;
-  menu.style.visibility = "";
-  graphMenuEl = menu;
-}
-
-// 바깥 상호작용으로 메뉴 닫기(캡처 단계 — 메뉴 내부 클릭은 contains로 제외).
-document.addEventListener("pointerdown", (e) => {
-  if (graphMenuEl && !graphMenuEl.contains(e.target)) closeGraphMenu();
-}, true);
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeGraphMenu(); });
-window.addEventListener("scroll", () => closeGraphMenu(), true);
-
-// 모바일 길게누름 상태. 캡처된 dot 드래그 중에도 이동을 감지하려 document(capture)에서 취소한다.
-let lpTimer = null;
-let lpStartXY = null;
-function clearGraphLongPress() { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } lpStartXY = null; }
-document.addEventListener("pointermove", (e) => {
-  if (lpStartXY && Math.hypot(e.clientX - lpStartXY.x, e.clientY - lpStartXY.y) > 10) clearGraphLongPress();
-}, true);
-document.addEventListener("pointerup", clearGraphLongPress, true);
-document.addEventListener("pointercancel", clearGraphLongPress, true);
-
-// plot에 우클릭·길게누름 핸들러를 건다. renderStageGraph가 매 렌더에 새 plot으로 호출하므로 이전
-// plot 리스너는 함께 폐기된다(누수 없음). 문서 레벨 리스너는 위에서 1회만 등록.
-function attachGraphMenu(plot) {
-  // 어느 좌표에서 우클릭/길게눌러도 두 옵션을 모두 제공(사용자 검수). 상한/하한은 각 함수가
-  // showGraphNotice로 안내하므로 항상 enabled로 둔다. 추가=클릭 x, 제거=클릭 최근접 포인트 기준.
-  const openFor = (clientX, clientY) => {
-    const rect = plot.getBoundingClientRect();
-    const fx = clamp01((clientX - rect.left) / rect.width);
-    openGraphMenu(clientX, clientY, [
-      { label: "여기에 에너지 단계 추가", onClick: () => addSegmentAt(fx) },
-      { label: "이 에너지 단계를 제거", onClick: () => removeSegmentAt(nearestSegmentIndex(fx)) },
-    ]);
-  };
-  plot.addEventListener("contextmenu", (e) => { e.preventDefault(); openFor(e.clientX, e.clientY); });
-  plot.addEventListener("pointerdown", (e) => {
-    if (e.pointerType === "mouse") return; // 데스크톱은 contextmenu 사용
-    const x = e.clientX, y = e.clientY;
-    if (lpTimer) clearTimeout(lpTimer);
-    lpStartXY = { x, y };
-    lpTimer = setTimeout(() => { lpTimer = null; openFor(x, y); }, LONGPRESS_MS);
-  });
-}
-
-// 클릭 x(0~1)에 가장 가까운 에너지 포인트(구간 중심)의 구간 index — '이 에너지 단계 제거' 대상.
-function nearestSegmentIndex(fx) {
-  const segs = stageModel.segments;
-  const cum = [0];
-  segs.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
-  let best = 0, bestDist = Infinity;
-  for (let i = 0; i < segs.length; i++) {
-    const d = Math.abs((cum[i] + cum[i + 1]) / 2 - fx);
-    if (d < bestDist) { bestDist = d; best = i; }
-  }
-  return best;
-}
-
-function addSegmentAt(fx) {
-  if (!stageModel) return;
-  const segs = stageModel.segments;
-  if (segs.length >= MAX_SEGMENTS) { showGraphNotice("구간 분리선은 최대 10개까지 만들 수 있어요!"); return; }
-  const cum = [0];
-  segs.forEach((s) => cum.push(cum[cum.length - 1] + s.width));
-  let i = 0;
-  while (i < segs.length - 1 && fx >= cum[i + 1]) i++;
-  let lw = fx - cum[i], rw = cum[i + 1] - fx;
-  if (lw < MIN_WIDTH || rw < MIN_WIDTH) { lw = segs[i].width / 2; rw = segs[i].width / 2; } // 너무 얇으면 반반
-  const e = segs[i].energy;                          // 좌 구간은 원 에너지 유지
-  const nextE = i + 1 < segs.length ? segs[i + 1].energy : e;
-  const newE = clamp01(+(((e + nextE) / 2).toFixed(2))); // 신규(우) 구간 = 앞뒤 값의 평균(사용자 검수)
-  segs.splice(i, 1, { energy: e, width: lw }, { energy: newE, width: rw });
-  stageTouched = true; // 사용자가 아크를 직접 구성 → 이후 요청에 이 아크 적용
-  renderStageGraph();
-}
-
-function removeSegmentAt(i) {
-  if (!stageModel) return;
-  const segs = stageModel.segments;
-  if (segs.length <= MIN_SEGMENTS) { showGraphNotice("구간은 최소 2개가 필요해요!"); return; }
-  const w = segs[i].width;
-  segs.splice(i, 1);
-  // 제거된 구간의 폭은 인접 구간이 흡수하고, 에너지는 '다음 구간' 값으로 대표(마지막이면 이전 구간).
-  const j = i < segs.length ? i : segs.length - 1;
-  segs[j].width += w;
-  stageTouched = true;
-  renderStageGraph();
-}
-
-let graphNoticeTimer = null;
-function showGraphNotice(msg) {
-  const hint = stageEditorEl.querySelector(".graph-hint");
-  if (!hint) return;
-  hint.classList.add("notice");
-  hint.textContent = msg;
-  if (graphNoticeTimer) clearTimeout(graphNoticeTimer);
-  graphNoticeTimer = setTimeout(() => {
-    const h = stageEditorEl.querySelector(".graph-hint");
-    if (h) { h.classList.remove("notice"); h.textContent = GRAPH_HINT_TEXT; }
-  }, 2200);
-}
-
-function elDiv(cls) { const d = document.createElement("div"); d.className = cls; return d; }
-function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-function clamp01(v) { return Math.max(0, Math.min(1, v)); }
-function clampInt(raw, lo, hi, dflt) { const n = parseInt(raw, 10); return Number.isNaN(n) ? dflt : Math.max(lo, Math.min(hi, n)); }
-
-// 응답 후 그래프를 LLM 해석 아크로 동기화(사용자가 드래그로 조정하기 전까지만).
-// → 그래프가 요청을 '반영'만 하고 간섭하지 않는다(코멘트 #1 대안 2).
-// stages(백엔드가 실제로 곡 선곡에 쓴 단계별 energy_target — stage_energies 비단조 아크 반영)가
-// 있으면 그대로 쓴다. params.start_energy/end_energy만으로 재선형보간하면 피크·비단조 아크가
-// 직선으로 뭉개져 실제 선곡과 그래프가 어긋난다(버그 — stages 응답 도입 후 그래프 동기화 누락).
 function syncGraphToParams(params, stages) {
   if (stageTouched || !params) return;
   const total = params.target_minutes || (stageModel ? stageModel.totalMinutes : 60);
@@ -598,25 +996,240 @@ function syncGraphToParams(params, stages) {
     const n = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, stages.length));
     segments = stages.slice(0, n).map((s) => {
       const e = typeof s.energy_target === "number" ? s.energy_target : 0.4;
-      return { energy: clamp01(+e.toFixed(2)), width: 1 / n };
+      return {
+        energy: clamp01(+e.toFixed(2)),
+        width: 1 / n,
+        valence: 0.5,
+        lufs_integrated: 0.5,
+        lra: 0.5,
+        danceability_norm: 0.5,
+        instr_stem_ratio: 0.5,
+        speech_median: 0.5,
+        impression: "",
+        bands: s.bands && s.bands.length ? s.bands : [],
+      };
     });
   } else {
-    // stages 응답이 없을 때만(구버전 백엔드 등) start/end 선형보간으로 폴백.
     const n = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, params.stage_count || 3));
     const start = typeof params.start_energy === "number" ? params.start_energy : 0.3;
     const end = typeof params.end_energy === "number" ? params.end_energy : 0.7;
     segments = [];
     for (let i = 0; i < n; i++) {
       const energy = n === 1 ? start : start + ((end - start) * i) / (n - 1);
-      segments.push({ energy: clamp01(+energy.toFixed(2)), width: 1 / n });
+      segments.push({
+        energy: clamp01(+energy.toFixed(2)),
+        width: 1 / n,
+        valence: 0.5,
+        lufs_integrated: 0.5,
+        lra: 0.5,
+        danceability_norm: 0.5,
+        instr_stem_ratio: 0.5,
+        speech_median: 0.5,
+        impression: "",
+        bands: [],
+      });
     }
   }
   stageModel = { totalMinutes: total, segments };
   renderStageGraph();
 }
 
+function clampInt(raw, lo, hi, dflt) { const n = parseInt(raw, 10); return Number.isNaN(n) ? dflt : Math.max(lo, Math.min(hi, n)); }
+
+// 세부설정 버튼 이벤트 — 정적 버튼에 한 번만 붙인다(renderStageGraph()는 다시 그릴 때마다 호출되므로)
+function initStageControls() {
+  // 배경 토글
+  const bgToggleButtons = bgToggleEl.querySelectorAll("button");
+  bgToggleButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      mapPadEl.classList.remove("bg-current", "bg-quadrant", "bg-emoi");
+      mapPadEl.classList.add(`bg-${btn.dataset.bg}`);
+      bgToggleButtons.forEach((b) => b.classList.toggle("on", b === btn));
+    });
+  });
+
+  // 구간 수 증가
+  stagePlusBtn.addEventListener("click", () => {
+    if (!stageModel || stageModel.segments.length >= MAX_SEGMENTS) return;
+    const last = stageModel.segments[stageModel.segments.length - 1];
+    const shrink = last.width / 2;
+    last.width -= shrink;
+    stageModel.segments.push({
+      width: shrink,
+      valence: clamp01(last.valence + 0.05),
+      energy: clamp01(last.energy - 0.1),
+      lufs_integrated: last.lufs_integrated,
+      lra: last.lra,
+      danceability_norm: last.danceability_norm,
+      instr_stem_ratio: last.instr_stem_ratio,
+      speech_median: last.speech_median,
+      impression: "", // 새 구간은 빈 값(직전 구간 텍스트를 복사하면 오해를 살 수 있음)
+      bands: [], // 밴드도 마찬가지로 직전 구간 값을 복사하지 않음
+    });
+    stageTouched = true;
+    renderStageGraph();
+  });
+
+  // 구간 수 감소
+  stageMinusBtn.addEventListener("click", () => {
+    if (!stageModel || stageModel.segments.length <= MIN_SEGMENTS) return;
+    const removed = stageModel.segments.pop();
+    stageModel.segments[stageModel.segments.length - 1].width += removed.width;
+    stageTouched = true;
+    renderStageGraph();
+  });
+
+  // 시간 배분 균일화 — 구간별 재생시간(width)만 똑같이 맞추고, 정서 궤적·고급 설정 값은 그대로 둔다.
+  const timebarEqualizeBtn = $("timebar-equalize");
+  if (timebarEqualizeBtn) {
+    timebarEqualizeBtn.addEventListener("click", () => {
+      if (!stageModel) return;
+      const n = stageModel.segments.length;
+      stageModel.segments.forEach((s) => { s.width = 1 / n; });
+      stageTouched = true;
+      renderStageGraph();
+    });
+  }
+}
+
+// ── 모드 전환 ─────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  currentMode = mode;
+  const isAi = mode === "ai";
+
+  // 스위치 손잡이 위치(체크 상태) 업데이트
+  const modeSwitch = $("mode-switch");
+  if (modeSwitch) modeSwitch.setAttribute("aria-checked", isAi ? "false" : "true");
+
+  // 프롬프트 필드 표시/숨김. required도 함께 꺼야 한다 — 켜진 채로 두면 커스텀 모드에서
+  // 빈 프롬프트input이 네이티브 HTML5 검증에 걸려 submit 이벤트 자체가 발생하지 않는다
+  // (콘솔 에러도 안 남아 겉으로는 아무 반응도 없는 것처럼 보이는 버그였음).
+  const promptField = $("prompt-field");
+  if (promptField) {
+    promptField.style.display = isAi ? "" : "none";
+  }
+  promptEl.required = isAi;
+
+  // 세부 설정은 커스텀 모드 전용 화면으로 취급한다 — AI 모드에서는 통째로 숨기고,
+  // 커스텀 모드에서는 항상 펼쳐서 보여준다(더 이상 접었다 펴는 선택 요소가 아님).
+  const optionsDetails = $("options-details");
+  if (optionsDetails) {
+    optionsDetails.style.display = isAi ? "none" : "";
+    if (isAi) {
+      optionsDetails.classList.remove("force-open");
+    } else {
+      optionsDetails.classList.add("force-open");
+      optionsDetails.open = true;
+      prefillCustomFromLast();
+    }
+  }
+}
+
+function prefillCustomFromLast() {
+  // 마지막 AI 생성 결과(lastStages)가 있으면 그것으로, 없으면 기본 0.5로.
+  if (!lastStages || lastStages.length === 0) {
+    // lastStages가 없으면 현재 stageModel로 초기화
+    lastStages = stageModel?.segments.map(s => ({ ...s })) || [];
+  }
+  if (lastStages.length === 0) {
+    stageTouched = false;
+    renderStageGraph();
+    return;
+  }
+
+  // lastStages는 두 출처를 가질 수 있어 형태가 다르다:
+  //  (a) 위 폴백처럼 stageModel.segments를 그대로 복사한 경우 — energy/width 등 이미 정상 형태.
+  //  (b) AI 모드 응답의 setlist.stages 에코 — 필드명이 energy_target(energy 아님)이고,
+  //      신규 6개 파라미터는 AI가 채우지 않으면 전부 null. width는 renderResult가 실제
+  //      곡 배정 비율(picks의 stage_index 개수)로 미리 채워두지만, 곡이 0개인 구간처럼
+  //      드문 경우엔 없을 수 있어 그때만 균등폭(1/n)으로 폴백한다.
+  //  (b)를 그대로 복사하면 energy/width가 undefined가 되고 신규 필드가 null인 채로 남아,
+  //  이후 collectStagesForCustomMode()의 .toFixed() 호출이 크래시한다(실사용 버그로 발견됨).
+  const n = lastStages.length;
+  const mapped = lastStages.map((s) => ({
+    width: s.width != null ? s.width : 1 / n,
+    energy: s.energy != null ? s.energy : (s.energy_target != null ? s.energy_target : 0.5),
+    valence: s.valence != null ? s.valence : 0.5,
+    lufs_integrated: s.lufs_integrated != null ? s.lufs_integrated : 0.5,
+    lra: s.lra != null ? s.lra : 0.5,
+    danceability_norm: s.danceability_norm != null ? s.danceability_norm : 0.5,
+    instr_stem_ratio: s.instr_stem_ratio != null ? s.instr_stem_ratio : 0.5,
+    speech_median: s.speech_median != null ? s.speech_median : 0.5,
+    impression: s.impression || "",
+    bands: s.bands && s.bands.length ? s.bands : [],
+  }));
+
+  if (!stageModel) initStageModel(n);
+  stageModel.segments = mapped;
+
+  stageTouched = false;
+  renderStageGraph();
+}
+
+function collectStagesForCustomMode() {
+  // 커스텀 모드: stageTouched 체크 없이 항상 모든 segments 반환
+  // (사용자가 그대로 제출해도 정상 동작)
+  if (!stageModel) return null;
+  const total = stageModel.totalMinutes;
+  return stageModel.segments.map((s) => ({
+    energy: +s.energy.toFixed(3),
+    minutes: Math.max(MIN_WIDTH_MIN, Math.round(s.width * total)),
+    valence: +s.valence.toFixed(3),
+    lufs_integrated: +s.lufs_integrated.toFixed(3),
+    lra: +s.lra.toFixed(3),
+    danceability_norm: +s.danceability_norm.toFixed(3),
+    instr_stem_ratio: +s.instr_stem_ratio.toFixed(3),
+    speech_median: +s.speech_median.toFixed(3),
+    impression: (s.impression || "").trim() || null,
+    bands: s.bands && s.bands.length ? s.bands : null,
+  }));
+}
+
+// ── 초기화 ─────────────────────────────────────────────────────────────────────
 loadBands();
 initStageModel();
+initStageControls(); // 버튼 이벤트 한 번 붙이기
+
+// 모드 스위치 리스너 (한 번만 붙이기) — 두 상태뿐이라 클릭할 때마다 반대 모드로 토글
+const modeSwitchEl = $("mode-switch");
+if (modeSwitchEl) {
+  modeSwitchEl.addEventListener("click", () => {
+    setMode(currentMode === "ai" ? "custom" : "ai");
+  });
+}
+
+setMode(currentMode); // 초기 모드 상태 적용 — 안 하면 AI 모드인데 세부설정이 보인다
+
+// DEPRECATED(디버깅용) — AI 해석 결과가 UI/의도와 어긋날 때 원인 추적용. epic 3단계
+// stage_params 튜닝이 끝나면 버튼과 이 핸들러를 통째로 제거할 것.
+const debugCopyBtn = $("debug-copy-state-btn");
+if (debugCopyBtn) {
+  debugCopyBtn.addEventListener("click", async () => {
+    const snapshot = {
+      prompt: promptEl.value.trim(),
+      mode: currentMode,
+      target_minutes: stageModel ? stageModel.totalMinutes : null,
+      bands: collectBands(),
+      song_type: settingsType,
+      // 지금 그래프 상태(구간별 energy/valence + 신규 6개 지표, 커스텀 모드 제출 형식과 동일).
+      current_stages: collectStagesForCustomMode(),
+      // 마지막으로 백엔드(LLM)가 실제로 반환한 해석 결과 — UI가 이를 어떻게 반영했는지 대조용.
+      last_ai_params: lastParams,
+      last_ai_stages: lastStages,
+      last_applied_bands: lastAppliedBands,
+    };
+    const json = JSON.stringify(snapshot, null, 2);
+    try {
+      await navigator.clipboard.writeText(json);
+      debugCopyBtn.textContent = "✅ 복사됨";
+    } catch (_) {
+      debugCopyBtn.textContent = "⚠️ 복사 실패(콘솔 확인)";
+      console.log(json);
+    }
+    setTimeout(() => { debugCopyBtn.textContent = "🐛 현재 상태 복사 (디버그)"; }, 1500);
+  });
+}
+
 renderStageGraph(); // 그래프는 세부설정에서 상시 표시(토글 없음)
 
 // 메뉴 안 버전 표기 = "v메인버전 - 커밋SHA". 배포 프론트는 빌드시 __COMMIT__을 SHA로,
@@ -660,7 +1273,15 @@ function renderResult(data) {
 
   lastParams = data.params || {};
   lastAppliedBands = data.applied_bands || [];
-  lastStages = data.stages || [];
+  // data.params.stage_minutes는 LLM의 '의도'일 뿐, 실제 적용 결과(완충 노드로 슬롯이 건너뛰어질
+  // 수 있음 등)와 다를 수 있다 — 그래서 width는 여기서 실제 곡 배정 결과(picks의 stage_index별
+  // 개수)로 직접 계산한다. 이렇게 안 하면 커스텀 모드 프리필(prefillCustomFromLast)이 항상
+  // 균등폭(1/n)으로 되돌아가 "마지막 구간만 길게" 같은 요청이 커스텀 모드로 넘어오면서 사라져
+  // 보인다(실사용 버그로 발견). stage_minutes 자체는 디버그 스냅샷(last_ai_params)에서 확인 가능.
+  lastStages = (data.stages || []).map((s, i) => {
+    const count = picks.filter((p) => p.stage_index === i).length;
+    return count > 0 ? { ...s, width: count / picks.length } : { ...s };
+  });
 
   // 백엔드가 재생 형태 override를 존중하지 않았다면(1회차·의도 변경 → honored_overrides=false) 사용자가
   // 만졌던 '재생 형태' 플래그를 풀어, 그래프·재생시간이 새 해석을 반영하도록 한다(고착 방지). 밴드·커버는
@@ -764,18 +1385,16 @@ function renderTracklist(list) {
     band.className = "band";
     band.textContent = prettyBand(p.band);
 
-    const reason = document.createElement("div");
-    reason.className = "reason";
-    reason.textContent = (p.reason && p.reason.text) || "";
-
     const badges = document.createElement("div");
     badges.className = "badges";
     const h = p.reason ? p.reason.harmonic : "";
     badges.appendChild(makeBadge(h, harmonicLabelKo(h), harmonicTooltipKo(h)));
-    badges.appendChild(makeEnergyBadge(p.energy));
-    badges.appendChild(makeBadge("key", keyLabel(p.camelot)));
+    badges.appendChild(makeBadge("key", keyLabel(p.camelot), "조성(Camelot " + (p.camelot || "") + ")"));
+    for (const { key, label } of PICK_PARAM_DEFS) {
+      if (typeof p[key] === "number") badges.appendChild(makeParamBadge(label, p[key]));
+    }
 
-    bodyEl.append(title, band, reason, badges);
+    bodyEl.append(title, band, badges);
     attachTrackLongPress(bodyEl, i); // 우클릭·길게누름 → "다음 곡 추가"/"현재 곡 제거" 메뉴
     li.append(pos, bodyEl, makeTrackActions(li, i));
     li.appendChild(makeInserter(i + 1)); // 이 트랙 '다음'(배열 index i+1) 삽입점
@@ -1105,23 +1724,6 @@ document.addEventListener(
   true,
 );
 
-// 에너지 배지 — 미니 가로 바 + 숫자(디자인 검토 아티팩트 "A안" 채택분).
-function makeEnergyBadge(energy) {
-  const b = document.createElement("span");
-  b.className = "badge badge-energy";
-  const track = document.createElement("span");
-  track.className = "bar-track";
-  const fill = document.createElement("span");
-  fill.className = "bar-fill";
-  fill.style.width = `${Math.round(clamp01(energy) * 100)}%`;
-  track.appendChild(fill);
-  const num = document.createElement("span");
-  num.className = "num";
-  num.textContent = fmtNum(energy);
-  b.append(track, num);
-  return b;
-}
-
 function makeBadge(kind, label, tooltip) {
   const b = document.createElement("span");
   b.className = "badge" + (kind ? " " + kind : "");
@@ -1435,9 +2037,28 @@ function syncGraphToEdited() {
   for (let i = 0; i < n; i++) {
     const startIdx = Math.floor((i * picks.length) / n);
     const endIdx = Math.floor(((i + 1) * picks.length) / n);
-    const slice = picks.slice(startIdx, Math.max(endIdx, startIdx + 1));
-    const mean = slice.reduce((a, p) => a + (typeof p.energy === "number" ? p.energy : 0), 0) / slice.length;
-    segments.push({ energy: clamp01(+mean.toFixed(2)), width: (endIdx - startIdx) / picks.length });
+    const origSlice = stageModel.segments.slice(startIdx, Math.max(endIdx, startIdx + 1));
+    const pickSlice = picks.slice(startIdx, Math.max(endIdx, startIdx + 1));
+
+    // energy: 원래 선택된 곡들의 평균
+    const energyMean = pickSlice.reduce((a, p) => a + (typeof p.energy === "number" ? p.energy : 0), 0) / pickSlice.length;
+
+    // 나머지 6개 필드: 해당 구간의 원래 stage 값들의 평균 (또는 없으면 0.5)
+    const getFieldMean = (fieldName) => {
+      if (!origSlice.length) return 0.5;
+      return origSlice.reduce((a, s) => a + (typeof s[fieldName] === "number" ? s[fieldName] : 0.5), 0) / origSlice.length;
+    };
+
+    segments.push({
+      energy: clamp01(+energyMean.toFixed(2)),
+      width: (endIdx - startIdx) / picks.length,
+      valence: clamp01(+getFieldMean("valence").toFixed(2)),
+      lufs_integrated: clamp01(+getFieldMean("lufs_integrated").toFixed(2)),
+      lra: clamp01(+getFieldMean("lra").toFixed(2)),
+      danceability_norm: clamp01(+getFieldMean("danceability_norm").toFixed(2)),
+      instr_stem_ratio: clamp01(+getFieldMean("instr_stem_ratio").toFixed(2)),
+      speech_median: clamp01(+getFieldMean("speech_median").toFixed(2)),
+    });
   }
   const wsum = segments.reduce((a, s) => a + s.width, 0) || 1;
   segments.forEach((s) => (s.width = s.width / wsum));
@@ -1619,19 +2240,7 @@ function isCoverSong(song) {
   return song.song.toLowerCase().includes("(cover)");
 }
 
-// bandori-song-sorter와 동일한 밴드 나열 순서 + 아이콘 애셋(assets/bands/<band>.png, 미포함은 뒤).
-const BAND_ORDER = [
-  "poppin_party", "afterglow", "pastel_palettes", "roselia",
-  "hello_happy_world", "morfonica", "raise_a_suilen", "mygo",
-  "ave_mujica", "mugendai_mutype", "millsage", "ikka_dumb_rock",
-];
 const BAND_ICON_BASE = "assets/bands";
-
-function bandsInSelectorOrder(present) {
-  const ordered = BAND_ORDER.filter((b) => present.includes(b));
-  const rest = present.filter((b) => !BAND_ORDER.includes(b)).sort();
-  return [...ordered, ...rest];
-}
 
 // 밴드 아이콘 img(로드 실패 시 _fallback로 1회 대체). bandori-song-sorter 애셋 재사용.
 function makeBandIcon(band, cls) {
@@ -2420,6 +3029,34 @@ const CAMELOT_TO_KEY_LABEL = {
 };
 function keyLabel(camelot) {
   return CAMELOT_TO_KEY_LABEL[camelot] || camelot;
+}
+// 트랙 리스트의 곡별 파라미터 태그 — 6개 오디오 지표(PARAM_DEFS + 밝기)를 짧은 배지로.
+const PICK_PARAM_DEFS = [
+  { key: "valence", label: "밝기" },
+  { key: "lufs_integrated", label: "라우드" },
+  { key: "lra", label: "다이내믹" },
+  { key: "danceability_norm", label: "리듬감" },
+  { key: "instr_stem_ratio", label: "악기" },
+  { key: "speech_median", label: "음절" },
+];
+// 곡별 파라미터 배지 — 예전 에너지 배지(미니 바 + 숫자)와 동일한 표현, 라벨만 앞에 붙인다.
+function makeParamBadge(label, value) {
+  const b = document.createElement("span");
+  b.className = "badge badge-param";
+  const lb = document.createElement("span");
+  lb.className = "label";
+  lb.textContent = label;
+  const track = document.createElement("span");
+  track.className = "bar-track";
+  const fill = document.createElement("span");
+  fill.className = "bar-fill";
+  fill.style.width = `${Math.round(clamp01(value) * 100)}%`;
+  track.appendChild(fill);
+  const num = document.createElement("span");
+  num.className = "num";
+  num.textContent = String(Math.round(clamp01(value) * 100));
+  b.append(lb, track, num);
+  return b;
 }
 function harmonicLabelKo(h) {
   return { seed: "시작곡", same: "동일조성", adjacent: "하모닉인접", non_harmonic: "조성전환", added: "추가한 곡" }[h] || h;

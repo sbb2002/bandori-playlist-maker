@@ -30,6 +30,7 @@ from video_id import extract_video_id  # noqa: E402  (cross-team, 경로 삽입 
 # 기본 데이터 경로: 리포지토리 루트 data/songs_master.csv. env로 override 가능.
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_CSV_PATH = _REPO_ROOT / "data" / "songs_master.csv"
+DEFAULT_LYRIC_JSON_PATH = _REPO_ROOT / "data" / "lyric_impressions.json"
 DEFAULT_OVERRIDES_PATH = Path(__file__).resolve().parent / "song_alias_overrides.json"
 
 
@@ -38,6 +39,34 @@ def _resolve_path(csv_path: str | os.PathLike[str] | None) -> Path:
         return Path(csv_path)
     env_path = os.environ.get("SONGS_CSV")
     return Path(env_path) if env_path else DEFAULT_CSV_PATH
+
+
+def _resolve_lyric_path(lyric_json_path: str | os.PathLike[str] | None) -> Path:
+    if lyric_json_path is not None:
+        return Path(lyric_json_path)
+    env_path = os.environ.get("LYRIC_EMBEDDINGS_JSON")
+    return Path(env_path) if env_path else DEFAULT_LYRIC_JSON_PATH
+
+
+def _load_lyric_map(path: Path) -> dict[tuple[str, str], list[float]]:
+    """가사 감상 임베딩 자산 로드 — 없으면(프로토타입 자산이라 필수 아님) 빈 딕셔너리.
+
+    `data/lyric_impressions.json`: `{"band|||song": {"desc": str, "vec": [floats]}}`.
+    """
+    if not path.exists():
+        return {}
+    try:
+        with path.open(encoding="utf-8") as f:
+            raw = json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return {}
+    out: dict[tuple[str, str], list[float]] = {}
+    for key, entry in raw.items():
+        band, _, song = key.partition("|||")
+        vec = entry.get("vec")
+        if band and song and vec:
+            out[(band, song)] = vec
+    return out
 
 
 def _load_overrides() -> dict[str, dict[str, str]]:
@@ -51,7 +80,34 @@ def _load_overrides() -> dict[str, dict[str, str]]:
     return {}
 
 
-def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, str]] | None = None) -> Song:
+# 오디오 지표 6종 — Song 필드명 → songs_master.csv 컬럼명(데이터팀 m*-prefix 유지).
+AUDIO_FEATURE_COLS = {
+    "valence": "m6-valence_median",
+    "lufs_integrated": "m4-lufs_integrated",
+    "lra": "m4-lra",
+    "danceability_norm": "m7-danceability_norm",
+    "instr_stem_ratio": "m9-instr_stem_ratio",
+    "speech_median": "m11-speech_median",
+}
+
+
+def _minmax_scalers(rows: list[dict[str, str]]) -> dict[str, Callable[[float], float]]:
+    """지표별 minmax 스케일 함수(eligible 풀 기준, 0~1 클램프). 컬럼이 없으면 그 지표는 생략."""
+    scalers: dict[str, Callable[[float], float]] = {}
+    for field, col in AUDIO_FEATURE_COLS.items():
+        values = [float(r[col]) for r in rows if (r.get(col) or "").strip()]
+        if not values:
+            continue
+        lo, hi = min(values), max(values)
+        span = hi - lo
+        scalers[field] = (lambda v, lo=lo, span=span:
+                          0.5 if span == 0 else max(0.0, min(1.0, (v - lo) / span)))
+    return scalers
+
+
+def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, str]] | None = None,
+             scalers: dict[str, Callable[[float], float]] | None = None,
+             lyric_map: dict[tuple[str, str], list[float]] | None = None) -> Song:
     url = (row.get("url") or "").strip()
     video_id = (row.get("video_id") or "").strip()
     if not video_id:
@@ -87,7 +143,17 @@ def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, 
     # 검색 매칭용 병기 문자열 — 오버라이드된 song_hangul(수동 관용 표기)도 항상 포함한다.
     song_hangul_search = " / ".join(dict.fromkeys([song_hangul, *song_hangul_variants]))
 
+    # 오디오 지표 6종(minmax 스케일). 셀이 비었거나 컬럼/스케일러가 없으면 None 유지.
+    audio_feats: dict[str, float | None] = {}
+    for field, col in AUDIO_FEATURE_COLS.items():
+        raw = (row.get(col) or "").strip()
+        scaler = (scalers or {}).get(field)
+        audio_feats[field] = scaler(float(raw)) if raw and scaler else None
+
+    lyric_vec = (lyric_map or {}).get((row["band"], song_title))
+
     return Song(
+        **audio_feats,
         idx=int(row["idx"]),
         band=row["band"],
         song=song_title,
@@ -100,6 +166,7 @@ def _to_song(row: dict[str, str], energy: float, overrides: dict[str, dict[str, 
         duration_sec=duration_sec,
         intro_energy=float(intro_raw) if intro_raw else 0.0,
         outro_energy=float(outro_raw) if outro_raw else 0.0,
+        lyric_vec=lyric_vec,
         # 검색 보조 필드(§ja_transliteration) — 서버 기동 시 이 함수 호출 때 1회 계산돼 캐싱됨.
         song_romaji=song_romaji,
         song_hangul=song_hangul,
@@ -131,7 +198,8 @@ def _percentile_ranker(values: list[float]) -> Callable[[float], float]:
     return rank
 
 
-def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
+def load_songs(csv_path: str | os.PathLike[str] | None = None,
+                lyric_json_path: str | os.PathLike[str] | None = None) -> list[Song]:
     """songs_master.csv를 읽어 전체 곡 목록을 반환한다.
 
     eligible 여부와 무관하게 전 행을 적재한다(후보 필터링은 선곡 엔진이 수행).
@@ -184,4 +252,10 @@ def load_songs(csv_path: str | os.PathLike[str] | None = None) -> list[Song]:
     # 오버라이드 로드 (매 서버 시작 시 1회 — 빈 딕셔너리로 폴백 가능)
     overrides = _load_overrides()
 
-    return [_to_song(r, intensity(r), overrides) for r in rows]
+    # 오디오 지표 6종 minmax 스케일러(백분위와 동일하게 eligible 풀 기준 — 밴드 필터와 무관하게 안정).
+    scalers = _minmax_scalers(eligible)
+
+    # 가사 감상 임베딩(프로토타입, 선택) — 자산이 없어도 song_repo는 정상 동작(lyric_vec=None).
+    lyric_map = _load_lyric_map(_resolve_lyric_path(lyric_json_path))
+
+    return [_to_song(r, intensity(r), overrides, scalers, lyric_map) for r in rows]

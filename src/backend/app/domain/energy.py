@@ -41,6 +41,39 @@ def distribute_counts(total: int, stage_count: int) -> list[int]:
     return [base + (1 if i < remainder else 0) for i in range(stage_count)]
 
 
+def distribute_counts_by_weights(total: int, weights: list[float]) -> list[int]:
+    """총 곡 수를 가중치(구간별 길이·분 등) 비율로 배분한다(largest-remainder method).
+
+    각 단계 최소 1곡을 보장한다(`total >= len(weights)`일 때). 가중치가 전부 0 이하이거나
+    합이 0이면 `distribute_counts`(균등분배)로 폴백한다.
+    """
+    n = len(weights)
+    if n <= 0:
+        raise ValueError(f"weights must be non-empty, got {weights!r}")
+    total_weight = sum(w for w in weights if w > 0)
+    if total_weight <= 0:
+        return distribute_counts(total, n)
+    # 1단계: 비율대로 내림 배분 + 최소 1곡 보장.
+    raw = [max(1.0, total * (w / total_weight)) for w in weights]
+    counts = [int(r) for r in raw]
+    # 2단계: 남은 곡을 소수점 나머지(remainder)가 큰 단계부터 하나씩 배분.
+    remainder = total - sum(counts)
+    order = sorted(range(n), key=lambda i: raw[i] - counts[i], reverse=True)
+    i = 0
+    while remainder > 0 and order:
+        counts[order[i % n]] += 1
+        remainder -= 1
+        i += 1
+    # 남은 곡이 음수(가중 최소 1곡 보장으로 total 초과)면 가장 많은 단계부터 회수.
+    while remainder < 0:
+        j = max(range(n), key=lambda i: counts[i])
+        if counts[j] <= 1:
+            break
+        counts[j] -= 1
+        remainder += 1
+    return counts
+
+
 def continuous_slot_targets(targets: list[float], counts: list[int]) -> list[float]:
     """스테이지별 flat 목표(targets)를 곡 하나하나 단위로 부드럽게 보간한다(feature/energy-stream).
 

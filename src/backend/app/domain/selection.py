@@ -13,7 +13,13 @@ from __future__ import annotations
 
 import random
 
-from .energy import continuous_slot_targets, distribute_counts, stage_energy_targets, total_song_count
+from .energy import (
+    continuous_slot_targets,
+    distribute_counts,
+    distribute_counts_by_weights,
+    stage_energy_targets,
+    total_song_count,
+)
 from .harmonic import harmonic_label, is_compatible
 from .models import (
     MoodParameters,
@@ -36,6 +42,15 @@ _SHAPE_BRIGHTNESS: dict[str, float] = {
 
 # duration 데이터 부재 시 곡 길이 플레이스홀더(architecture.md §④-2, 초 단위).
 DEFAULT_AVG_SONG_SECONDS = 213
+
+# 3.5단계(2026-08-04): stage_specs/stage_params의 신규 오디오 지표 6종(연구 채택,
+# audio_feats_revised) — 지금까지 echo 전용이었으나, 이제 Stage A 소프트 매칭에도 반영한다.
+# Song에 해당 컬럼이 없는(구 스냅샷·테스트 픽스처) 곡·요청은 값이 None이라 자동으로 무시된다
+# (에너지 하드 필터·밝기 소프트 정렬은 그대로 유지 — 이 지표들은 그 다음 3순위 타이브레이커).
+_NEW_STAGE_PARAM_FIELDS = (
+    "valence", "lufs_integrated", "lra",
+    "danceability_norm", "instr_stem_ratio", "speech_median",
+)
 
 # 2단계 엔진 파라미터(R&D §4.2 권장 기본값). 파일럿 후 실사용 피드백으로 튜닝.
 _TOL = 0.08              # Stage A 강도 허용창(목표에서 이 이내만 후보)
@@ -220,6 +235,107 @@ def _make_reason(
     )
 
 
+def _resolve_stage_target_params(
+    stage_index: int,
+    stage_specs: list[StageSpec] | None,
+    params: MoodParameters,
+) -> dict[str, float | str | None]:
+    """스테이지 하나의 신규 지표 6종 + 가사 감상(impression) 목표값을 결정한다(스펙 우선,
+    그다음 LLM stage_params).
+
+    Stage A(선곡)·Stage 리포트(echo) 양쪽에서 동일한 우선순위 규칙을 쓰기 위해 분리(이전엔
+    build_setlist 안의 클로저 `_field()`가 리포트 용도로만 있었다 — 이제 선곡에도 같은 값을
+    써야 하므로 루프 시작 전에 한 번만 계산해 재사용한다).
+
+    `impression`도 6개 수치와 동일한 우선순위(스펙 우선 → LLM stage_params 폴백)를 따른다 —
+    커스텀 모드 사용자가 직접 입력한 텍스트가 있으면 그걸 쓰고, 없으면 AI 모드 해석 결과를 쓴다.
+    `_stage_param_distance`는 `_NEW_STAGE_PARAM_FIELDS`(수치 6종)만 순회하므로 이 키가 섞여
+    있어도 안전하게 무시된다.
+    """
+    spec = stage_specs[stage_index] if stage_specs else None
+    llm_stage = (
+        params.stage_params[stage_index]
+        if params.stage_params and stage_index < len(params.stage_params)
+        else None
+    )
+    resolved: dict[str, float | str | None] = {}
+    for field in _NEW_STAGE_PARAM_FIELDS:
+        value = getattr(spec, field) if spec is not None else None
+        if value is None and llm_stage is not None:
+            value = llm_stage.get(field)
+        resolved[field] = value
+    spec_impression = getattr(spec, "impression", None) if spec is not None else None
+    resolved["impression"] = spec_impression or (
+        llm_stage.get("impression") if llm_stage is not None else None
+    )
+    return resolved
+
+
+def resolve_stage_impression_text(
+    stage_index: int,
+    stage_specs: list[StageSpec] | None,
+    params: MoodParameters,
+) -> str | None:
+    """스테이지 하나의 가사 감상 텍스트를 우선순위 규칙대로 해석한다(공개 API).
+
+    라우트가 `build_setlist()` 호출 전에 이 텍스트를 임베딩 어댑터로 벡터화해 넘겨야 하므로
+    (도메인은 임베딩 모델을 모름), `_resolve_stage_target_params`와 동일한 규칙을 노출하는
+    얇은 래퍼 — 로직 중복 없이 라우트가 재사용한다.
+    """
+    return _resolve_stage_target_params(stage_index, stage_specs, params)["impression"]
+
+
+def resolve_stage_bands(
+    stage_index: int,
+    stage_specs: list[StageSpec] | None,
+    params: MoodParameters,
+) -> frozenset[str] | None:
+    """스테이지 하나의 고정 밴드 집합을 우선순위 규칙(스펙 우선 → LLM stage_bands 폴백)대로
+    해석한다(1개 이상 동시 지정 가능).
+
+    "모르포니카가 30분, 개유노가 30분"처럼 여러 밴드가 시간 분할과 함께 언급된 요청(LLM,
+    스테이지당 밴드 1개)이나, 커스텀 모드에서 사용자가 "밴드 고정" 팝업으로 이 스테이지에
+    직접 여러 밴드를 고른 경우(스펙, 스테이지당 밴드 1개 이상)에 쓰인다 — 값이 있으면
+    Stage A가 그 스테이지의 후보를 이 집합에 속한 밴드로만 하드필터링한다(에너지 허용창보다
+    먼저 적용). 라우트가 `build_setlist()` 호출 전에 `params.stage_bands`의 각 값이 실제로
+    프롬프트에서 감지된 밴드인지 검증(무효화)해뒀다고 가정 — 여기선 형태·우선순위 해석만 담당.
+    """
+    spec = stage_specs[stage_index] if stage_specs else None
+    spec_bands = getattr(spec, "bands", None) if spec is not None else None
+    if spec_bands:
+        return frozenset(spec_bands)
+    if params.stage_bands and stage_index < len(params.stage_bands):
+        llm_band = params.stage_bands[stage_index]
+        if llm_band:
+            return frozenset({llm_band})
+    return None
+
+
+def _stage_param_distance(song: Song, target: dict[str, float | None]) -> float:
+    """곡의 신규 지표 6종과 목표값의 평균 절대거리(사용 가능한 필드만, 없으면 0=중립)."""
+    diffs = []
+    for field in _NEW_STAGE_PARAM_FIELDS:
+        t = target.get(field)
+        v = getattr(song, field)
+        if t is None or v is None:
+            continue
+        diffs.append(abs(v - t))
+    return sum(diffs) / len(diffs) if diffs else 0.0
+
+
+def _lyric_similarity(song: Song, target_vec: list[float] | None) -> float:
+    """곡의 가사 감상 임베딩과 스테이지 목표 임베딩의 코사인 유사도(프로토타입, 4순위 타이브레이크).
+
+    둘 다 사전 L2-정규화되어 있다고 가정(어댑터·오프라인 스크립트가 보장) — 그러면 코사인
+    유사도는 단순 내적과 같다. `song.lyric_vec`나 `target_vec` 중 하나라도 없으면(가사
+    매칭 데이터 없는 곡, LLM이 impression을 못 채운 경우) `0.0`(중립) — 기존 3개 우선순위
+    (energy 하드필터·밝기·6개 수치 지표)만으로 동작하던 기존 흐름을 그대로 보존한다.
+    """
+    if song.lyric_vec is None or target_vec is None:
+        return 0.0
+    return sum(a * b for a, b in zip(song.lyric_vec, target_vec))
+
+
 def _stage_targets_and_counts(
     params: MoodParameters,
     target_seconds: int,
@@ -232,14 +348,22 @@ def _stage_targets_and_counts(
         counts = [max(1, s.song_count) for s in stage_specs]
         return targets, counts
     if params.stage_energies:
-        # 비단조 아크(LLM 산출): 단계별 에너지 배열을 그대로 목표로. 곡 수는 균등 분배.
+        # 비단조 아크(LLM 산출): 단계별 에너지 배열을 그대로 목표로.
         targets = [_clamp(e, 0.0, 1.0) for e in params.stage_energies]
         n = len(targets)
         total = min(total_song_count(target_seconds, avg_song_seconds, n), pool_size)
+        # 3.5단계: 단계별 길이(분) 의도가 있으면 곡 수를 그 비율로 배분("마지막 5분은
+        # 릴랙스" 같은 요청이 균등분배로 뭉개지지 않도록). 길이가 안 맞으면(모델이 배열
+        # 길이를 못 맞춤) 신뢰하지 않고 기존 균등분배로 폴백.
+        if params.stage_minutes and len(params.stage_minutes) == n:
+            return targets, distribute_counts_by_weights(total, params.stage_minutes)
         return targets, distribute_counts(total, n)
     targets = stage_energy_targets(params.start_energy, params.end_energy, params.stage_count)
     total = min(total_song_count(target_seconds, avg_song_seconds, params.stage_count), pool_size)
-    counts = distribute_counts(total, params.stage_count)
+    if params.stage_minutes and len(params.stage_minutes) == params.stage_count:
+        counts = distribute_counts_by_weights(total, params.stage_minutes)
+    else:
+        counts = distribute_counts(total, params.stage_count)
     return targets, counts
 
 
@@ -251,6 +375,7 @@ def build_setlist(
     band_filter: set[str] | None = None,
     stage_specs: list[StageSpec] | None = None,
     rng: random.Random | None = None,
+    stage_impression_vectors: list[list[float] | None] | None = None,
 ) -> Setlist:
     """무드/에너지 파라미터로 세트리스트를 구성한다(2단계 SELECT→SEQUENCE).
 
@@ -262,6 +387,11 @@ def build_setlist(
         band_filter: 밴드 화이트리스트(설정 기능 §5-1b, 기본 None=ALL).
         stage_specs: 사용자 지정 단계 스펙(설정 기능 §5-1a).
         rng: Stage A 후보 셔플 RNG. None이면 매 호출 새 시드(운영: 변주). 동일 시드 → 재현.
+        stage_impression_vectors: 스테이지별 가사 감상 목표 임베딩(프로토타입). 라우트가
+            `MoodParameters.stage_params[i]["impression"]`을 임베딩 어댑터로 미리 벡터화해
+            넘긴다(도메인은 임베딩 모델을 직접 호출하지 않음 — 클린 아키텍처 불변식). 길이는
+            stage_count와 같아야 하며, 인덱스가 벗어나거나 항목이 None이면 그 스테이지는
+            가사 유사도 타이브레이크 없이(중립) 기존 동작 그대로.
 
     Returns:
         Setlist(단계·추정시간·곡 순서·선곡 이유 포함).
@@ -281,6 +411,16 @@ def build_setlist(
     targets, counts = _stage_targets_and_counts(
         params, target_seconds, avg_song_seconds, len(pool), stage_specs
     )
+    # 3.5단계: 스테이지별 신규 지표 6종 목표값을 미리 한 번 계산(Stage A 매칭 + Stage 리포트
+    # 양쪽에서 재사용 — 우선순위 규칙 이원화 방지).
+    stage_target_params = [
+        _resolve_stage_target_params(i, stage_specs, params) for i in range(len(targets))
+    ]
+    # 프로토타입: 스테이지별 고정 밴드 집합(선택, 1개 이상) — Stage A 하드필터에 쓴다
+    # (에너지 허용창보다 먼저).
+    stage_bands_resolved = [
+        resolve_stage_bands(i, stage_specs, params) for i in range(len(targets))
+    ]
 
     # ── Stage A: SELECT — 곡 하나하나를 스테이지 경계에서 부드럽게 흐르는 목표에 매칭 ──
     # feature/energy-stream: 스테이지 전체에 flat 목표 하나만 쓰던 기존 방식 대신, 곡
@@ -292,19 +432,43 @@ def build_setlist(
     stage_members: list[list[Song]] = []
     degraded_idx: set[int] = set()  # 허용창 밖이지만 채택된 픽(완충 노드가 표시만 하는 케이스)
     slot = 0
-    for count in counts:
+    for stage_index, count in enumerate(counts):
         chosen: list[Song] = []
+        target_params = stage_target_params[stage_index]
+        stage_bands_for_slot = stage_bands_resolved[stage_index]
+        stage_target_vec = (
+            stage_impression_vectors[stage_index]
+            if stage_impression_vectors and stage_index < len(stage_impression_vectors)
+            else None
+        )
         for _ in range(count):
             if not remaining:
                 break
             slot_target = slot_targets[slot]
             slot += 1
-            cand = sorted(remaining.values(), key=lambda s: (abs(s.energy - slot_target), s.idx))
+            # 스테이지 고정 밴드(프로토타입) — 에너지 허용창보다 먼저 적용하는 최우선 하드필터.
+            # 이 밴드의 후보가 이미 소진됐으면(다른 스테이지가 다 가져감 등) 억지로 다른 밴드를
+            # 채우지 않고 슬롯을 건너뛴다 — "이 스테이지는 이 밴드만"이라는 사용자 의도를
+            # energy 허용창 완충 로직보다 더 엄격하게 지킨다.
+            band_pool = (
+                {idx: s for idx, s in remaining.items() if s.band in stage_bands_for_slot}
+                if stage_bands_for_slot else remaining
+            )
+            if not band_pool:
+                continue
+            cand = sorted(band_pool.values(), key=lambda s: (abs(s.energy - slot_target), s.idx))
             window = [s for s in cand if abs(s.energy - slot_target) <= _TOL]
             if window:
-                # 허용창 내 곡은 모두 무드 부합 → rng 셔플로 변주 후 밝기 버킷 근접 우선(재현적).
+                # 허용창 내 곡은 모두 무드 부합 → rng 셔플로 변주 후 밝기 버킷 근접 우선(재현적),
+                # 그다음 신규 지표 6종(valence 등) 거리로 타이브레이크(3.5단계 — 지표 없는
+                # 곡/요청이면 거리 0이라 이 tiebreak는 자동으로 무력화되고 기존 동작 그대로),
+                # 마지막으로 가사 감상 임베딩 유사도(프로토타입, 4순위 — 벡터 없으면 0.0 중립).
                 rng.shuffle(window)
-                window.sort(key=lambda s: round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET))
+                window.sort(key=lambda s: (
+                    round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET),
+                    round(_stage_param_distance(s, target_params), 4),
+                    -_lyric_similarity(s, stage_target_vec),
+                ))
                 pick = window[0]
             else:
                 # 완충 노드: 허용창 밖 최근접 후보. 이탈이 _HARD_TOL을 넘으면 억지로 채우지
@@ -328,7 +492,24 @@ def build_setlist(
     slot_cursor = 0  # slot_targets에서 이 스테이지가 차지하는 구간 추적(Stage A와 동일 순서)
 
     for stage_index, (target, members) in enumerate(zip(targets, stage_members)):
-        stages_out.append(Stage(index=stage_index, energy_target=round(target, 4)))
+        # stage_specs(사용자 지정, 커스텀 모드 등)가 최우선, 없으면 LLM stage_params 폴백 —
+        # Stage A에서 이미 쓴 것과 동일한 stage_target_params[stage_index]를 그대로 echo.
+        target_params = stage_target_params[stage_index]
+        stages_out.append(Stage(
+            index=stage_index,
+            energy_target=round(target, 4),
+            valence=target_params["valence"],
+            lufs_integrated=target_params["lufs_integrated"],
+            lra=target_params["lra"],
+            danceability_norm=target_params["danceability_norm"],
+            instr_stem_ratio=target_params["instr_stem_ratio"],
+            speech_median=target_params["speech_median"],
+            impression=target_params["impression"],
+            bands=(
+                tuple(sorted(stage_bands_resolved[stage_index]))
+                if stage_bands_resolved[stage_index] else None
+            ),
+        ))
         if not members:
             continue
         stage_slot_targets = slot_targets[slot_cursor : slot_cursor + len(members)]
@@ -351,6 +532,12 @@ def build_setlist(
                     energy=s.energy,
                     stage_index=stage_index,
                     reason=reason,
+                    valence=s.valence,
+                    lufs_integrated=s.lufs_integrated,
+                    lra=s.lra,
+                    danceability_norm=s.danceability_norm,
+                    instr_stem_ratio=s.instr_stem_ratio,
+                    speech_median=s.speech_median,
                 )
             )
             prev = s

@@ -5,7 +5,7 @@ import random
 import pytest
 
 from app.domain.models import MoodParameters, NoSetlistError, Song, StageSpec
-from app.domain.selection import _local_refine_order, _stage_sequence_cost, build_setlist
+from app.domain.selection import _local_refine_order, _stage_sequence_cost, build_setlist, resolve_stage_bands
 
 
 def _songs() -> list[Song]:
@@ -186,6 +186,51 @@ def test_stage_energies_produce_nonmonotonic_arc():
     assert [s.energy_target for s in setlist.stages] == [0.2, 0.9, 0.3]
 
 
+def test_stage_minutes_skews_song_counts_with_stage_energies():
+    # 3.5단계: stage_energies + stage_minutes 조합 — 가운데 단계가 훨씬 길면 곡도 더 많이 배정.
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=3,
+        target_minutes=None, interpretation_summary="", stage_energies=[0.2, 0.9, 0.3],
+        stage_minutes=[10.0, 40.0, 10.0],
+    )
+    setlist = build_setlist(_songs(), params, target_seconds=9 * 213, rng=random.Random(0))
+    counts = [sum(1 for p in setlist.picks if p.stage_index == i) for i in range(3)]
+    assert counts[1] > counts[0]
+    assert counts[1] > counts[2]
+    assert sum(counts) == len(setlist.picks)
+
+
+def test_stage_minutes_skews_song_counts_without_stage_energies():
+    # stage_energies 없이 start/end 선형 아크만 있어도 stage_minutes는 반영돼야 한다.
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.2, end_energy=0.9, stage_count=3,
+        target_minutes=None, interpretation_summary="", stage_minutes=[5.0, 5.0, 40.0],
+    )
+    setlist = build_setlist(_songs(), params, target_seconds=9 * 213, rng=random.Random(0))
+    counts = [sum(1 for p in setlist.picks if p.stage_index == i) for i in range(3)]
+    assert counts[2] > counts[0]
+    assert counts[2] > counts[1]
+
+
+def test_stage_minutes_ignored_when_length_mismatches_stage_count():
+    # 배열 길이가 stage_count와 다르면(모델 실수) 신뢰하지 않고 균등분배로 폴백 —
+    # stage_minutes가 아예 없을 때와 결과(단계별 곡 수)가 완전히 같아야 한다.
+    base_params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=3,
+        target_minutes=None, interpretation_summary="", stage_energies=[0.2, 0.9, 0.3],
+    )
+    mismatched_params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=3,
+        target_minutes=None, interpretation_summary="", stage_energies=[0.2, 0.9, 0.3],
+        stage_minutes=[10.0, 40.0],  # 길이 2 != stage_count 3
+    )
+    setlist_base = build_setlist(_songs(), base_params, target_seconds=9 * 213, rng=random.Random(0))
+    setlist_mismatched = build_setlist(_songs(), mismatched_params, target_seconds=9 * 213, rng=random.Random(0))
+    counts_base = [sum(1 for p in setlist_base.picks if p.stage_index == i) for i in range(3)]
+    counts_mismatched = [sum(1 for p in setlist_mismatched.picks if p.stage_index == i) for i in range(3)]
+    assert counts_mismatched == counts_base
+
+
 def test_stage_specs_energy_clamped():
     specs = [StageSpec(energy_target=5.0, song_count=1), StageSpec(energy_target=-3.0, song_count=1)]
     setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs, rng=random.Random(0))
@@ -206,3 +251,285 @@ def test_all_ineligible_raises_no_setlist():
     songs = [Song(0, "a", "song", "vid0000000", "8A", 0.5, 0.0, "neutral", eligible_band=False)]
     with pytest.raises(NoSetlistError):
         build_setlist(songs, _params(), target_seconds=6 * 213)
+
+
+# ── 신규 필드 통과 및 매칭 미반영 회귀 ──────────────────────────────────────────
+def test_stage_specs_pass_through_new_fields():
+    """StageSpec의 신규 필드(valence 등)가 Stage까지 전달되는지 확인."""
+    specs = [
+        StageSpec(energy_target=0.3, song_count=2, valence=0.7, lra=5.5),
+        StageSpec(energy_target=0.7, song_count=3, valence=0.4, lra=10.2),
+    ]
+    setlist = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs, rng=random.Random(0))
+    assert len(setlist.stages) == 2
+    assert setlist.stages[0].energy_target == 0.3
+    assert setlist.stages[0].valence == 0.7
+    assert setlist.stages[0].lra == 5.5
+    assert setlist.stages[1].energy_target == 0.7
+    assert setlist.stages[1].valence == 0.4
+    assert setlist.stages[1].lra == 10.2
+
+
+def test_ai_mode_stage_params_used_when_no_stage_specs():
+    """3단계: stage_specs가 없어도(=AI 모드 첫 요청) params.stage_params가 있으면 Stage에 반영된다."""
+    params = MoodParameters(
+        brightness=0.3, start_energy=0.2, end_energy=0.9, stage_count=2,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[
+            {"valence": 0.7, "lra": 5.5},
+            {"valence": 0.4, "lra": 10.2},
+        ],
+    )
+    setlist = build_setlist(_songs(), params, target_seconds=999, rng=random.Random(0))
+    assert len(setlist.stages) == 2
+    assert setlist.stages[0].valence == 0.7
+    assert setlist.stages[0].lra == 5.5
+    assert setlist.stages[0].danceability_norm is None
+    assert setlist.stages[1].valence == 0.4
+    assert setlist.stages[1].lra == 10.2
+
+
+def test_stage_specs_take_priority_over_stage_params():
+    """사용자 지정 stage_specs가 있으면 LLM stage_params보다 우선한다(필드별)."""
+    specs = [StageSpec(energy_target=0.3, song_count=3, valence=0.9)]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.3, end_energy=0.3, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[{"valence": 0.1, "lra": 0.5}],
+    )
+    setlist = build_setlist(_songs(), params, target_seconds=999, stage_specs=specs, rng=random.Random(0))
+    # valence는 spec이 우선(0.9, LLM의 0.1 아님), lra는 spec에 없어 stage_params로 폴백(0.5).
+    assert setlist.stages[0].valence == 0.9
+    assert setlist.stages[0].lra == 0.5
+
+
+def test_new_fields_do_not_affect_selection_when_songs_lack_them():
+    """3.5단계: 곡 풀에 신규 지표(Song.valence 등)가 없으면(이 파일의 _songs() 픽스처처럼
+    전부 None) stage_specs/stage_params에 값을 줘도 거리가 0으로 무력화돼 선곡이 안 바뀐다
+    — 기존 스냅샷·테스트 픽스처와의 하위호환. 지표가 실제로 있을 때 선곡에 반영되는지는
+    test_stage_params_valence_influences_pick_when_available 참고."""
+    # valence가 다르지만 energy_target이 같은 두 개의 specs
+    specs_without_valence = [
+        StageSpec(energy_target=0.3, song_count=3),
+        StageSpec(energy_target=0.7, song_count=3),
+    ]
+    specs_with_valence = [
+        StageSpec(energy_target=0.3, song_count=3, valence=0.9),
+        StageSpec(energy_target=0.7, song_count=3, valence=0.1),
+    ]
+    setlist1 = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs_without_valence, rng=random.Random(42))
+    setlist2 = build_setlist(_songs(), _params(), target_seconds=999, stage_specs=specs_with_valence, rng=random.Random(42))
+
+    # 선곡 결과(picks의 idx 집합)가 동일해야 함
+    picks1 = {p.idx for p in setlist1.picks}
+    picks2 = {p.idx for p in setlist2.picks}
+    assert picks1 == picks2, "신규 필드의 유무가 선곡 결과를 변경해서는 안 됨"
+
+
+def test_stage_params_valence_influences_pick_when_available():
+    """3.5단계: 곡에 실제 valence 값이 있으면 stage_specs.valence가 Stage A 3순위
+    타이브레이커로 반영돼 다른 곡이 뽑힌다(에너지·밝기는 전부 동일하게 맞춰 valence만 변수로)."""
+    songs = [
+        Song(idx=i, band="a", song=f"s{i}", video_id=f"vid{i:07d}0", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True, valence=v)
+        for i, v in enumerate([0.1, 0.3, 0.5, 0.7, 0.9])
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    spec_low = [StageSpec(energy_target=0.5, song_count=1, valence=0.1)]
+    spec_high = [StageSpec(energy_target=0.5, song_count=1, valence=0.9)]
+    low = build_setlist(songs, params, target_seconds=999, stage_specs=spec_low, rng=random.Random(0))
+    high = build_setlist(songs, params, target_seconds=999, stage_specs=spec_high, rng=random.Random(0))
+    picked_low = next(s for s in songs if s.idx == low.picks[0].idx)
+    picked_high = next(s for s in songs if s.idx == high.picks[0].idx)
+    assert picked_low.idx != picked_high.idx
+    assert picked_low.valence < picked_high.valence
+
+
+def test_stage_params_multi_field_distance_picks_closest_overall():
+    """valence·lra 두 지표를 동시에 지정하면 평균 거리가 가장 가까운 곡이 뽑힌다."""
+    songs = [
+        Song(idx=0, band="a", song="s0", video_id="vid0000000", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+             valence=0.2, lra=0.8),  # valence 거리 0.6, lra 거리 0.1 → 평균 0.35
+        Song(idx=1, band="a", song="s1", video_id="vid0000001", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+             valence=0.75, lra=0.75),  # valence 거리 0.05, lra 거리 0.05 → 평균 0.05
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    spec = [StageSpec(energy_target=0.5, song_count=1, valence=0.8, lra=0.7)]
+    setlist = build_setlist(songs, params, target_seconds=999, stage_specs=spec, rng=random.Random(0))
+    assert setlist.picks[0].idx == 1
+
+
+# ── 가사 감상 임베딩 매칭(프로토타입, 4순위 타이브레이크) ──────────────────────────────
+
+def test_resolve_stage_target_params_includes_impression_from_llm():
+    from app.domain.selection import _resolve_stage_target_params
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[{"valence": 0.5, "impression": "차분하고 그리운 정서"}],
+    )
+    resolved = _resolve_stage_target_params(0, None, params)
+    assert resolved["impression"] == "차분하고 그리운 정서"
+
+
+def test_resolve_stage_target_params_impression_none_when_no_llm_stage_params():
+    from app.domain.selection import _resolve_stage_target_params
+    params = _params(stage_count=1)
+    resolved = _resolve_stage_target_params(0, None, params)
+    assert resolved["impression"] is None
+
+
+def test_resolve_stage_impression_text_spec_takes_priority_over_llm():
+    """커스텀 모드(StageSpec.impression) 사용자 입력이 AI 모드 LLM stage_params보다 우선한다."""
+    from app.domain.selection import resolve_stage_impression_text
+    specs = [StageSpec(energy_target=0.5, song_count=1, impression="사용자 직접 입력")]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[{"impression": "LLM이 뽑은 감상"}],
+    )
+    assert resolve_stage_impression_text(0, specs, params) == "사용자 직접 입력"
+
+
+def test_resolve_stage_impression_text_falls_back_to_llm_when_spec_has_none():
+    from app.domain.selection import resolve_stage_impression_text
+    specs = [StageSpec(energy_target=0.5, song_count=1)]  # impression 미지정
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_params=[{"impression": "LLM이 뽑은 감상"}],
+    )
+    assert resolve_stage_impression_text(0, specs, params) == "LLM이 뽑은 감상"
+
+
+def test_lyric_similarity_neutral_when_either_side_missing():
+    from app.domain.selection import _lyric_similarity
+    song = Song(idx=0, band="a", song="s0", video_id="vid0000000", camelot="8A",
+                energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+                lyric_vec=[1.0, 0.0])
+    song_no_vec = Song(idx=1, band="a", song="s1", video_id="vid0000001", camelot="8A",
+                        energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True)
+    assert _lyric_similarity(song, None) == 0.0
+    assert _lyric_similarity(song_no_vec, [1.0, 0.0]) == 0.0
+    assert _lyric_similarity(song, [1.0, 0.0]) == 1.0
+    assert _lyric_similarity(song, [0.0, 1.0]) == 0.0
+
+
+def test_build_setlist_lyric_similarity_breaks_tie_when_numeric_params_equal():
+    """energy·밝기·6개 수치 지표가 모두 동률인 두 후보 중 1곡만 뽑아야 하는 상황에서,
+    가사 감상 임베딩이 더 유사한 쪽이 선택돼야 한다(4순위 타이브레이크, 프로토타입).
+    target_seconds를 곡 1개분(avg_song_seconds)으로 맞춰 후보 2곡 중 1곡만 채택되게 한다
+    — 그래야 Stage A의 선택 자체(둘 다 채택되는 게 아니라)가 검증된다."""
+    songs = [
+        Song(idx=0, band="a", song="s0", video_id="vid0000000", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+             lyric_vec=[0.0, 1.0]),  # target과 직교(유사도 0)
+        Song(idx=1, band="a", song="s1", video_id="vid0000001", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True,
+             lyric_vec=[1.0, 0.0]),  # target과 완전 일치(유사도 1)
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    setlist = build_setlist(
+        songs, params, target_seconds=213, rng=random.Random(0),
+        stage_impression_vectors=[[1.0, 0.0]],
+    )
+    assert len(setlist.picks) == 1
+    assert setlist.picks[0].idx == 1
+
+
+def test_build_setlist_missing_impression_vector_keeps_existing_behavior():
+    """스테이지 impression 벡터가 없으면(프로토타입 신호 부재) 기존 동작 그대로 —
+    가사 유사도 타이브레이크가 결과에 영향을 주지 않는다(크래시도 안 남)."""
+    songs = [
+        Song(idx=i, band="a", song=f"s{i}", video_id=f"vid{i:07d}0", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True)
+        for i in range(3)
+    ]
+    params = _params(stage_count=1, start=0.5, end=0.5)
+    setlist = build_setlist(songs, params, target_seconds=999, rng=random.Random(0))
+    assert len(setlist.picks) >= 1
+
+
+# ── 스테이지별 고정 밴드(프로토타입) ────────────────────────────────────────────
+
+def test_resolve_stage_bands_spec_takes_priority_over_llm():
+    specs = [StageSpec(energy_target=0.5, song_count=1, bands=("roselia", "mygo"))]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_bands=["ave_mujica"],
+    )
+    assert resolve_stage_bands(0, specs, params) == frozenset({"roselia", "mygo"})
+
+
+def test_resolve_stage_bands_falls_back_to_llm_when_spec_has_none():
+    specs = [StageSpec(energy_target=0.5, song_count=1)]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_bands=["mygo"],
+    )
+    assert resolve_stage_bands(0, specs, params) == frozenset({"mygo"})
+
+
+def test_resolve_stage_bands_none_when_neither_set():
+    assert resolve_stage_bands(0, None, _params(stage_count=1)) is None
+
+
+def test_build_setlist_stage_bands_hard_filters_per_stage():
+    """두 밴드가 섞인 풀에서 stage_bands로 스테이지별 밴드를 고정하면, 각 스테이지는
+    오직 그 밴드 곡만 뽑는다(에너지 하드필터보다 우선하는 최상위 필터)."""
+    songs = [
+        Song(idx=i, band="morfonica", song=f"morf{i}", video_id=f"vidm{i:06d}", camelot="8A",
+             energy=e, mode_score=0.0, shape="neutral", eligible_band=True)
+        for i, e in enumerate([0.2, 0.3, 0.7, 0.8])
+    ] + [
+        Song(idx=100 + i, band="mugendai_mutype", song=f"mm{i}", video_id=f"vidu{i:06d}", camelot="8A",
+             energy=e, mode_score=0.0, shape="neutral", eligible_band=True)
+        for i, e in enumerate([0.2, 0.3, 0.7, 0.8])
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.25, end_energy=0.75, stage_count=2,
+        target_minutes=None, interpretation_summary="test",
+        stage_energies=[0.25, 0.75],
+        stage_bands=["morfonica", "mugendai_mutype"],
+    )
+    setlist = build_setlist(songs, params, target_seconds=2 * 213, rng=random.Random(0))
+    by_idx = {s.idx: s for s in songs}
+    stage0_bands = {by_idx[p.idx].band for p in setlist.picks if p.stage_index == 0}
+    stage1_bands = {by_idx[p.idx].band for p in setlist.picks if p.stage_index == 1}
+    assert stage0_bands == {"morfonica"}
+    assert stage1_bands == {"mugendai_mutype"}
+
+
+def test_build_setlist_stage_band_skips_slot_when_band_pool_exhausted():
+    """지정된 밴드의 후보가 소진되면(곡 부족), 억지로 다른 밴드를 채우지 않고 슬롯을
+    건너뛴다 — 곡 수가 자동으로 줄어든다."""
+    songs = [
+        Song(idx=0, band="morfonica", song="only", video_id="vidm0000000", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True),
+    ] + [
+        Song(idx=100 + i, band="mygo", song=f"mygo{i}", video_id=f"vidg{i:06d}", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True)
+        for i in range(5)
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+        stage_bands=["morfonica"],
+    )
+    # 3곡 분량을 요청해도 morfonica 후보가 1곡뿐이라 1곡만 채택돼야 한다(mygo로 채우지 않음).
+    setlist = build_setlist(songs, params, target_seconds=3 * 213, rng=random.Random(0))
+    assert len(setlist.picks) == 1
+    assert setlist.picks[0].idx == 0

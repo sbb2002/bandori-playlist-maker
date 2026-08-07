@@ -45,16 +45,19 @@ def test_setlist_happy_path(client):
     assert len(idxs) == len(set(idxs))
 
 
-def test_same_intent_honors_request_overrides(client):
-    # 직전 요청과 의도가 같으면(previous_prompt 동봉) 사용자 override(재생시간·단계수)를 존중한다.
+def test_ai_mode_never_honors_overrides_even_with_same_intent(client):
+    """DEPRECATED 동작 교체 확인(3단계): 예전엔 previous_prompt와 의도가 같으면(same_as_previous)
+    AI 모드에서도 사용자 override(재생시간·단계수)를 존중했다. 지금은 AI 모드가 항상 honor=False라
+    같은 의도여도 override를 무시하고 모델이 새로 제어한다(routes.py의 honor 판정 참고)."""
     r = client.post("/api/setlist", json={
         "prompt": "차분한 곡", "previous_prompt": "차분한 곡",
         "target_minutes": 30, "stage_count": 2,
     })
     assert r.status_code == 200
     body = r.json()
-    assert body["params"]["stage_count"] == 2
-    assert len(body["stages"]) == 2
+    # 스텁 기본 단계수는 3 — override(2)가 이제는 항상 무시됨을 확인.
+    assert body["params"]["stage_count"] == 3
+    assert len(body["stages"]) == 3
 
 
 def test_first_request_ignores_user_overrides(client):
@@ -78,11 +81,13 @@ def test_changed_prompt_drops_stale_overrides(client):
 
 
 def test_response_exposes_honored_overrides(client):
-    """응답의 honored_overrides로 프론트가 자동 해석(false) 시 그래프/재생시간을 되돌릴 수 있어야 한다."""
+    """DEPRECATED 동작 교체 확인(3단계): honored_overrides는 이제 AI 모드에서 항상 False다
+    (예전엔 같은 의도일 때 True였음 — routes.py의 honor DEPRECATED 주석 참고). 커스텀 모드는
+    test_custom_mode_* 쪽에서 항상 True인지 별도로 검증한다."""
     r1 = client.post("/api/setlist", json={"prompt": "차분한 곡"})
     assert r1.json()["honored_overrides"] is False  # 1회차 → 자동
     r2 = client.post("/api/setlist", json={"prompt": "차분한 곡", "previous_prompt": "차분한 곡"})
-    assert r2.json()["honored_overrides"] is True   # 같은 의도 → 재생 형태 override 존중
+    assert r2.json()["honored_overrides"] is False  # 같은 의도여도 AI 모드는 항상 자동(변경됨)
     r3 = client.post("/api/setlist", json={"prompt": "신나는 파티", "previous_prompt": "조용한 수면 명상"})
     assert r3.json()["honored_overrides"] is False  # 의도 변경 → 자동
 
@@ -203,6 +208,28 @@ def test_prompt_band_name_auto_filters(client):
     assert body["applied_bands"] == ["raise_a_suilen"]  # 프론트 체크박스 동기화용
 
 
+# ── 스테이지별 고정 밴드 검증(프로토타입, LLM이 지어낸 값 무효화) ──────────────────
+
+def test_validate_stage_bands_keeps_values_within_detected_set():
+    from app.api.routes import _validate_stage_bands
+    detected = {"morfonica", "mugendai_mutype"}
+    raw = ["모르포니카", "개유노"]
+    assert _validate_stage_bands(raw, detected) == ["morfonica", "mugendai_mutype"]
+
+
+def test_validate_stage_bands_nulls_hallucinated_band():
+    from app.api.routes import _validate_stage_bands
+    detected = {"morfonica"}  # 프롬프트에 mygo는 언급 안 됨
+    raw = ["모르포니카", "마이고"]
+    assert _validate_stage_bands(raw, detected) == ["morfonica", None]
+
+
+def test_validate_stage_bands_none_and_empty_list_passthrough():
+    from app.api.routes import _validate_stage_bands
+    assert _validate_stage_bands(None, {"morfonica"}) is None
+    assert _validate_stage_bands([], {"morfonica"}) == []
+
+
 def test_empty_bands_is_all(client):
     r = client.post("/api/setlist", json={"prompt": "신나는 곡", "bands": []})
     assert r.status_code == 200
@@ -226,9 +253,10 @@ def test_prompt_bands_do_not_carry_across_requests(client):
 
 
 def test_custom_stages_override(client):
-    # 그래프 수동 단계(stages)도 의도가 같을 때만 적용 → previous_prompt 동봉.
+    # DEPRECATED 동작 교체(3단계): 예전엔 그래프 수동 단계(stages)도 previous_prompt가 같은
+    # 의도일 때만 적용됐다. 지금은 mode="custom"이 항상 사용자 stages를 그대로 존중한다.
     r = client.post("/api/setlist", json={
-        "prompt": "아무거나", "previous_prompt": "아무거나",
+        "prompt": "아무거나", "mode": "custom",
         "stages": [{"energy": 0.2, "minutes": 5}, {"energy": 0.85, "minutes": 5}],
     })
     assert r.status_code == 200
@@ -240,7 +268,7 @@ def test_custom_stages_override(client):
 
 def test_custom_stage_song_count(client):
     r = client.post("/api/setlist", json={
-        "prompt": "아무거나", "previous_prompt": "아무거나",
+        "prompt": "아무거나", "mode": "custom",
         "stages": [{"energy": 0.3, "song_count": 2}, {"energy": 0.7, "song_count": 4}],
     })
     assert r.status_code == 200
@@ -252,7 +280,7 @@ def test_custom_stage_song_count(client):
 def test_many_stages_up_to_eleven(client):
     """핫픽스 제안2: 수동 그래프는 최대 11구간까지 허용(기존 5 상한 확장)."""
     stages = [{"energy": round(0.2 + 0.05 * i, 2), "song_count": 1} for i in range(11)]
-    r = client.post("/api/setlist", json={"prompt": "아무거나", "previous_prompt": "아무거나", "stages": stages})
+    r = client.post("/api/setlist", json={"prompt": "아무거나", "mode": "custom", "stages": stages})
     assert r.status_code == 200
     assert len(r.json()["stages"]) == 11
 
@@ -311,3 +339,140 @@ def test_refresh_data_succeeds_with_correct_token(client, monkeypatch):
     assert body["status"] == "ok"
     assert body["song_count"] == len(client.app.state.songs)
     assert calls == [True]
+
+
+# ── AI 모드 / 커스텀 모드 토글 테스트 ──────────────────────────────────────────────
+def test_custom_mode_requires_stages(client):
+    """커스텀 모드는 stages가 필수."""
+    r = client.post("/api/setlist", json={"mode": "custom"})
+    assert r.status_code == 400
+    assert r.json()["error"]["code"] == "INVALID_REQUEST"
+
+
+def test_custom_mode_builds_from_stages(client):
+    """커스텀 모드는 stages를 받아 직접 세트리스트 구성."""
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "stages": [{"energy": 0.2, "minutes": 5}, {"energy": 0.85, "minutes": 5}],
+        "target_minutes": 10,
+    })
+    assert r.status_code == 200
+    body = r.json()
+    assert body["params"]["interpretation_summary"] == ""
+    assert body["params"]["stage_count"] == 2
+    assert len(body["stages"]) == 2
+    assert body["stages"][0]["energy_target"] == 0.2
+    assert body["stages"][1]["energy_target"] == 0.85
+
+
+def test_custom_mode_ignores_previous_prompt(client):
+    """커스텀 모드는 previous_prompt를 무시(LLM 호출 없음)."""
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "previous_prompt": "불필요한 프롬프트",
+        "stages": [{"energy": 0.5, "song_count": 3}],
+    })
+    assert r.status_code == 200
+
+
+def test_custom_mode_new_stage_fields_echoed(client):
+    """커스텀 모드에서 신규 필드(valence 등)가 요청에 있으면 응답에도 있어야 한다."""
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "stages": [
+            {
+                "energy": 0.5,
+                "song_count": 2,
+                "valence": 0.7,
+                "lufs_integrated": -10.5,
+                "lra": 8.2,
+                "danceability_norm": 0.6,
+                "instr_stem_ratio": 0.8,
+                "speech_median": 0.1,
+            }
+        ],
+    })
+    assert r.status_code == 200
+    body = r.json()
+    stage0 = body["stages"][0]
+    assert stage0["valence"] == 0.7
+    assert stage0["lufs_integrated"] == -10.5
+    assert stage0["lra"] == 8.2
+    assert stage0["danceability_norm"] == 0.6
+    assert stage0["instr_stem_ratio"] == 0.8
+    assert stage0["speech_median"] == 0.1
+
+
+def test_custom_mode_skips_llm_interpreter(client, monkeypatch):
+    """커스텀 모드에서는 LLM interpreter.interpret이 호출되지 않아야 한다."""
+    calls = []
+
+    def fake_interpret(prompt, previous_prompt=None, energy_stats=None, feature_stats=None):
+        calls.append((prompt, previous_prompt))
+        raise RuntimeError("interpreter.interpret should not be called in custom mode")
+
+    monkeypatch.setattr(client.app.state, "interpreter", type("FakeInterpreter", (), {"interpret": fake_interpret})())
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "stages": [{"energy": 0.5, "song_count": 1}],
+    })
+    assert r.status_code == 200
+    assert calls == []  # interpreter.interpret 호출 안 됨
+
+
+def test_ai_mode_stage_params_flow_to_response(client, monkeypatch):
+    """3단계: AI 모드 첫 요청도(honor 무관) LLM이 채운 stage_params가 응답 stages에 실려야 한다."""
+    from app.domain.models import MoodParameters
+
+    def fake_interpret(self, prompt, previous_prompt=None, energy_stats=None, feature_stats=None):
+        return MoodParameters(
+            brightness=0.5, start_energy=0.4, end_energy=0.4, stage_count=2,
+            target_minutes=20, interpretation_summary="test",
+            stage_params=[
+                {"valence": 0.8, "lufs_integrated": 0.6},
+                {"valence": 0.3, "instr_stem_ratio": 0.9},
+            ],
+        )
+
+    monkeypatch.setattr(client.app.state, "interpreter", type("FakeInterpreter", (), {"interpret": fake_interpret})())
+    r = client.post("/api/setlist", json={"prompt": "아무거나"})
+    assert r.status_code == 200
+    stages = r.json()["stages"]
+    assert len(stages) == 2
+    assert stages[0]["valence"] == 0.8
+    assert stages[0]["lufs_integrated"] == 0.6
+    assert stages[1]["valence"] == 0.3
+    assert stages[1]["instr_stem_ratio"] == 0.9
+
+
+def test_ai_mode_default_when_mode_omitted(client):
+    """mode 필드를 생략하면 기본값 'ai'로 동작(회귀 테스트)."""
+    r = client.post("/api/setlist", json={"prompt": "신나는 곡"})
+    assert r.status_code == 200
+    body = r.json()
+    assert "params" in body and "stages" in body
+
+
+def test_empty_prompt_still_invalid_in_ai_mode(client):
+    """AI 모드(기본)에서는 빈 prompt가 여전히 무효."""
+    r = client.post("/api/setlist", json={"prompt": "   "})
+    assert r.status_code == 400
+    assert r.json()["error"]["code"] == "INVALID_REQUEST"
+
+
+def test_missing_prompt_still_invalid_in_ai_mode(client):
+    """AI 모드(명시적)에서 prompt 없음은 무효."""
+    r = client.post("/api/setlist", json={"mode": "ai"})
+    assert r.status_code == 400
+    assert r.json()["error"]["code"] == "INVALID_REQUEST"
+
+
+def test_custom_mode_with_null_new_fields(client):
+    """커스텀 모드에서 신규 필드가 null이면 응답에도 null."""
+    r = client.post("/api/setlist", json={
+        "mode": "custom",
+        "stages": [{"energy": 0.5, "song_count": 1, "valence": None}],
+    })
+    assert r.status_code == 200
+    body = r.json()
+    assert body["stages"][0]["valence"] is None

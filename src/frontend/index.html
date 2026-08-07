@@ -52,40 +52,123 @@
     </header>
 
     <form id="request-form" class="card">
-      <label class="field">
+      <button type="button" class="mode-switch" id="mode-switch" role="switch" aria-checked="false" aria-label="생성 모드 전환 — AI 모드 또는 커스텀 모드">
+        <span class="mode-switch-thumb" aria-hidden="true"></span>
+        <span class="mode-switch-label" data-mode="ai">AI 모드</span>
+        <span class="mode-switch-label" data-mode="custom">커스텀 모드</span>
+      </button>
+
+      <label class="field" id="prompt-field">
         <span class="field-label">어떤 플레이리스트를 원하세요?</span>
         <input id="prompt" name="prompt" type="text" maxlength="500" autocomplete="off"
                placeholder="예) 퇴근하고 주말 시작! 기분이 절로 좋아지는 1시간 플레이리스트" required />
         <span id="prompt-hint" class="field-hint" aria-live="polite"></span>
       </label>
 
-      <details class="options">
+      <details class="options" id="options-details">
         <summary>세부 설정 (선택)</summary>
         <p class="options-guide">여기서 플레이리스트를 직접 다듬을 수 있어요. 바꾼 설정은 같은 요청에서 유지되고, 프롬프트를 새 내용으로 바꾸면 다시 자동으로 맞춰드려요.</p>
+        <!-- DEPRECATED(디버깅용, epic 3단계 stage_params 튜닝 완료 후 제거 예정) — 숨김(주석처리), app.js의 리스너 바인딩은 요소 없으면 자동 스킵.
+        <button type="button" id="debug-copy-state-btn" class="link-btn">🐛 현재 상태 복사 (디버그)</button>
+        -->
         <div class="options-grid">
           <label class="field">
-            <span class="field-label">재생시간(분)</span>
-            <input id="target-minutes" type="number" min="10" max="180" placeholder="60 (기본)" />
+            <span class="field-label">플레이리스트 재생시간</span>
+            <ul class="field-note"><li>비워두면 AI가 상황에 맞게 정해요</li></ul>
+            <div class="minutes-input-row">
+              <input id="target-minutes" type="number" min="10" max="180" placeholder="60(기본)" />
+              <span class="minutes-unit">분</span>
+            </div>
             <span id="target-minutes-hint" class="field-hint" aria-live="polite"></span>
           </label>
-        </div>
-
-        <div class="setting-block">
-          <span class="field-label">곡 종류 <small class="muted">(안 건드리면 모델이 판단 · 기본 전체)</small></span>
-          <div id="settings-type-filter" class="picker-type-filter"></div>
+          <div class="options-grid-divider" aria-hidden="true"></div>
+          <div class="field">
+            <span class="field-label">곡 종류</span>
+            <ul class="field-note"><li>안 건드리면 AI가 판단해요(기본 전체)</li></ul>
+            <div id="settings-type-filter" class="picker-type-filter"></div>
+          </div>
         </div>
 
         <div class="setting-block">
           <div class="setting-head">
-            <span class="field-label">밴드 필터 <small class="muted">(선택 안 하면 전체)</small></span>
-            <button type="button" id="band-clear" class="link-btn">전체 해제</button>
+            <span class="field-label">듣고싶은 밴드</span>
+            <button type="button" id="band-clear" class="timebar-equalize-btn">전체 해제</button>
           </div>
+          <ul class="field-note"><li>모두 선택해제되면 자동으로 전체선택되요.</li></ul>
           <div id="band-list" class="band-list">밴드 목록 불러오는 중…</div>
         </div>
 
         <div class="setting-block">
-          <span class="field-label">에너지 텐션 그래프 <small class="muted">(드래그로 조정 · 우클릭/길게눌러 구간 추가·제거, 최대 11구간)</small></span>
-          <div id="stage-editor" class="stage-editor"></div>
+          <div class="setting-head">
+            <span class="field-label">에너지 X 감정 궤적</span>
+            <div class="stage-count">
+              <button id="stage-minus" type="button" aria-label="구간 줄이기">−</button>
+              <span class="n" id="stage-n">5구간</span>
+              <button id="stage-plus" type="button" aria-label="구간 늘리기">+</button>
+            </div>
+          </div>
+          <ul class="field-note">
+            <li>우측에 원하는 만큼 구간을 조절하세요.</li>
+            <li>구간을 나타내는 포인트를 드래그해서 원하는 곳에 놓으세요.</li>
+          </ul>
+
+          <!-- 디자인 2(사분면 4색)로 고정 확정 — 셀렉터는 숨김(hidden). 버튼 자체는 유지해
+               initStageControls()의 querySelectorAll("button") 바인딩이 그대로 통과하게 한다. -->
+          <div class="bg-toggle-row hidden">
+            <div class="bg-toggle" id="bg-toggle">
+              <button type="button" data-bg="current">1) 현재</button>
+              <button type="button" data-bg="quadrant" class="on">2) 사분면 4색</button>
+              <button type="button" data-bg="emoi">3) EMOI-MAP풍</button>
+            </div>
+          </div>
+          <div class="map-stage">
+            <div class="map-wrap">
+              <div class="map-pad bg-quadrant" id="map-pad">
+                <svg class="map-svg" id="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <!-- 그리드는 JS가 채움 -->
+                </svg>
+                <div class="quadrant-label q-tl">무겁고<br />격렬한</div>
+                <div class="quadrant-label q-tr">밝고<br />신나는</div>
+                <div class="quadrant-label q-bl">차분하고<br />가라앉은</div>
+                <div class="quadrant-label q-br">밝고<br />잔잔한</div>
+                <!-- stage-node들은 JS가 채움 -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UI상으로만 별도 항목으로 분리(데이터는 정서 궤적과 같은 stageModel.segments 공유). -->
+        <div class="setting-block">
+          <span class="field-label">구간 세부설정</span>
+
+          <div class="timebar-label-row">
+            <span class="field-sublabel">시간 설정</span>
+            <div class="timebar-label-actions">
+              <button type="button" id="timebar-equalize" class="timebar-equalize-btn">모두 균일하게</button>
+              <span id="timebar-total-label"></span>
+            </div>
+          </div>
+          <ul class="field-note">
+            <li>원하는 만큼 구간 길이를 설정할 수 있어요! (최소 3분)</li>
+            <li>우측에 '모두 균일하게' 버튼을 누르면 모든 구간의 시간을 균일하게 맞춰요.</li>
+          </ul>
+          <div class="timebar" id="timebar"></div>
+          <div class="timebar-ticks" id="timebar-ticks"></div>
+
+          <span class="field-sublabel">구간 감성 및 밴드 설정</span>
+          <ul class="field-note">
+            <li>각 구간에 원하는 감성을 입력해보세요!</li>
+            <li>각 구간에 입력하신 감성과 어울리는 가사를 가진 노래로 찾아드려요.</li>
+            <li>비워두시면 자동으로 찾아드려요.</li>
+            <li>일부 구간에서 특정밴드만 듣고 싶으면 '밴드 고정' 버튼을 눌러보세요!</li>
+            <li>듣고싶은 밴드 중에서 1개 이상 고를 수 있어요.</li>
+          </ul>
+          <div class="impression-row" id="impression-row"></div>
+        </div>
+
+        <div class="setting-block">
+          <span class="field-label">고급 설정</span>
+          <div id="param-graphs"></div>
         </div>
       </details>
 

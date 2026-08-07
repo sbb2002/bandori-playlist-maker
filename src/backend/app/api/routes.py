@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import secrets
 import statistics
@@ -14,14 +15,106 @@ from dataclasses import replace
 from fastapi import APIRouter, Header, HTTPException, Request, Response
 
 from ..domain.models import MoodParameters, StageSpec
-from ..domain.selection import DEFAULT_AVG_SONG_SECONDS, build_setlist
+from ..domain.selection import (
+    DEFAULT_AVG_SONG_SECONDS,
+    build_setlist,
+    resolve_stage_bands,
+    resolve_stage_impression_text,
+)
+from ..repo.song_repo import AUDIO_FEATURE_COLS
 from .band_aliases import detect_bands
 from .schemas import SetlistRequest, serialize_setlist
 
 router = APIRouter()
+logger = logging.getLogger("setlist_maker")
 
 _DEFAULT_TARGET_MINUTES = 60
 _MAX_TARGET_MINUTES = 180  # 최장 3시간 — 사용자 입력·LLM·단계 그래프 어느 경로로 와도 이 값으로 고정
+
+
+def _feature_stats(pool) -> dict | None:
+    """오디오 지표 6종의 분포 통계(전체 + 밴드별 min/max/mean/median/std).
+
+    LLM이 stage_params 값을 실제 곡 분포에 근거해 고르게 하는 프롬프트 재료
+    (관찰된 문제: 분포 정보가 없으면 중앙값 근처에 소극적으로 안주). 값은 Song에
+    적재된 minmax 스케일(0~1) 그대로 — UI 슬라이더·stage_params와 동일 스케일.
+    지표 컬럼이 없는 데이터(구 스냅샷·테스트 픽스처)면 None.
+    """
+    def _group(songs) -> dict[str, dict[str, float]]:
+        out = {}
+        for field in AUDIO_FEATURE_COLS:
+            values = [v for s in songs if (v := getattr(s, field)) is not None]
+            if not values:
+                continue
+            out[field] = {
+                "min": min(values),
+                "max": max(values),
+                "mean": statistics.fmean(values),
+                "median": statistics.median(values),
+                "std": statistics.pstdev(values) if len(values) > 1 else 0.0,
+            }
+        return out
+
+    total = _group(pool)
+    if not total:
+        return None
+    stats = {"전체": total}
+    for band in sorted({s.band for s in pool}):
+        band_stats = _group([s for s in pool if s.band == band])
+        if band_stats:
+            stats[band] = band_stats
+    return stats
+
+
+def _build_stage_impression_vectors(embedder, impression_texts: list[str | None]) -> list[list[float] | None] | None:
+    """스테이지별 가사 감상 텍스트(우선순위 해석 완료)를 임베딩 어댑터로 벡터화한다(프로토타입).
+
+    텍스트는 `domain.selection.resolve_stage_impression_text()`로 이미 스펙 우선/LLM 폴백
+    규칙을 거친 최종값 — AI 모드(LLM stage_params)든 커스텀 모드(사용자 수동 입력)든 동일하게
+    처리된다. 도메인(`build_setlist`)은 임베딩 모델을 직접 호출하지 않는다는 원칙에 따라
+    라우트(조립 지점)에서 미리 계산해 넘긴다. 임베딩 실패(모델 로드 실패 등)는 이 신호 없이
+    (중립) 계속 진행 — 가사 유사도는 4순위 타이브레이크일 뿐이라 실패해도 선곡 자체는 막히지 않는다.
+    """
+    if not impression_texts or not any(impression_texts):
+        return None
+    vectors: list[list[float] | None] = []
+    for text in impression_texts:
+        if not text:
+            vectors.append(None)
+            continue
+        try:
+            vectors.append(embedder.embed(text))
+        except Exception:  # noqa: BLE001 — 임베딩 실패는 이 스테이지만 중립 처리하고 계속
+            logger.warning("스테이지 impression 임베딩 실패 — 이 스테이지는 가사 유사도 없이 진행.", exc_info=True)
+            vectors.append(None)
+    return vectors
+
+
+def _validate_stage_bands(
+    stage_bands: list[str | None] | None, detected_bands: set[str]
+) -> list[str | None] | None:
+    """LLM이 산출한 stage_bands 값을 실제로 이 요청에서 감지된 밴드로만 제한한다(프로토타입).
+
+    각 원소는 LLM이 사용자 표현 그대로(별명 포함) 적은 자유 텍스트일 수 있으므로, 그 텍스트를
+    다시 `detect_bands()`(band_aliases.py의 결정적 별명 매칭)에 통과시켜 정규 밴드 id로
+    바꾼다. 정확히 밴드 1개로 좁혀지지 않거나, 그 밴드가 `detected_bands`(이 프롬프트에서
+    실제로 언급된 밴드 집합 — band_filter의 근거와 동일)에 없으면 무조건 None으로 무효화한다.
+    LLM이 언급되지 않은 밴드를 지어내거나 애매하게 적어도 그 스테이지는 밴드 제한 없이(중립)
+    진행되도록 하는 안전장치.
+    """
+    if not stage_bands:
+        return stage_bands
+    validated: list[str | None] = []
+    for raw in stage_bands:
+        band: str | None = None
+        if raw:
+            resolved = detect_bands(raw)
+            if len(resolved) == 1:
+                candidate = next(iter(resolved))
+                if candidate in detected_bands:
+                    band = candidate
+        validated.append(band)
+    return validated
 
 
 def _is_cover(song) -> bool:
@@ -111,30 +204,67 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     # 밴드 필터(설정 §5-1b, 스코프 필터): 항상 적용 — 수동 선택 밴드 ∪ 현재 프롬프트 자동감지.
     # interpreter.interpret() 호출 전에 계산 (band_filter는 LLM 결과에 의존하지 않음).
     band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
-    band_names |= detect_bands(payload.prompt)  # 현재 프롬프트에 밴드명(별명) 언급 시 자동 필터
+    band_names |= detect_bands(payload.prompt or "")  # 현재 프롬프트에 밴드명(별명) 언급 시 자동 필터
     band_filter = band_names or None
 
-    # band_filter를 이용해 현재 필터 곡 풀의 에너지 분포 통계 계산 (3차 LLM 프롬프트용).
-    pool = [s for s in request.app.state.songs if not band_filter or s.band in band_filter]
-    if pool:
-        energies = [s.energy for s in pool]
-        energy_stats = {
-            "min": min(energies),
-            "max": max(energies),
-            "mean": statistics.fmean(energies),
-            "std": statistics.pstdev(energies) if len(energies) > 1 else 0.0,
-        }
+    # AI 모드 vs 커스텀 모드 분기
+    if payload.mode == "custom":
+        # 커스텀 모드: LLM 호출 안 함, stages 필수
+        if not payload.stages:
+            raise HTTPException(
+                status_code=400,
+                detail={"error": {"code": "INVALID_REQUEST", "message": "커스텀 모드는 stages가 필요합니다."}}
+            )
+        # 사용자가 직접 지정한 단계들로부터 MoodParameters 구성
+        params = MoodParameters(
+            brightness=0.0,
+            start_energy=payload.stages[0].energy,
+            end_energy=payload.stages[-1].energy,
+            stage_count=len(payload.stages),
+            target_minutes=payload.target_minutes,
+            interpretation_summary="",
+            stage_energies=[s.energy for s in payload.stages],
+            tags=[],
+            song_type="all",
+            same_as_previous=None,
+        )
+        honor = True  # 커스텀 모드는 항상 사용자 설정을 존중
     else:
-        energy_stats = None
+        # AI 모드: 기존 로직
+        # band_filter를 이용해 현재 필터 곡 풀의 에너지 분포 통계 계산 (3차 LLM 프롬프트용).
+        pool = [s for s in request.app.state.songs if not band_filter or s.band in band_filter]
+        if pool:
+            energies = [s.energy for s in pool]
+            energy_stats = {
+                "min": min(energies),
+                "max": max(energies),
+                "mean": statistics.fmean(energies),
+                "std": statistics.pstdev(energies) if len(energies) > 1 else 0.0,
+            }
+        else:
+            energy_stats = None
 
-    params: MoodParameters = interpreter.interpret(payload.prompt, payload.previous_prompt, energy_stats=energy_stats)
+        params = interpreter.interpret(
+            payload.prompt, payload.previous_prompt,
+            energy_stats=energy_stats, feature_stats=_feature_stats(pool),
+        )
+        # 프로토타입: LLM이 지어낸 stage_bands 값을 이 프롬프트에서 실제로 감지된 밴드로만
+        # 제한(band_names는 위에서 이미 detect_bands(payload.prompt)를 포함해 계산됨).
+        params = replace(params, stage_bands=_validate_stage_bands(params.stage_bands, band_names))
 
-    # 핫픽스(세부설정 우선순위): 'honor'는 **재생 형태 설정**(에너지 아크·단계 수·재생시간)에만 적용.
-    # 직전 요청과 의도가 본질적으로 같을 때만 사용자가 건드린 이 값들을 존중하고, 1회차이거나 의도가
-    # 바뀌면(honor=False) 무시하고 모델이 새로 제어한다(프롬프트 바꿔도 옛 아크가 고착되던 버그 해소).
-    # ※ **스코프 필터(밴드·커버)는 honor와 무관하게 항상 적용** — 사용자가 명시적으로 좁힌 범위라
-    #   프롬프트 mood와 독립적으로 지속되어야 한다(밴드 셀렉터가 2회차에 무시되던 문제 해소).
-    honor = bool(payload.previous_prompt) and bool(params.same_as_previous)
+        # DEPRECATED(2026-08-03, 3단계): 예전엔 'honor'를 "직전 요청과 의도가 같은가"
+        # (params.same_as_previous)로 판정해, 같을 때만 사용자가 건드린 세부설정(에너지
+        # 아크·단계 수·재생시간)을 존중했다 — AI/커스텀 모드가 나뉘기 전, 한 화면에서
+        # 프롬프트+수동 그래프 조정이 섞여 있던 시절의 핫픽스였다. 지금은 AI 모드가 항상
+        # 세부설정 UI 자체를 숨기고 매번 새로 해석하므로(커스텀 모드는 반대로 항상 honor=True,
+        # 위 분기) 이 판정이 더 이상 필요 없다 — AI 모드는 항상 honor=False.
+        # params.same_as_previous/payload.previous_prompt 자체는 하위호환을 위해 계속 받고
+        # LLM에도 전달하지만(interpret 호출 그대로), 라우팅 판단에는 더 이상 쓰지 않는다.
+        # 옛 판정식(참고용, 삭제 안 함): bool(payload.previous_prompt) and bool(params.same_as_previous)
+        honor = False
+
+        # ※ **스코프 필터(밴드·커버)는 honor와 무관하게 항상 적용** — 사용자가 명시적으로 좁힌 범위라
+        #   프롬프트 mood와 독립적으로 지속되어야 한다(밴드 셀렉터가 2회차에 무시되던 문제 해소).
 
     # 커버/오리지널(스코프 필터): 프롬프트 의도와 무관하게 항상 사용자 명시값을 존중(없으면 LLM song_type).
     inc_original, inc_cover = _resolve_song_type(
@@ -151,6 +281,14 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
                 song_count=st.song_count
                 if st.song_count is not None
                 else max(1, round(st.minutes * 60 / DEFAULT_AVG_SONG_SECONDS)),
+                valence=st.valence,
+                lufs_integrated=st.lufs_integrated,
+                lra=st.lra,
+                danceability_norm=st.danceability_norm,
+                instr_stem_ratio=st.instr_stem_ratio,
+                speech_median=st.speech_median,
+                impression=st.impression,
+                bands=tuple(st.bands) if st.bands else None,
             )
             for st in payload.stages
         ]
@@ -175,9 +313,18 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
         minutes = max(10, min(_MAX_TARGET_MINUTES, minutes))
 
     effective = replace(params, stage_count=stage_count, target_minutes=minutes)
+    # 프로토타입: 스테이지별 impression 텍스트(스펙 우선 → LLM 폴백, AI/커스텀 모드 공통 규칙)를
+    # 임베딩(있을 때만) — 도메인은 임베딩 모델을 모르므로 조립 지점(라우트)에서 미리 벡터화해 넘긴다.
+    stage_impression_texts = [
+        resolve_stage_impression_text(i, stage_specs, effective) for i in range(effective.stage_count)
+    ]
+    stage_impression_vectors = _build_stage_impression_vectors(
+        request.app.state.embedder, stage_impression_texts
+    )
     setlist = build_setlist(
         songs, effective, target_seconds=minutes * 60,
         band_filter=band_filter, stage_specs=stage_specs,
+        stage_impression_vectors=stage_impression_vectors,
     )
     result = serialize_setlist(setlist)
     # 실제 적용된 밴드 필터(프롬프트 자동감지 포함) — 프론트가 체크박스 동기화에 사용.

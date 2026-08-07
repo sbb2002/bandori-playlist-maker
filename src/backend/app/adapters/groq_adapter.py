@@ -90,11 +90,12 @@ class GroqMoodInterpreter:
     def interpret(
         self, prompt: str, previous_prompt: str | None = None,
         energy_stats: dict | None = None,
+        feature_stats: dict | None = None,
     ) -> MoodParameters:
         # print("TEST:", self._model, self._base_url, self._response_format_mode)
         payload = {
             "model": self._model,
-            "messages": prompt_mod.build_messages(prompt, previous_prompt),
+            "messages": prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats),
             "temperature": 0.2,
         }
         if self._response_format_mode == "json_schema":
