@@ -34,9 +34,11 @@ services:
       # 트래픽 급증 대비: 429/5xx 백오프 재시도 횟수(기본 2).
       - key: GROQ_MAX_RETRIES
         value: "2"
-      # 프로액티브 RPM 준수(분당 요청 상한). Groq 모델 한도에 맞춰 조정(0=비활성).
-      - key: GROQ_RATE_PER_MIN
-        value: "25"
+      # 프로액티브 TPM(분당 토큰) 페이싱 예산 — 요청 개수가 아니라 추정 토큰량 기준(2026-08-10,
+      # RPM 방식은 요청 1건 고정비만으로 TPM 상당량을 써버려 429를 못 막았음). Groq on_demand
+      # 티어 실측 한도(8000)에 맞춤 — GROQ_MODEL 바꾸면 이 값도 같이 확인할 것(0=비활성).
+      - key: GROQ_TPM_LIMIT
+        value: "8000"
       # 입장제어: /api/setlist 동시 처리 상한. 초과 시 503 안내 + 개발자 알림.
       - key: REQUEST_QUEUE_MAX
         value: "200"
