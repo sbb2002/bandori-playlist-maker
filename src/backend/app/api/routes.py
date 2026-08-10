@@ -202,13 +202,13 @@ def list_songs(request: Request) -> dict:
     return {"songs": songs}
 
 
-@router.post("/api/setlist")
-def create_setlist(payload: SetlistRequest, request: Request, response: Response) -> dict:
-    # 응답 캐시 금지 — 매 요청 새로 생성되는 결과가 브라우저/프록시에 캐시돼 요약 카드가 '고착'되지
-    # 않도록 방지(사용자 보고: 캐시 지우기 전까지 동일 요약 유지).
-    response.headers["Cache-Control"] = "no-store"
-
-    interpreter = request.app.state.interpreter
+def _run_setlist(payload: SetlistRequest, state) -> dict:
+    """실제 세트리스트 생성(LLM 해석 + 선곡 + 직렬화). AI 모드는 이 안에서 interpreter.interpret()가
+    TPM 리미터에 블로킹될 수 있다 — 그래서 create_setlist가 이 함수를 커스텀 모드만 직접(동기)
+    호출하고, AI 모드는 jobs.JobStore를 통해 백그라운드 스레드에서 돌린다. `state`는
+    `request.app.state`(Starlette State) — 백그라운드 잡은 Request 객체가 없어 이렇게 분리했다.
+    """
+    interpreter = state.interpreter
 
     # 밴드 필터(설정 §5-1b, 스코프 필터): 항상 적용 — 수동 선택 밴드 ∪ 현재 프롬프트 자동감지.
     # interpreter.interpret() 호출 전에 계산 (band_filter는 LLM 결과에 의존하지 않음).
@@ -241,7 +241,7 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     else:
         # AI 모드: 기존 로직
         # band_filter를 이용해 현재 필터 곡 풀의 에너지 분포 통계 계산 (3차 LLM 프롬프트용).
-        pool = [s for s in request.app.state.songs if not band_filter or s.band in band_filter]
+        pool = [s for s in state.songs if not band_filter or s.band in band_filter]
         if pool:
             energies = [s.energy for s in pool]
             energy_stats = {
@@ -279,7 +279,7 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     inc_original, inc_cover = _resolve_song_type(
         payload.include_original, payload.include_cover, params.song_type
     )
-    songs = _apply_cover_filter(request.app.state.songs, inc_original, inc_cover)
+    songs = _apply_cover_filter(state.songs, inc_original, inc_cover)
 
     # 사용자 지정 단계(설정 §5-1a): honor일 때만 에너지 아크·곡 수를 강제(그래프 수동, 최대 11구간).
     stage_specs = None
@@ -328,7 +328,7 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
         resolve_stage_impression_text(i, stage_specs, effective) for i in range(effective.stage_count)
     ]
     stage_impression_vectors = _build_stage_impression_vectors(
-        request.app.state.embedder, stage_impression_texts
+        state.embedder, stage_impression_texts
     )
     setlist = build_setlist(
         songs, effective, target_seconds=minutes * 60,
@@ -345,6 +345,64 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     # 새 해석으로 되돌리는 데 사용(밴드·커버 스코프 필터는 항상 적용이라 무관).
     result["honored_overrides"] = honor
     return result
+
+
+@router.post("/api/setlist")
+def create_setlist(payload: SetlistRequest, request: Request, response: Response) -> dict:
+    # 응답 캐시 금지 — 매 요청 새로 생성되는 결과가 브라우저/프록시에 캐시돼 요약 카드가 '고착'되지
+    # 않도록 방지(사용자 보고: 캐시 지우기 전까지 동일 요약 유지).
+    response.headers["Cache-Control"] = "no-store"
+
+    state = request.app.state
+    estimate_fn = getattr(state.interpreter, "estimate_wait", None)
+    if payload.mode == "custom" or estimate_fn is None:
+        # 커스텀 모드(LLM 호출 없음)이거나, 인터프리터에 TPM 리미터가 없어(estimate_wait 미구현
+        # — 스텁 어댑터·GROQ_TPM_LIMIT=0 등) 대기 가능성 자체가 없으면 그대로 동기 처리한다.
+        # 폴링 왕복 지연을 더할 이유가 없는 경우까지 잡으로 밀 필요는 없다.
+        return _run_setlist(payload, state)
+
+    # AI 모드 + TPM 리미터 활성: interpreter.interpret()가 몇 분까지 대기할 수 있다(groq_adapter.py
+    # tpm_max_wait). HTTP 요청 안에서 블로킹하면 플랫폼 프록시 타임아웃에 걸릴 수 있어(2026-08-10),
+    # 잡으로 등록만 하고 즉시 202로 응답 — 프론트는 GET .../status/{job_id}로 폴링한다.
+    band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
+    band_names |= detect_bands(payload.prompt or "")
+    pool = [s for s in state.songs if not band_names or s.band in band_names]
+    estimate = lambda: estimate_fn(payload.prompt, payload.previous_prompt, _feature_stats(pool))  # noqa: E731
+    # 제출 "직전"에 한 번 재보고 응답에 그대로 싣는다 — job.estimated_wait_seconds()는 폴링용이라
+    # 잡이 이미 끝났으면 0을 주는데(status="done"/"error"), 잡이 아주 빨리 끝나버리면(경합) 방금
+    # 등록한 202 응답조차 그 로직을 타서 "얼마나 기다렸어야 했는지"가 뭉개지는 문제가 있었다.
+    initial_wait = estimate()
+    # QueueFullError(대기열 정원 초과)는 여기서 안 잡는다 — main.py의 전용 핸들러가 429로 매핑.
+    job = state.job_store.submit(lambda: _run_setlist(payload, state), estimate=estimate)
+    response.status_code = 202
+    return {
+        "job_id": job.id,
+        "estimated_wait_seconds": None if initial_wait == float("inf") else round(initial_wait, 1),
+        "queue_position": state.job_store.queue_position(job),
+    }
+
+
+@router.get("/api/setlist/status/{job_id}")
+def get_setlist_status(job_id: str, response: Response, request: Request) -> dict:
+    """POST /api/setlist(AI 모드)가 등록한 잡의 진행상황 폴링. 2~3초 간격 폴링을 전제로 가볍게 설계."""
+    response.headers["Cache-Control"] = "no-store"
+    job_store = request.app.state.job_store
+    job = job_store.get(job_id)
+    if job is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": {"code": "JOB_NOT_FOUND", "message": "요청을 찾을 수 없습니다(만료됐을 수 있어요)."}}
+        )
+    if job.status == "done":
+        return {"status": "done", "result": job.result}
+    if job.status == "error":
+        response.status_code = job.error["status_code"]
+        return {"status": "error", "error": {"code": job.error["code"], "message": job.error["message"]}}
+    return {
+        "status": job.status,
+        "estimated_wait_seconds": job.estimated_wait_seconds(),
+        "queue_position": job_store.queue_position(job),
+    }
 
 
 @router.post("/api/admin/refresh-data")

@@ -137,8 +137,11 @@ form.addEventListener("submit", async (e) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    const data = await res.json().catch(() => null);
-    if (!res.ok) {
+    let data = await res.json().catch(() => null);
+    if (res.status === 202) {
+      // 큐잉(TPM 페이싱) 중 — job_id로 폴링해서 완료를 기다린다(architecture.md 스키마3 확장).
+      data = await pollSetlistJob(data);
+    } else if (!res.ok) {
       const msg = (data && data.error && data.error.message) || `요청 실패 (HTTP ${res.status})`;
       throw new Error(msg);
     }
@@ -157,6 +160,48 @@ form.addEventListener("submit", async (e) => {
     showLoading(false);
   }
 });
+
+// 큐 대기(TPM 페이싱) 폴링 — POST /api/setlist가 202+job_id를 주면(트래픽 몰려 리미터가
+// 요청을 바로 못 받는 경우) GET .../status/{job_id}를 주기적으로 물어 완료를 기다린다.
+// 예전엔 서버가 이 대기를 HTTP 요청 안에서 블로킹하다 20초 넘으면 그냥 429를 냈는데(사용자 피드백:
+// "큐 대기 중인데 단순히 20초 넘어갔다고 429 처리하면 안 되지"), 이제 대기 자체는 서버 백그라운드
+// 잡으로 옮기고 여기서 폴링하며 "몇 초 남음"을 계속 갱신해 보여준다.
+const SETLIST_POLL_INTERVAL_MS = 1500;
+const SETLIST_POLL_TIMEOUT_MS = 5 * 60 * 1000; // 5분 — groq_adapter.py tpm_max_wait(180s)보다 여유
+
+function setQueueWaitMessage(waitSeconds, queuePosition) {
+  if (!loadingSubEl) return;
+  const ahead = queuePosition > 0 ? `내 앞에 ${queuePosition}명 대기 중. ` : "";
+  if (waitSeconds == null || waitSeconds <= 0) {
+    loadingSubEl.textContent = ahead
+      ? `${ahead}곧 시작할게요! 🙏`
+      : "지금 요청이 몰려서 순서를 기다리고 있어요. 곧 시작할게요! 🙏";
+    return;
+  }
+  const rounded = Math.max(1, Math.round(waitSeconds));
+  loadingSubEl.textContent = `${ahead}약 ${rounded}초 정도 걸릴 것 같아요… ⏳`;
+}
+
+async function pollSetlistJob(initial) {
+  const jobId = initial && initial.job_id;
+  if (!jobId) throw new Error("대기열 등록에 실패했어요. 잠시 후 다시 시도해 주세요.");
+  if (coldStartTimer) { clearTimeout(coldStartTimer); coldStartTimer = null; } // 콜드스타트 안내와 겹치지 않게
+  setQueueWaitMessage(initial.estimated_wait_seconds, initial.queue_position);
+
+  const deadline = Date.now() + SETLIST_POLL_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, SETLIST_POLL_INTERVAL_MS));
+    const res = await fetch(`${API_BASE}/api/setlist/status/${jobId}`);
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      const msg = (data && data.error && data.error.message) || `요청 실패 (HTTP ${res.status})`;
+      throw new Error(msg);
+    }
+    if (data.status === "done") return data.result;
+    setQueueWaitMessage(data.estimated_wait_seconds, data.queue_position);
+  }
+  throw new Error("대기 시간이 너무 길어져 요청을 취소했어요. 잠시 후 다시 시도해 주세요.");
+}
 
 // 대기 UX(트래픽/콜드스타트 대비): 로딩 중 문구를 위트있게 순환하고, 오래 걸리면(콜드스타트 추정)
 // '서버 깨우는 중' 안내로 강화. 무료 플랜 슬립 시 첫 응답이 느려도 이탈을 줄인다.

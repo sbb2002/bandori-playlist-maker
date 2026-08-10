@@ -36,8 +36,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from .api.errors import QueueFullError, map_error
 from .api.routes import router
 from .domain.models import NoSetlistError
+from .jobs import JobStore
 from .ports.mood_port import (
     LLMRateLimitError,
     LLMUpstreamError,
@@ -351,6 +353,10 @@ def create_app() -> FastAPI:
     app.state.songs = _load_current_songs()
     app.state.refresh_songs = _load_current_songs  # 관리자 강제 리프레시 엔드포인트가 재사용
     logger.info("곡 %d건 적재 완료.", len(app.state.songs))
+    # AI 모드 setlist 생성(LLM 호출 포함)을 백그라운드 잡으로 돌리는 큐 — REQUEST_QUEUE_MAX와
+    # 동일한 상한으로 사이징(그 이상 동시 요청은 InflightLimitMiddleware가 이미 503으로 막음).
+    _queue_max = _env_int("REQUEST_QUEUE_MAX", 200)
+    app.state.job_store = JobStore(max_workers=_queue_max, max_queue_len=_queue_max)
 
     app.include_router(router)
     _register_exception_handlers(app)
@@ -364,35 +370,36 @@ def _register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(HTTPException)
     async def _on_http_exception(_: Request, exc: HTTPException) -> JSONResponse:
-        # HTTPException의 detail이 dict인 경우 {error: {code, message}} 형식으로 처리
-        if isinstance(exc.detail, dict) and "error" in exc.detail:
-            return JSONResponse(status_code=exc.status_code, content=exc.detail)
-        # 그 외의 경우는 기본 메시지로 처리
-        return _error_response(exc.status_code, "HTTP_ERROR", str(exc.detail) if exc.detail else "요청에 오류가 있습니다.")
+        return _error_response(*map_error(exc))
 
     @app.exception_handler(MoodInterpretationError)
     async def _on_mood(_: Request, exc: MoodInterpretationError) -> JSONResponse:
-        return _error_response(422, "MOOD_UNINTERPRETABLE", "요청을 무드로 해석하지 못했습니다.")
+        return _error_response(*map_error(exc))
 
     @app.exception_handler(LLMRateLimitError)
     async def _on_ratelimit(_: Request, exc: LLMRateLimitError) -> JSONResponse:
         # 트래픽 급증: 재시도 소진 후에도 429 → 친절한 안내(프론트가 그대로 표시).
-        return _error_response(429, "RATE_LIMITED", "지금 요청이 많아요. 잠시 후 다시 시도해 주세요. 🙏")
+        return _error_response(*map_error(exc))
 
     @app.exception_handler(LLMUpstreamError)
     async def _on_upstream(request: Request, exc: LLMUpstreamError) -> JSONResponse:
         _alert(request, "LLM_UPSTREAM 502", exc)
-        return _error_response(502, "LLM_UPSTREAM_FAILED", "LLM 호출에 실패했습니다. 잠시 후 다시 시도하세요.")
+        return _error_response(*map_error(exc))
 
     @app.exception_handler(NoSetlistError)
     async def _on_no_setlist(_: Request, exc: NoSetlistError) -> JSONResponse:
-        return _error_response(409, "NO_SETLIST", "조건에 맞는 세트리스트를 만들 수 없습니다.")
+        return _error_response(*map_error(exc))
+
+    @app.exception_handler(QueueFullError)
+    async def _on_queue_full(_: Request, exc: QueueFullError) -> JSONResponse:
+        # 트래픽이 정원을 넘긴 기대되는 상황(버그 아님) — INTERNAL 500과 달리 알림·트레이스백 없음.
+        return _error_response(*map_error(exc))
 
     @app.exception_handler(Exception)
     async def _on_internal(request: Request, exc: Exception) -> JSONResponse:
         logger.exception("처리되지 않은 오류: %s", exc)
         _alert(request, "INTERNAL 500", exc)
-        return _error_response(500, "INTERNAL", "서버 내부 오류가 발생했습니다.")
+        return _error_response(*map_error(exc))
 
 
 # uvicorn src.backend.app.main:app 진입점.
