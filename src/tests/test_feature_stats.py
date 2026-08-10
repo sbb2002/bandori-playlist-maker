@@ -5,7 +5,7 @@ LLM이 stage_params를 분포에 근거해 고르게 하는 경로의 순수 함
 """
 
 from backend.app.adapters.prompt import build_messages
-from backend.app.api.routes import _feature_stats
+from backend.app.api.routes import _MIN_BAND_STATS_SAMPLE, _feature_stats
 from backend.app.domain.models import Song
 from backend.app.repo.song_repo import _minmax_scalers
 
@@ -34,20 +34,31 @@ def test_minmax_scalers_scale_and_clamp():
 
 
 def test_feature_stats_groups_by_band_with_total():
-    pool = [
-        _song(1, "Roselia", valence=0.2, lra=0.8),
-        _song(2, "Roselia", valence=0.4),
-        _song(3, "MyGO!!!!!", valence=0.9),
-    ]
+    n = _MIN_BAND_STATS_SAMPLE
+    roselia = [_song(i, "Roselia", valence=0.2, lra=0.8) for i in range(n)]
+    roselia[1] = _song(1, "Roselia", valence=0.4, lra=None)  # None 값은 통계에서 제외되는지 확인
+    mygo = [_song(100 + i, "MyGO!!!!!", valence=0.9) for i in range(n)]
+    pool = roselia + mygo
     stats = _feature_stats(pool)
     assert set(stats) == {"전체", "Roselia", "MyGO!!!!!"}
     total_v = stats["전체"]["valence"]
-    assert total_v["min"] == 0.2 and total_v["max"] == 0.9 and total_v["median"] == 0.4
-    assert round(total_v["mean"], 4) == 0.5
-    # None 값은 통계에서 제외(lra는 1곡만 보유)
-    assert stats["전체"]["lra"]["std"] == 0.0
+    assert total_v["min"] == 0.2 and total_v["max"] == 0.9
+    # lra는 (n-1)곡만 보유해도 개수만 줄 뿐 정상 집계된다(None 곡은 값 목록에서 제외).
+    assert stats["Roselia"]["lra"]["max"] == 0.8
     # 전 지표 None이면 통계 자체가 None
     assert _feature_stats([_song(4, "Afterglow")]) is None
+
+
+def test_feature_stats_excludes_sparse_bands():
+    """표본이 _MIN_BAND_STATS_SAMPLE 미만인 밴드는 프롬프트 블록에서 제외(선곡 후보에서는 안 뺌)."""
+    n = _MIN_BAND_STATS_SAMPLE
+    mygo = [_song(i, "MyGO!!!!!", valence=0.9) for i in range(n)]
+    sparse = [_song(200 + i, "Millsage", valence=0.1) for i in range(n - 1)]
+    stats = _feature_stats(mygo + sparse)
+    assert set(stats) == {"전체", "MyGO!!!!!"}
+    assert "Millsage" not in stats
+    # 전체 통계에는 소수 밴드 곡도 그대로 반영되어 있다(제외되는 건 프롬프트 텍스트뿐).
+    assert stats["전체"]["valence"]["min"] == 0.1
 
 
 def test_build_messages_injects_stats_block():

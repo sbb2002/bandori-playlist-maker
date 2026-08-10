@@ -30,6 +30,11 @@ logger = logging.getLogger("setlist_maker")
 
 _DEFAULT_TARGET_MINUTES = 60
 _MAX_TARGET_MINUTES = 180  # 최장 3시간 — 사용자 입력·LLM·단계 그래프 어느 경로로 와도 이 값으로 고정
+# 표본이 이 미만인 밴드는 feature_stats 프롬프트 블록에서 제외(선곡 후보 풀에서 빼는 게
+# 아니라 LLM 프롬프트 텍스트에서만 — 후자는 _MIN_BAND_SAMPLE=1로 항상 전 밴드 포함).
+# n=2~5 표본의 mean/std는 통계적으로 거의 무의미해 토큰만 쓰고 신호는 약하다(2026-08-10 실측:
+# 소수 밴드 3개 제외로 feature_stats 블록 토큰 -21%).
+_MIN_BAND_STATS_SAMPLE = 10
 
 
 def _feature_stats(pool) -> dict | None:
@@ -38,7 +43,8 @@ def _feature_stats(pool) -> dict | None:
     LLM이 stage_params 값을 실제 곡 분포에 근거해 고르게 하는 프롬프트 재료
     (관찰된 문제: 분포 정보가 없으면 중앙값 근처에 소극적으로 안주). 값은 Song에
     적재된 minmax 스케일(0~1) 그대로 — UI 슬라이더·stage_params와 동일 스케일.
-    지표 컬럼이 없는 데이터(구 스냅샷·테스트 픽스처)면 None.
+    지표 컬럼이 없는 데이터(구 스냅샷·테스트 픽스처)면 None. 표본이 _MIN_BAND_STATS_SAMPLE
+    미만인 밴드는 통계가 신뢰하기 어려워 블록에서 제외한다(전체 통계는 항상 포함).
     """
     def _group(songs) -> dict[str, dict[str, float]]:
         out = {}
@@ -60,7 +66,10 @@ def _feature_stats(pool) -> dict | None:
         return None
     stats = {"전체": total}
     for band in sorted({s.band for s in pool}):
-        band_stats = _group([s for s in pool if s.band == band])
+        band_songs = [s for s in pool if s.band == band]
+        if len(band_songs) < _MIN_BAND_STATS_SAMPLE:
+            continue
+        band_stats = _group(band_songs)
         if band_stats:
             stats[band] = band_stats
     return stats
