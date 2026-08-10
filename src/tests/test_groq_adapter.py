@@ -166,3 +166,38 @@ def test_default_mood_parse_retries_is_three():
     with pytest.raises(MoodInterpretationError):
         interp.interpret("x")
     assert len(client.calls) == 4  # 기본값 3회 재시도 확인(최초 1 + 재시도 3)
+
+
+def test_tpm_limit_allows_request_within_budget():
+    interp = GroqMoodInterpreter(
+        api_key="test-key", model="test/model", client=FakeClient(response=_chat_response(_OK_JSON)),
+        retry_base=0.0, tpm_limit=100_000, tpm_max_wait=0, tpm_max_waiters=0,
+    )
+    params = interp.interpret("주말 신나는 1시간")  # 예산이 넉넉하니 정상 처리
+    assert params.stage_count == 3
+
+
+def test_tpm_limit_rejects_when_estimated_cost_exceeds_budget():
+    # 예산(1)은 어떤 요청의 추정 토큰량보다도 작다 — 즉시 429(LLMRateLimitError)로 매핑돼야 한다.
+    client = FakeClient(response=_chat_response(_OK_JSON))
+    interp = GroqMoodInterpreter(
+        api_key="test-key", model="test/model", client=client,
+        retry_base=0.0, tpm_limit=1, tpm_max_wait=0, tpm_max_waiters=0,
+    )
+    with pytest.raises(LLMRateLimitError):
+        interp.interpret("주말 신나는 1시간")
+    assert len(client.calls) == 0  # 리미터에서 거절되면 HTTP 호출 자체를 안 함
+
+
+def test_estimate_tokens_weighs_system_and_user_content_differently():
+    messages = [
+        {"role": "system", "content": "a" * 100},
+        {"role": "user", "content": "가" * 100},
+    ]
+    from app.adapters.groq_adapter import (
+        _RESERVED_OUTPUT_TOKENS,
+        _SYSTEM_TOKENS_PER_CHAR,
+        _USER_TOKENS_PER_CHAR,
+    )
+    expected = _RESERVED_OUTPUT_TOKENS + 100 * _SYSTEM_TOKENS_PER_CHAR + 100 * _USER_TOKENS_PER_CHAR
+    assert GroqMoodInterpreter._estimate_tokens(messages) == pytest.approx(expected)

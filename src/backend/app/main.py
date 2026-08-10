@@ -10,6 +10,8 @@
     GROQ_MAX_RETRIES     429/5xx 백오프 재시도 횟수(기본 2).
     GROQ_MOOD_RETRIES    200 응답인데 content가 무드 JSON으로 파싱 안 될 때 재호출 횟수(기본 3,
                          디테일한 다단계 절대시간 요청에서 간헐적 파싱 실패 완화).
+    GROQ_TPM_LIMIT       프로액티브 TPM(분당 토큰) 페이싱 예산(기본 8000, Groq on_demand 실측
+                         한도. 0=비활성). 요청마다 추정 토큰량만큼 소비 — RPM(요청 개수) 아님.
     MOOD_INTERPRETER     "stub" | "groq" 로 강제 선택(기본: 키 유무로 자동).
     FRONTEND_ORIGIN      CORS 허용 오리진(쉼표 구분). 개발용 localhost는 항상 허용.
     TELEGRAM_BOT_TOKEN·TELEGRAM_CHAT_ID   운영 오류 Telegram 알림(선택, 둘 다 필요).
@@ -175,16 +177,20 @@ def _build_interpreter() -> MoodInterpreter:
         response_format = os.environ.get("GROQ_RESPONSE_FORMAT", "none")
         max_retries = _env_int("GROQ_MAX_RETRIES", 2)  # 트래픽 급증 시 429 백오프 재시도 횟수
         mood_parse_retries = _env_int("GROQ_MOOD_RETRIES", 3)  # 무드 파싱 실패 시 재호출 횟수
-        rate_per_min = _env_int("GROQ_RATE_PER_MIN", 25)  # 프로액티브 RPM 준수(0=비활성)
+        # 프로액티브 TPM(분당 토큰) 페이싱(0=비활성). 8000은 Groq on_demand 티어의 실측 한도 —
+        # 요청 개수가 아니라 추정 토큰량으로 소비하므로 GROQ_MODEL·프롬프트가 바뀌면 실제 한도에
+        # 맞춰 같이 조정할 것(2026-08-10, RPM 방식에서 전환 — 요청 1건 고정비만 TPM의 상당 부분을
+        # 차지해 개수 기준 페이싱은 429를 못 막았음).
+        tpm_limit = _env_int("GROQ_TPM_LIMIT", 8000)
         logger.info(
-            "MoodInterpreter: Groq (model=%s, response_format=%s, rate_per_min=%s, mood_parse_retries=%s)",
-            model, response_format, rate_per_min, mood_parse_retries,
+            "MoodInterpreter: Groq (model=%s, response_format=%s, tpm_limit=%s, mood_parse_retries=%s)",
+            model, response_format, tpm_limit, mood_parse_retries,
         )
         return GroqMoodInterpreter(
             api_key=api_key, model=model, base_url=base_url, referer=referer,
             response_format_mode=response_format, max_retries=max_retries,
             mood_parse_retries=mood_parse_retries,
-            rate_per_min=rate_per_min,
+            tpm_limit=tpm_limit,
         )
 
     from .adapters.stub_adapter import StubMoodInterpreter

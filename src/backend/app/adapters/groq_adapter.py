@@ -26,6 +26,17 @@ DEFAULT_BASE_URL = "https://api.groq.com/openai/v1"
 DEFAULT_MODEL = "llama-3.1-8b-instant"
 DEFAULT_TIMEOUT = 60.0  # 무료/reasoning 모델 지연 감안
 
+# TPM(분당 토큰) 예산 추정용 상수(2026-08-10, 실측 기반) — 실제 vendor 토크나이저와 다르므로
+# 과소추정(→429) 대신 과대추정(→약간의 불필요한 대기) 쪽으로 여유를 둔다.
+# 시스템 메시지(영문 지시문+JSON 예시+숫자 위주 feature_stats)는 tiktoken cl100k 실측
+# ~0.45 tok/char라 0.5로 반올림. 사용자 프롬프트(자연어 한국어)는 실측 최대 ~1.17
+# tok/char라 1.2로 올림.
+_SYSTEM_TOKENS_PER_CHAR = 0.5
+_USER_TOKENS_PER_CHAR = 1.2
+# response_format="none"이라 max_tokens을 안 보내 응답 길이를 모델이 정한다 — 운영 로그 관찰상
+# 완성까지 최대 2048 토큰(finish_reason=length) 찍히는 걸 상한으로 예약해둔다.
+_RESERVED_OUTPUT_TOKENS = 2048
+
 
 class GroqMoodInterpreter:
     """Groq chat/completions로 무드를 해석하는 MoodInterpreter 구현."""
@@ -43,9 +54,9 @@ class GroqMoodInterpreter:
         max_retries: int = 2,
         retry_base: float = 0.5,
         mood_parse_retries: int = 3,
-        rate_per_min: float = 0.0,
-        rate_max_wait: float = 20.0,
-        rate_max_waiters: int = 100,
+        tpm_limit: float = 0.0,
+        tpm_max_wait: float = 20.0,
+        tpm_max_waiters: int = 100,
     ) -> None:
         if not api_key:
             raise ValueError("Groq api_key가 비어 있습니다.")
@@ -57,7 +68,9 @@ class GroqMoodInterpreter:
         self._client = client or httpx.Client(timeout=timeout)
         self._referer = referer
         self._title = title
-        # 트래픽 급증 대비 2단: (1) 프로액티브 레이트리밋(RPM 준수 페이싱, rate_per_min>0 시),
+        # 트래픽 급증 대비 2단: (1) 프로액티브 TPM 페이싱(tpm_limit>0 시, 요청마다 추정 토큰량만큼
+        # 버킷 소비 — RPM(요청 개수)이 아니라 실제 토큰 예산 기준이라야 8000 TPM 한도를 지킨다,
+        # 2026-08-10 실측: 요청 1건 고정비만 ~3200토큰이라 개수 기준 페이싱은 무의미했음),
         # (2) 429/5xx 지수 백오프 재시도(사후 backstop). 세마포어 선블로킹은 스레드풀 고갈
         # 위험이 있어 쓰지 않고, 리미터는 대기 상한(max_wait)·대기열 상한(max_waiters)으로 보호.
         self._max_retries = max(0, max_retries)
@@ -68,13 +81,27 @@ class GroqMoodInterpreter:
         # 실패하면 기존과 동일하게 MoodInterpretationError를 올려 422 폴백 처리한다(동작 유지).
         self._mood_parse_retries = max(0, mood_parse_retries)
         self._limiter = (
-            TokenBucketLimiter(rate_per_min, max_wait=rate_max_wait, max_waiters=rate_max_waiters)
-            if rate_per_min and rate_per_min > 0
+            TokenBucketLimiter(tpm_limit, max_wait=tpm_max_wait, max_waiters=tpm_max_waiters)
+            if tpm_limit and tpm_limit > 0
             else None
         )
         # 응답 포맷 강제 모드: "none"(전 모델 호환, 프롬프트+관용 파서에 의존) |
         # "json_object"(JSON 모드) | "json_schema"(structured output — 지원 모델만).
         self._response_format_mode = response_format_mode.strip().lower()
+
+    @staticmethod
+    def _estimate_tokens(messages: list[dict]) -> float:
+        """실제 vendor 토크나이저 없이 문자수로 토큰량을 보수적으로(과대) 추정한다.
+
+        시스템 메시지(영문 지시문+숫자 위주 feature_stats)와 사용자 메시지(한국어 자연어)는
+        글자당 토큰 밀도가 크게 달라(모듈 상단 상수 참고) 따로 추정한 뒤 합산한다.
+        """
+        total = _RESERVED_OUTPUT_TOKENS
+        for message in messages:
+            content = message.get("content", "")
+            ratio = _SYSTEM_TOKENS_PER_CHAR if message.get("role") == "system" else _USER_TOKENS_PER_CHAR
+            total += len(content) * ratio
+        return total
 
     def _headers(self) -> dict[str, str]:
         headers = {
@@ -104,9 +131,14 @@ class GroqMoodInterpreter:
             payload["response_format"] = {"type": "json_object"}
         # "none": response_format 미전송 — 강한 시스템 프롬프트 + 관용 파서로 처리(전 모델 호환).
 
-        # 프로액티브 레이트리밋(RPM 준수). 대기열/대기시간 초과 시 429로 즉시 안내.
-        if self._limiter is not None and not self._limiter.acquire():
-            raise LLMRateLimitError("요청이 많아 대기열이 가득 찼습니다(레이트리밋).")
+        # 프로액티브 TPM 페이싱. 이 요청이 쓸 것으로 추정되는 토큰량만큼 버킷을 소비 —
+        # 버킷에 그만큼 여유가 생길 때까지 대기(최대 tpm_max_wait)하고, 그래도 안 되면 429.
+        # ponytail: mood_parse_retries로 재호출이 일어나도 예산은 최초 1회분만 뗀다(드문 실패
+        # 경로 — attempt별 재추정·재소비까지 하면 복잡도만 늘고 실효는 작음).
+        if self._limiter is not None:
+            estimated_tokens = self._estimate_tokens(payload["messages"])
+            if not self._limiter.acquire(cost=estimated_tokens):
+                raise LLMRateLimitError("요청이 많아 대기열이 가득 찼습니다(레이트리밋).")
 
         last_error: MoodInterpretationError | None = None
         for attempt in range(self._mood_parse_retries + 1):
