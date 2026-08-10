@@ -332,7 +332,7 @@ async def _lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     _load_dotenv()  # 어댑터·CORS가 env를 읽기 전에 .env 주입.
-    app = FastAPI(title="setlist-maker", version="2.0.2", lifespan=_lifespan)
+    app = FastAPI(title="setlist-maker", version="2.0.3", lifespan=_lifespan)
 
     # 입장제어(in-flight 상한) — CORS보다 먼저 add해 CORS가 바깥에서 감싸도록(거절 응답에도 CORS 헤더).
     app.add_middleware(InflightLimitMiddleware, limit=_env_int("REQUEST_QUEUE_MAX", 200))
