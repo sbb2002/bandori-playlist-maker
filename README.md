@@ -9,6 +9,13 @@
 
 ---
 
+## v2.0.1 — 2026-08-10
+
+SYSTEM_PROMPT 영문 축소(토큰 ~76% 절감)로 Groq TPM 한도 초과 완화 + 앱 버전 표기 2.0.1로 확정(PR #62의 미이행 2.0.0 흡수).
+
+- 기준 커밋: `4bc5776`
+- 관련 PR: [#63](https://github.com/sbb2002/bandori-playlist-maker/pull/63)
+
 ## v1.12.0 — 2026-07-26
 
 트랙리스트에 세트리스트 조성 흐름을 Camelot Wheel로 시각화하는 접이식 패널 추가.
