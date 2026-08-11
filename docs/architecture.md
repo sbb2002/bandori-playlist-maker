@@ -92,7 +92,7 @@ composition root로 어댑터를 포트 자리에 주입. `domain/`은 `adapters
 | `target_minutes` | integer\|null, 10~180 | null→API가 60 적용 | 발화에서 추출 |
 | `interpretation_summary` | string ≤120자 | "" | 설명 전용(로직 무영향) |
 | `same_as_previous` | boolean\|null | null | **DEPRECATED(2026-08-03)** — 직전 요청과 의도가 같은지 LLM이 판정하던 필드. AI 모드/커스텀 모드가 명확히 분리된 뒤로는 라우팅에 쓰이지 않는다(§5-1 옛 핫픽스, 아래 스키마3 참고). 필드 자체는 하위호환을 위해 남아 있음(계속 파싱·전달되지만 무시됨) |
-| `stage_params` | array<object>\|null | null | 3단계(2026-08-03): AI 모드 단일 응답이 단계별로 함께 채우는 신규 오디오 지표. 길이는 `stage_count`와 같아야 함(안 맞으면 통째로 null 폴백). 각 객체 키는 `valence`·`lufs_integrated`·`lra`·`danceability_norm`·`instr_stem_ratio`·`speech_median`(전부 0.0~1.0, 개별 키 생략/null 허용). `stage_specs`(사용자 지정, 있으면 최우선)가 없을 때만 `Stage`에 반영됨(`selection.py`). **3.5단계(2026-08-04)부터 선곡 매칭에도 반영**: `_resolve_stage_target_params()`가 스펙>LLM 우선순위로 스테이지별 목표값을 계산해 Stage A에서 에너지(하드 필터)·밝기(2순위 소프트)에 이은 **3순위 타이브레이커**로 씀(`_stage_param_distance()` — 평균 절대거리, 값이 없는 필드는 건너뜀). `Song`에 해당 컬럼이 없는 곡(구 스냅샷·테스트 픽스처)이나 목표값 자체가 없으면 거리가 0으로 무력화돼 기존 동작과 동일 |
+| `stage_params` | array<object>\|null | null | 3단계(2026-08-03): AI 모드 단일 응답이 단계별로 함께 채우는 신규 오디오 지표. 길이는 `stage_count`와 같아야 함(안 맞으면 통째로 null 폴백). 각 객체 키는 `valence`·`lufs_integrated`·`lra`·`danceability_norm`·`instr_stem_ratio`·`speech_median`(전부 0.0~1.0, 개별 키 생략/null 허용). `stage_specs`(사용자 지정, 있으면 최우선)가 없을 때만 `Stage`에 반영됨(`selection.py`). **2026-08-11 재설계**: mode_score/shape 기반 "밝기" 축을 완전히 제거하고, 에너지와 이 6종을 하나의 통합거리로 합쳤다(`_param_distance()` — 값 있는 필드만 평균, 에너지는 항상 포함). `Song`에 해당 컬럼이 없는 곡(구 스냅샷·테스트 픽스처)이나 목표값 자체가 없으면 그 필드만 거리 계산에서 빠지고 에너지 단독 거리로 자연 폴백 |
 | `stage_minutes` | array<number>\|null | null | 3.5단계(2026-08-03): 단계별 길이(분) 의도. 길이는 `stage_count`와 같아야 함(안 맞으면 통째로 null 폴백), 개별 값은 3분 하한 클램프(프론트 `MIN_WIDTH_MIN`과 동일 기준). 있으면 `_stage_targets_and_counts()`(`selection.py`)가 곡 수를 균등분배 대신 이 분 비율로 배분(`distribute_counts_by_weights`, largest-remainder). 없으면 기존 `distribute_counts` 균등분배(하위호환) — "마지막 5분은 릴랙스"처럼 특정 구간만 길이가 다른 요청을 곡 개수에도 반영하기 위한 필드 |
 
 검증 실패: 누락 필드 기본값 주입 / 완전 파싱 불가 시 `MoodInterpretationError`(재시도 없음, §7).
@@ -105,17 +105,23 @@ build_setlist(songs: list[Song], params: MoodParameters, target_seconds: int,
 ```
 
 `Song` 파일럿 사용분: `idx, band, song, video_id, camelot, energy(0–1), mode_score, shape,
-eligible_band` (+ 향후 `duration_sec: int|None`).
+eligible_band` (+ 향후 `duration_sec: int|None`). `mode_score`/`shape`는 2026-08-11부로
+선곡 매칭에는 쓰이지 않는다(아래 2번 참조) — 필드 자체는 다른 용도 대비 남아있음.
 
 출력 `Setlist`: `params`(에코) + `stages[{index, energy_target}]` + `estimated_total_seconds` +
 `picks[{position, idx, video_id, band, song, camelot, energy, stage_index, reason}]`.
 `reason` = `{stage_energy_target, matched_energy, harmonic: "seed"|"adjacent"|"same"|"non_harmonic",
-prev_camelot, brightness_fit, text}`.
+prev_camelot, param_fit, text}`.
 
 **알고리즘 (순수·결정적)**:
-1. 곡풀: `eligible_band == True`만(653곡). 밴드 필터 확장 자리로 `band_filter: set|None` 인자
+1. 곡풀: `eligible_band == True`만. 밴드 필터 확장 자리로 `band_filter: set|None` 인자
    예약(기본 None=ALL, §5-1b).
-2. 밝기 랭킹: min-max 정규화한 `mode_score`(주 신호) + `shape` 보조 가중 → `params.brightness`와 비교.
+2. **2026-08-11 재설계**: mode_score/shape 기반 "밝기" 랭킹은 폐지됐다(형제 프로젝트의
+   펄스 애니메이션용 지표라 무드 매칭 검증이 안 됐고, 커스텀 모드에서 `params.brightness`가
+   0.0 하드코딩이라 사용자 밝기 설정이 선곡에 전혀 반영 안 되는 문제가 실측으로 확인됨).
+   대신 에너지 + 신규 지표 6종(valence 등)을 하나의 통합거리로 합쳐(`_param_distance()`)
+   버킷 이산화 → 가사 임베딩 유사도 상위 비율 필터 → 랜덤 선택 순으로 후보를 고른다
+   (`selection.py`, 상세 흐름은 `document-archive` 브랜치 `archive/version/v2/` 참조).
 3. 단계 에너지 목표: `start + (end - start) * i / (N-1)` 선형 보간.
 4. 곡 수 산정: `round(target_seconds / effective_song_seconds)` 단계 균등 분배.
    `duration_sec` 있으면 실측 누적, 없으면 `avg_song_seconds` 추정.

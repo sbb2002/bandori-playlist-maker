@@ -32,33 +32,36 @@ from .models import (
     StageSpec,
 )
 
-# shape(음색 시그니처) → 밝기 보조 가중(architecture.md §③ 스키마2 2: mode_score 주 신호 + shape 보조).
-_SHAPE_BRIGHTNESS: dict[str, float] = {
-    "bright": 0.15,
-    "shimmer": 0.10,
-    "neutral": 0.0,
-    "acoustic": -0.10,
-}
+# DEPRECATED(2026-08-11): mode_score/shape 기반 "밝기" 축(_SHAPE_BRIGHTNESS·_brightness_scores)은
+# 완전히 제거됐다 — 둘 다 형제 프로젝트(bandori-song-sorter)의 EMOI-MAP 펄스 애니메이션용으로
+# 만들어진 지표라 무드 매칭 정확도가 검증된 적이 없었고(CLAUDE.md §데이터 소스), 실측 결과
+# 커스텀 모드에서 params.brightness가 0.0 하드코딩이라 사용자의 밝기 설정이 선곡에 전혀
+# 반영되지 않는 문제까지 있었다(document-archive archive/version/v2/01-*.md 참조). 대신 아래
+# `_param_distance()`가 에너지+신규 지표 6종만으로 통합거리를 낸다(2026-08-11 사용자 결정 —
+# "UI에 노출된 7종 지표만 쓰고 형제 앱·과거 프로젝트가 쓰던 지표는 쓰지 않는다"). Song.mode_score/
+# shape 필드 자체는 다른 용도(형제 앱 데이터 호환 등) 대비 남겨두되 선곡에는 더 이상 안 쓴다.
 
 # duration 데이터 부재 시 곡 길이 플레이스홀더(architecture.md §④-2, 초 단위).
 DEFAULT_AVG_SONG_SECONDS = 213
 
-# 3.5단계(2026-08-04): stage_specs/stage_params의 신규 오디오 지표 6종(연구 채택,
-# audio_feats_revised) — 지금까지 echo 전용이었으나, 이제 Stage A 소프트 매칭에도 반영한다.
-# Song에 해당 컬럼이 없는(구 스냅샷·테스트 픽스처) 곡·요청은 값이 None이라 자동으로 무시된다
-# (에너지 하드 필터·밝기 소프트 정렬은 그대로 유지 — 이 지표들은 그 다음 3순위 타이브레이커).
+# 신규 지표 6종(연구 채택, audio_feats_revised) — Song에 해당 컬럼이 없는(구 스냅샷·테스트
+# 픽스처) 곡·요청은 값이 None이라 `_param_distance()`가 자동으로 무시한다(에너지만으로 폴백).
 _NEW_STAGE_PARAM_FIELDS = (
     "valence", "lufs_integrated", "lra",
     "danceability_norm", "instr_stem_ratio", "speech_median",
 )
 
 # 2단계 엔진 파라미터(R&D §4.2 권장 기본값). 파일럿 후 실사용 피드백으로 튜닝.
-_TOL = 0.08              # Stage A 강도 허용창(목표에서 이 이내만 후보)
-# 완충 노드(4-5단계 사이, hotfix/boundary-tension 논의): 허용창 밖으로 폴백된 픽 중에서도
-# 이탈이 이 이상이면 억지로 채우지 않고 슬롯을 건너뛴다(자동 축소) — 밴드 필터 등으로 풀이
-# 좁을 때 "조용 요청인데 안 조용한 곡"이 섞이는 걸 막는다. 이 값 이하는 채우되 degraded로 표시.
-_HARD_TOL = 2 * _TOL
-_BRIGHTNESS_BUCKET = 0.25  # Stage A 밝기 근접 버킷 폭(같은 버킷 내에선 rng 변주)
+_TOL = 0.08              # Stage B 오프너(전체 첫 곡) 시드 선정에서만 쓰는 강도 근접창(아래 참조).
+# Stage A 통합 지표 거리(에너지+신규 6종, _param_distance) 파라미터 — 2026-08-11 재설계.
+# 값 있는 필드만 평균하는 0~1 스케일 거리라 mode_score/shape 시절의 _TOL(0.08, 에너지 단독
+# 기준)보다 폭을 조금 넓게 잡았다(여러 필드 평균은 단일 필드보다 극단값이 상쇄되는 경향).
+# 둘 다 실사용 피드백으로 튜닝 예정인 프로토타입 상수.
+_PARAM_BUCKET = 0.15       # 이 폭으로 이산화한 버킷이 같으면 "동등하게 가까운" 후보로 취급.
+_PARAM_HARD_TOL = 0.35     # 가장 가까운 후보조차 이보다 멀면 억지로 채우지 않고 슬롯을 건너뛴다
+                           # (자동 축소 — 밴드 필터 등으로 풀이 좁을 때의 안전망, 기존 완충 노드
+                           # 정책과 같은 취지). 이 값 이하는 채우되 버킷폭을 넘으면 degraded로 표시.
+_LYRIC_KEEP_FRACTION = 0.5  # 버킷 후보 중 가사 임베딩 유사도 상위 비율만 최종 후보로 남긴다.
 # Stage B 시퀀싱: 경계갭 + 하모닉 + 강도순서이탈을 다목적 비용으로 최소화. (검증 하네스로 튜닝 — R&D §8.)
 _RANDOM_SLACK = 0.05     # 최소 비용 대비 이 범위 내 후보는 랜덤(곡 선택 변주는 Stage A가 담당)
 _HARMONIC_PENALTY = 0.15  # 비하모닉 전환 비용(경계갭과 동일 단위; 경계 최소화와 하모닉 균형점)
@@ -70,20 +73,6 @@ _ENERGY_ORDER_WEIGHT = 1.5
 
 def _clamp(value: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, value))
-
-
-def _brightness_scores(pool: list[Song]) -> dict[int, float]:
-    """곡별 밝기 점수(-1~1). mode_score min-max 정규화(주) + shape 보조 가중."""
-    mode_scores = [s.mode_score for s in pool]
-    lo, hi = min(mode_scores), max(mode_scores)
-    span = hi - lo
-    scores: dict[int, float] = {}
-    for s in pool:
-        norm = (s.mode_score - lo) / span if span > 0 else 0.5
-        base = norm * 2.0 - 1.0
-        adjusted = base + _SHAPE_BRIGHTNESS.get(s.shape, 0.0)
-        scores[s.idx] = _clamp(adjusted, -1.0, 1.0)
-    return scores
 
 
 def _sequence_by_continuity(
@@ -202,14 +191,15 @@ def _local_refine_order(seq: list[Song], slot_targets: list[float], max_passes: 
 def _make_reason(
     energy_target: float,
     picked: Song,
-    picked_brightness: float,
-    brightness_target: float,
+    param_distance: float,
     prev: Song | None,
     harmonic: str,
     stage_index: int,
     degraded: bool = False,
 ) -> PickReason:
-    brightness_fit = round(1.0 - abs(picked_brightness - brightness_target) / 2.0, 3)
+    # param_distance는 _param_distance()(에너지+신규 지표 6종 통합거리, 0~1 스케일)를
+    # 스테이지 플랫 목표 기준으로 재계산한 값 — 거리가 작을수록 fit이 1.0에 가깝다.
+    param_fit = round(_clamp(1.0 - param_distance, 0.0, 1.0), 3)
     if harmonic == "seed":
         harmonic_text = "시작 곡 — 하모닉 제약 없음."
     elif harmonic == "same":
@@ -229,7 +219,7 @@ def _make_reason(
         matched_energy=round(picked.energy, 4),
         harmonic=harmonic,
         prev_camelot=(prev.camelot if prev is not None else None),
-        brightness_fit=brightness_fit,
+        param_fit=param_fit,
         text=text,
         degraded=degraded,
     )
@@ -249,7 +239,7 @@ def _resolve_stage_target_params(
 
     `impression`도 6개 수치와 동일한 우선순위(스펙 우선 → LLM stage_params 폴백)를 따른다 —
     커스텀 모드 사용자가 직접 입력한 텍스트가 있으면 그걸 쓰고, 없으면 AI 모드 해석 결과를 쓴다.
-    `_stage_param_distance`는 `_NEW_STAGE_PARAM_FIELDS`(수치 6종)만 순회하므로 이 키가 섞여
+    `_param_distance`는 `_NEW_STAGE_PARAM_FIELDS`(수치 6종)만 순회하므로 이 키가 섞여
     있어도 안전하게 무시된다.
     """
     spec = stage_specs[stage_index] if stage_specs else None
@@ -311,25 +301,31 @@ def resolve_stage_bands(
     return None
 
 
-def _stage_param_distance(song: Song, target: dict[str, float | None]) -> float:
-    """곡의 신규 지표 6종과 목표값의 평균 절대거리(사용 가능한 필드만, 없으면 0=중립)."""
-    diffs = []
+def _param_distance(song: Song, energy_target: float, target_params: dict[str, float | None]) -> float:
+    """곡의 통합 지표 거리(0~1) — 에너지(항상 포함) + 신규 지표 6종(값 있는 필드만) 평균 절대거리.
+
+    2026-08-11 재설계: mode_score/shape 기반 "밝기" 축은 완전히 제거하고, 에너지를 더 이상
+    별도 하드필터로 떼어두지 않고 이 통합거리 안에 첫 항으로 합쳤다(둘 다 0~1 스케일이라 같은
+    단위로 평균 가능). 6종 중 song/target 어느 한쪽이라도 값이 없으면 그 필드만 건너뛴다 —
+    전부 없으면(LLM/사용자가 stage_params를 안 채운 경우) 에너지 단독 거리로 자연 폴백한다.
+    """
+    diffs = [abs(song.energy - energy_target)]
     for field in _NEW_STAGE_PARAM_FIELDS:
-        t = target.get(field)
+        t = target_params.get(field)
         v = getattr(song, field)
         if t is None or v is None:
             continue
         diffs.append(abs(v - t))
-    return sum(diffs) / len(diffs) if diffs else 0.0
+    return sum(diffs) / len(diffs)
 
 
 def _lyric_similarity(song: Song, target_vec: list[float] | None) -> float:
-    """곡의 가사 감상 임베딩과 스테이지 목표 임베딩의 코사인 유사도(프로토타입, 4순위 타이브레이크).
+    """곡의 가사 감상 임베딩과 스테이지 목표 임베딩의 코사인 유사도(프로토타입).
 
     둘 다 사전 L2-정규화되어 있다고 가정(어댑터·오프라인 스크립트가 보장) — 그러면 코사인
     유사도는 단순 내적과 같다. `song.lyric_vec`나 `target_vec` 중 하나라도 없으면(가사
-    매칭 데이터 없는 곡, LLM이 impression을 못 채운 경우) `0.0`(중립) — 기존 3개 우선순위
-    (energy 하드필터·밝기·6개 수치 지표)만으로 동작하던 기존 흐름을 그대로 보존한다.
+    매칭 데이터 없는 곡, LLM이 impression을 못 채운 경우) `0.0`(중립) — Stage A가 이 값으로
+    버킷 후보를 필터링할 때, 데이터가 없는 곡들은 서로 동률로 취급돼 자동으로 무력화된다.
     """
     if song.lyric_vec is None or target_vec is None:
         return 0.0
@@ -407,7 +403,6 @@ def build_setlist(
     if not pool:
         raise NoSetlistError("후보곡이 없습니다(eligible_band/band_filter 결과 0건).")
 
-    brightness = _brightness_scores(pool)
     targets, counts = _stage_targets_and_counts(
         params, target_seconds, avg_song_seconds, len(pool), stage_specs
     )
@@ -456,28 +451,28 @@ def build_setlist(
             )
             if not band_pool:
                 continue
-            cand = sorted(band_pool.values(), key=lambda s: (abs(s.energy - slot_target), s.idx))
-            window = [s for s in cand if abs(s.energy - slot_target) <= _TOL]
-            if window:
-                # 허용창 내 곡은 모두 무드 부합 → rng 셔플로 변주 후 밝기 버킷 근접 우선(재현적),
-                # 그다음 신규 지표 6종(valence 등) 거리로 타이브레이크(3.5단계 — 지표 없는
-                # 곡/요청이면 거리 0이라 이 tiebreak는 자동으로 무력화되고 기존 동작 그대로),
-                # 마지막으로 가사 감상 임베딩 유사도(프로토타입, 4순위 — 벡터 없으면 0.0 중립).
-                rng.shuffle(window)
-                window.sort(key=lambda s: (
-                    round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET),
-                    round(_stage_param_distance(s, target_params), 4),
-                    -_lyric_similarity(s, stage_target_vec),
-                ))
-                pick = window[0]
-            else:
-                # 완충 노드: 허용창 밖 최근접 후보. 이탈이 _HARD_TOL을 넘으면 억지로 채우지
-                # 않고 이 슬롯을 건너뛴다 — 목표 곡 수가 풀 크기에 맞게 자동으로 줄어든다
-                # (좁은 밴드 필터 등으로 "조용 요청인데 시끄러운 곡 섞임" 방지).
-                closest = cand[0]
-                if abs(closest.energy - slot_target) > _HARD_TOL:
-                    continue
-                pick = closest
+            # 2026-08-11 재설계: 에너지 하드필터+밝기(mode_score/shape) 버킷 대신, 에너지도
+            # 포함한 통합 지표 거리(_param_distance) 하나로 정렬한다(사용자 결정 — 임계값 없이
+            # 항상 최선을 찾되, 그래도 너무 멀면 슬롯 스킵 안전망만 유지).
+            scored = sorted(
+                ((_param_distance(s, slot_target, target_params), s) for s in band_pool.values()),
+                key=lambda ds: (ds[0], ds[1].idx),
+            )
+            min_dist = scored[0][0]
+            if min_dist > _PARAM_HARD_TOL:
+                # 안전망: 밴드 필터 등으로 후보가 극히 좁아 가장 가까운 곡조차 목표와 크게
+                # 동떨어지면 억지로 채우지 않고 슬롯을 건너뛴다(목표 곡 수보다 자동 축소).
+                continue
+            best_bucket = round(min_dist / _PARAM_BUCKET)
+            bucket_pool = [s for d, s in scored if round(d / _PARAM_BUCKET) == best_bucket]
+            # 같은 버킷 안에서는 rng 셔플로 다양성을 확보한 뒤, 가사 임베딩 유사도 상위
+            # _LYRIC_KEEP_FRACTION만 남기고(벡터 없는 곡들은 전부 0.0으로 동률 — 셔플 덕에
+            # 편향 없이 살아남는다), 그 안에서 최종 1곡을 랜덤으로 고른다.
+            rng.shuffle(bucket_pool)
+            bucket_pool.sort(key=lambda s: -_lyric_similarity(s, stage_target_vec))
+            keep_n = max(1, round(len(bucket_pool) * _LYRIC_KEEP_FRACTION))
+            pick = rng.choice(bucket_pool[:keep_n])
+            if min_dist > _PARAM_BUCKET:
                 degraded_idx.add(pick.idx)
             del remaining[pick.idx]
             chosen.append(pick)
@@ -518,7 +513,7 @@ def build_setlist(
         for s in seq:
             harmonic = harmonic_label(None if prev is None else prev.camelot, s.camelot)
             reason = _make_reason(
-                target, s, brightness[s.idx], params.brightness, prev, harmonic, stage_index,
+                target, s, _param_distance(s, target, target_params), prev, harmonic, stage_index,
                 degraded=s.idx in degraded_idx,
             )
             picks.append(

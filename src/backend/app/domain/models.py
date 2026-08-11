@@ -80,10 +80,10 @@ class MoodParameters:
     # 길이는 stage_count와 같아야 하며, 각 dict의 키는 StageSpec/Stage와 동일: valence·
     # lufs_integrated·lra·danceability_norm·instr_stem_ratio·speech_median(전부 0.0~1.0,
     # 개별 키가 없거나 None이면 그 값만 미상). selection.py가 stage_specs 없을 때(AI 모드
-    # 첫 요청 등) 이 값을 Stage에 반영한다 — 3.5단계(2026-08-04)부터 선곡 매칭에도 3순위
-    # 타이브레이커로 쓰인다(에너지 하드 필터·밝기 소프트에 이어, Song에 값이 없으면 무력화).
+    # 첫 요청 등) 이 값을 Stage에 반영한다 — 2026-08-11 재설계부터 선곡 매칭에서 에너지와
+    # 함께 통합거리(_param_distance)를 이룬다(Song에 값이 없으면 그 필드만 무력화).
     # 프로토타입(다중 파라미터 체제 위 가사 감상 매칭): 각 dict에 "impression"(문자열, 가사
-    # 정서 요약) 키도 추가됨 — 6개 수치와 별도로 취급(selection.py가 4순위 타이브레이크로 사용).
+    # 정서 요약) 키도 추가됨 — 6개 수치와 별도로 취급(selection.py가 버킷 필터 단계에서 사용).
     stage_params: list[dict[str, float | str | None]] | None = None
     # 3.5단계: 단계별 길이(분) 의도(선택). 주어지면(길이==stage_count) 곡 수를 균등분배 대신
     # 이 분 비율로 배분한다(selection.py의 _stage_targets_and_counts) — "마지막 5분은
@@ -155,10 +155,12 @@ class PickReason:
     matched_energy: float
     harmonic: str              # "seed" | "same" | "adjacent" | "non_harmonic"
     prev_camelot: str | None
-    brightness_fit: float      # 0.0~1.0 (1=밝기 목표와 완전 일치)
+    # 2026-08-11 재설계: mode_score/shape 기반 "밝기" 축을 완전히 제거하고, 에너지+신규 지표
+    # 6종을 합친 통합거리(selection.py._param_distance) 기준으로 바뀜(1=목표와 완전 일치).
+    param_fit: float           # 0.0~1.0
     text: str
-    # 후보 풀 부족으로 허용창(_TOL) 밖 곡이 불가피하게 선택됐는지(hotfix: 4-5단계 사이 완충 노드).
-    # True면 이 곡의 energy가 stage_energy_target에서 _TOL을 넘겨 벗어났다는 뜻.
+    # 후보 풀 부족으로 통합거리 버킷(_PARAM_BUCKET) 밖 곡이 불가피하게 선택됐는지(완충 노드).
+    # True면 이 곡의 _param_distance가 _PARAM_BUCKET을 넘겨 벗어났다는 뜻.
     degraded: bool = False
 
 
