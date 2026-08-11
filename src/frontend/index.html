@@ -10,6 +10,11 @@
     자동 분기. Render 서비스명/URL이 바뀌면 아래 배포 URL만 고치면 됨.
   -->
   <script>
+    // 테마 FOUC 방지: CSS 렌더 전에 저장된 테마를 root에 미리 세팅(없으면 라이트 기본값 유지).
+    (function () {
+      var saved = localStorage.getItem("theme");
+      if (saved) document.documentElement.dataset.theme = saved;
+    })();
     window.SETLIST_API_BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
       ? "http://localhost:8000"
       : "https://bandori-playlist-maker.onrender.com";
@@ -40,6 +45,10 @@
     <ul id="preset-list" class="preset-list"></ul>
     <p id="preset-empty" class="preset-empty">아직 저장된 플레이리스트가 없어요.<br>플레이리스트를 만들면 자동으로 저장돼요.</p>
     <div class="menu-footer">
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="다크 모드 전환" aria-pressed="false">
+        <span class="theme-toggle-icon" data-theme-icon="light" aria-hidden="true">☀️</span>
+        <span class="theme-toggle-icon" data-theme-icon="dark" aria-hidden="true">🌙</span>
+      </button>
       <!-- 현재 버전(v메인버전 - 커밋). app.js가 텍스트·링크 설정. -->
       <a id="app-version" class="app-version" target="_blank" rel="noopener" aria-label="현재 버전"></a>
     </div>

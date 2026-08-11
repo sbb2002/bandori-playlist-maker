@@ -31,6 +31,21 @@ const nowPlayingEl = $("now-playing");
 const wheelSvgEl = $("camelot-wheel");
 const wheelModeToggleEl = $("wheel-mode-toggle");
 
+// ── 테마(라이트/다크) ────────────────────────────────────────────────────────────
+// index.html head의 인라인 스크립트가 렌더 전에 이미 data-theme을 세팅해뒀으므로
+// 여기서는 토글 버튼 클릭 시 상태 반전 + localStorage 저장만 담당(FOUC 방지는 그쪽 담당).
+const themeToggleBtn = $("theme-toggle");
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("theme", next);
+    themeToggleBtn.setAttribute("aria-pressed", String(next === "dark"));
+    track("theme_toggle", { theme: next });
+  });
+  themeToggleBtn.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === "dark"));
+}
+
 // ── 재생 상태 ─────────────────────────────────────────────────────────────────
 let picks = [];
 let current = -1;
