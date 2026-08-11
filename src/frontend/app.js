@@ -73,7 +73,9 @@ let lastAppliedBands = [];
 let lastStages = [];
 let currentPresetId = null; // 현재 세션이 매핑된 프리셋 id(편집 시 이 프리셋 갱신)
 let restoring = false; // 프리셋 복원 중엔 새 프리셋 자동생성 생략
-let previousPrompt = ""; // 직전 성공 요청의 프롬프트(핫픽스: 의도 동일성 판정용 — 성공분만 기억)
+// DEPRECATED(2026-08-11): previousPrompt(직전 성공 요청 저장)는 제거됨 — AI/커스텀 모드가
+// 완전히 분리된 뒤 백엔드가 same_as_previous 판정 결과를 라우팅에 쓰지 않아(honor는 모드로만
+// 결정) 더 이상 보낼 이유가 없다. src/backend/app/adapters/prompt.py의 동일 코멘트 참조.
 
 // ── umami 계측(스크립트 미설치 시 무해) ─────────────────────────────────────────
 function track(name, data) {
@@ -222,8 +224,6 @@ form.addEventListener("submit", async (e) => {
     body.prompt = prompt;
     body.mode = "ai";
 
-    // 직전 회차 요청을 함께 보내 백엔드가 '의도 동일성'을 판정하게 한다(핫픽스).
-    if (previousPrompt) body.previous_prompt = previousPrompt;
     if (minutesTouched) {
       const minutes = parseInt($("target-minutes").value, 10);
       if (!Number.isNaN(minutes)) body.target_minutes = minutes;
@@ -277,11 +277,8 @@ form.addEventListener("submit", async (e) => {
       throw new Error(msg);
     }
     renderResult(data);
-    if (currentMode === "ai") {
-      previousPrompt = $("prompt").value.trim();
-      // lastStages(width 포함)는 renderResult가 이미 채워둔다 — 여기서 다시 덮어쓰면
-      // width 계산이 유실된다(재도입 금지).
-    }
+    // lastStages(width 포함)는 renderResult가 이미 채워둔다 — 여기서 다시 덮어쓰면
+    // width 계산이 유실된다(재도입 금지).
   } catch (err) {
     const offline = err instanceof TypeError;
     showError(offline

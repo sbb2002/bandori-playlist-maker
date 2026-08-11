@@ -264,11 +264,13 @@ def test_unparseable_content_raises_mood_error():
         interp.interpret("x")
 
 
-# ── 프롬프트 의도 동일성(핫픽스: 세부설정 우선순위) ───────────────────────────────
-def test_build_messages_includes_previous_prompt():
+# ── previous_prompt/same_as_previous DEPRECATED(2026-08-11): AI/커스텀 모드 분리 후
+# 라우팅에서 안 쓰여 프롬프트 생성 단계에서도 완전히 무시한다 ────────────────────────
+def test_build_messages_ignores_previous_prompt():
     from app.adapters.prompt import build_messages
-    user = build_messages("현재 요청 텍스트", "직전 요청 텍스트")[-1]["content"]
-    assert "직전 요청 텍스트" in user and "현재 요청 텍스트" in user and "same_as_previous" in user
+    with_prev = build_messages("현재 요청 텍스트", "직전 요청 텍스트")[-1]["content"]
+    assert with_prev == "현재 요청 텍스트"
+    assert "직전 요청" not in with_prev
 
 
 def test_build_messages_without_previous_is_plain():
@@ -295,11 +297,11 @@ def test_jitter_stage_params_stays_in_bounds():
         assert all(0.0 <= v <= 1.0 for v in jittered.values())
 
 
-def test_parse_mood_same_as_previous_extracted():
+def test_parse_mood_same_as_previous_always_none_even_if_present():
     from app.adapters.prompt import parse_mood
     p = parse_mood('{"brightness":0,"start_energy":0.4,"end_energy":0.4,"stage_count":3,'
                    '"target_minutes":null,"interpretation_summary":"","same_as_previous":true}')
-    assert p.same_as_previous is True
+    assert p.same_as_previous is None
 
 
 def test_parse_mood_same_as_previous_absent_is_none():
@@ -307,8 +309,8 @@ def test_parse_mood_same_as_previous_absent_is_none():
     assert parse_mood(_OK_JSON).same_as_previous is None
 
 
-def test_interpret_forwards_previous_prompt():
+def test_interpret_does_not_forward_previous_prompt():
     client = FakeClient(response=_chat_response(_OK_JSON))
     _make(client).interpret("현재 요청", "직전 요청")
     sent = client.calls[0]["json"]["messages"][-1]["content"]
-    assert "현재 요청" in sent and "직전 요청" in sent
+    assert "현재 요청" in sent and "직전 요청" not in sent
