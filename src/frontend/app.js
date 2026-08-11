@@ -177,9 +177,13 @@ function buildOmakasePrompt(ctx) {
 }
 
 if (omakaseBtn) {
+  omakaseBtn.addEventListener("animationend", () => omakaseBtn.classList.remove("rolling"));
   omakaseBtn.addEventListener("click", async () => {
     track("omakase_click");
     omakaseBtn.disabled = true;
+    omakaseBtn.classList.remove("rolling");
+    void omakaseBtn.offsetWidth; // 연타 시에도 애니메이션이 재시작되도록 리플로우 강제
+    omakaseBtn.classList.add("rolling");
     try {
       const ctx = await getOmakaseContext();
       promptEl.value = buildOmakasePrompt(ctx);
