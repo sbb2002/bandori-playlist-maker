@@ -97,7 +97,7 @@
         -->
         <div class="options-grid">
           <label class="field">
-            <span class="field-label">플리 재생시간</span>
+            <span class="field-label">플레이리스트 재생시간</span>
             <ul class="field-note">
               <li>플레이리스트의 총 재생시간이에요.</li>
               <li>최소 30분, 최대 180분 가능해요.</li>
@@ -136,7 +136,7 @@
              피드백으로 두 블록 순서를 맞바꿈(DOM 순서만 변경, id 기반 바인딩이라 로직 영향 없음). -->
         <div class="setting-block">
           <div class="setting-head">
-            <span class="field-label">구간 세부설정</span>
+            <span class="field-label">플레이리스트 구간 설정</span>
             <div class="stage-count">
               <button id="stage-minus" type="button" aria-label="구간 줄이기">−</button>
               <span class="n" id="stage-n">5구간</span>
@@ -145,26 +145,26 @@
           </div>
 
           <div class="timebar-label-row">
-            <span class="field-sublabel">시간 설정</span>
+            <span class="field-sublabel">구간 시간길이 정하기</span>
             <div class="timebar-label-actions">
               <button type="button" id="timebar-equalize" class="timebar-equalize-btn">모두 균일하게</button>
               <span id="timebar-total-label"></span>
             </div>
           </div>
           <ul class="field-note">
-            <li>원하는 만큼 구간 길이를 설정할 수 있어요! (최소 3분)</li>
+            <li>구간에 따라 시간을 자유롭게 정해보세요.</li>
+            <li>각 구간은 최소 3분 이상이에요.</li>
             <li>우측에 '모두 균일하게' 버튼을 누르면 모든 구간의 시간을 균일하게 맞춰요.</li>
           </ul>
           <div class="timebar" id="timebar"></div>
           <div class="timebar-ticks" id="timebar-ticks"></div>
 
-          <span class="field-sublabel">구간 감성 및 밴드 설정</span>
+          <span class="field-sublabel">구간 가사 감성 정하기 및 밴드 설정</span>
           <ul class="field-note">
-            <li>각 구간에 원하는 감성을 입력해보세요!</li>
-            <li>각 구간에 입력하신 감성과 어울리는 가사를 가진 노래로 찾아드려요.</li>
-            <li>비워두시면 자동으로 찾아드려요.</li>
+            <li>구간에 따라 원하는 감성을 입력해보세요!</li>
+            <li>감성과 어울리는 가사를 가진 노래를 찾아줘요. 비워둬도 상관없어요!</li>
             <li>일부 구간에서 특정밴드만 듣고 싶으면 '밴드 고정' 버튼을 눌러보세요!</li>
-            <li>듣고싶은 밴드 중에서 1개 이상 고를 수 있어요.</li>
+            <li>듣고싶은 밴드 중에서 1개 이상 지정할 수 있어요.</li>
           </ul>
           <div class="impression-row" id="impression-row"></div>
         </div>
@@ -175,7 +175,7 @@
             <li>듣고 싶은 노래의 에너지와 감정을 조절해보세요!</li>
             <li>노란색으로 갈수록 밝고 신나는 노래가, 녹색으로 갈수록 밝고 잔잔한 노래가 나와요.</li>
             <li>빨간색으로 갈수록 무겁고 격렬한 노래가, 파란색으로 갈수록 차분하고 가라앉은 노래가 나와요.</li>
-            <li>구간을 나타내는 포인트를 드래그해서 원하는 곳에 놓으세요.</li>
+            <li>구간 포인트를 드래그해서 원하는 곳에 놓으세요. 시간에 따라 그 감성으로 진행되요!</li>
           </ul>
 
           <!-- 디자인 2(사분면 4색)로 고정 확정 — 셀렉터는 숨김(hidden). 버튼 자체는 유지해

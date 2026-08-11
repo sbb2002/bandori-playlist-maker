@@ -10,11 +10,11 @@ const MIN_WIDTH_MIN = 3; // 구간 최소 길이(분) — 구간이 너무 촘�
 
 // 고급 설정 그래프 5개
 const PARAM_DEFS = [
-  { key: "lufs_integrated", label: "라우드니스", desc: "높을수록 크고 힘있는 곡이, 낮을수록 조용한 곡이 선택됩니다." },
-  { key: "lra", label: "다이내믹 범위", desc: "높을수록 벅차는 느낌의 곡이, 낮을수록 일정한 느낌의 곡이 선택됩니다." },
-  { key: "danceability_norm", label: "리듬감", desc: "높을수록 리드미컬한 곡이, 낮을수록 변칙적인 리듬의 곡이 선택됩니다." },
-  { key: "instr_stem_ratio", label: "악기 비중", desc: "높을수록 악기 비중이 높은 곡이, 낮을수록 보컬 비중이 높은 곡이 선택됩니다." },
-  { key: "speech_median", label: "음절밀도", desc: "높을수록 랩 성향의 곡이, 낮을수록 랩이 아닌 곡이 선택됩니다." },
+  { key: "lufs_integrated", label: "라우드니스", desc: "높을수록 크고 힘있는 곡이, 낮을수록 조용한 곡이 선택되요." },
+  { key: "lra", label: "다이내믹 범위", desc: "높을수록 점점 벅차오르는 느낌이! 낮을수록 조곤조곤한 느낌의 곡이 선택되요." },
+  { key: "danceability_norm", label: "리듬감", desc: "높을수록 일정한 리듬을 가진 곡이, 낮을수록 변칙적인 리듬의 곡이 선택되요. 둠칫둠칫~" },
+  { key: "instr_stem_ratio", label: "악기 비중", desc: "높을수록 악기 비중이 높은 곡이, 낮을수록 보컬 비중이 높은 곡이 선택되요." },
+  { key: "speech_median", label: "음절밀도", desc: "높을수록 속사포 랩같은 곡이, 낮을수록 멜로디가 있는 곡이 선택됩니다." },
 ];
 
 // 고급 설정 그래프용 여백
