@@ -1,11 +1,9 @@
-# archive/version/v2.2.0/ — 배포판 기준 사용 기능 로직·흐름도
+# archive/version/v2/ — 배포판 기준 사용 기능 로직·흐름도
 
-`main`(태그 `v2.2.0`, PR #66 오마카세 + PR #67 테마토글까지 포함한 origin/main HEAD와 동일
-내용)이 실제로 사용 중인 주요 로직 중, 짧지 않고 외부 API 호출 한 줄로 안 끝나는 것들만
-골라 흐름도로 정리한다. `archive/last-papers/reports/`가 "특정 시점 기록·다음 패치
-아이디어" 티어라면, 이 `version/<태그>/` 묶음은 "그 버전이 실제로 서비스하는 로직을 한
-곳에 모은 스냅샷" 티어다 — 다음 버전에서 로직이 크게 바뀌면 새 `version/v<X.Y.Z>/` 폴더를
-추가하고, 옛 폴더는 그대로 히스토리로 남긴다(수정하지 않음).
+`main`(Major v2 계열, 최초 작성 시점 태그 `v2.2.0`, PR #66 오마카세 + PR #67 테마토글까지
+포함한 origin/main HEAD와 동일 내용)이 실제로 사용 중인 주요 로직 중, 짧지 않고 외부 API
+호출 한 줄로 안 끝나는 것들만 골라 흐름도로 정리한다. 이 폴더의 버전 관리 단위(Epic/
+Minor/Patch)와 갱신 규칙은 `archive/version/README.md` 참조.
 
 - [01-prompt-to-playlist-flow.md](01-prompt-to-playlist-flow.md) — 사용자 프롬프트 →
   플레이리스트 생성 전체 흐름(단일호출 Groq LLM 해석 + Stage A/B 선곡 알고리즘).

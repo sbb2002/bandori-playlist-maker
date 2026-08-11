@@ -1,8 +1,8 @@
-# v2.2.0 — 오마카세 버튼 로직
+# v2 — 오마카세 버튼 로직
 
 > **상태: 배포판 기준 로직 기록.** `archive/last-papers/reports/2026-08-11-omakase-button-logic.md`
 > (PR #66, `feature/omakase-prompt-button` 브랜치에서 작성)의 내용을 그대로 이어받아 이
-> `version/v2.2.0/` 묶음에 재수록한다 — 그 문서는 기능 단위 기록(last-papers 티어)이고, 이
+> `version/v2/` 묶음에 재수록한다 — 그 문서는 기능 단위 기록(last-papers 티어)이고, 이
 > 문서는 "현재 배포판이 쓰는 로직" 묶음(version 티어)이라는 위치만 다르다. 세부 표·근거는
 > 원본 문서가 더 상세하니 갱신이 필요하면 원본을 우선 고친다.
 

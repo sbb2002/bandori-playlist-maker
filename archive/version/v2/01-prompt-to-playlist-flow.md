@@ -1,11 +1,13 @@
-# v2.2.0 — 사용자 프롬프트 → 플레이리스트 생성 흐름
+# v2 — 사용자 프롬프트 → 플레이리스트 생성 흐름
 
-> **상태: 배포판 기준 로직 기록.** `main`(태그 `v2.2.0` 및 그 이후 동일 내용의 origin/main
-> HEAD, PR #66 오마카세 + PR #67 테마토글까지 포함)의 `src/backend/app/`을 근거로 정리했다.
-> 실제 배포 중인 경로는 **단일호출 `GroqMoodInterpreter`**다 — `docs/diagrams/multistage-*.mmd`
-> (untracked 산출물)는 아직 미배포 실험 어댑터(`groq_multistage_adapter`, `MOOD_INTERPRETER`
-> 미설정 시 절대 선택되지 않음)에 대한 것이므로 착각하지 말 것. 오래된 배경 지식은
-> `archive/last-papers/reports/2026-07-29-request-flow-diagrams.md`(3b 절)를 재활용·확장했다.
+> **상태: 배포판 기준 로직 기록(Major v2 계열, 최초 작성 시점 태그 `v2.2.0`).** `main`
+> (origin/main HEAD, PR #66 오마카세 + PR #67 테마토글까지 포함)의 `src/backend/app/`을
+> 근거로 정리했다. 실제 배포 중인 경로는 **단일호출 `GroqMoodInterpreter`**다 —
+> `docs/diagrams/multistage-*.mmd`(untracked 산출물)는 아직 미배포 실험 어댑터
+> (`groq_multistage_adapter`, `MOOD_INTERPRETER` 미설정 시 절대 선택되지 않음)에 대한
+> 것이므로 착각하지 말 것. 오래된 배경 지식은 `archive/last-papers/reports/
+> 2026-07-29-request-flow-diagrams.md`(3b 절)를 재활용·확장했다. 폴더 버전 규칙은
+> `archive/version/README.md` 참조 — Patch급 변경은 이 파일을 직접 고쳐 반영한다.
 
 ## 전체 흐름
 
@@ -110,6 +112,38 @@ flowchart TD
 - `TPM 예산`(`GROQ_RATE_PER_MIN`)이 활성이면 HTTP 호출 전에 `TokenBucketLimiter.acquire()`로
   선차감한다 — 대기열 초과 시에도 `LLMRateLimitError`.
 
+### `previous_prompt`는 죽은 코드인가? (2026-08-11 코멘트 답변)
+
+**아니다 — 라우팅 판단에서만 죽었고, LLM 호출·프론트 배선은 여전히 살아있다.** AI 모드가
+`mode` 필드로 커스텀 모드와 완전히 분리된 뒤(§8-3, `routes.py:266-273` 주석에 DEPRECATED로
+명시), AI 모드는 항상 `honor=False`로 고정된다 — 즉 "직전 요청과 의도가 같은가"
+(`same_as_previous`)로 세부설정 override 여부를 가르던 옛 판정식은 라우팅에서 **더 이상
+안 쓰인다.**
+
+다만 `previous_prompt` 자체는 아직 3곳에서 살아있다:
+1. **프론트**(`app.js:61,211,266`): 직전 성공 요청 프롬프트를 `previousPrompt` 변수에 저장해
+   두었다가, 다음 요청 body에 `previous_prompt`로 계속 실어 보낸다.
+2. **`interpret()` 호출**(`routes.py:257`): 여전히 인자로 그대로 전달된다.
+3. **LLM 프롬프트 본문**(`prompt.py:236-245`): `previous_prompt`가 있으면 "[직전 요청]\n...\n\n
+   [현재 요청]\n..."을 user 메시지에 통째로 끼워 넣고, `same_as_previous`를 판정해 응답
+   JSON에 채우라고 지시한다. `routes.py`는 그 응답값을 받고도 라우팅에는 안 쓴다
+   (§ 위 DEPRECATED 주석 — 하위호환으로만 보관).
+
+즉 **지금 코드는 "묻고 대답은 받지만 아무도 안 쓰는" 상태**다. 주석 처리(비활성화)하면
+동작에 문제가 없을 가능성이 높다 — 다음 3곳을 함께 건드려야 완전히 제거된다:
+- 프론트: `previousPrompt` 저장·전송 중단(`app.js:61,211,266`).
+- `prompt.py`: `build_messages()`의 `previous_prompt` 분기(236-245줄) 및 `SYSTEM_PROMPT`의
+  `same_as_previous` 필드 지시(130줄) 제거 — 매 요청 토큰을 아낄 수 있다(TPM 예산이
+  빠듯한 이 프로젝트엔 실이익).
+- `routes.py`/`schemas.py`: `previous_prompt`/`same_as_previous` 필드·인자 자체는 남겨두고
+  값을 항상 무시하거나, 완전히 스키마에서 빼도 된다.
+
+**단, 미배포 실험 어댑터(`groq_multistage_adapter`)는 예외다** — 그쪽은 `previous_prompt`·
+`previous_params`를 0차 변경판정(`_stage0_decide`)의 핵심 입력으로 실제 사용한다(스킵
+최적화 전체가 이 값에 의존). 단일호출 경로에서 이 필드를 완전히 스키마째 제거하면
+`groq_multistage_adapter`가 나중에 실배포될 때 다시 살려야 하므로, 스키마 필드는 남기고
+**단일호출 경로(`prompt.py`/프론트)에서만** 사용을 끊는 편이 안전하다.
+
 ## 4. 선곡 로직 — `build_setlist()` (`domain/selection.py`, 순수 함수)
 
 LLM·HTTP에 무의존이라 단위 테스트로 검증 가능(`src/tests`). `pool`(에너지허용 밴드 ∧
@@ -129,6 +163,34 @@ band_filter 곡)이 0건이면 즉시 `NoSetlistError`(409).
 3. 허용창 내 후보가 없으면 허용창 밖 최근접("완충 노드")을 채택하되, 편차가
    0.16(`_HARD_TOL`)을 넘으면 그 슬롯은 **스킵**한다(에러가 아니라 결과 곡 수가 목표보다
    적어지는 방식의 degraded 처리).
+
+#### "밝기 버킷"이 뭐고, 6지표 거리로 바로 가면 안 되나? (2026-08-11 코멘트 답변)
+
+정렬 1순위는 **연속값이 아니라 이산 버킷**이다(`selection.py:468`):
+```python
+round(abs(brightness[s.idx] - params.brightness) / _BRIGHTNESS_BUCKET)  # _BRIGHTNESS_BUCKET=0.25
+```
+`brightness[s.idx]`는 `_brightness_scores()`가 곡의 `mode_score`(장조/단조 등 조성 기반,
+min-max 정규화) + `shape` 보조가중으로 만든 **-1~1 밝기 점수**다. `params.brightness`는
+이번 요청 전체에 대해 LLM이 낸 **단일 스칼라**(매 요청 항상 채워짐). 이걸 0.25 폭으로
+나눠 버림으로써 "밝기가 비슷한 후보 그룹" 안에서는 순서를 rng 셔플로 흩뜨리고, 그 다음에야
+6지표 거리로 타이브레이크한다.
+
+**버킷을 생략하고 6지표 거리로 바로 정렬하면 안 되는 이유 2가지:**
+1. **서로 다른 신호다.** `brightness`는 조성(mode_score) 기반, 6지표의 `valence`는 LLM이
+   `stage_params`로 직접 낸 감정가 목표 — 상관은 있지만 같은 값이 아니다. 6지표로
+   대체하면 "밝기" 축 자체가 선곡에서 빠진다.
+2. **6지표는 자주 비어 있다.** `_stage_param_distance()`(`selection.py:314-322`)는 필드가
+   없으면(LLM이 `stage_params`를 못 채웠거나 곡에 값이 없으면) 그 필드를 건너뛰고,
+   전부 없으면 `0.0`(중립)을 반환한다. `stage_params`는 프로토타입 단계 지표라 실제로
+   비는 경우가 드물지 않다 — 이때 6지표 거리만으로 정렬하면 후보 전원이 동률(0.0)이 되어
+   **정렬 기준이 사실상 rng 순서로 무너진다.** `brightness`는 LLM 응답에 항상 존재하는
+   필드라 이런 붕괴가 없다 — 그래서 1순위로 남겨둔 것.
+
+즉 버킷(이산화)은 "정확도보다 다양성"을 의도한 설계고, 1순위 자리 자체는 6지표보다
+`brightness`가 더 안정적으로 채워지기 때문에 유지된다. 버킷 폭(0.25)을 더 좁히거나
+없애 연속값 정렬로 바꾸는 것은 가능하지만, 그건 "같은 밝기대에서도 매번 똑같은 순서로
+곡이 나오게" 만드는 트레이드오프라 신중해야 한다.
 
 ### Stage B — SEQUENCE(곡 순서 배치)
 
