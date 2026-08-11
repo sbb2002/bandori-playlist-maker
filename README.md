@@ -35,6 +35,15 @@ Stage A 밝기 축을 mode_score/shape(형제 프로젝트 재활용 지표, 무
 - 기준 커밋: `d504c6d`
 - 관련 PR: [#69](https://github.com/sbb2002/bandori-playlist-maker/pull/69)
 
+## v2.2.1 — 2026-08-11
+
+`previous_prompt`/`same_as_previous`를 단일호출 경로(배포 중인 GroqMoodInterpreter)에서
+완전 비활성화 — AI/커스텀 모드 분리 후 라우팅에 안 쓰인 지 오래인데도 매 요청 LLM에게
+계속 묻고 있던 죽은 경로 정리(부수효과로 프롬프트 토큰도 소폭 절감).
+
+- 기준 커밋: `ee6b633`
+- 관련 PR: [#68](https://github.com/sbb2002/bandori-playlist-maker/pull/68)
+
 ## v2.0.1 — 2026-08-10
 
 SYSTEM_PROMPT 영문 축소(토큰 ~76% 절감)로 Groq TPM 한도 초과 완화 + 앱 버전 표기 2.0.1로 확정(PR #62의 미이행 2.0.0 흡수).
