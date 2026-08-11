@@ -224,7 +224,10 @@ def _run_setlist(payload: SetlistRequest, state) -> dict:
                 status_code=400,
                 detail={"error": {"code": "INVALID_REQUEST", "message": "커스텀 모드는 stages가 필요합니다."}}
             )
-        # 사용자가 직접 지정한 단계들로부터 MoodParameters 구성
+        # 사용자가 직접 지정한 단계들로부터 MoodParameters 구성. brightness=0.0은 placeholder일
+        # 뿐 실제로 아무 데도 안 쓰인다 — 선곡(selection.py)은 2026-08-11부터 mode_score/shape
+        # 기반 밝기 축을 완전히 제거했고(에너지+신규 지표 6종 통합거리로 대체), 커스텀 모드의
+        # "밝기" 슬라이더는 이미 stage 각각의 valence(StageSpec.valence)로 따로 전달된다.
         params = MoodParameters(
             brightness=0.0,
             start_energy=payload.stages[0].energy,

@@ -532,4 +532,72 @@ def test_build_setlist_stage_band_skips_slot_when_band_pool_exhausted():
     # 3곡 분량을 요청해도 morfonica 후보가 1곡뿐이라 1곡만 채택돼야 한다(mygo로 채우지 않음).
     setlist = build_setlist(songs, params, target_seconds=3 * 213, rng=random.Random(0))
     assert len(setlist.picks) == 1
-    assert setlist.picks[0].idx == 0
+
+
+# ── 2026-08-11 재설계: mode_score/shape 기반 "밝기" 축 제거 + 통합거리(에너지+6지표) ──────
+
+def test_mode_score_and_shape_no_longer_influence_selection():
+    """에너지·6지표가 완전히 동일하고 mode_score/shape만 극단적으로 다른 두 곡은, 여러 시드에
+    걸쳐 둘 다 뽑힐 수 있어야 한다 — mode_score/shape가 더 이상 타이브레이커가 아님을 증명."""
+    songs = [
+        Song(idx=0, band="a", song="s0", video_id="vid0000000", camelot="8A",
+             energy=0.5, mode_score=-1.0, shape="acoustic", eligible_band=True),
+        Song(idx=1, band="a", song="s1", video_id="vid0000001", camelot="8A",
+             energy=0.5, mode_score=1.0, shape="bright", eligible_band=True),
+    ]
+    params = MoodParameters(
+        brightness=0.9, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    spec = [StageSpec(energy_target=0.5, song_count=1)]  # 풀(2곡)보다 적게 요청 — Stage A 선택 자체를 관찰
+    picked = {
+        build_setlist(songs, params, target_seconds=999, stage_specs=spec, rng=random.Random(seed)).picks[0].idx
+        for seed in range(20)
+    }
+    assert picked == {0, 1}
+
+
+def test_param_fit_is_full_when_energy_matches_exactly():
+    songs = [
+        Song(idx=0, band="a", song="s0", video_id="vid0000000", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True),
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    setlist = build_setlist(songs, params, target_seconds=999, rng=random.Random(0))
+    assert setlist.picks[0].reason.param_fit == 1.0
+
+
+def test_slot_skipped_when_even_closest_candidate_is_far():
+    """에너지 하드필터가 사라졌어도 안전망(_PARAM_HARD_TOL)은 남아있다 — 후보 전체가 목표와
+    아주 멀면(0.9 이상 차이) 억지로 채우지 않고 슬롯을 건너뛴다."""
+    songs = [
+        Song(idx=0, band="a", song="s0", video_id="vid0000000", camelot="8A",
+             energy=0.05, mode_score=0.0, shape="neutral", eligible_band=True),
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.95, end_energy=0.95, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    with pytest.raises(NoSetlistError):
+        build_setlist(songs, params, target_seconds=999, rng=random.Random(0))
+
+
+def test_valence_drives_selection_on_real_scale_data():
+    """재현: 커스텀 모드에서 밝기(valence) 90% 요청 시, 재설계 전에는 params.brightness=0.0
+    하드코딩 때문에 사실상 무시됐다 — 이제는 통합거리에 직접 반영돼 밝은 곡이 뽑힌다."""
+    songs = [
+        Song(idx=i, band="a", song=f"s{i}", video_id=f"vid{i:07d}0", camelot="8A",
+             energy=0.5, mode_score=0.0, shape="neutral", eligible_band=True, valence=v)
+        for i, v in enumerate([0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95])
+    ]
+    params = MoodParameters(
+        brightness=0.0, start_energy=0.5, end_energy=0.5, stage_count=1,
+        target_minutes=None, interpretation_summary="test",
+    )
+    spec = [StageSpec(energy_target=0.5, song_count=1, valence=0.9)]
+    setlist = build_setlist(songs, params, target_seconds=999, stage_specs=spec, rng=random.Random(0))
+    picked = next(s for s in songs if s.idx == setlist.picks[0].idx)
+    assert picked.valence >= 0.75

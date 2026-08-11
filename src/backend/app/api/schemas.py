@@ -135,7 +135,7 @@ def serialize_setlist(setlist: Setlist) -> dict:
                     "matched_energy": p.reason.matched_energy,
                     "harmonic": p.reason.harmonic,
                     "prev_camelot": p.reason.prev_camelot,
-                    "brightness_fit": p.reason.brightness_fit,
+                    "param_fit": p.reason.param_fit,
                     "text": p.reason.text,
                     "degraded": p.reason.degraded,
                 },
