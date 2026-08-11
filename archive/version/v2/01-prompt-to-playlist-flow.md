@@ -129,20 +129,25 @@ flowchart TD
    JSON에 채우라고 지시한다. `routes.py`는 그 응답값을 받고도 라우팅에는 안 쓴다
    (§ 위 DEPRECATED 주석 — 하위호환으로만 보관).
 
-즉 **지금 코드는 "묻고 대답은 받지만 아무도 안 쓰는" 상태**다. 주석 처리(비활성화)하면
-동작에 문제가 없을 가능성이 높다 — 다음 3곳을 함께 건드려야 완전히 제거된다:
-- 프론트: `previousPrompt` 저장·전송 중단(`app.js:61,211,266`).
-- `prompt.py`: `build_messages()`의 `previous_prompt` 분기(236-245줄) 및 `SYSTEM_PROMPT`의
-  `same_as_previous` 필드 지시(130줄) 제거 — 매 요청 토큰을 아낄 수 있다(TPM 예산이
-  빠듯한 이 프로젝트엔 실이익).
-- `routes.py`/`schemas.py`: `previous_prompt`/`same_as_previous` 필드·인자 자체는 남겨두고
-  값을 항상 무시하거나, 완전히 스키마에서 빼도 된다.
+**→ 조치 완료(2026-08-11, PR #68, 태그 `v2.2.1`).** 아래 3곳을 고쳐 단일호출 경로에서
+완전히 비활성화했다 — 각 자리에 DEPRECATED 코드 코멘트를 남겨 다음 세션이 "아직 뭔가에
+쓰이나?" 헷갈리지 않게 했다:
+- 프론트: `previousPrompt` 저장·전송 로직 자체를 삭제(`app.js`).
+- `prompt.py`: `build_messages()`가 `previous_prompt` 인자를 받되 본문에서 무시(항상
+  `user_prompt` 그대로 사용), `SYSTEM_PROMPT`/`RESPONSE_JSON_SCHEMA`/예시에서
+  `same_as_previous` 필드 지시 제거, `parse_mood()`는 `same_as_previous`를 항상 `None`으로
+  고정. 매 AI 모드 요청의 프롬프트 토큰이 소폭 줄어드는 부수효과도 있다(TPM 예산이 빠듯한
+  이 프로젝트엔 실이익).
+- 테스트(`test_openrouter_adapter.py`): "previous_prompt가 무시된다"를 검증하는 방향으로
+  3개 테스트 재작성.
 
-**단, 미배포 실험 어댑터(`groq_multistage_adapter`)는 예외다** — 그쪽은 `previous_prompt`·
-`previous_params`를 0차 변경판정(`_stage0_decide`)의 핵심 입력으로 실제 사용한다(스킵
-최적화 전체가 이 값에 의존). 단일호출 경로에서 이 필드를 완전히 스키마째 제거하면
-`groq_multistage_adapter`가 나중에 실배포될 때 다시 살려야 하므로, 스키마 필드는 남기고
-**단일호출 경로(`prompt.py`/프론트)에서만** 사용을 끊는 편이 안전하다.
+**남겨둔 것(의도적):** `previous_prompt` **파라미터 자체는 시그니처에 남아있다** —
+`MoodInterpreter` 포트 인터페이스, 그리고 미배포 실험 어댑터 `groq_multistage_adapter`
+(0차 변경판정 `_stage0_decide`의 핵심 입력으로 `previous_prompt`/`previous_params`를 실제
+사용 — 스킵 최적화 전체가 이 값에 의존)와의 시그니처 호환 때문에, 값을 무시할 뿐 인자
+자체를 지우지는 않았다. `MoodParameters.same_as_previous` 필드도 커스텀 모드 등 다른 생성
+경로와 공유하는 도메인 모델 필드라 그대로 남겼다(단일호출 경로에서 채우는 값만 항상
+`None`).
 
 ## 4. 선곡 로직 — `build_setlist()` (`domain/selection.py`, 순수 함수)
 
@@ -176,21 +181,37 @@ min-max 정규화) + `shape` 보조가중으로 만든 **-1~1 밝기 점수**다
 나눠 버림으로써 "밝기가 비슷한 후보 그룹" 안에서는 순서를 rng 셔플로 흩뜨리고, 그 다음에야
 6지표 거리로 타이브레이크한다.
 
-**버킷을 생략하고 6지표 거리로 바로 정렬하면 안 되는 이유 2가지:**
-1. **서로 다른 신호다.** `brightness`는 조성(mode_score) 기반, 6지표의 `valence`는 LLM이
-   `stage_params`로 직접 낸 감정가 목표 — 상관은 있지만 같은 값이 아니다. 6지표로
-   대체하면 "밝기" 축 자체가 선곡에서 빠진다.
-2. **6지표는 자주 비어 있다.** `_stage_param_distance()`(`selection.py:314-322`)는 필드가
-   없으면(LLM이 `stage_params`를 못 채웠거나 곡에 값이 없으면) 그 필드를 건너뛰고,
-   전부 없으면 `0.0`(중립)을 반환한다. `stage_params`는 프로토타입 단계 지표라 실제로
-   비는 경우가 드물지 않다 — 이때 6지표 거리만으로 정렬하면 후보 전원이 동률(0.0)이 되어
-   **정렬 기준이 사실상 rng 순서로 무너진다.** `brightness`는 LLM 응답에 항상 존재하는
-   필드라 이런 붕괴가 없다 — 그래서 1순위로 남겨둔 것.
+**6지표에 "energy"는 없다 — 목록과 변수명(정정 포함, 2026-08-11 후속 코멘트 답변):**
+`_STAGE_PARAM_KEYS`(`prompt.py:28-31`) 기준 정확히 6개다: `valence`(감정가/밝기),
+`lufs_integrated`(통합 러프니스=체감 음량), `lra`(다이내믹 레인지), `danceability_norm`
+(리듬감), `instr_stem_ratio`(보컬 대비 악기 비중), `speech_median`(가사 음절 밀도). "energy"는
+이 6개에 **없다** — 에너지는 별도 축(`params.start_energy`/`end_energy`/`stage_energies`,
+`song.energy`)으로 Stage A의 1순위 하드필터(허용창 `_TOL`)를 담당하고, 6지표는 그 다음
+타이브레이크 전용이다. "밝기 지표"에 해당하는 **곡 쪽 저장 필드는 없다** — `mode_score`
+(조성)와 `shape`을 `_brightness_scores()`가 조합해 그때그때 계산하는 파생값
+(`brightness[s.idx]`)이며, LLM 쪽 스칼라는 `params.brightness`다.
 
-즉 버킷(이산화)은 "정확도보다 다양성"을 의도한 설계고, 1순위 자리 자체는 6지표보다
-`brightness`가 더 안정적으로 채워지기 때문에 유지된다. 버킷 폭(0.25)을 더 좁히거나
-없애 연속값 정렬로 바꾸는 것은 가능하지만, 그건 "같은 밝기대에서도 매번 똑같은 순서로
-곡이 나오게" 만드는 트레이드오프라 신중해야 한다.
+**버킷을 생략하고 6지표 거리로 바로 정렬하면 안 되는 이유 — 정정: "다른 신호"가 아니라
+"같은 방향으로 설계된 신호인데 안정성이 다르다".** 앞선 답변에서 "서로 다른 신호"라고 썼는데
+부정확했다 — `SYSTEM_PROMPT`가 LLM에게 명시적으로 "valence (emotional brightness, **same
+direction as brightness**)"라고 지시하므로, `valence`는 애초에 `brightness`와 같은 방향으로
+가도록 설계된 값이다. 즉 **개념적으로 겹친다(의도된 중복)** — 두 값이 동어반복은 아니지만
+(전자는 곡의 조성에서, 후자는 LLM이 요청 전체에 대해 내는 감정가 목표에서 온다), 둘 다
+"밝기"를 나타내려는 축이라는 점에서는 같다. 그럼에도 버킷을 생략하면 안 되는 진짜 이유는
+안정성 차이다:
+- **6지표는 자주 비어 있다.** `_stage_param_distance()`(`selection.py:314-322`)는 필드가
+  없으면(LLM이 `stage_params`를 못 채웠거나 곡에 값이 없으면) 그 필드를 건너뛰고, 전부
+  없으면 `0.0`(중립)을 반환한다. `stage_params`는 프로토타입 단계 지표라 실제로 비는 경우가
+  드물지 않다 — 이때 6지표 거리만으로 정렬하면 후보 전원이 동률(0.0)이 되어 **정렬 기준이
+  사실상 rng 순서로 무너진다.**
+- `brightness`(곡 쪽 `mode_score`/`shape` 기반 파생값, LLM 쪽 `params.brightness` 스칼라
+  둘 다)는 항상 채워지는 값이라 이런 붕괴가 없다 — 그래서 1순위로 남겨둔 것.
+
+즉 버킷(이산화) 자체는 "정확도보다 다양성"을 의도한 설계고, 1순위 자리를 `brightness`가
+차지하는 이유는 "6지표와 다른 걸 보려는 게" 아니라 "같은 걸 보는 값 중 더 안정적으로
+채워지는 쪽을 1순위로 쓰는" 것이다. 버킷 폭(0.25)을 더 좁히거나 없애 연속값 정렬로 바꾸는
+것은 가능하지만, 그건 "같은 밝기대에서도 매번 똑같은 순서로 곡이 나오게" 만드는 트레이드오프라
+신중해야 한다.
 
 ### Stage B — SEQUENCE(곡 순서 배치)
 
