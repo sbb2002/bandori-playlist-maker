@@ -2583,7 +2583,7 @@ function buildAddedPick(song) {
     song: song.song, camelot: song.camelot, energy: song.energy, stage_index: -1,
     reason: {
       stage_energy_target: 0, matched_energy: song.energy, harmonic: "added",
-      prev_camelot: null, brightness_fit: 0, text: "직접 추가한 곡",
+      prev_camelot: null, param_fit: 0, text: "직접 추가한 곡",
     },
   };
 }
