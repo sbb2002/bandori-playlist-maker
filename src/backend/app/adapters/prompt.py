@@ -89,7 +89,7 @@ def _build_dynamic_examples(rng: random.Random) -> str:
     full_example = {
         "brightness": 0.7, "start_energy": 0.35, "end_energy": 0.85, "stage_count": 3,
         "target_minutes": 60, "interpretation_summary": "주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",
-        "tags": ["드라이브", "설렘", "주말", "고조되는"], "song_type": "all", "same_as_previous": False,
+        "tags": ["드라이브", "설렘", "주말", "고조되는"], "song_type": "all",
         "stage_minutes": drive_stage_minutes, "stage_params": drive_stages,
     }
     return (
@@ -127,8 +127,6 @@ SYSTEM_PROMPT = (
     "- interpretation_summary: one warm Korean sentence (<=80 chars) describing the mood, no numbers.\n"
     "- tags: 2-5 Korean keywords, no '#', never empty.\n"
     "- song_type: \"all\"|\"original\"|\"cover\" — only set original/cover if explicitly mentioned.\n"
-    "- same_as_previous: boolean, meaningful only when a previous request is provided (true if same "
-    "intent).\n"
     "- stage_params: array of length stage_count, never null. Each object has 6 floats (0.0-1.0) "
     "plus impression:\n"
     "  - valence (emotional brightness, same direction as brightness)\n"
@@ -186,7 +184,6 @@ RESPONSE_JSON_SCHEMA = {
                 "interpretation_summary": {"type": "string"},
                 "tags": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 5},
                 "song_type": {"type": "string", "enum": ["all", "original", "cover"]},
-                "same_as_previous": {"type": "boolean"},
             },
             "required": [
                 "brightness",
@@ -201,7 +198,6 @@ RESPONSE_JSON_SCHEMA = {
                 "interpretation_summary",
                 "tags",
                 "song_type",
-                "same_as_previous",
             ],
         },
     },
@@ -233,19 +229,15 @@ def build_messages(
 ) -> list[dict]:
     """OpenRouter/Groq chat/completions messages 배열을 만든다.
 
-    previous_prompt가 주어지면(2회차+ 요청) 직전 요청과 현재 요청을 함께 제시하고, 두 요청이
-    '본질적으로 같은 의도'인지 same_as_previous로 판정하게 한다(핫픽스: 세부설정 우선순위 결정).
-    파라미터는 항상 '현재 요청' 기준으로 산출한다.
+    DEPRECATED(2026-08-11): previous_prompt는 더 이상 프롬프트에 반영하지 않는다 — AI/커스텀
+    모드가 완전히 분리된 뒤 same_as_previous 판정 결과를 라우팅에서 쓰지 않게 됐고(honor는
+    모드로만 결정, routes.py DEPRECATED 주석 참조), 프롬프트 1회당 LLM 요청도 1회뿐이라 "직전
+    요청과 비교" 자체가 의미가 없다. 파라미터는 포트 인터페이스(MoodInterpreter.interpret) 및
+    미배포 실험 어댑터(groq_multistage_adapter, previous_prompt/previous_params를 0차
+    변경판정에 실제 사용)와의 시그니처 호환을 위해서만 남겨두고 여기서는 무시한다.
     feature_stats가 주어지면 시스템 메시지 끝에 [지표 분포 통계] 블록을 덧붙인다.
     """
-    if previous_prompt and previous_prompt.strip():
-        user_content = (
-            "아래는 직전 회차 요청과 현재 회차 요청이다. 두 요청이 본질적으로 같은 의도인지 판단해 "
-            "same_as_previous(true/false)로 표기하라. 나머지 파라미터는 반드시 '현재 요청' 기준으로 산출한다.\n"
-            f"[직전 요청]\n{previous_prompt.strip()}\n\n[현재 요청]\n{user_prompt}"
-        )
-    else:
-        user_content = user_prompt
+    user_content = user_prompt
     # 예시 숫자를 요청마다 새로 jitter(모델의 예시-그대로-복사 방지, 위 _build_dynamic_examples 참고).
     system_content = SYSTEM_PROMPT + "\n" + _build_dynamic_examples(random.Random())
     if feature_stats:
@@ -393,10 +385,10 @@ def parse_mood(raw_text: str) -> MoodParameters:
     if song_type not in ("all", "original", "cover"):
         song_type = "all"
 
-    # 직전 요청과 같은 의도인지 LLM 판정(직전 프롬프트가 제공된 경우만 의미). 불리언이 아니면 None
-    # → 라우트가 previous_prompt 존재 여부와 함께 override 적용 여부를 안전하게 가른다.
-    raw_same = obj.get("same_as_previous")
-    same_as_previous = raw_same if isinstance(raw_same, bool) else None
+    # DEPRECATED(2026-08-11): same_as_previous는 더 이상 프롬프트에서 묻지 않으므로(위
+    # build_messages 참조) 항상 None — MoodParameters 필드 자체는 커스텀 모드 등 다른 생성
+    # 경로와의 호환을 위해 유지.
+    same_as_previous = None
 
     return MoodParameters(
         brightness=brightness,
