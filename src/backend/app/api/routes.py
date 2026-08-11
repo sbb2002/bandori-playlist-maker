@@ -322,7 +322,10 @@ def _run_setlist(payload: SetlistRequest, state) -> dict:
         minutes = payload.target_minutes if (honor and payload.target_minutes is not None) else params.target_minutes
         if minutes is None:
             minutes = _DEFAULT_TARGET_MINUTES
-        minutes = max(10, min(_MAX_TARGET_MINUTES, minutes))
+        # AI 모드가 10~15분짜리 짧은 플리를 내놓던 버그(2026-08-11) 수정 — LLM이 target_minutes를
+        # 너무 짧게 잡아도 여기서 최소 30분으로 다시 한번 하한을 강제한다(prompt.py의 LLM 지시문·
+        # _MINUTES_RANGE와 동일한 하한을 이중으로 보장).
+        minutes = max(30, min(_MAX_TARGET_MINUTES, minutes))
 
     effective = replace(params, stage_count=stage_count, target_minutes=minutes)
     # 프로토타입: 스테이지별 impression 텍스트(스펙 우선 → LLM 폴백, AI/커스텀 모드 공통 규칙)를
