@@ -39,16 +39,17 @@
   <button id="menu-btn" class="menu-btn" type="button" aria-label="메뉴 열기" aria-expanded="false">
     <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
   </button>
+  <!-- 우상단 테마 토글(햄버거 메뉴 버튼과 대칭 위치) -->
+  <button type="button" id="theme-toggle" class="theme-toggle" aria-label="다크 모드 전환" aria-pressed="false">
+    <span class="theme-toggle-icon" data-theme-icon="light" aria-hidden="true">☀️</span>
+    <span class="theme-toggle-icon" data-theme-icon="dark" aria-hidden="true">🌙</span>
+  </button>
   <div id="menu-scrim" class="menu-scrim" hidden></div>
   <aside id="menu-panel" class="menu-panel" aria-hidden="true" aria-label="저장된 플레이리스트">
     <div class="menu-header"><strong>저장된 플레이리스트</strong></div>
     <ul id="preset-list" class="preset-list"></ul>
     <p id="preset-empty" class="preset-empty">아직 저장된 플레이리스트가 없어요.<br>플레이리스트를 만들면 자동으로 저장돼요.</p>
     <div class="menu-footer">
-      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="다크 모드 전환" aria-pressed="false">
-        <span class="theme-toggle-icon" data-theme-icon="light" aria-hidden="true">☀️</span>
-        <span class="theme-toggle-icon" data-theme-icon="dark" aria-hidden="true">🌙</span>
-      </button>
       <!-- 현재 버전(v메인버전 - 커밋). app.js가 텍스트·링크 설정. -->
       <a id="app-version" class="app-version" target="_blank" rel="noopener" aria-label="현재 버전"></a>
     </div>
