@@ -10,6 +10,7 @@ import logging
 import os
 import secrets
 import statistics
+import threading
 from dataclasses import replace
 
 from fastapi import APIRouter, Header, HTTPException, Request, Response
@@ -202,11 +203,18 @@ def list_songs(request: Request) -> dict:
     return {"songs": songs}
 
 
-def _run_setlist(payload: SetlistRequest, state) -> dict:
+def _run_setlist(payload: SetlistRequest, state, acquired_event: threading.Event | None = None) -> dict:
     """실제 세트리스트 생성(LLM 해석 + 선곡 + 직렬화). AI 모드는 이 안에서 interpreter.interpret()가
     TPM 리미터에 블로킹될 수 있다 — 그래서 create_setlist가 이 함수를 커스텀 모드만 직접(동기)
     호출하고, AI 모드는 jobs.JobStore를 통해 백그라운드 스레드에서 돌린다. `state`는
     `request.app.state`(Starlette State) — 백그라운드 잡은 Request 객체가 없어 이렇게 분리했다.
+
+    acquired_event: AI 모드에서만 create_setlist가 만들어 넘긴다. interpreter.interpret()가
+    레이트리밋 게이트(TokenBucketLimiter.acquire())를 통과하는 순간 이 이벤트를 set() 해서,
+    GET .../status가 폴링하는 "예상 대기초"가 그 이후로는 곧장 0을 반환하게 한다 — 안 그러면
+    이 요청 자신이 방금 소비한 토큰 때문에 "레이트리밋 대기"와 무관한 실제 LLM 응답 대기
+    구간까지 계속 대기 중으로 잘못 표시되는 문제가 있었다(2026-08-12 버그 리포트: 대기초가
+    부정확하게 오르내리거나, 표시된 값보다 훨씬 먼저 결과가 나타남).
     """
     interpreter = state.interpreter
 
@@ -259,6 +267,7 @@ def _run_setlist(payload: SetlistRequest, state) -> dict:
         params = interpreter.interpret(
             payload.prompt, payload.previous_prompt,
             energy_stats=energy_stats, feature_stats=_feature_stats(pool),
+            lang=payload.lang, acquired_event=acquired_event,
         )
         # 프로토타입: LLM이 지어낸 stage_bands 값을 이 프롬프트에서 실제로 감지된 밴드로만
         # 제한(band_names는 위에서 이미 detect_bands(payload.prompt)를 포함해 계산됨).
@@ -373,13 +382,22 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
     band_names |= detect_bands(payload.prompt or "")
     pool = [s for s in state.songs if not band_names or s.band in band_names]
-    estimate = lambda: estimate_fn(payload.prompt, payload.previous_prompt, _feature_stats(pool))  # noqa: E731
+    # acquired_event: interpreter.interpret()가 레이트리밋 게이트(acquire())를 통과하는 순간
+    # set()된다 — 그 뒤로는 estimate_wait()(이 요청 자신이 방금 소비한 토큰 때문에 부정확해지는
+    # 재조회)를 더 이상 신뢰하지 않고 곧장 0을 반환한다(_run_setlist 위 docstring 참고).
+    acquired_event = threading.Event()
+    estimate = lambda: (  # noqa: E731
+        0.0 if acquired_event.is_set()
+        else estimate_fn(payload.prompt, payload.previous_prompt, _feature_stats(pool), lang=payload.lang)
+    )
     # 제출 "직전"에 한 번 재보고 응답에 그대로 싣는다 — job.estimated_wait_seconds()는 폴링용이라
     # 잡이 이미 끝났으면 0을 주는데(status="done"/"error"), 잡이 아주 빨리 끝나버리면(경합) 방금
     # 등록한 202 응답조차 그 로직을 타서 "얼마나 기다렸어야 했는지"가 뭉개지는 문제가 있었다.
     initial_wait = estimate()
     # QueueFullError(대기열 정원 초과)는 여기서 안 잡는다 — main.py의 전용 핸들러가 429로 매핑.
-    job = state.job_store.submit(lambda: _run_setlist(payload, state), estimate=estimate)
+    job = state.job_store.submit(
+        lambda: _run_setlist(payload, state, acquired_event=acquired_event), estimate=estimate
+    )
     response.status_code = 202
     return {
         "job_id": job.id,

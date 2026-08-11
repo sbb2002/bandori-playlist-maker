@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import re
+import threading
 
 from ..domain.models import MoodParameters
 from ..domain.tags import ensure_min_tags
@@ -81,6 +82,8 @@ class StubMoodInterpreter:
         self, prompt: str, previous_prompt: str | None = None,
         energy_stats: dict | None = None,
         feature_stats: dict | None = None,  # 미사용 — 포트 시그니처 준수용
+        lang: str = "ko",  # 미사용 — 스텁은 키워드 휴리스틱이라 다국어 미지원, 항상 한국어 산출(포트 시그니처 준수용)
+        acquired_event: threading.Event | None = None,  # 미사용 — 스텁은 TPM 리미터 없음(포트 시그니처 준수용)
     ) -> MoodParameters:
         text = prompt.lower()
 

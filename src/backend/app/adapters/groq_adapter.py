@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import random
+import threading
 import time
 
 import httpx
@@ -110,16 +111,18 @@ class GroqMoodInterpreter:
 
     def estimate_wait(
         self, prompt: str, previous_prompt: str | None = None, feature_stats: dict | None = None,
+        lang: str = "ko",
     ) -> float:
         """이 요청을 지금 넣으면 TPM 버킷이 찰 때까지 몇 초 걸릴지 순수 조회(호출·소비 없음).
 
         routes.py가 잡을 큐에 넣기 전에 사용자에게 보여줄 "약 N초 대기" 안내용 — 실제
         레이트리밋 판정은 interpret() 안의 acquire()가 따로, 정확하게 한다(이건 참고치).
-        리미터가 비활성(tpm_limit=0)이면 항상 0.0.
+        리미터가 비활성(tpm_limit=0)이면 항상 0.0. lang은 interpret()과 동일한 메시지를
+        구성해 토큰 추정치를 맞추기 위한 것일 뿐 대기시간 자체에 미치는 영향은 미미하다.
         """
         if self._limiter is None:
             return 0.0
-        messages = prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats)
+        messages = prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats, lang=lang)
         return self._limiter.estimate_wait(cost=self._estimate_tokens(messages))
 
     def _headers(self) -> dict[str, str]:
@@ -137,11 +140,13 @@ class GroqMoodInterpreter:
         self, prompt: str, previous_prompt: str | None = None,
         energy_stats: dict | None = None,
         feature_stats: dict | None = None,
+        lang: str = "ko",
+        acquired_event: threading.Event | None = None,
     ) -> MoodParameters:
         # print("TEST:", self._model, self._base_url, self._response_format_mode)
         payload = {
             "model": self._model,
-            "messages": prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats),
+            "messages": prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats, lang=lang),
             "temperature": 0.2,
         }
         if self._response_format_mode == "json_schema":
@@ -158,6 +163,10 @@ class GroqMoodInterpreter:
             estimated_tokens = self._estimate_tokens(payload["messages"])
             if not self._limiter.acquire(cost=estimated_tokens):
                 raise LLMRateLimitError("요청이 많아 대기열이 가득 찼습니다(레이트리밋).")
+        # 레이트리밋 게이트 통과(또는 리미터 자체가 비활성) — 이후 지연은 순수 업스트림 응답
+        # 시간이라 routes.py의 폴링 예상 대기초 계산에 리미터를 더 이상 재조회하지 말라고 신호.
+        if acquired_event is not None:
+            acquired_event.set()
 
         last_error: MoodInterpretationError | None = None
         for attempt in range(self._mood_parse_retries + 1):
