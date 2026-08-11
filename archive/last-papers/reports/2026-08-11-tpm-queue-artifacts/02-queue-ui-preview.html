@@ -1,0 +1,397 @@
+<title>큐 대기 화면 미리보기 — setlist-maker</title>
+<style>
+  :root {
+    --page-bg: #f4f4f7;
+    --page-text: #1b1c22;
+    --page-muted: #6b6d78;
+    --page-line: #dcdde3;
+    --page-accent: #6a53ff;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    --sans: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    /* ── 아래부터는 실제 앱(src/frontend/style.css)의 디자인 토큰을 그대로 옮김 ── */
+    --app-bg: #0f1017;
+    --app-card: #1a1c28;
+    --app-card-2: #232636;
+    --app-text: #eef0f7;
+    --app-muted: #9aa0b4;
+    --app-accent: #7c6cff;
+    --app-accent-2: #ff6cc4;
+    --app-radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --page-bg: #131318; --page-text: #eceef5; --page-muted: #9497a6; --page-line: #2b2c36; }
+  }
+  :root[data-theme="dark"] { --page-bg: #131318; --page-text: #eceef5; --page-muted: #9497a6; --page-line: #2b2c36; }
+  :root[data-theme="light"] { --page-bg: #f4f4f7; --page-text: #1b1c22; --page-muted: #6b6d78; --page-line: #dcdde3; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--page-bg); color: var(--page-text); font-family: var(--sans); }
+  body { padding: 36px 20px 64px; }
+
+  .wrap { max-width: 960px; margin: 0 auto; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--page-accent); margin: 0 0 10px;
+  }
+  h1 { font-size: clamp(21px, 3.6vw, 27px); font-weight: 800; text-wrap: balance; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .lede { font-size: 14.5px; line-height: 1.7; color: var(--page-muted); max-width: 66ch; margin: 0 0 30px; }
+  .lede code {
+    font-family: var(--mono); font-size: 12.5px; background: rgba(122,90,255,0.12); color: var(--page-accent);
+    padding: 1px 6px; border-radius: 4px;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(300px, 380px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 780px) { .stage { grid-template-columns: 1fr; } }
+
+  /* ── 폰 프레임 ── */
+  .phone {
+    background: #000;
+    border-radius: 34px;
+    padding: 12px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .phone-screen {
+    background: radial-gradient(1200px 600px at 20% -10%, #241d3a 0%, var(--app-bg) 55%);
+    border-radius: 24px;
+    overflow: hidden;
+    height: 640px;
+    position: relative;
+    font-family: var(--sans);
+  }
+  .phone-notch {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 22px; background: #000; border-radius: 0 0 14px 14px; z-index: 5;
+  }
+  .app-scroll {
+    height: 100%;
+    overflow: hidden;
+    padding: 40px 16px 16px;
+    color: var(--app-text);
+  }
+
+  .app-hero { text-align: center; margin-bottom: 16px; }
+  .app-hero h2 {
+    font-size: 1.3rem; margin: 0 0 4px; color: var(--app-text); font-weight: 800;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .app-hero .sub { color: var(--app-muted); font-size: 0.78rem; margin: 0; }
+
+  .app-card {
+    background: var(--app-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--app-radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  }
+  .app-field-label { font-size: 0.72rem; color: var(--app-muted); display: block; margin-bottom: 6px; }
+  .app-input {
+    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+    background: var(--app-card-2); color: var(--app-text); font-size: 0.85rem; font-family: inherit;
+  }
+  .app-btn-primary {
+    width: 100%; margin-top: 12px; padding: 12px; border: none; border-radius: 10px;
+    font-weight: 700; font-size: 0.85rem; color: #fff; font-family: inherit;
+    background: linear-gradient(120deg, var(--app-accent), var(--app-accent-2));
+  }
+  .app-btn-primary:disabled { opacity: 0.55; }
+
+  .app-loading { text-align: center; display: none; }
+  .app-loading.show { display: block; }
+  .app-spinner {
+    width: 36px; height: 36px; margin: 4px auto 10px;
+    border: 4px solid rgba(255,255,255,0.12);
+    border-top-color: var(--app-accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .app-loading-text { font-weight: 700; margin: 8px 0 4px; font-size: 0.92rem; color: var(--app-text); }
+  .app-loading-sub {
+    color: var(--app-muted); font-size: 0.8rem; margin: 0; min-height: 2.6em;
+    transition: opacity 0.15s ease;
+  }
+
+  .app-result { display: none; }
+  .app-result.show { display: block; animation: fadein 0.4s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .app-result .interp { font-size: 0.9rem; margin: 0 0 10px; color: var(--app-text); line-height: 1.5; }
+  .app-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .app-chip {
+    font-size: 0.72rem; color: var(--app-muted); background: var(--app-card-2);
+    border-radius: 999px; padding: 4px 10px;
+  }
+  .app-track {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    background: var(--app-card-2); border-radius: 10px; margin-top: 8px;
+  }
+  .app-track img { width: 30px; height: 30px; border-radius: 6px; background: #333; flex: none; }
+  .app-track-meta { min-width: 0; }
+  .app-track-title { font-size: 0.78rem; color: var(--app-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .app-track-band { font-size: 0.68rem; color: var(--app-muted); }
+
+  /* ── 오른쪽: 진행 타임라인 + 컨트롤 ── */
+  .panel {
+    background: rgba(0,0,0,0.02);
+    border: 1px solid var(--page-line);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  :root[data-theme="dark"] .panel, @media (prefers-color-scheme: dark) { }
+  .panel-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--page-muted); margin: 0 0 14px; }
+
+  .timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .tl-step {
+    display: grid; grid-template-columns: 22px 1fr; gap: 12px;
+    padding: 9px 0;
+    opacity: 0.4;
+    transition: opacity 0.25s ease;
+  }
+  .tl-step.active { opacity: 1; }
+  .tl-step.past { opacity: 0.62; }
+  .tl-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--page-line); margin-top: 5px;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+  }
+  .tl-step.active .tl-dot { background: var(--page-accent); box-shadow: 0 0 0 4px rgba(106,83,255,0.16); }
+  .tl-step.past .tl-dot { background: #37d399; }
+  .tl-label { font-size: 13px; font-weight: 600; }
+  .tl-detail { font-family: var(--mono); font-size: 11.5px; color: var(--page-muted); margin-top: 2px; }
+
+  .controls { display: flex; align-items: center; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--page-line); }
+  button.ctl {
+    font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+    color: #fff; background: var(--page-accent); border: none; border-radius: 6px; padding: 9px 16px; cursor: pointer;
+  }
+  button.ctl.ghost { color: var(--page-text); background: transparent; border: 1px solid var(--page-line); }
+  button.ctl:disabled { opacity: 0.45; cursor: default; }
+  .controls .note { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--page-muted); }
+
+  footer {
+    max-width: 960px; margin: 40px auto 0; padding-top: 16px; border-top: 1px solid var(--page-line);
+    font-family: var(--mono); font-size: 11px; color: var(--page-muted); line-height: 1.8;
+  }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">src/frontend/index.html + style.css 그대로</p>
+  <h1>사용자에게는 이렇게 보인다</h1>
+  <p class="lede">
+    백엔드가 202 + <code>job_id</code>를 주면 프론트는 기존 로딩 카드 그대로 재사용해서
+    <code>.loading-sub</code> 문구만 폴링 결과로 계속 갈아끼운다 — 새 UI를 만들지 않고
+    있던 화면에 문구만 얹은 것. 오른쪽 재생 버튼으로 순서를 확인할 수 있다.
+  </p>
+
+  <div class="stage">
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-notch"></div>
+        <div class="app-scroll">
+          <div class="app-hero">
+            <h2>🎧 뱅드림 세트리스트 메이커</h2>
+            <p class="sub">기분이나 상황을 말하면 긴 재생 흐름을 만들어드려요</p>
+          </div>
+
+          <div class="app-card" id="promptCard">
+            <span class="app-field-label">어떤 플레이리스트를 원하세요?</span>
+            <input class="app-input" type="text" readonly
+                   value="기분 좋아지는 신나는 드라이브 플레이리스트 30분" />
+            <button class="app-btn-primary" id="submitBtn">플레이리스트 만들기</button>
+          </div>
+
+          <div class="app-card app-loading" id="loadingCard">
+            <div class="app-spinner"></div>
+            <p class="app-loading-text" id="loadingText">플레이리스트를 만드는 중입니다~ 🎶</p>
+            <p class="app-loading-sub" id="loadingSub">백엔드가 잠들어 있었다면 첫 응답이 조금 느릴 수 있어요.</p>
+          </div>
+
+          <div class="app-result" id="resultCard">
+            <div class="app-card">
+              <p class="interp">“상쾌한 드라이브, 기분 좋은 리듬으로 30분을 즐겨요” 🚗✨</p>
+              <div class="app-chips">
+                <span class="app-chip">#드라이브</span><span class="app-chip">#신나는</span>
+                <span class="app-chip">#기분좋음</span><span class="app-chip">#에너지</span>
+              </div>
+            </div>
+            <div class="app-card">
+              <div class="app-track">
+                <img src="" alt="" /><div class="app-track-meta">
+                  <div class="app-track-title">曇天マーチ</div><div class="app-track-band">Poppin'Party</div>
+                </div>
+              </div>
+              <div class="app-track">
+                <img src="" alt="" /><div class="app-track-meta">
+                  <div class="app-track-title">キズナミュージック♪</div><div class="app-track-band">Afterglow</div>
+                </div>
+              </div>
+              <div class="app-track">
+                <img src="" alt="" /><div class="app-track-meta">
+                  <div class="app-track-title">Kizuna Music</div><div class="app-track-band">Roselia</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">진행 순서</p>
+      <ul class="timeline" id="timeline">
+        <li class="tl-step" data-step="0">
+          <span class="tl-dot"></span>
+          <div><div class="tl-label">"플레이리스트 만들기" 클릭</div>
+            <div class="tl-detail">POST /api/setlist</div></div>
+        </li>
+        <li class="tl-step" data-step="1">
+          <span class="tl-dot"></span>
+          <div><div class="tl-label">202 Accepted 수신</div>
+            <div class="tl-detail" id="tlAccepted">job_id + queue_position + estimated_wait_seconds</div></div>
+        </li>
+        <li class="tl-step" data-step="2">
+          <span class="tl-dot"></span>
+          <div><div class="tl-label">대기 안내 갱신 중</div>
+            <div class="tl-detail" id="tlPolling">GET /api/setlist/status/{job_id} · 1.5초 간격</div></div>
+        </li>
+        <li class="tl-step" data-step="3">
+          <span class="tl-dot"></span>
+          <div><div class="tl-label">예산 확보 → LLM 호출</div>
+            <div class="tl-detail">status: running (acquire 성공)</div></div>
+        </li>
+        <li class="tl-step" data-step="4">
+          <span class="tl-dot"></span>
+          <div><div class="tl-label">결과 렌더링</div>
+            <div class="tl-detail">status: done → renderResult()</div></div>
+        </li>
+      </ul>
+      <div class="controls">
+        <button class="ctl" id="playBtn">재생 ▸</button>
+        <button class="ctl ghost" id="resetBtn">처음부터</button>
+        <span class="note">약 3배속</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  좌측은 실제 라이트박스 크기(390×640 기준)로 style.css의 --bg·--card·--accent·spinner 정의를 그대로 사용.<br>
+  텍스트는 app.js의 setQueueWaitMessage()가 실제로 생성하는 문자열 그대로.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // 실제 app.js의 setQueueWaitMessage() 로직을 그대로 옮김(로직 재사용, 값만 시나리오용).
+  function queueMessage(waitSeconds, queuePosition) {
+    var ahead = queuePosition > 0 ? ("내 앞에 " + queuePosition + "명 대기 중. ") : "";
+    if (waitSeconds == null || waitSeconds <= 0) {
+      return ahead ? (ahead + "곧 시작할게요! 🙏") : "지금 요청이 몰려서 순서를 기다리고 있어요. 곧 시작할게요! 🙏";
+    }
+    var rounded = Math.max(1, Math.round(waitSeconds));
+    return ahead + "약 " + rounded + "초 정도 걸릴 것 같아요… ⏳";
+  }
+
+  // 시나리오: 실측 로그(queue_position 2, 초기 wait 6.9s)를 살짝 매끄럽게 다듬은 재생용 타임라인.
+  var TIMELINE = [
+    { t: 0.0,  step: 0 },
+    { t: 0.6,  step: 1, sub: queueMessage(6.9, 2) },
+    { t: 1.2,  step: 2, sub: queueMessage(5.4, 2) },
+    { t: 1.9,  step: 2, sub: queueMessage(4.0, 2) },
+    { t: 2.6,  step: 2, sub: queueMessage(2.6, 1) },
+    { t: 3.3,  step: 2, sub: queueMessage(1.2, 1) },
+    { t: 4.0,  step: 2, sub: queueMessage(0, 0) },
+    { t: 4.6,  step: 3, sub: "LLM 응답을 기다리는 중…" },
+    { t: 5.6,  step: 4 }
+  ];
+  var TOTAL = TIMELINE[TIMELINE.length - 1].t + 1.0;
+  var SPEED = 1; // 실시간(초 단위 그대로) — 이미 재생용으로 압축된 타임라인
+
+  var promptCard = document.getElementById("promptCard");
+  var loadingCard = document.getElementById("loadingCard");
+  var resultCard = document.getElementById("resultCard");
+  var submitBtn = document.getElementById("submitBtn");
+  var loadingSub = document.getElementById("loadingSub");
+  var loadingText = document.getElementById("loadingText");
+  var steps = Array.prototype.slice.call(document.querySelectorAll(".tl-step"));
+  var playBtn = document.getElementById("playBtn");
+  var resetBtn = document.getElementById("resetBtn");
+
+  var FLAVOR = ["플레이리스트를 만드는 중입니다~ 🎶", "요청을 무드로 해석하고 있어요… 🔮", "곡을 하모닉하게 잇는 중… 🎼"];
+
+  var raf = null, startTs = null, playing = false;
+
+  function applyFrame(simT) {
+    var current = TIMELINE[0];
+    for (var i = 0; i < TIMELINE.length; i++) {
+      if (TIMELINE[i].t <= simT) current = TIMELINE[i];
+    }
+    var step = current.step;
+
+    steps.forEach(function (el) {
+      var s = parseInt(el.dataset.step, 10);
+      el.classList.toggle("active", s === step);
+      el.classList.toggle("past", s < step);
+    });
+
+    if (step === 0) {
+      promptCard.style.display = "";
+      loadingCard.classList.remove("show");
+      resultCard.classList.remove("show");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "플레이리스트 만들기";
+    } else if (step >= 1 && step <= 3) {
+      promptCard.style.display = "none";
+      loadingCard.classList.add("show");
+      resultCard.classList.remove("show");
+      loadingText.textContent = FLAVOR[Math.floor(simT) % FLAVOR.length];
+      if (current.sub) loadingSub.textContent = current.sub;
+    } else if (step === 4) {
+      promptCard.style.display = "none";
+      loadingCard.classList.remove("show");
+      resultCard.classList.add("show");
+    }
+  }
+
+  function tick(ts) {
+    if (!startTs) startTs = ts;
+    var simT = ((ts - startTs) / 1000) * SPEED;
+    if (simT >= TOTAL) {
+      applyFrame(TOTAL);
+      playing = false;
+      playBtn.textContent = "다시 재생 ▸";
+      playBtn.disabled = false;
+      return;
+    }
+    applyFrame(simT);
+    raf = requestAnimationFrame(tick);
+  }
+
+  function reset() {
+    if (raf) cancelAnimationFrame(raf);
+    playing = false;
+    startTs = null;
+    applyFrame(0);
+    playBtn.textContent = "재생 ▸";
+    playBtn.disabled = false;
+  }
+
+  playBtn.addEventListener("click", function () {
+    if (playing) return;
+    playing = true;
+    startTs = null;
+    playBtn.textContent = "재생 중…";
+    playBtn.disabled = true;
+    raf = requestAnimationFrame(tick);
+  });
+  resetBtn.addEventListener("click", reset);
+
+  reset();
+})();
+</script>

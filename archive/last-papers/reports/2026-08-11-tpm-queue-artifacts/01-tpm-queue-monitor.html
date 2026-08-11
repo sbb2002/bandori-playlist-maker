@@ -1,0 +1,571 @@
+<title>TPM Queue Monitor — setlist-maker</title>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161922;
+    --surface-2: #1e222d;
+    --border: #2a3040;
+    --text: #e6e9f0;
+    --text-dim: #7d859b;
+    --text-faint: #4d5567;
+    --accent: #ffb020;
+    --accent-soft: rgba(255, 176, 32, 0.14);
+    --status-queued: #7d859b;
+    --status-queued-soft: rgba(125, 133, 155, 0.14);
+    --status-running: #4f9dff;
+    --status-running-soft: rgba(79, 157, 255, 0.14);
+    --status-done: #37d399;
+    --status-done-soft: rgba(55, 211, 153, 0.14);
+    --status-error: #ff5d5d;
+    --status-error-soft: rgba(255, 93, 93, 0.14);
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    padding: 32px 20px 64px;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: clamp(22px, 4vw, 30px);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 10px;
+    color: var(--text);
+  }
+  .lede {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--text-dim);
+    max-width: 62ch;
+    margin: 0 0 28px;
+  }
+  .lede code {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  section { margin-top: 40px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+  .section-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .section-note {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  /* ── 실측 로그 ── */
+  .terminal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow-x: auto;
+  }
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-faint); opacity: 0.5; }
+  .terminal-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-left: 6px;
+  }
+  .terminal pre {
+    margin: 0;
+    padding: 14px 16px 16px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.75;
+    white-space: pre;
+    color: var(--text-dim);
+  }
+  .terminal pre .t-cmd { color: var(--text); }
+  .terminal pre .t-job1 { color: var(--status-done); }
+  .terminal pre .t-job2 { color: var(--status-running); }
+  .terminal pre .t-job3 { color: var(--accent); }
+  .terminal pre .t-dim { color: var(--text-faint); }
+  .callout {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-dim);
+    margin: 12px 2px 0;
+    padding-left: 14px;
+    border-left: 2px solid var(--accent);
+  }
+
+  /* ── 시뮬레이션 ── */
+  .sim-frame {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .gauge-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+  .gauge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .gauge-track {
+    flex: 1;
+    height: 20px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .gauge-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 100%;
+    background: linear-gradient(90deg, var(--accent), #ffd479);
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .gauge-fill.drain { transition: width 0.18s ease-out; }
+  .gauge-readout {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    white-space: nowrap;
+    min-width: 96px;
+    text-align: right;
+  }
+
+  .lanes { display: flex; flex-direction: column; gap: 10px; }
+  .card {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--text-faint);
+    border-radius: 5px;
+    padding: 12px 14px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-left-color 0.3s ease;
+  }
+  .card.in { opacity: 1; transform: translateY(0); }
+  .card.st-queued { border-left-color: var(--status-queued); }
+  .card.st-running { border-left-color: var(--status-running); }
+  .card.st-done { border-left-color: var(--status-done); }
+  .card.st-error { border-left-color: var(--status-error); }
+
+  .card-id {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .card-id .who { color: var(--text-faint); font-size: 10.5px; display: block; margin-top: 2px; }
+
+  .card-mid { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .card-status-text {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .card-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--status-running);
+    transition: width 0.4s linear, background 0.3s ease;
+  }
+  .card.st-done .card-bar-fill { background: var(--status-done); width: 100% !important; }
+
+  .pill {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .st-queued .pill { color: var(--status-queued); background: var(--status-queued-soft); }
+  .st-running .pill { color: var(--status-running); background: var(--status-running-soft); }
+  .st-done .pill { color: var(--status-done); background: var(--status-done-soft); }
+  .st-error .pill { color: var(--status-error); background: var(--status-error-soft); }
+
+  .card-pos {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: right;
+    white-space: nowrap;
+    min-width: 64px;
+  }
+  .card-pos b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+  .sim-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  button {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--bg);
+    background: var(--accent);
+    border: none;
+    border-radius: 4px;
+    padding: 9px 16px;
+    cursor: pointer;
+  }
+  button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  button.ghost {
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid var(--border);
+  }
+  button:disabled { opacity: 0.4; cursor: default; }
+  .speed-note {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 560px) {
+    .card { grid-template-columns: 1fr; gap: 8px; }
+    .card-pos { text-align: left; }
+    .gauge-row { flex-wrap: wrap; }
+    .gauge-readout { min-width: 0; }
+  }
+</style>
+
+<p class="eyebrow">setlist-maker · backend/app/jobs.py</p>
+<h1>TPM Queue Monitor</h1>
+<p class="lede">
+  Groq는 <code>openai/gpt-oss-20b</code>에 분당 8,000토큰(TPM) 한도를 건다. 요청 1건의 고정 비용만
+  ~5,600토큰이라, 두 번째 요청부터는 그냥 기다려야 한다. 예전엔 이 대기를 HTTP 요청 안에서 블로킹하다
+  20초 만에 429로 끊었는데, 이제 <code>JobStore</code>가 잡을 등록하고 즉시 202를 준 뒤 백그라운드에서
+  실제 예산이 찰 때까지 기다린다 — 아래는 그 실측 로그와, 같은 메커니즘을 재생해보는 시뮬레이션이다.
+</p>
+
+<section>
+  <div class="section-head">
+    <span class="section-title">실측 — 2026-08-10 로컬 세션</span>
+    <span class="section-note">curl, 동일 프롬프트 3건 연타</span>
+  </div>
+  <div class="terminal">
+    <div class="terminal-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="terminal-label">bash — POST /api/setlist × 3, 이어서 GET status 폴링</span>
+    </div>
+    <pre><span class="t-dim">$</span> <span class="t-cmd">curl -sX POST .../api/setlist</span>  <span class="t-dim"># req1</span>
+<span class="t-job1">{"job_id":"a9eba17f…","estimated_wait_seconds":0.0,"queue_position":0}</span>
+
+<span class="t-dim">$</span> <span class="t-cmd">curl -sX POST .../api/setlist</span>  <span class="t-dim"># req2, 0.1초 뒤</span>
+<span class="t-job2">{"job_id":"e52f1d1d…","estimated_wait_seconds":7.0,"queue_position":1}</span>
+
+<span class="t-dim">$</span> <span class="t-cmd">curl -sX POST .../api/setlist</span>  <span class="t-dim"># req3, 또 0.1초 뒤</span>
+<span class="t-job3">{"job_id":"4d540c5f…","estimated_wait_seconds":6.9,"queue_position":2}</span>
+
+<span class="t-dim">$</span> <span class="t-cmd">watch curl .../api/setlist/status/4d540c5f…</span>  <span class="t-dim"># req3 폴링 (1초 간격)</span>
+<span class="t-job3">running  wait=28.9s  ahead=2</span>
+<span class="t-job3">running  wait=27.7s  ahead=2</span>
+<span class="t-job3">running  wait=25.2s  ahead=2</span>
+<span class="t-job3">running  wait=22.7s  ahead=2</span>
+<span class="t-job3">running  wait=19.1s  ahead=2</span>
+<span class="t-job3">running  wait=15.0s  ahead=2</span>
+<span class="t-job3">running  wait=13.8s  ahead=2</span>  <span class="t-dim">← req1이 아직 안 끝나 ahead=2 그대로</span>
+<span class="t-dim">   ⋮</span>
+<span class="t-job1">req1 → done</span>
+<span class="t-job3">running  wait=33.2s  ahead=0</span>  <span class="t-dim">← req1·req2 끝나 ahead=0인데, req2가 방금 예산을 더</span>
+<span class="t-job3">running  wait=31.8s  ahead=0</span>  <span class="t-dim">  가져가 wait는 오히려 늘어남(근사치라 이런 역전이 있음)</span>
+<span class="t-job3"><b>done</b>     result: {"params": {...}, "picks": [...] }</span></pre>
+  </div>
+  <p class="callout">
+    req3의 대기시간이 13.8초→33.2초로 <em>늘어난</em> 구간이 핵심이다 — <code>estimated_wait_seconds</code>는
+    "지금 이 순간" 남은 예산 기준 근사치일 뿐, 순번을 예약해두지 않는다. req2가 먼저 깨어나 토큰을 가져가면
+    req3의 실제 대기는 늘어날 수 있다. 그래도 <code>queue_position</code>(몇 명 앞섰는지)은 끝난 잡만 정확히
+    빠지므로 신뢰할 수 있다.
+  </p>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="section-title">시뮬레이션 — 같은 메커니즘 재생</span>
+    <span class="section-note">TokenBucketLimiter(8000 TPM, 요청당 ~5,600 토큰)</span>
+  </div>
+  <div class="sim-frame">
+    <div class="gauge-row">
+      <span class="gauge-label">TPM BUDGET</span>
+      <div class="gauge-track"><div class="gauge-fill" id="gaugeFill"></div></div>
+      <span class="gauge-readout" id="gaugeReadout">8000 / 8000</span>
+    </div>
+
+    <div class="lanes" id="lanes"></div>
+
+    <div class="sim-controls">
+      <button id="playBtn">재생 ▸</button>
+      <button id="resetBtn" class="ghost">처음부터</button>
+      <span class="speed-note" id="speedNote">6배속 재생 · 실제 대기초는 카드에 그대로 표시</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  bandori-playlist-maker · patch/setlist-queue-status · GroqMoodInterpreter.estimate_wait() 기반<br>
+  실측 로그는 실제 로컬 세션 curl 출력을 그대로 옮김. 아래 시뮬레이션은 동일 알고리즘(TokenBucketLimiter)의
+  단순화된 재생이며 숫자는 예시.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var CAPACITY = 8000;
+  var REFILL_PER_SEC = CAPACITY / 60; // 133.33 tok/s
+  var COST = 5600;
+  var SPEED = 6; // 재생 배속
+
+  // 요청 3건: [도착 시각(초), 표시용 이름]
+  var REQS = [
+    { name: "req A", arriveAt: 0.0 },
+    { name: "req B", arriveAt: 0.3 },
+    { name: "req C", arriveAt: 0.6 }
+  ];
+  var LLM_CALL_SEC = 3.2; // acquire 성공 후 실제 Groq 호출에 걸리는 시간(가정)
+
+  var lanesEl = document.getElementById("lanes");
+  var gaugeFillEl = document.getElementById("gaugeFill");
+  var gaugeReadoutEl = document.getElementById("gaugeReadout");
+  var playBtn = document.getElementById("playBtn");
+  var resetBtn = document.getElementById("resetBtn");
+
+  var cards = [];
+  REQS.forEach(function (r, i) {
+    var card = document.createElement("div");
+    card.className = "card st-queued";
+    card.innerHTML =
+      '<div class="card-id">' + r.name + '<span class="who">job_' + (i + 1) + "</span></div>" +
+      '<div class="card-mid">' +
+        '<div class="card-status-text">대기열 진입 전</div>' +
+        '<div class="card-bar"><div class="card-bar-fill"></div></div>' +
+      "</div>" +
+      '<span class="pill">QUEUED</span>' +
+      '<div class="card-pos">앞에 <b class="pos-val">–</b>명</div>';
+    lanesEl.appendChild(card);
+    cards.push({
+      el: card,
+      statusText: card.querySelector(".card-status-text"),
+      bar: card.querySelector(".card-bar-fill"),
+      pill: card.querySelector(".pill"),
+      pos: card.querySelector(".pos-val"),
+      req: r,
+      state: "pending", // pending → arrived → acquired → calling → done
+      acquiredAt: null,
+      doneAt: null
+    });
+  });
+
+  var budget = CAPACITY;
+  var raf = null;
+  var startTime = null;
+  var playing = false;
+
+  function fmtBudget(v) {
+    return Math.max(0, Math.round(v)) + " / " + CAPACITY;
+  }
+
+  function render(simT) {
+    // 예산 갱신(연속 리필 + 즉시 소비는 acquire 시점에 별도 처리)
+    gaugeReadoutEl.textContent = fmtBudget(budget);
+    gaugeFillEl.style.width = Math.max(0, Math.min(100, (budget / CAPACITY) * 100)) + "%";
+
+    cards.forEach(function (c) {
+      if (c.req.arriveAt > simT) return; // 아직 도착 전
+
+      if (c.el.classList.contains("in") === false) c.el.classList.add("in");
+
+      if (c.state === "pending") {
+        c.state = "arrived";
+      }
+
+      if (c.state === "arrived") {
+        var need = COST - budget;
+        if (budget >= COST) {
+          // 예산 확보 → acquire
+          budget -= COST;
+          c.state = "calling";
+          c.acquiredAt = simT;
+        } else {
+          var etaSec = need / REFILL_PER_SEC;
+          setCardState(c, "queued", "예산 부족 · 약 " + Math.max(0, Math.round(etaSec)) + "초 후 시작 예상");
+        }
+      }
+
+      if (c.state === "calling") {
+        var elapsed = simT - c.acquiredAt;
+        if (elapsed >= LLM_CALL_SEC) {
+          c.state = "done";
+          c.doneAt = simT;
+        } else {
+          setCardState(c, "running", "LLM 호출 중…", elapsed / LLM_CALL_SEC);
+        }
+      }
+
+      if (c.state === "done") {
+        setCardState(c, "done", "완료");
+      }
+
+      c.pos.textContent = c.state === "done" ? "0" : countAhead(c);
+    });
+  }
+
+  function countAhead(card) {
+    var n = 0;
+    cards.forEach(function (other) {
+      if (other !== card && other.req.arriveAt < card.req.arriveAt && other.state !== "done") n++;
+    });
+    return n;
+  }
+
+  function setCardState(c, state, text, barFrac) {
+    c.el.classList.remove("st-queued", "st-running", "st-done", "st-error");
+    c.el.classList.add("st-" + state);
+    c.statusText.textContent = text;
+    c.pill.textContent = state.toUpperCase();
+    if (typeof barFrac === "number") c.bar.style.width = Math.round(barFrac * 100) + "%";
+    if (state === "queued") c.bar.style.width = "0%";
+  }
+
+  function tick(ts) {
+    if (!startTime) startTime = ts;
+    var simT = ((ts - startTime) / 1000) * SPEED;
+
+    // 예산 리필(선형, 잡은 acquire 순간 즉시 차감 — render() 안에서 처리)
+    budget = Math.min(CAPACITY, budget + (REFILL_PER_SEC / 60) * SPEED);
+
+    render(simT);
+
+    var allDone = cards.every(function (c) { return c.state === "done"; });
+    if (allDone) {
+      playing = false;
+      playBtn.textContent = "다시 재생 ▸";
+      playBtn.disabled = false;
+      return;
+    }
+    raf = requestAnimationFrame(tick);
+  }
+
+  function resetSim() {
+    if (raf) cancelAnimationFrame(raf);
+    playing = false;
+    startTime = null;
+    budget = CAPACITY;
+    cards.forEach(function (c) {
+      c.state = "pending";
+      c.acquiredAt = null;
+      c.doneAt = null;
+      c.el.classList.remove("in", "st-running", "st-done", "st-error");
+      c.el.classList.add("st-queued");
+      c.statusText.textContent = "대기열 진입 전";
+      c.bar.style.width = "0%";
+      c.pill.textContent = "QUEUED";
+      c.pos.textContent = "–";
+    });
+    gaugeReadoutEl.textContent = fmtBudget(CAPACITY);
+    gaugeFillEl.style.width = "100%";
+    playBtn.textContent = "재생 ▸";
+    playBtn.disabled = false;
+  }
+
+  playBtn.addEventListener("click", function () {
+    if (playing) return;
+    if (cards.every(function (c) { return c.state === "done"; })) resetSim();
+    playing = true;
+    playBtn.textContent = "재생 중…";
+    playBtn.disabled = true;
+    raf = requestAnimationFrame(tick);
+  });
+  resetBtn.addEventListener("click", resetSim);
+
+  resetSim();
+})();
+</script>
