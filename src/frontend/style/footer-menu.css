@@ -87,7 +87,20 @@
 .menu-header strong { font-size: 1rem; }
 
 /* 프리셋 리스트 */
-.preset-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; overscroll-behavior: contain; flex: 1 1 auto; }
+.preset-list {
+  list-style: none; margin: 0; padding: 0; overflow-y: auto; overscroll-behavior: contain; flex: 1 1 auto;
+  /* 저장된 플레이리스트 목록 스크롤바 — OS 기본값(라이트/다크 무관하게 고정된 색) 대신
+     현재 테마 변수를 따르도록 지정(Firefox). */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--line-rgb),0.35) transparent;
+}
+/* 위와 동일한 목적의 Chrome/Safari(WebKit) 대응. */
+.preset-list::-webkit-scrollbar { width: 8px; }
+.preset-list::-webkit-scrollbar-track { background: transparent; }
+.preset-list::-webkit-scrollbar-thumb {
+  background: rgba(var(--line-rgb),0.35); border-radius: 8px;
+}
+.preset-list::-webkit-scrollbar-thumb:hover { background: rgba(var(--line-rgb),0.5); }
 .preset-empty { color: var(--muted); font-size: 0.85rem; line-height: 1.6; padding: 12px 8px; }
 .preset-item { display: flex; align-items: stretch; gap: 4px; margin-bottom: 6px; }
 .preset-open {

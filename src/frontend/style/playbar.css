@@ -1,14 +1,15 @@
 /* ── 하단 고정 플레이바 ───────────────────────────────────────────────────────── */
 .playbar {
-  /* 플레이바는 라이트/다크 테마와 무관하게 항상 어두운 "플레이어 크롬"으로 고정
-     (유튜브 등 플레이어 컨트롤 바 관례) — 아래 --pb-* 는 테마 변수(--card-2 등) 대신 사용. */
-  --pb-text: #eef0f7;
-  --pb-muted: #9aa0b4;
-  --pb-surface: #232636;
-  --pb-line-rgb: 255,255,255;
+  /* 2026-08-11: 예전엔 플레이바만 라이트/다크와 무관하게 항상 어두운 크롬으로 고정했으나(버그
+     리포트) 다른 UI와 마찬가지로 테마를 따라가도록 --pb-* 를 루트 테마 변수에 연결한다. */
+  --pb-text: var(--text);
+  --pb-muted: var(--muted);
+  --pb-surface: var(--card-2);
+  --pb-line-rgb: var(--line-rgb);
+  --pb-bg-rgb: 255,255,255; /* 라이트 기본값, 다크는 아래 [data-theme="dark"]에서 덮어씀 */
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 42;
-  /* 카드와 같은 톤이되 살짝 어둡고 블러 — 위로 스크롤되는 트랙 카드들과 시각적으로 분리된다. */
-  background: rgba(20,22,32,0.88);
+  /* 카드와 같은 톤이되 살짝 불투명하고 블러 — 위로 스크롤되는 트랙 카드들과 시각적으로 분리된다. */
+  background: rgba(var(--pb-bg-rgb), 0.88);
   backdrop-filter: blur(12px);
   border-top: 1px solid rgba(var(--pb-line-rgb),0.1);
   box-shadow: 0 -10px 30px rgba(0,0,0,0.45);
@@ -16,6 +17,7 @@
   pointer-events: none;
   padding-bottom: env(safe-area-inset-bottom, 0); /* 노치 기기 하단 안전영역 */
 }
+:root[data-theme="dark"] .playbar { --pb-bg-rgb: 20,22,32; }
 .playbar.show { transform: translateY(0); pointer-events: auto; }
 
 /* 진행바: 보이는 선은 얇게 두되, 클릭·터치 판정은 투명 여백을 포함한 바깥 상자가 받는다
@@ -64,7 +66,7 @@
 .playbar-info:hover { background: var(--pb-surface); }
 .playbar-title {
   display: block; max-width: 100%; overflow: hidden;
-  font-weight: 700; font-size: 1.05rem; color: #fff;
+  font-weight: 700; font-size: 1.05rem; color: var(--pb-text);
   white-space: nowrap; text-overflow: ellipsis;
 }
 /* 곡 이름이 바 폭을 넘치면 한 방향(왼쪽)으로 끊김 없이 흐른다. JS가 사본을 하나 덧붙여
@@ -154,7 +156,7 @@
   background: var(--pb-surface); border: 1px solid rgba(var(--pb-line-rgb),0.08);
   font-variant-numeric: tabular-nums; line-height: 1.25;
 }
-.playbar-count-cur { color: #fff; font-size: 1rem; font-weight: 700; }
+.playbar-count-cur { color: var(--pb-text); font-size: 1rem; font-weight: 700; }
 .playbar-count-sep, .playbar-count-total { color: var(--pb-muted); font-size: 0.85rem; font-weight: 500; }
 
 @media (max-width: 520px) {
@@ -177,7 +179,7 @@
      밴드명(0.82rem) 합의 80% 수준(≈1.5rem)으로 키워 구석에 있어도 눈에 잘 띄게 한다. */
   .playbar-time {
     position: absolute; right: 18px; bottom: 12px;
-    font-size: 1.5rem; font-weight: 700; color: #fff;
+    font-size: 1.5rem; font-weight: 700; color: var(--pb-text);
   }
   .wrap { padding-bottom: 152px; } /* 2단 플레이바(+터치용 진행바 판정) 높이만큼 여유 */
 }

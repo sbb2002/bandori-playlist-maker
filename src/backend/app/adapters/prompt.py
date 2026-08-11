@@ -17,7 +17,7 @@ from ..ports.mood_port import MoodInterpretationError
 _BRIGHTNESS_RANGE = (-1.0, 1.0)
 _ENERGY_RANGE = (0.0, 1.0)
 _STAGE_RANGE = (2, 5)
-_MINUTES_RANGE = (10, 180)
+_MINUTES_RANGE = (30, 180)  # 2026-08-11: AI 모드가 10~15분짜리 짧은 플리를 내놓던 버그 수정 — 하한 상향
 _SUMMARY_MAX = 120
 _MIN_STAGE_MINUTES = 3.0  # 프론트 app.js MIN_WIDTH_MIN과 동일 하한(구간이 너무 촘촘해지는 것 방지)
 
@@ -122,8 +122,11 @@ SYSTEM_PROMPT = (
     "- stage_bands: (optional) array of length stage_count, string|null. Fill only when the user "
     "explicitly splits time across named bands, using their exact wording; otherwise null — never "
     "invent a band.\n"
-    "- target_minutes: integer 10-180. Use the stated value if given; otherwise estimate from the "
-    "activity; null only if there is truly no clue.\n"
+    "- target_minutes: integer 30-180, never below 30 even for short activities or quick moods — pad "
+    "with a natural continuation instead. Use the stated value if given (clamp up to 30 if the user "
+    "asked for less); otherwise estimate a sensible length from the activity/mood (a full album-length "
+    "session by default, longer for long activities like driving or studying); null only if there is "
+    "truly no clue, in which case 60 is assumed.\n"
     "- interpretation_summary: one warm Korean sentence (<=80 chars) describing the mood, no numbers.\n"
     "- tags: 2-5 Korean keywords, no '#', never empty.\n"
     "- song_type: \"all\"|\"original\"|\"cover\" — only set original/cover if explicitly mentioned.\n"
