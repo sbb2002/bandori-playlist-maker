@@ -24,6 +24,18 @@ _MIN_STAGE_MINUTES = 3.0  # 프론트 app.js MIN_WIDTH_MIN과 동일 하한(구�
 DEFAULT_BRIGHTNESS = 0.0
 DEFAULT_START_ENERGY = 0.4
 DEFAULT_STAGE_COUNT = 3
+
+# 프론트 언어 선택(app/i18n.js SUPPORTED_LANGS) → LLM에 지시할 언어 이름(영문, 시스템
+# 프롬프트 전체가 영문이라 통일). interpretation_summary/tags/stage_params.impression을
+# 이 언어로 쓰도록 지시하는 데만 쓰고, 그 외 필드(숫자류)는 언어와 무관하다.
+_LANGUAGE_NAMES = {
+    "ko": "Korean",
+    "ja": "Japanese",
+    "en": "English",
+    "zh-Hans": "Simplified Chinese",
+    "zh-Hant": "Traditional Chinese",
+}
+DEFAULT_LANG = "ko"
 # 3단계: MoodParameters.stage_params 항목의 수치 키(StageSpec/Stage와 동일 이름, 전부 0.0~1.0).
 _STAGE_PARAM_KEYS = (
     "valence", "lufs_integrated", "lra",
@@ -127,8 +139,9 @@ SYSTEM_PROMPT = (
     "asked for less); otherwise estimate a sensible length from the activity/mood (a full album-length "
     "session by default, longer for long activities like driving or studying); null only if there is "
     "truly no clue, in which case 60 is assumed.\n"
-    "- interpretation_summary: one warm Korean sentence (<=80 chars) describing the mood, no numbers.\n"
-    "- tags: 2-5 Korean keywords, no '#', never empty.\n"
+    "- interpretation_summary: one warm sentence (<=80 chars, in the target output language given "
+    "below) describing the mood, no numbers.\n"
+    "- tags: 2-5 keywords in the target output language, no '#', never empty.\n"
     "- song_type: \"all\"|\"original\"|\"cover\" — only set original/cover if explicitly mentioned.\n"
     "- stage_params: array of length stage_count, never null. Each object has 6 floats (0.0-1.0) "
     "plus impression:\n"
@@ -141,8 +154,9 @@ SYSTEM_PROMPT = (
     "  If [지표 분포 통계] (feature distribution stats) is given, ground each value in that "
     "distribution (min~median or median~max) instead of defaulting to 0.5; prefer the matching "
     "band's row if one band is requested.\n"
-    "  - impression: a Korean sentence (<=40 chars, in Korean) describing the *lyrical* mood of this "
-    "stage — an emotional description, not a number. Never empty or null.\n"
+    "  - impression: a short sentence (<=40 chars, in the target output language given below) "
+    "describing the *lyrical* mood of this stage — an emotional description, not a number. "
+    "Never empty or null.\n"
 )
 
 # OpenRouter response_format용 JSON 스키마(structured output 지원 모델에서 사용).
@@ -229,6 +243,7 @@ def _format_feature_stats(feature_stats: dict) -> str:
 def build_messages(
     user_prompt: str, previous_prompt: str | None = None,
     feature_stats: dict | None = None,
+    lang: str = DEFAULT_LANG,
 ) -> list[dict]:
     """OpenRouter/Groq chat/completions messages 배열을 만든다.
 
@@ -239,12 +254,22 @@ def build_messages(
     미배포 실험 어댑터(groq_multistage_adapter, previous_prompt/previous_params를 0차
     변경판정에 실제 사용)와의 시그니처 호환을 위해서만 남겨두고 여기서는 무시한다.
     feature_stats가 주어지면 시스템 메시지 끝에 [지표 분포 통계] 블록을 덧붙인다.
+    lang이 주어지면 interpretation_summary·tags·stage_params[].impression을 그 언어로 쓰라는
+    지시를 시스템 메시지 맨 끝(가장 최근 지시가 더 잘 지켜지는 recency 효과 노림)에 덧붙인다
+    — 필드 설명(SYSTEM_PROMPT)과 few-shot 예시(_build_dynamic_examples) 자체는 언어 중립적
+    구조 설명이라 그대로 두고, 실제 출력 언어만 이 마지막 지시로 못박는다.
     """
     user_content = user_prompt
     # 예시 숫자를 요청마다 새로 jitter(모델의 예시-그대로-복사 방지, 위 _build_dynamic_examples 참고).
     system_content = SYSTEM_PROMPT + "\n" + _build_dynamic_examples(random.Random())
     if feature_stats:
         system_content += "\n\n" + _format_feature_stats(feature_stats)
+    language_name = _LANGUAGE_NAMES.get(lang, _LANGUAGE_NAMES[DEFAULT_LANG])
+    system_content += (
+        f"\n\nIMPORTANT: Write interpretation_summary, tags, and every stage_params[].impression "
+        f"in {language_name}. All other fields (numbers, song_type, stage_bands) are "
+        "language-independent — leave them as-is regardless of the output language."
+    )
     return [
         {"role": "system", "content": system_content},
         {"role": "user", "content": user_content},

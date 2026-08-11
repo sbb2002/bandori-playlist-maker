@@ -106,13 +106,13 @@ async function loadBands() {
     // 구간별 밴드 셀렉터는 이 응답이 오기 전에 이미 그려졌을 수 있어(비동기), 도착 즉시 갱신.
     if (stageModel) renderStageGraph();
   } catch (_) {
-    bandListEl.textContent = "밴드 목록을 불러오지 못했어요 (백엔드가 켜져 있는지 확인).";
+    bandListEl.textContent = t("options.bandLoadError");
   }
 }
 
 function renderBands(bands) {
   bandListEl.replaceChildren();
-  if (!bands.length) { bandListEl.textContent = "밴드 없음"; return; }
+  if (!bands.length) { bandListEl.textContent = t("options.bandNone"); return; }
   // 표처럼 가지런한 그리드: 밴드 아이콘 + 곡 수(이름 생략, 툴팁으로 제공). 순서=BAND_ORDER.
   const countByBand = new Map(bands.map((b) => [b.band, b.count]));
   for (const band of bandsInSelectorOrder([...countByBand.keys()])) {
@@ -167,4 +167,10 @@ function syncStageBandsToGlobalFilter() {
     renderBandPopupOptions(impressionBandPopupEls[openBandPopupIndex], openBandPopupIndex);
   }
 }
+
+// 언어 전환 시 세부 설정 그래프 전체(구간 수·"밴드 고정"·placeholder 예시 등 번역 문자열이
+// 섞인 동적 UI)를 다시 그린다. renderStageGraph()는 매번 통째로 재구성하므로 재호출만으로 충분.
+document.addEventListener("i18n:change", () => {
+  if (stageModel) renderStageGraph();
+});
 

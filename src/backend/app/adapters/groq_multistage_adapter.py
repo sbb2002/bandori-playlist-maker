@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import random
 import re
+import threading
 import time
 
 import httpx
@@ -352,6 +353,8 @@ class GroqMultistageMoodInterpreter:
         self, prompt: str, previous_prompt: str | None = None,
         energy_stats: dict | None = None,
         feature_stats: dict | None = None,  # 미사용 — 다단계 어댑터는 stage_params 미지원(포트 시그니처 준수용)
+        lang: str = "ko",  # 미사용 — 실험용 어댑터라 다국어 미지원(포트 시그니처 준수용), 항상 한국어 산출
+        acquired_event: threading.Event | None = None,  # 미사용 — 이 어댑터는 TPM 리미터 미구현(포트 시그니처 준수용)
     ) -> MoodParameters:
         target_minutes = self._stage1_minutes(prompt)
         stages = self._stage2_stages(prompt, target_minutes)

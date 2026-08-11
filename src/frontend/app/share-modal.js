@@ -38,7 +38,7 @@ document.addEventListener("keydown", (e) => {
 function closeShareModal() { hide(shareModalEl); lockBodyScroll(false); }
 function resetCopyBtn() {
   const btn = $("share-copy");
-  btn.textContent = "복사";
+  btn.textContent = t("share.copy");
   btn.classList.remove("copied");
 }
 
@@ -54,7 +54,7 @@ async function copyShareUrl() {
     shareUrlInputEl.select();
     try { ok = document.execCommand("copy"); } catch (_2) { ok = false; }
   }
-  btn.textContent = ok ? "복사됨 ✓" : "직접 복사하세요";
+  btn.textContent = ok ? t("share.copied") : t("share.copyManual");
   btn.classList.toggle("copied", ok);
   setTimeout(resetCopyBtn, 1500);
   if (ok) track("playlist_link_copied", { count: picks.length });

@@ -1,19 +1,33 @@
 // ── 오마카세(시간대+날씨 기반 프롬프트 자동 생성) ──────────────────────────────────
+// 문구 뱅크는 app/i18n.js(omakase.time.*/omakase.weather.*/omakase.suffixes)에 언어별로
+// 있다 — 여기서는 getter로 항상 현재 언어의 배열을 읽는다(고정 배열로 캐시하지 않음).
 const OMAKASE_TIME_PHRASES = {
-  dawn: ["차분하게 하루를 여는", "고요한 새벽 감성의"],
-  morning: ["상쾌하게 하루를 시작하는", "기운 넘치는 아침"],
-  afternoon: ["나른한 오후를 깨워줄", "집중력 올려주는"],
-  evening: ["노을 지는 저녁에 어울리는", "하루를 마무리하는 잔잔한"],
-  night: ["늦은 밤 감성적인", "잠들기 전 편안한"],
+  get dawn() { return tArr("omakase.time.dawn"); },
+  get morning() { return tArr("omakase.time.morning"); },
+  get afternoon() { return tArr("omakase.time.afternoon"); },
+  get evening() { return tArr("omakase.time.evening"); },
+  get night() { return tArr("omakase.time.night"); },
 };
 const OMAKASE_WEATHER_PHRASES = {
-  clear: ["맑고 청량한", "햇살 좋은 날씨에 어울리는"],
-  cloudy: ["흐린 날씨에 잔잔한", "구름 낀 하늘 아래 아련한"],
-  rain: ["비 오는 날 감성적인", "빗소리와 잘 어울리는"],
-  snow: ["눈 내리는 날의 포근한", "하얗게 눈 쌓인 겨울 감성의"],
-  storm: ["천둥번개 치는 날 몰입감 있는", "폭풍우 속 강렬한"],
+  get clear() { return tArr("omakase.weather.clear"); },
+  get cloudy() { return tArr("omakase.weather.cloudy"); },
+  get rain() { return tArr("omakase.weather.rain"); },
+  get snow() { return tArr("omakase.weather.snow"); },
+  get storm() { return tArr("omakase.weather.storm"); },
 };
-const OMAKASE_SUFFIXES = ["플레이리스트 만들어줘", "세트리스트 부탁해", "플리 하나 뽑아줘"];
+function omakaseSuffixes() { return tArr("omakase.suffixes"); }
+
+// "밤(night)"·"새벽(dawn)"엔 해가 없어 "햇살 좋은" 같은 낮 전용 표현이 말이 안 된다("햇살 좋은
+// 날씨에 어울리는 늦은 밤 감성적인 플리" 버그 리포트) — 그 시간대에는 clearDaytime 문구를
+// 풀에서 아예 뺀다. 다른 날씨(비/눈/폭풍/흐림) 문구는 시간대 특정 표현이 없어 그대로 둔다.
+const OMAKASE_DAYTIME_PERIODS = new Set(["morning", "afternoon", "evening"]);
+function omakaseWeatherPool(weather, timeOfDay) {
+  const base = OMAKASE_WEATHER_PHRASES[weather] || [];
+  if (weather === "clear" && OMAKASE_DAYTIME_PERIODS.has(timeOfDay)) {
+    return [...base, ...tArr("omakase.weather.clearDaytime")];
+  }
+  return base;
+}
 
 function omakaseTimeOfDay(hour) {
   if (hour >= 5 && hour < 8) return "dawn";
@@ -87,11 +101,12 @@ function getOmakaseContext() {
 
 function buildOmakasePrompt(ctx) {
   const parts = [];
-  if (ctx.weather && OMAKASE_WEATHER_PHRASES[ctx.weather]) {
-    parts.push(pickRandom(OMAKASE_WEATHER_PHRASES[ctx.weather]));
+  if (ctx.weather) {
+    const pool = omakaseWeatherPool(ctx.weather, ctx.timeOfDay);
+    if (pool.length) parts.push(pickRandom(pool));
   }
   parts.push(pickRandom(OMAKASE_TIME_PHRASES[ctx.timeOfDay]));
-  parts.push(pickRandom(OMAKASE_SUFFIXES));
+  parts.push(pickRandom(omakaseSuffixes()));
   return parts.join(" ");
 }
 
@@ -112,7 +127,7 @@ if (omakaseBtn) {
     const prevPlaceholder = promptEl.placeholder;
     promptEl.disabled = true;
     promptEl.classList.add("prompt-generating");
-    promptEl.placeholder = "오마카세 프롬프트 생성 중…";
+    promptEl.placeholder = t("omakase.generating");
     try {
       const ctx = await getOmakaseContext();
       promptEl.value = buildOmakasePrompt(ctx);

@@ -32,6 +32,50 @@ if (themeToggleBtn) {
   themeToggleBtn.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === "dark"));
 }
 
+// ── 언어 선택 ─────────────────────────────────────────────────────────────────
+// 번역 문자열·전환 로직 자체는 app/i18n.js(항상 첫 번째로 로드) 담당 — 여기서는 버튼·팝업
+// UI만 다루고 실제 언어 전환은 i18n.setLang()에 위임한다.
+const langToggleBtn = $("lang-toggle");
+const langPopupEl = $("lang-popup");
+if (langToggleBtn && langPopupEl) {
+  const closeLangPopup = () => {
+    langPopupEl.hidden = true;
+    langToggleBtn.setAttribute("aria-expanded", "false");
+  };
+  const syncLangUi = () => {
+    const lang = window.i18n.getLang();
+    langPopupEl.querySelectorAll(".lang-option").forEach((el) => {
+      const active = el.dataset.lang === lang;
+      el.classList.toggle("is-active", active);
+      el.setAttribute("aria-checked", String(active));
+      if (active) langToggleBtn.textContent = el.dataset.code;
+    });
+  };
+  langToggleBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const willOpen = langPopupEl.hidden;
+    langPopupEl.hidden = !willOpen;
+    langToggleBtn.setAttribute("aria-expanded", String(willOpen));
+  });
+  langPopupEl.querySelectorAll(".lang-option").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      window.i18n.setLang(btn.dataset.lang);
+      track("lang_select", { lang: btn.dataset.lang });
+      closeLangPopup();
+    });
+  });
+  document.addEventListener("click", (e) => {
+    if (!langPopupEl.hidden && !langPopupEl.contains(e.target) && e.target !== langToggleBtn) {
+      closeLangPopup();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !langPopupEl.hidden) closeLangPopup();
+  });
+  syncLangUi();
+  document.addEventListener("i18n:change", syncLangUi);
+}
+
 // ── 재생 상태 ─────────────────────────────────────────────────────────────────
 let picks = [];
 let current = -1;
@@ -66,7 +110,7 @@ let restoring = false; // 프리셋 복원 중엔 새 프리셋 자동생성 생
 // 한계에 닿았을 때만 안내한다(native maxlength라 501번째 글자부터는 조용히 씹혀서 이유를 알기 어려움).
 promptEl.addEventListener("input", () => {
   if (promptEl.value.length >= promptEl.maxLength) {
-    promptHintEl.textContent = `⚠️ ${promptEl.maxLength}자까지만 적을 수 있어요.`;
+    promptHintEl.textContent = t("form.promptMaxLen", { n: promptEl.maxLength });
     promptHintEl.classList.add("notice");
   } else {
     promptHintEl.textContent = "";

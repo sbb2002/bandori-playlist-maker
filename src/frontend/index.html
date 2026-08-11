@@ -47,73 +47,86 @@
 </head>
 <body>
   <!-- 좌상단 메뉴(햄버거 ↔ X) → 좌측 프리셋 패널 -->
-  <button id="menu-btn" class="menu-btn" type="button" aria-label="메뉴 열기" aria-expanded="false">
+  <button id="menu-btn" class="menu-btn" type="button" data-i18n-aria-label="menu.open" aria-label="메뉴 열기" aria-expanded="false">
     <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
   </button>
   <!-- 우상단 테마 토글(햄버거 메뉴 버튼과 대칭 위치) -->
-  <button type="button" id="theme-toggle" class="theme-toggle" aria-label="다크 모드 전환" aria-pressed="false">
+  <button type="button" id="theme-toggle" class="theme-toggle" data-i18n-aria-label="theme.toggle" aria-label="다크 모드 전환" aria-pressed="false">
     <span class="theme-toggle-icon" data-theme-icon="light" aria-hidden="true">☀️</span>
     <span class="theme-toggle-icon" data-theme-icon="dark" aria-hidden="true">🌙</span>
   </button>
+  <!-- 테마 토글 바로 아래 언어 선택 버튼. 언어명(한국어/日本語/...)은 항상 그 언어 자체
+       표기로 고정 — i18n 대상 아님(app/i18n.js 헤더 코멘트 참고). -->
+  <div class="lang-select">
+    <button type="button" id="lang-toggle" class="lang-toggle" data-i18n-aria-label="lang.select" aria-label="언어 선택" aria-haspopup="true" aria-expanded="false">KO</button>
+    <ul id="lang-popup" class="lang-popup" role="menu" hidden>
+      <li role="none"><button type="button" class="lang-option is-active" role="menuitemradio" aria-checked="true" data-lang="ko" data-code="KO">한국어</button></li>
+      <li role="none"><button type="button" class="lang-option" role="menuitemradio" aria-checked="false" data-lang="ja" data-code="JP">日本語</button></li>
+      <li role="none"><button type="button" class="lang-option" role="menuitemradio" aria-checked="false" data-lang="en" data-code="EN">English</button></li>
+      <li role="none"><button type="button" class="lang-option" role="menuitemradio" aria-checked="false" data-lang="zh-Hans" data-code="CH">中文(简体)</button></li>
+      <li role="none"><button type="button" class="lang-option" role="menuitemradio" aria-checked="false" data-lang="zh-Hant" data-code="ZH">中文(繁體)</button></li>
+    </ul>
+  </div>
   <div id="menu-scrim" class="menu-scrim" hidden></div>
-  <aside id="menu-panel" class="menu-panel" aria-hidden="true" aria-label="저장된 플레이리스트">
-    <div class="menu-header"><strong>저장된 플레이리스트</strong></div>
+  <aside id="menu-panel" class="menu-panel" aria-hidden="true" data-i18n-aria-label="menu.title" aria-label="저장된 플레이리스트">
+    <div class="menu-header"><strong data-i18n="menu.title">저장된 플레이리스트</strong></div>
     <ul id="preset-list" class="preset-list"></ul>
-    <p id="preset-empty" class="preset-empty">아직 저장된 플레이리스트가 없어요.<br>플레이리스트를 만들면 자동으로 저장돼요.</p>
+    <p id="preset-empty" class="preset-empty" data-i18n-html="menu.empty">아직 저장된 플레이리스트가 없어요.<br>플레이리스트를 만들면 자동으로 저장돼요.</p>
     <div class="menu-footer">
       <!-- 현재 버전(v메인버전 - 커밋). app/main.js가 텍스트·링크 설정. -->
-      <a id="app-version" class="app-version" target="_blank" rel="noopener" aria-label="현재 버전"></a>
+      <a id="app-version" class="app-version" target="_blank" rel="noopener" data-i18n-aria-label="menu.versionLabel" aria-label="현재 버전"></a>
     </div>
   </aside>
 
   <main class="wrap">
     <header class="hero">
-      <h1><img src="assets/logo.png" alt="Bangdream Playlist Maker 로고" class="brand-logo" /> Bangdream Playlist Maker</h1>
-      <p class="sub">유메와빠와~ 한 문장으로 뱅드림 플레이리스트를 말아드립니다.</p>
+      <h1><img src="assets/logo.png" alt="Bangdream Playlist Maker 로고" data-i18n-alt="hero.logoAlt" class="brand-logo" /> Bangdream Playlist Maker</h1>
+      <p class="sub" data-i18n="hero.subtitle">유메와빠와~ 한 문장으로 뱅드림 플레이리스트를 말아드립니다.</p>
     </header>
 
     <form id="request-form" class="card">
-      <button type="button" class="mode-switch" id="mode-switch" role="switch" aria-checked="false" aria-label="생성 모드 전환 — AI 모드 또는 커스텀 모드">
+      <button type="button" class="mode-switch" id="mode-switch" role="switch" aria-checked="false" data-i18n-aria-label="mode.switchAria" aria-label="생성 모드 전환 — AI 모드 또는 커스텀 모드">
         <span class="mode-switch-thumb" aria-hidden="true"></span>
-        <span class="mode-switch-label" data-mode="ai">AI 모드</span>
-        <span class="mode-switch-label" data-mode="custom">커스텀 모드</span>
+        <span class="mode-switch-label" data-mode="ai" data-i18n="mode.ai">AI 모드</span>
+        <span class="mode-switch-label" data-mode="custom" data-i18n="mode.custom">커스텀 모드</span>
       </button>
 
       <label class="field" id="prompt-field">
-        <span class="field-label">어떤 플레이리스트를 원하세요?</span>
+        <span class="field-label" data-i18n="form.promptLabel">어떤 플레이리스트를 원하세요?</span>
         <div class="prompt-input-row">
           <input id="prompt" name="prompt" type="text" maxlength="500" autocomplete="off"
+                 data-i18n-placeholder="form.promptPlaceholder"
                  placeholder="예) 퇴근하고 주말 시작! 기분이 절로 좋아지는 1시간 플레이리스트" required />
-          <button type="button" id="omakase-btn" class="omakase-btn" aria-label="오마카세로 프롬프트 자동 생성" title="오마카세">🎲</button>
+          <button type="button" id="omakase-btn" class="omakase-btn" data-i18n-aria-label="omakase.aria" data-i18n-title="omakase.title" aria-label="오마카세로 프롬프트 자동 생성" title="오마카세">🎲</button>
         </div>
         <span id="prompt-hint" class="field-hint" aria-live="polite"></span>
       </label>
 
       <details class="options" id="options-details">
-        <summary>세부 설정 (선택)</summary>
-        <p class="options-guide">여기서 플레이리스트를 직접 다듬을 수 있어요. 바꾼 설정은 같은 요청에서 유지되고, 프롬프트를 새 내용으로 바꾸면 다시 자동으로 맞춰드려요.</p>
+        <summary data-i18n="options.summary">세부 설정 (선택)</summary>
+        <p class="options-guide" data-i18n="options.guide">여기서 플레이리스트를 직접 다듬을 수 있어요. 바꾼 설정은 같은 요청에서 유지되고, 프롬프트를 새 내용으로 바꾸면 다시 자동으로 맞춰드려요.</p>
         <!-- DEPRECATED(디버깅용, epic 3단계 stage_params 튜닝 완료 후 제거 예정) — 숨김(주석처리), app/main.js의 리스너 바인딩은 요소 없으면 자동 스킵.
         <button type="button" id="debug-copy-state-btn" class="link-btn">🐛 현재 상태 복사 (디버그)</button>
         -->
         <div class="options-grid">
           <label class="field">
-            <span class="field-label">플레이리스트 재생시간</span>
+            <span class="field-label" data-i18n="options.minutesLabel">플레이리스트 재생시간</span>
             <ul class="field-note">
-              <li>플레이리스트의 총 재생시간이에요.</li>
-              <li>최소 30분, 최대 180분 가능해요.</li>
+              <li data-i18n="options.minutesNote1">플레이리스트의 총 재생시간이에요.</li>
+              <li data-i18n="options.minutesNote2">최소 30분, 최대 180분 가능해요.</li>
             </ul>
             <div class="minutes-input-row">
-              <input id="target-minutes" type="number" min="10" max="180" placeholder="60(기본)" />
-              <span class="minutes-unit">분</span>
+              <input id="target-minutes" type="number" min="10" max="180" data-i18n-placeholder="options.minutesPlaceholder" placeholder="60(기본)" />
+              <span class="minutes-unit" data-i18n="common.minuteUnit">분</span>
             </div>
             <span id="target-minutes-hint" class="field-hint" aria-live="polite"></span>
           </label>
           <div class="options-grid-divider" aria-hidden="true"></div>
           <div class="field">
-            <span class="field-label">곡 종류</span>
+            <span class="field-label" data-i18n="options.typeLabel">곡 종류</span>
             <ul class="field-note">
-              <li>오리지날 또는 커버 곡만 들어볼 수도 있어요.</li>
-              <li>물론 둘다도 들어볼 수 있죠!</li>
+              <li data-i18n="options.typeNote1">오리지날 또는 커버 곡만 들어볼 수도 있어요.</li>
+              <li data-i18n="options.typeNote2">물론 둘다도 들어볼 수 있죠!</li>
             </ul>
             <div id="settings-type-filter" class="picker-type-filter"></div>
           </div>
@@ -121,14 +134,14 @@
 
         <div class="setting-block">
           <div class="setting-head">
-            <span class="field-label">듣고싶은 밴드</span>
-            <button type="button" id="band-clear" class="timebar-equalize-btn">전체 해제</button>
+            <span class="field-label" data-i18n="options.bandLabel">듣고싶은 밴드</span>
+            <button type="button" id="band-clear" class="timebar-equalize-btn" data-i18n="options.bandClearAll">전체 해제</button>
           </div>
           <ul class="field-note">
-            <li>듣고 싶은 밴드만 선택해볼 수 있죠!</li>
-            <li>모두 해제하면 모든 밴드가 선택되요.</li>
+            <li data-i18n="options.bandNote1">듣고 싶은 밴드만 선택해볼 수 있죠!</li>
+            <li data-i18n="options.bandNote2">모두 해제하면 모든 밴드가 선택되요.</li>
           </ul>
-          <div id="band-list" class="band-list">밴드 목록 불러오는 중…</div>
+          <div id="band-list" class="band-list" data-i18n="options.bandLoading">밴드 목록 불러오는 중…</div>
         </div>
 
         <!-- UI상으로만 별도 항목으로 분리(데이터는 정서 궤적과 같은 stageModel.segments 공유).
@@ -136,46 +149,46 @@
              피드백으로 두 블록 순서를 맞바꿈(DOM 순서만 변경, id 기반 바인딩이라 로직 영향 없음). -->
         <div class="setting-block">
           <div class="setting-head">
-            <span class="field-label">플레이리스트 구간 설정</span>
+            <span class="field-label" data-i18n="options.stageLabel">플레이리스트 구간 설정</span>
             <div class="stage-count">
-              <button id="stage-minus" type="button" aria-label="구간 줄이기">−</button>
+              <button id="stage-minus" type="button" data-i18n-aria-label="options.stageMinus" aria-label="구간 줄이기">−</button>
               <span class="n" id="stage-n">5구간</span>
-              <button id="stage-plus" type="button" aria-label="구간 늘리기">+</button>
+              <button id="stage-plus" type="button" data-i18n-aria-label="options.stagePlus" aria-label="구간 늘리기">+</button>
             </div>
           </div>
 
           <div class="timebar-label-row">
-            <span class="field-sublabel">구간 시간길이 정하기</span>
+            <span class="field-sublabel" data-i18n="options.timebarSub">구간 시간길이 정하기</span>
             <div class="timebar-label-actions">
-              <button type="button" id="timebar-equalize" class="timebar-equalize-btn">모두 균일하게</button>
+              <button type="button" id="timebar-equalize" class="timebar-equalize-btn" data-i18n="options.timebarEqualize">모두 균일하게</button>
               <span id="timebar-total-label"></span>
             </div>
           </div>
           <ul class="field-note">
-            <li>구간에 따라 시간을 자유롭게 정해보세요.</li>
-            <li>각 구간은 최소 3분 이상이에요.</li>
-            <li>우측에 '모두 균일하게' 버튼을 누르면 모든 구간의 시간을 균일하게 맞춰요.</li>
+            <li data-i18n="options.timebarNote1">구간에 따라 시간을 자유롭게 정해보세요.</li>
+            <li data-i18n="options.timebarNote2">각 구간은 최소 3분 이상이에요.</li>
+            <li data-i18n="options.timebarNote3">우측에 '모두 균일하게' 버튼을 누르면 모든 구간의 시간을 균일하게 맞춰요.</li>
           </ul>
           <div class="timebar" id="timebar"></div>
           <div class="timebar-ticks" id="timebar-ticks"></div>
 
-          <span class="field-sublabel">구간 가사 감성 정하기 및 밴드 설정</span>
+          <span class="field-sublabel" data-i18n="options.impressionSub">구간 가사 감성 정하기 및 밴드 설정</span>
           <ul class="field-note">
-            <li>구간에 따라 원하는 감성을 입력해보세요!</li>
-            <li>감성과 어울리는 가사를 가진 노래를 찾아줘요. 비워둬도 상관없어요!</li>
-            <li>일부 구간에서 특정밴드만 듣고 싶으면 '밴드 고정' 버튼을 눌러보세요!</li>
-            <li>듣고싶은 밴드 중에서 1개 이상 지정할 수 있어요.</li>
+            <li data-i18n="options.impressionNote1">구간에 따라 원하는 감성을 입력해보세요!</li>
+            <li data-i18n="options.impressionNote2">감성과 어울리는 가사를 가진 노래를 찾아줘요. 비워둬도 상관없어요!</li>
+            <li data-i18n="options.impressionNote3">일부 구간에서 특정밴드만 듣고 싶으면 '밴드 고정' 버튼을 눌러보세요!</li>
+            <li data-i18n="options.impressionNote4">듣고싶은 밴드 중에서 1개 이상 지정할 수 있어요.</li>
           </ul>
           <div class="impression-row" id="impression-row"></div>
         </div>
 
         <div class="setting-block">
-          <span class="field-label">에너지 X 감정 궤적</span>
+          <span class="field-label" data-i18n="options.energyLabel">에너지 X 감정 궤적</span>
           <ul class="field-note">
-            <li>듣고 싶은 노래의 에너지와 감정을 조절해보세요!</li>
-            <li>노란색으로 갈수록 밝고 신나는 노래가, 녹색으로 갈수록 밝고 잔잔한 노래가 나와요.</li>
-            <li>빨간색으로 갈수록 무겁고 격렬한 노래가, 파란색으로 갈수록 차분하고 가라앉은 노래가 나와요.</li>
-            <li>구간 포인트를 드래그해서 원하는 곳에 놓으세요. 시간에 따라 그 감성으로 진행되요!</li>
+            <li data-i18n="options.energyNote1">듣고 싶은 노래의 에너지와 감정을 조절해보세요!</li>
+            <li data-i18n="options.energyNote2">노란색으로 갈수록 밝고 신나는 노래가, 녹색으로 갈수록 밝고 잔잔한 노래가 나와요.</li>
+            <li data-i18n="options.energyNote3">빨간색으로 갈수록 무겁고 격렬한 노래가, 파란색으로 갈수록 차분하고 가라앉은 노래가 나와요.</li>
+            <li data-i18n="options.energyNote4">구간 포인트를 드래그해서 원하는 곳에 놓으세요. 시간에 따라 그 감성으로 진행되요!</li>
           </ul>
 
           <!-- 디자인 2(사분면 4색)로 고정 확정 — 셀렉터는 숨김(hidden). 버튼 자체는 유지해
@@ -193,10 +206,10 @@
                 <svg class="map-svg" id="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
                   <!-- 그리드는 JS가 채움 -->
                 </svg>
-                <div class="quadrant-label q-tl">무겁고<br />격렬한</div>
-                <div class="quadrant-label q-tr">밝고<br />신나는</div>
-                <div class="quadrant-label q-bl">차분하고<br />가라앉은</div>
-                <div class="quadrant-label q-br">밝고<br />잔잔한</div>
+                <div class="quadrant-label q-tl" data-i18n-html="options.quadrantHeavy">무겁고<br />격렬한</div>
+                <div class="quadrant-label q-tr" data-i18n-html="options.quadrantBright">밝고<br />신나는</div>
+                <div class="quadrant-label q-bl" data-i18n-html="options.quadrantCalm">차분하고<br />가라앉은</div>
+                <div class="quadrant-label q-br" data-i18n-html="options.quadrantSoft">밝고<br />잔잔한</div>
                 <!-- stage-node들은 JS가 채움 -->
               </div>
             </div>
@@ -204,18 +217,18 @@
         </div>
 
         <div class="setting-block">
-          <span class="field-label">고급 설정</span>
+          <span class="field-label" data-i18n="options.advancedLabel">고급 설정</span>
           <div id="param-graphs"></div>
         </div>
       </details>
 
-      <button id="submit-btn" type="submit" class="primary">플레이리스트 만들기</button>
+      <button id="submit-btn" type="submit" class="primary" data-i18n="submit.button">플레이리스트 만들기</button>
     </form>
 
     <section id="loading" class="card loading hidden" aria-live="polite">
       <div class="spinner" aria-hidden="true"></div>
-      <p class="loading-text">플레이리스트를 만드는 중입니다~ 🎶</p>
-      <p class="loading-sub">백엔드가 잠들어 있었다면 첫 응답이 조금 느릴 수 있어요.</p>
+      <p class="loading-text" data-i18n="loading.text">플레이리스트를 만드는 중입니다~ 🎶</p>
+      <p class="loading-sub" data-i18n="loading.sub">백엔드가 잠들어 있었다면 첫 응답이 조금 느릴 수 있어요.</p>
     </section>
 
     <section id="error" class="card error hidden" aria-live="assertive"></section>
@@ -229,30 +242,30 @@
         </div>
         <div id="now-playing" class="now-playing"></div>
         <div class="player-controls">
-          <button id="prev-btn" type="button" class="ghost" title="이전 곡">⏮</button>
-          <button id="next-btn" type="button" class="ghost" title="다음 곡">⏭</button>
-          <button id="yt-playlist-btn" type="button" class="ghost" title="전체를 YouTube 재생목록으로 열기">🔗 내 플리 공유하기</button>
+          <button id="prev-btn" type="button" class="ghost" data-i18n-title="player.prev" title="이전 곡">⏮</button>
+          <button id="next-btn" type="button" class="ghost" data-i18n-title="player.next" title="다음 곡">⏭</button>
+          <button id="yt-playlist-btn" type="button" class="ghost" data-i18n-title="player.shareTitle" data-i18n="player.shareText" title="전체를 YouTube 재생목록으로 열기">🔗 내 플리 공유하기</button>
         </div>
       </div>
 
       <details class="options card wheel-panel">
-        <summary>조성 궤적 보기 (Camelot Wheel)</summary>
+        <summary data-i18n="wheel.summary">조성 궤적 보기 (Camelot Wheel)</summary>
         <div class="wheel-head">
-          <p class="wheel-caption">선은 재생 순서를 따라가요.</p>
+          <p class="wheel-caption" data-i18n="wheel.caption">선은 재생 순서를 따라가요.</p>
           <div class="mode-toggle" id="wheel-mode-toggle">
             <button type="button" data-mode="camelot" class="on">Camelot</button>
-            <button type="button" data-mode="key">음이름</button>
+            <button type="button" data-mode="key" data-i18n="wheel.keyNameBtn">음이름</button>
           </div>
         </div>
         <div class="wheel-stage">
           <svg id="camelot-wheel" viewBox="0 0 420 420"></svg>
         </div>
         <ul class="wheel-guide">
-          <li>점 하나가 곡 한 곡, 점 위 숫자는 재생 순서예요.</li>
-          <li><span style="color:var(--ok)">초록 실선</span>은 자연스럽게 이어지는 구간, <span style="color:var(--warn)">주황 점선</span>은 분위기가 훅 바뀌는 구간이에요.</li>
-          <li>점을 클릭하면 그 곡으로 바로 이동해요.</li>
-          <li>점들이 원 안에서 좁게 모여 있을수록 통일된 분위기, 넓게 퍼져 있을수록 다채로운 분위기의 플레이리스트예요.</li>
-          <li>실선이 많을수록 쭉 이어 듣기 좋은 흐름, 점선이 많을수록 곡마다 분위기가 확확 바뀌는 구성이에요.</li>
+          <li data-i18n="wheel.guide1">점 하나가 곡 한 곡, 점 위 숫자는 재생 순서예요.</li>
+          <li data-i18n-html="wheel.guide2"><span style="color:var(--ok)">초록 실선</span>은 자연스럽게 이어지는 구간, <span style="color:var(--warn)">주황 점선</span>은 분위기가 훅 바뀌는 구간이에요.</li>
+          <li data-i18n="wheel.guide3">점을 클릭하면 그 곡으로 바로 이동해요.</li>
+          <li data-i18n="wheel.guide4">점들이 원 안에서 좁게 모여 있을수록 통일된 분위기, 넓게 퍼져 있을수록 다채로운 분위기의 플레이리스트예요.</li>
+          <li data-i18n="wheel.guide5">실선이 많을수록 쭉 이어 듣기 좋은 흐름, 점선이 많을수록 곡마다 분위기가 확확 바뀌는 구성이에요.</li>
         </ul>
       </details>
 
@@ -260,30 +273,26 @@
     </section>
 
     <footer class="disclaimer">
-      <!-- 한글 고지 (fan-project 안내 · OAuth 심사용 앱 설명 · YouTube API 이용 고지 · 링크) -->
-      <p>* 본 프로젝트는 'BanG Dream!'의 팬이 제작한 비공식 프로젝트이며, 상업적 목적으로 사용되지 않습니다. 사용된 모든 이미지 및 음원의 권리는 ©BanG Dream! Project 및 각 저작권자에게 있습니다.</p>
-      <p>* 원하는 분위기를 한 문장으로 입력하면 AI가 뱅드림 곡 데이터를 분석해 무드에 맞는 플레이리스트를 자동으로 만들고 YouTube로 바로 재생합니다. 로그인 없이 모든 기능을 쓸 수 있고, 선택적으로 Google 계정으로 로그인하면 생성된 플레이리스트를 내 YouTube 계정에 실제 재생목록으로 저장할 수 있어요.</p>
-      <p class="yt-attrib">* 본 서비스는 <strong>YouTube API 서비스</strong>를 이용합니다. 이용 시 <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">YouTube 서비스 약관</a>이 적용되며, <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 개인정보처리방침</a>을 함께 참고하세요.</p>
-      <p class="footer-links">* <a href="privacy.html">개인정보처리방침</a> <span aria-hidden="true">·</span> <a href="terms.html">서비스 약관</a></p>
-
-      <!-- English notices (fan-project notice · OAuth review app description · YouTube API attribution · links) -->
-      <p>* This is a fan-made, non-official project inspired by 'BanG Dream!'. All rights to images and audio belong to ©BanG Dream! Project and their respective owners. This project is for non-commercial use only.</p>
-      <p>* Enter your mood in one sentence and AI builds a matching BanG Dream! playlist from song data, played instantly via YouTube. The app works fully without signing in; optionally, sign in with your Google account to save the generated playlist to your own YouTube account as a real playlist.</p>
-      <p class="yt-attrib">* This service uses <strong>YouTube API Services</strong>. The <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">YouTube Terms of Service</a> apply; see also the <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>.</p>
-      <p class="footer-links">* <a href="privacy.html">Privacy Policy</a> <span aria-hidden="true">·</span> <a href="terms.html">Terms of Service</a></p>
+      <!-- 고지문(fan-project 안내 · OAuth 심사용 앱 설명 · YouTube API 이용 고지 · 링크) — 현재 선택된
+           언어 1벌만 노출(app/i18n.js). 이전엔 한글+영문을 항상 동시에 보여줬으나, 언어 선택 기능
+           도입으로 활성 언어에 맞춰 하나만 표시하도록 변경. -->
+      <p data-i18n="footer.notice1">* 본 프로젝트는 'BanG Dream!'의 팬이 제작한 비공식 프로젝트이며, 상업적 목적으로 사용되지 않습니다. 사용된 모든 이미지 및 음원의 권리는 ©BanG Dream! Project 및 각 저작권자에게 있습니다.</p>
+      <p data-i18n="footer.notice2">* 원하는 분위기를 한 문장으로 입력하면 AI가 뱅드림 곡 데이터를 분석해 무드에 맞는 플레이리스트를 자동으로 만들고 YouTube로 바로 재생합니다. 로그인 없이 모든 기능을 쓸 수 있고, 선택적으로 Google 계정으로 로그인하면 생성된 플레이리스트를 내 YouTube 계정에 실제 재생목록으로 저장할 수 있어요.</p>
+      <p class="yt-attrib" data-i18n-html="footer.ytAttrib">* 본 서비스는 <strong>YouTube API 서비스</strong>를 이용합니다. 이용 시 <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">YouTube 서비스 약관</a>이 적용되며, <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 개인정보처리방침</a>을 함께 참고하세요.</p>
+      <p class="footer-links" data-i18n-html="footer.links">* <a href="privacy.html">개인정보처리방침</a> <span aria-hidden="true">·</span> <a href="terms.html">서비스 약관</a></p>
     </footer>
   </main>
 
   <!-- 곡 추가 미니 브라우저(밴드 셀렉터 + 곡 리스트) — + 버튼으로 열림 -->
-  <div id="song-picker" class="picker hidden" role="dialog" aria-modal="true" aria-label="곡 추가">
+  <div id="song-picker" class="picker hidden" role="dialog" aria-modal="true" data-i18n-aria-label="picker.ariaLabel" aria-label="곡 추가">
     <div class="picker-backdrop" data-close></div>
     <div class="picker-panel">
-      <button type="button" id="picker-close" class="picker-close-x" data-close aria-label="닫기">✕</button>
+      <button type="button" id="picker-close" class="picker-close-x" data-close data-i18n-aria-label="common.close" aria-label="닫기">✕</button>
       <div class="picker-head">
-        <strong>곡 추가</strong>
+        <strong data-i18n="picker.title">곡 추가</strong>
         <span id="picker-where" class="picker-where"></span>
       </div>
-      <input id="picker-search" type="search" placeholder="곡·밴드 검색" autocomplete="off" />
+      <input id="picker-search" type="search" data-i18n-placeholder="picker.searchPlaceholder" placeholder="곡·밴드 검색" autocomplete="off" />
       <div id="picker-type-filter" class="picker-type-filter"></div>
       <div class="picker-body">
         <div id="picker-bands" class="picker-bands"></div>
@@ -293,22 +302,22 @@
   </div>
 
   <!-- 공유 팝업(B2) — 'YouTube 재생목록' 버튼으로 열림. 안내 + URL 복사 + 유튜브 듣기. -->
-  <div id="share-modal" class="picker hidden" role="dialog" aria-modal="true" aria-label="플레이리스트 공유">
+  <div id="share-modal" class="picker hidden" role="dialog" aria-modal="true" data-i18n-aria-label="share.ariaLabel" aria-label="플레이리스트 공유">
     <div class="picker-backdrop" data-close></div>
     <div class="picker-panel share-panel">
-      <button type="button" class="picker-close-x" data-close aria-label="닫기">✕</button>
+      <button type="button" class="picker-close-x" data-close data-i18n-aria-label="common.close" aria-label="닫기">✕</button>
       <div class="picker-head">
-        <strong>플레이리스트가 생성되었어요 🎉</strong>
+        <strong data-i18n="share.title">플레이리스트가 생성되었어요 🎉</strong>
       </div>
-      <p class="share-desc">내 플리를 다른 방붕이에게 공유하려면...</p>
+      <p class="share-desc" data-i18n="share.desc1">내 플리를 다른 방붕이에게 공유하려면...</p>
       <div class="share-url-row">
-        <input id="share-url" type="text" readonly aria-label="공유 링크" />
-        <button type="button" id="share-copy" class="ghost">복사</button>
+        <input id="share-url" type="text" readonly data-i18n-aria-label="share.urlAriaLabel" aria-label="공유 링크" />
+        <button type="button" id="share-copy" class="ghost" data-i18n="share.copy">복사</button>
       </div>
       <hr class="share-divider" />
-      <p class="share-desc">이 플리를 내 YouTube 계정에 추가하려면...</p>
+      <p class="share-desc" data-i18n="share.desc2">이 플리를 내 YouTube 계정에 추가하려면...</p>
       <div class="share-actions">
-        <button type="button" id="share-open" class="primary">내 재생목록에 넣기</button>
+        <button type="button" id="share-open" class="primary" data-i18n="share.addToMyPlaylist">내 재생목록에 넣기</button>
       </div>
       <p id="yt-save-status" class="share-note hidden" aria-live="polite"></p>
       <!-- 저장 결과(또는 폴백) 열기 링크. window.open은 팝업 차단으로 막힐 수 있어(OAuth 팝업이
@@ -317,14 +326,14 @@
       <div id="yt-save-progress" class="yt-progress hidden">
         <div id="yt-save-progress-bar" class="yt-progress-bar"></div>
       </div>
-      <p class="share-note">※ Google 로그인 후 내 계정에 실제 YouTube 재생목록으로 저장돼요(일부공개).</p>
+      <p class="share-note" data-i18n="share.footnote">※ Google 로그인 후 내 계정에 실제 YouTube 재생목록으로 저장돼요(일부공개).</p>
     </div>
   </div>
 
   <!-- 하단 고정 플레이바 — 플레이리스트 생성 시에만 아래에서 올라옴. 트랙리스트를 스크롤 중에도
        현재 곡 정보·진행률·재생 조작이 가능하도록 상시 노출. -->
-  <div id="playbar" class="playbar" role="region" aria-label="재생 바">
-    <div id="playbar-progress" class="playbar-progress" role="slider" aria-label="재생 위치"
+  <div id="playbar" class="playbar" role="region" data-i18n-aria-label="playbar.regionAria" aria-label="재생 바">
+    <div id="playbar-progress" class="playbar-progress" role="slider" data-i18n-aria-label="playbar.seekAria" aria-label="재생 위치"
          aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
       <div class="playbar-progress-track">
         <div id="playbar-progress-fill" class="playbar-progress-fill"></div>
@@ -332,7 +341,7 @@
     </div>
     <div class="playbar-inner">
       <div class="playbar-main">
-        <button type="button" id="playbar-info" class="playbar-info" aria-label="플레이어로 이동">
+        <button type="button" id="playbar-info" class="playbar-info" data-i18n-aria-label="playbar.gotoPlayerAria" aria-label="플레이어로 이동">
           <span id="playbar-title" class="playbar-title">
             <span id="playbar-title-track" class="playbar-title-track">
               <span id="playbar-title-text" class="playbar-title-text"></span>
@@ -344,7 +353,7 @@
       <div class="playbar-side">
         <span id="playbar-time" class="playbar-time">0:00 / 0:00</span>
         <div class="playbar-controls">
-          <button type="button" id="playbar-prev" class="playbar-btn" title="이전 곡" aria-label="이전 곡">
+          <button type="button" id="playbar-prev" class="playbar-btn" data-i18n-title="player.prev" data-i18n-aria-label="player.prev" title="이전 곡" aria-label="이전 곡">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <rect x="5" y="5" width="2.6" height="14" rx="1.3" />
               <path d="M19 6.3v11.4c0 .8-.9 1.3-1.6.8l-8-5.7a1 1 0 0 1 0-1.6l8-5.7c.7-.5 1.6 0 1.6.8z" />
@@ -367,19 +376,19 @@
               <path class="play-wave-a" id="play-wave-a"></path>
               <path class="play-wave-b" id="play-wave-b"></path>
             </svg>
-            <button type="button" id="playbar-play" class="playbar-btn playbar-play" title="재생" aria-label="재생">
+            <button type="button" id="playbar-play" class="playbar-btn playbar-play" data-i18n-title="player.play" data-i18n-aria-label="player.play" title="재생" aria-label="재생">
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M8 5.6c0-.8.9-1.3 1.6-.8l9 6.4c.6.4.6 1.3 0 1.7l-9 6.4c-.7.4-1.6 0-1.6-.9V5.6z" />
               </svg>
             </button>
           </div>
-          <button type="button" id="playbar-next" class="playbar-btn" title="다음 곡" aria-label="다음 곡">
+          <button type="button" id="playbar-next" class="playbar-btn" data-i18n-title="player.next" data-i18n-aria-label="player.next" title="다음 곡" aria-label="다음 곡">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <rect x="16.4" y="5" width="2.6" height="14" rx="1.3" />
               <path d="M5 6.3v11.4c0 .8.9 1.3 1.6.8l8-5.7a1 1 0 0 0 0-1.6l-8-5.7C5.9 5 5 5.5 5 6.3z" />
             </svg>
           </button>
-          <button type="button" id="playbar-repeat" class="playbar-btn playbar-repeat" title="한 곡 반복 (꺼짐)"
+          <button type="button" id="playbar-repeat" class="playbar-btn playbar-repeat" data-i18n-title="playbar.repeatOffTitle" data-i18n-aria-label="playbar.repeatOffAria" title="한 곡 반복 (꺼짐)"
                   aria-label="한 곡 반복 켜기" aria-pressed="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -396,9 +405,11 @@
   </div>
 
   <!-- app/*.js: 순수(비-module) 스크립트라 전역 스코프 공유(과거 단일 app.js와 동일). 로드
-       순서가 곧 실행 순서이자 의존성 순서이므로 임의로 재배열하지 말 것 — utils.js가 항상
-       첫 번째(다른 모든 파일이 참조하는 leaf 헬퍼), main.js가 항상 마지막(부트스트랩,
-       나머지 전부가 정의된 뒤 실행되어야 함)이어야 한다. 자세한 이유는 app/utils.js 헤더 참고. -->
+       순서가 곧 실행 순서이자 의존성 순서이므로 임의로 재배열하지 말 것 — i18n.js가 항상
+       맨 처음(t()/tArr()를 다른 모든 모듈이 참조하는 leaf 헬퍼, utils.js보다도 먼저),
+       main.js가 항상 마지막(부트스트랩, 나머지 전부가 정의된 뒤 실행되어야 함)이어야 한다.
+       자세한 이유는 app/utils.js 헤더 참고. -->
+  <script src="app/i18n.js"></script>
   <script src="app/utils.js"></script>
   <script src="app/state.js"></script>
   <script src="app/omakase.js"></script>

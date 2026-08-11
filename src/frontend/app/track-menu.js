@@ -48,8 +48,8 @@ document.addEventListener("pointercancel", clearTrackLongPress, true);
 function attachTrackLongPress(bodyEl, index) {
   const openFor = (clientX, clientY) => {
     openTrackMenu(clientX, clientY, [
-      { label: "다음 곡 추가", onClick: () => openSongPickerAt(index + 1) },
-      { label: "현재 곡 제거", onClick: () => removeSong(index) },
+      { label: t("track.addNext"), onClick: () => openSongPickerAt(index + 1) },
+      { label: t("track.removeCurrent"), onClick: () => removeSong(index) },
     ]);
   };
   bodyEl.addEventListener("contextmenu", (e) => { e.preventDefault(); openFor(e.clientX, e.clientY); });
@@ -76,8 +76,8 @@ function makeTrackActions(li, index) {
   const move = document.createElement("button");
   move.type = "button";
   move.className = "track-btn track-move";
-  move.title = "잡고 위아래로 드래그해 순서 이동";
-  move.setAttribute("aria-label", "순서 이동 (드래그)");
+  move.title = t("track.moveTitle");
+  move.setAttribute("aria-label", t("track.moveAria"));
   move.innerHTML =
     '<svg viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2.4" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -87,8 +87,8 @@ function makeTrackActions(li, index) {
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "track-btn track-remove";
-  remove.title = "이 곡 제거";
-  remove.setAttribute("aria-label", "곡 제거");
+  remove.title = t("track.removeTitle");
+  remove.setAttribute("aria-label", t("track.removeAria"));
   remove.innerHTML =
     '<svg viewBox="0 0 16 16" aria-hidden="true">' +
     '<rect x="3" y="7" width="10" height="2" rx="1" fill="currentColor"/></svg>';
@@ -106,8 +106,8 @@ function makeInserter(atIndex) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "inserter-btn";
-  btn.title = "여기에 곡 추가";
-  btn.setAttribute("aria-label", "여기에 곡 추가");
+  btn.title = t("track.addHere");
+  btn.setAttribute("aria-label", t("track.addHere"));
   btn.innerHTML =
     '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" ' +
     'stroke-linecap="round" aria-hidden="true"><path d="M8 3.5 V12.5 M3.5 8 H12.5"/></svg>';

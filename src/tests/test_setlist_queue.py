@@ -23,10 +23,10 @@ class _BlockingQueuedInterpreter:
     def __init__(self):
         self._release = threading.Event()
 
-    def estimate_wait(self, prompt, previous_prompt=None, feature_stats=None):
+    def estimate_wait(self, prompt, previous_prompt=None, feature_stats=None, lang="ko"):
         return 0.0
 
-    def interpret(self, prompt, previous_prompt=None, energy_stats=None, feature_stats=None):
+    def interpret(self, prompt, previous_prompt=None, energy_stats=None, feature_stats=None, lang="ko", acquired_event=None):
         self._release.wait(timeout=5)
         return MoodParameters(
             brightness=0.5, start_energy=0.4, end_energy=0.4, stage_count=2,
@@ -44,10 +44,10 @@ class _FakeQueuedInterpreter:
         self._wait_seconds = wait_seconds
         self._raise_exc = raise_exc
 
-    def estimate_wait(self, prompt, previous_prompt=None, feature_stats=None):
+    def estimate_wait(self, prompt, previous_prompt=None, feature_stats=None, lang="ko"):
         return self._wait_seconds
 
-    def interpret(self, prompt, previous_prompt=None, energy_stats=None, feature_stats=None):
+    def interpret(self, prompt, previous_prompt=None, energy_stats=None, feature_stats=None, lang="ko", acquired_event=None):
         if self._raise_exc is not None:
             raise self._raise_exc
         return MoodParameters(

@@ -54,6 +54,10 @@ class SetlistRequest(BaseModel):
 
     prompt: str | None = Field(default=None, max_length=500, description="자연어 요청 한 문장(AI 모드 필수)")
     mode: Literal["ai", "custom"] = Field(default="ai", description="AI 모드(LLM) 또는 커스텀 모드(수동 설정)")
+    # 프론트 언어 선택(app/i18n.js SUPPORTED_LANGS와 동일 값) — AI 모드에서 LLM이
+    # interpretation_summary·tags·구간별 impression을 이 언어로 쓰도록 지시하는 데만 쓰인다.
+    # 커스텀 모드는 LLM을 호출하지 않으므로 무시됨. 미지정 시 "ko"(과거 동작과 동일).
+    lang: Literal["ko", "ja", "en", "zh-Hans", "zh-Hant"] = Field(default="ko", description="응답 언어(AI 모드 요약·태그용)")
     # 직전 회차 요청(2회차+). 주어지면 백엔드가 LLM에 함께 넘겨 '의도가 같은지'를 판정하고,
     # 같을 때만 아래 사용자 override(target_minutes·stage_count·stages·bands·cover)를 적용한다.
     previous_prompt: str | None = Field(default=None, max_length=500, description="직전 회차 요청(의도 동일성 판정용)")

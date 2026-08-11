@@ -106,7 +106,9 @@
 .stage-node:hover, .stage-node.linked { background: var(--accent-2); }
 .node-val {
   position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-  font-size: 0.66rem; color: var(--text); background: rgba(0,0,0,0.6);
+  /* 배경이 항상 고정 반투명 검정이라 텍스트도 테마와 무관하게 항상 흰색으로 고정
+     (라이트 모드에서 var(--text)의 어두운 글자색을 쓰면 검정 배경 위에서 거의 안 보였음). */
+  font-size: 0.66rem; color: #fff; background: rgba(0,0,0,0.75);
   padding: 2px 6px; border-radius: 6px; white-space: nowrap; pointer-events: none;
   opacity: 0; transition: opacity 0.12s;
 }
@@ -262,7 +264,8 @@
 .param-dot.dragging { background: var(--accent-2); }
 .param-dot-val {
   position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-  font-size: 0.64rem; color: var(--text); background: rgba(0,0,0,0.6);
+  /* node-val과 동일한 이유로 텍스트 색을 흰색 고정(라이트 모드 가시성 버그 수정). */
+  font-size: 0.64rem; color: #fff; background: rgba(0,0,0,0.75);
   padding: 1px 5px; border-radius: 6px; white-space: nowrap; pointer-events: none;
   opacity: 0; transition: opacity 0.12s;
 }

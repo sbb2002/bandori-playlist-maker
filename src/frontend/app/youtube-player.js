@@ -79,13 +79,13 @@ function onPlayerError(e) {
   console.warn("YouTube 재생 오류", e && e.data, "video", p && p.video_id);
   errorSkips += 1;
   if (errorSkips > picks.length) {
-    showError("재생 가능한 영상을 찾지 못했어요. 다른 요청을 시도해 보세요.");
+    showError(t("error.noPlayable"));
     return;
   }
   if (current + 1 < picks.length) {
     playSong(current + 1, true);
   } else {
-    showError("이 영상은 재생할 수 없어요. 아래 'YouTube에서 열기'로 시청해 주세요.");
+    showError(t("error.cantPlay"));
   }
 }
 

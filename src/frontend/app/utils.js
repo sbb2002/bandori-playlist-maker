@@ -105,13 +105,14 @@ function keyLabel(camelot) {
 }
 
 // 트랙 리스트의 곡별 파라미터 태그 — 6개 오디오 지표(PARAM_DEFS + 밝기)를 짧은 배지로.
+// label은 함수로 둬서(고정 문자열 아님) 언어 전환 후 다시 그릴 때도 최신 번역을 읽는다.
 const PICK_PARAM_DEFS = [
-  { key: "valence", label: "밝기" },
-  { key: "lufs_integrated", label: "라우드" },
-  { key: "lra", label: "다이내믹" },
-  { key: "danceability_norm", label: "리듬감" },
-  { key: "instr_stem_ratio", label: "악기" },
-  { key: "speech_median", label: "음절" },
+  { key: "valence", get label() { return t("paramShort.valence"); } },
+  { key: "lufs_integrated", get label() { return t("paramShort.lufs"); } },
+  { key: "lra", get label() { return t("paramShort.lra"); } },
+  { key: "danceability_norm", get label() { return t("paramShort.dance"); } },
+  { key: "instr_stem_ratio", get label() { return t("paramShort.instr"); } },
+  { key: "speech_median", get label() { return t("paramShort.speech"); } },
 ];
 // 곡별 파라미터 배지 — 예전 에너지 배지(미니 바 + 숫자)와 동일한 표현, 라벨만 앞에 붙인다.
 function makeParamBadge(label, value) {
@@ -133,16 +134,12 @@ function makeParamBadge(label, value) {
   return b;
 }
 function harmonicLabelKo(h) {
-  return { seed: "시작곡", same: "동일조성", adjacent: "하모닉인접", non_harmonic: "조성전환", added: "추가한 곡" }[h] || h;
+  return t(`harmonic.${h}.label`) !== `harmonic.${h}.label` ? t(`harmonic.${h}.label`) : h;
 }
 function harmonicTooltipKo(h) {
-  return {
-    seed: "세트리스트의 첫 곡이라 직전 곡과 비교할 조성이 없어요.",
-    same: "직전 곡과 조성이 완전히 같아요. 조옮김 없이 그대로 이어져 가장 매끄러운 전환이에요.",
-    adjacent: "직전 곡과 Camelot Wheel 기준으로 인접한 조성이에요(관계조 또는 5도 이웃). 공통음이 많아 자연스럽게 넘어가요.",
-    non_harmonic: "직전 곡과 조성이 같지도, 인접하지도 않아요. 곡 경계에서 조성이 크게 바뀌는 전환이에요.",
-    added: "직접 추가한 곡이라 하모닉 배치 로직이 적용되지 않았어요.",
-  }[h] || "";
+  const key = `harmonic.${h}.tooltip`;
+  const val = t(key);
+  return val !== key ? val : "";
 }
 function fmtNum(v) { return (typeof v === "number" ? v : 0).toFixed(2); }
 function fmtSigned(v) { const n = typeof v === "number" ? v : 0; return (n >= 0 ? "+" : "") + n.toFixed(2); }

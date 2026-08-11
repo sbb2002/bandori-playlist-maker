@@ -31,6 +31,18 @@
 
 * { box-sizing: border-box; }
 
+/* 다크/라이트 전환 시 배경·글자·테두리색이 즉시 뚝 바뀌지 않고 서서히 변하도록 하는
+   전역 규칙. `*`(범용 선택자)라 특이도가 가장 낮아, 이미 자기 transition을 선언한
+   요소(버튼 hover 등)는 그 선언이 그대로 우선한다 — 여긴 아무 transition도 없던
+   요소(body·카드 배경·본문 텍스트 등)에만 실질적으로 적용된다. prefers-reduced-motion
+   사용자는 애니메이션 없이 즉시 전환되도록 존중한다. */
+@media (prefers-reduced-motion: no-preference) {
+  *, *::before, *::after {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease,
+      fill 0.25s ease, stroke 0.25s ease, box-shadow 0.25s ease;
+  }
+}
+
 body {
   margin: 0;
   font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
@@ -38,6 +50,7 @@ body {
   color: var(--text);
   line-height: 1.55;
   min-height: 100vh;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 .wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 100px; } /* 하단: 고정 플레이바 높이 여유 */

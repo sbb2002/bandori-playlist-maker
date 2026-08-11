@@ -8,13 +8,13 @@ const MAX_SEGMENTS = 11; // 구간 최대 개수
 const DEFAULT_STAGE_COUNT = 3; // 기본 구간 수
 const MIN_WIDTH_MIN = 3; // 구간 최소 길이(분) — 구간이 너무 촘촘해지면 곡 배정이 어색해짐
 
-// 고급 설정 그래프 5개
+// 고급 설정 그래프 5개 — label/desc는 함수로 두어 언어 전환 후 재빌드 시 최신 번역을 읽는다.
 const PARAM_DEFS = [
-  { key: "lufs_integrated", label: "라우드니스", desc: "높을수록 크고 힘있는 곡이, 낮을수록 조용한 곡이 선택되요." },
-  { key: "lra", label: "다이내믹 범위", desc: "높을수록 점점 벅차오르는 느낌이! 낮을수록 조곤조곤한 느낌의 곡이 선택되요." },
-  { key: "danceability_norm", label: "리듬감", desc: "높을수록 일정한 리듬을 가진 곡이, 낮을수록 변칙적인 리듬의 곡이 선택되요. 둠칫둠칫~" },
-  { key: "instr_stem_ratio", label: "악기 비중", desc: "높을수록 악기 비중이 높은 곡이, 낮을수록 보컬 비중이 높은 곡이 선택되요." },
-  { key: "speech_median", label: "음절밀도", desc: "높을수록 속사포 랩같은 곡이, 낮을수록 멜로디가 있는 곡이 선택됩니다." },
+  { key: "lufs_integrated", get label() { return t("param.lufs.label"); }, get desc() { return t("param.lufs.desc"); } },
+  { key: "lra", get label() { return t("param.lra.label"); }, get desc() { return t("param.lra.desc"); } },
+  { key: "danceability_norm", get label() { return t("param.dance.label"); }, get desc() { return t("param.dance.desc"); } },
+  { key: "instr_stem_ratio", get label() { return t("param.instr.label"); }, get desc() { return t("param.instr.desc"); } },
+  { key: "speech_median", get label() { return t("param.speech.label"); }, get desc() { return t("param.speech.desc"); } },
 ];
 
 // 고급 설정 그래프용 여백
@@ -33,7 +33,7 @@ minutesEl.addEventListener("input", () => {
   const n = parseInt(minutesEl.value, 10);
   if (!Number.isNaN(n) && n > 180) {
     minutesEl.value = 180;
-    minutesHintEl.textContent = "⚠️ 최대 3시간(180분)까지 설정할 수 있어요.";
+    minutesHintEl.textContent = t("options.minutesMax");
     minutesHintEl.classList.add("notice");
   } else {
     minutesHintEl.textContent = "";
@@ -131,7 +131,7 @@ function renderStageGraph() {
     updateTimebar();
     updateImpressionRow();
     updateAllParamCharts();
-    stageNEl.textContent = `${stageModel.segments.length}구간`;
+    stageNEl.textContent = t("options.stageCount", { n: stageModel.segments.length });
     stageMinusBtn.disabled = stageModel.segments.length <= MIN_SEGMENTS;
     stagePlusBtn.disabled = stageModel.segments.length >= MAX_SEGMENTS;
   }
@@ -205,7 +205,7 @@ function renderStageGraph() {
       node.style.left = `${x}%`;
       node.style.top = `${y}%`;
       node.querySelector(".node-val").textContent =
-        `밝기 ${Math.round(s.valence * 100)} · 에너지 ${Math.round(s.energy * 100)}`;
+        t("map.nodeVal", { v: Math.round(s.valence * 100), e: Math.round(s.energy * 100) });
     });
   }
 
@@ -280,7 +280,7 @@ function renderStageGraph() {
     timebarTickEls.push(lastTick);
     const unit = document.createElement("span");
     unit.className = "timebar-unit";
-    unit.textContent = "분";
+    unit.textContent = t("common.minuteUnit");
     timebarTicksEl.appendChild(unit);
   }
 
@@ -347,13 +347,7 @@ function renderStageGraph() {
   let impressionBadgeEls = [];
   // placeholder용 예시 문구 — 빈 입력창이 "가사 감상(선택)"처럼 막연하지 않고, 어떤 식으로
   // 적으면 되는지 감이 오도록 구간 순서대로 다른 예시를 보여준다.
-  const IMPRESSION_PLACEHOLDER_EXAMPLES = [
-    "설레고 두근거리는 마음",
-    "지치고 무거운 마음을 다독이는 위로",
-    "터질 듯한 흥분과 해방감",
-    "쓸쓸하고 애틋한 그리움",
-    "작은 희망을 붙잡는 담담한 의지",
-  ];
+  const IMPRESSION_PLACEHOLDER_EXAMPLES = tArr("options.impressionExamples");
 
   function buildImpressionRow() {
     impressionRowEl.innerHTML = "";
@@ -370,7 +364,7 @@ function renderStageGraph() {
       impressionBadgeEls.push(badge);
       const label = document.createElement("span");
       label.className = "impression-item-label";
-      label.textContent = "구간";
+      label.textContent = t("options.impressionItemLabel");
       const input = document.createElement("input");
       input.type = "text";
       input.className = "impression-input";
@@ -394,7 +388,7 @@ function renderStageGraph() {
       bandToggle.classList.toggle("on", (s.bands || []).length > 0);
       const dot = document.createElement("span");
       dot.className = "indicator-dot";
-      bandToggle.append(dot, document.createTextNode("밴드 고정"));
+      bandToggle.append(dot, document.createTextNode(t("options.bandFix")));
       const popup = document.createElement("div");
       popup.className = "impression-band-popup hidden";
       renderBandPopupOptions(popup, i);

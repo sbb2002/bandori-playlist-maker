@@ -11,7 +11,7 @@ function renderResult(data) {
   clearEditUndos(); // 새 플레이리스트 → 편집 되돌리기 리셋(프리셋 삭제 되돌리기는 유지)
 
   if (!picks.length) {
-    showError("조건에 맞는 곡을 찾지 못했어요. 요청을 조금 바꿔 보세요.");
+    showError(t("error.noMatch"));
     return;
   }
 
@@ -72,7 +72,7 @@ function renderSummary(data) {
 
   const interp = document.createElement("p");
   interp.className = "interp";
-  interp.textContent = p.interpretation_summary || "요청에 맞춰 세트리스트를 구성했어요.";
+  interp.textContent = p.interpretation_summary || t("summary.defaultInterp");
   summaryEl.appendChild(interp);
 
   // 인스타그램식 해시태그(최대 5개).
@@ -93,7 +93,7 @@ function renderSummary(data) {
   const meta = document.createElement("div");
   meta.className = "meta";
   const mins = Math.round(estimatedTotal / 60);
-  for (const c of [`${picks.length}곡`, `약 ${mins}분`]) {
+  for (const c of [t("summary.songCount", { n: picks.length }), t("summary.approxMinutes", { n: mins })]) {
     const span = document.createElement("span");
     span.className = "chip";
     span.textContent = c;
@@ -133,7 +133,7 @@ function renderTracklist(list) {
     badges.className = "badges";
     const h = p.reason ? p.reason.harmonic : "";
     badges.appendChild(makeBadge(h, harmonicLabelKo(h), harmonicTooltipKo(h)));
-    badges.appendChild(makeBadge("key", keyLabel(p.camelot), "조성(Camelot " + (p.camelot || "") + ")"));
+    badges.appendChild(makeBadge("key", keyLabel(p.camelot), t("track.keyTooltip", { code: p.camelot || "" })));
     for (const { key, label } of PICK_PARAM_DEFS) {
       if (typeof p[key] === "number") badges.appendChild(makeParamBadge(label, p[key]));
     }
@@ -145,4 +145,12 @@ function renderTracklist(list) {
     tracklistEl.appendChild(li);
   });
 }
+
+// 언어 전환 시 이미 화면에 떠 있는 결과(요약·배지·트랙리스트)를 새 언어로 다시 그린다.
+// picks/lastParams는 이미 생성된 결과 그대로이므로 재요청 없이 로컬 재렌더만으로 충분하다.
+document.addEventListener("i18n:change", () => {
+  if (!picks.length) return;
+  renderSummary({ params: lastParams });
+  renderTracklist(picks);
+});
 

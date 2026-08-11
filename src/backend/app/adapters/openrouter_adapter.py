@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import random
+import threading
 import time
 
 import httpx
@@ -75,10 +76,12 @@ class OpenRouterMoodInterpreter:
         self, prompt: str, previous_prompt: str | None = None,
         energy_stats: dict | None = None,
         feature_stats: dict | None = None,
+        lang: str = "ko",
+        acquired_event: threading.Event | None = None,  # 미사용 — 이 어댑터는 TPM 리미터 미구현(포트 시그니처 준수용)
     ) -> MoodParameters:
         payload = {
             "model": self._model,
-            "messages": prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats),
+            "messages": prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats, lang=lang),
             "temperature": 0.2,
         }
         if self._response_format_mode == "json_schema":

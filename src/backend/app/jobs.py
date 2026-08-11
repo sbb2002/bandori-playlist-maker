@@ -36,16 +36,31 @@ class Job:
     result: dict | None = None
     error: dict | None = None  # {"status_code", "code", "message"}
     _estimate: Callable[[], float] | None = field(default=None, repr=False)
+    # 폴링 응답에 실제로 내보낸 값 중 최솟값 — 아래 estimated_wait_seconds()가 단조감소를
+    # 보장하는 데 쓴다(2026-08-12 버그 리포트: "0초까지 내려갔다가 다시 42초로 튐" 참고).
+    _min_estimate: float | None = field(default=None, repr=False)
 
     def estimated_wait_seconds(self) -> float:
-        """지금 시점 기준 예상 대기초(폴링마다 새로 계산 — 참고용, 위 rate_limiter 주석 참고)."""
+        """지금 시점 기준 예상 대기초(폴링마다 새로 계산 — 참고용, 위 rate_limiter 주석 참고).
+
+        _estimate()는 TokenBucketLimiter.estimate_wait()를 그대로 호출하는 비소비성 조회라
+        "지금 cost만큼의 토큰이 새로 필요하다면 얼마나 기다려야 하는가"만 안다 — 이 잡 자신의
+        acquire()가 이미 성공해서 토큰을 소비한 뒤(=레이트리밋 대기는 끝났고 실제 LLM 응답을
+        기다리는 단계)에도 계속 호출되므로, 방금 자신이 써버린 토큰 때문에 마치 다시 대기해야
+        하는 것처럼 재계산돼버린다(레이트리밋 대기와 무관한 LLM 응답 지연을 레이트리밋 대기로
+        오인). 그 결과 사용자에게는 "0초"까지 내려갔던 안내가 뜬금없이 다시 몇十초로 튀어
+        보이는 버그가 됐다 — 한 번 관측된 최솟값 밑으로는 다시 올리지 않게 클램프해서 막는다.
+        """
         if self.status in ("done", "error") or self._estimate is None:
             return 0.0
         try:
             wait = self._estimate()
         except Exception:  # noqa: BLE001 — 안내용 추정치 계산 실패는 무시(0으로 폴백)
-            return 0.0
-        return 0.0 if wait == float("inf") else round(wait, 1)
+            wait = 0.0
+        wait = 0.0 if wait == float("inf") else round(wait, 1)
+        if self._min_estimate is None or wait < self._min_estimate:
+            self._min_estimate = wait
+        return self._min_estimate
 
 
 class JobStore:

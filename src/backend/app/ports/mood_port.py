@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import threading
 from typing import Protocol
 
 from ..domain.models import MoodParameters
@@ -33,6 +34,8 @@ class MoodInterpreter(Protocol):
         self, prompt: str, previous_prompt: str | None = None,
         energy_stats: dict | None = None,
         feature_stats: dict | None = None,
+        lang: str = "ko",
+        acquired_event: threading.Event | None = None,
     ) -> MoodParameters:
         """자연어 발화를 검증된 MoodParameters로 변환한다.
 
@@ -46,6 +49,15 @@ class MoodInterpreter(Protocol):
             feature_stats: 오디오 지표 6종(stage_params와 동일 키·동일 minmax 스케일)의 분포
                 통계({"전체": {지표: {min,max,mean,median,std}}, 밴드명: {...}}). LLM이
                 stage_params 값을 실제 곡 분포에 근거해 고르게 하는 재료. None이면 통계 없음.
+            lang: 프론트 언어 선택(app/i18n.js SUPPORTED_LANGS와 동일 값: ko/ja/en/zh-Hans/
+                zh-Hant). interpretation_summary·tags·구간별 impression을 이 언어로 쓰도록
+                LLM에 지시하는 데 쓰인다. 구현이 무시해도 무방(예: 스텁은 항상 한국어).
+            acquired_event: 구현이 내부 레이트리밋(TokenBucketLimiter 등)의 acquire()를 성공적으로
+                통과하는 순간 set()해야 하는 신호. routes.py가 GET .../status 폴링에서 "예상
+                대기초"를 계산할 때 이 이벤트가 set돼 있으면 더 이상 리미터를 재조회하지 않고
+                즉시 0을 반환한다 — 그 시점부턴 남은 지연이 레이트리밋이 아니라 순수 업스트림
+                응답 시간이라 리미터 재조회가 부정확해지기 때문(자신이 방금 쓴 토큰 때문에
+                아직 대기 중인 것처럼 보임). 리미터가 없는 구현(스텁 등)은 무시해도 된다.
 
         Raises:
             MoodInterpretationError: 응답을 해석할 수 없는 경우(재시도 없음, PRD §7).

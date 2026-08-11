@@ -46,7 +46,7 @@ function autoSaveOnEdit() {
 // 프리셋 생성/갱신. 없으면 맨 앞에 추가(초과 시 오래된 것 제거), 있으면 제자리 갱신.
 function upsertPreset(id) {
   const arr = loadPresets();
-  const title = (lastParams && lastParams.interpretation_summary) || "플레이리스트";
+  const title = (lastParams && lastParams.interpretation_summary) || t("preset.defaultTitle");
   const data = JSON.parse(JSON.stringify(currentSnapshot())); // 라이브 상태와 참조 분리
   const idx = arr.findIndex((p) => p.id === id);
   if (idx >= 0) {
@@ -90,12 +90,12 @@ function restorePreset(id) {
 
 function relTime(ts) {
   const s = Math.max(0, (Date.now() - (ts || 0)) / 1000);
-  if (s < 60) return "방금 전";
+  if (s < 60) return t("time.justNow");
   const m = Math.floor(s / 60);
-  if (m < 60) return `${m}분 전`;
+  if (m < 60) return t("time.minAgo", { n: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}시간 전`;
-  return `${Math.floor(h / 24)}일 전`;
+  if (h < 24) return t("time.hourAgo", { n: h });
+  return t("time.dayAgo", { n: Math.floor(h / 24) });
 }
 
 function renderPresetList() {
@@ -111,18 +111,18 @@ function renderPresetList() {
     open.type = "button";
     open.className = "preset-open";
     const title = elDiv("preset-title");
-    title.textContent = p.title || "플레이리스트";
+    title.textContent = p.title || t("preset.defaultTitle");
     const meta = elDiv("preset-meta");
     const count = (p.data && p.data.picks && p.data.picks.length) || 0;
-    meta.textContent = `${relTime(p.savedAt)} · ${count}곡`;
+    meta.textContent = t("preset.meta", { time: relTime(p.savedAt), n: count });
     open.append(title, meta);
     open.addEventListener("click", () => restorePreset(p.id));
 
     const del = document.createElement("button");
     del.type = "button";
     del.className = "preset-del";
-    del.title = "삭제";
-    del.setAttribute("aria-label", "프리셋 삭제");
+    del.title = t("common.delete");
+    del.setAttribute("aria-label", t("preset.deleteAria"));
     del.innerHTML =
       '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" ' +
       'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -138,14 +138,14 @@ function renderPresetList() {
 let menuOpen = false;
 function openMenu() {
   menuOpen = true;
-  if (menuBtn) { menuBtn.classList.add("open"); menuBtn.setAttribute("aria-expanded", "true"); menuBtn.setAttribute("aria-label", "메뉴 닫기"); }
+  if (menuBtn) { menuBtn.classList.add("open"); menuBtn.setAttribute("aria-expanded", "true"); menuBtn.setAttribute("aria-label", t("menu.close")); }
   if (menuPanel) { menuPanel.classList.add("open"); menuPanel.setAttribute("aria-hidden", "false"); }
   if (menuScrim) menuScrim.hidden = false;
   renderPresetList();
 }
 function closeMenu() {
   menuOpen = false;
-  if (menuBtn) { menuBtn.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); menuBtn.setAttribute("aria-label", "메뉴 열기"); }
+  if (menuBtn) { menuBtn.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); menuBtn.setAttribute("aria-label", t("menu.open")); }
   if (menuPanel) { menuPanel.classList.remove("open"); menuPanel.setAttribute("aria-hidden", "true"); }
   if (menuScrim) menuScrim.hidden = true;
 }
@@ -153,5 +153,10 @@ if (menuBtn) menuBtn.addEventListener("click", () => (menuOpen ? closeMenu() : o
 if (menuScrim) menuScrim.addEventListener("click", closeMenu);
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && menuOpen) closeMenu();
+});
+
+// 언어 전환 시 열려 있는 메뉴의 프리셋 목록(상대시간·곡수 등)을 새 언어로 다시 그린다.
+document.addEventListener("i18n:change", () => {
+  if (menuOpen) renderPresetList();
 });
 
