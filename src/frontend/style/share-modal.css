@@ -1,0 +1,59 @@
+/* 공유 팝업(B2) — .picker 오버레이/백드롭/패널 재사용 + 좁은 폭 */
+.share-panel { width: min(460px, calc(100vw - 32px)); max-height: none; }
+.share-desc { color: var(--muted); font-size: 0.9rem; margin: 0 0 14px; }
+.share-url-row { display: flex; gap: 8px; margin-bottom: 14px; }
+#share-url {
+  flex: 1 1 auto; min-width: 0; padding: 9px 12px;
+  background: var(--card-2); color: var(--text);
+  border: 1px solid rgba(var(--line-rgb),0.1); border-radius: 9px; font-size: 0.85rem;
+}
+.share-divider { border: none; border-top: 1px solid rgba(var(--line-rgb),0.08); margin: 0 0 14px; }
+.share-actions { display: flex; }
+.share-actions .primary { width: 100%; }
+.share-note { color: var(--muted); font-size: 0.78rem; margin: 12px 0 0; }
+
+/* 저장 결과·폴백 열기 링크(버튼 모양) — 팝업 차단으로 자동 열기가 막혔을 때의 확실한 경로 */
+.yt-open-link {
+  display: block; margin-top: 10px; padding: 10px;
+  text-align: center; text-decoration: none; font-size: 0.9rem; font-weight: 600;
+  color: var(--text); background: var(--card-2);
+  border: 1px solid rgba(124,108,255,0.5); border-radius: 10px;
+}
+.yt-open-link:hover { background: rgba(124,108,255,0.16); border-color: var(--accent); }
+
+/* 유튜브 재생목록 곡 추가 진행률 — 흐르는 사선 패턴 */
+.yt-progress {
+  height: 8px; border-radius: 4px; margin: 10px 0 0; overflow: hidden;
+  background: var(--card-2);
+}
+.yt-progress-bar {
+  height: 100%; width: 0%; border-radius: 4px;
+  background-color: var(--accent);
+  /* accent 배경 위 진행률 줄무늬 — 테마와 무관하게 항상 고정 흰색 */
+  background-image: linear-gradient(
+    45deg,
+    rgba(255,255,255,0.28) 25%, transparent 25%,
+    transparent 50%, rgba(255,255,255,0.28) 50%,
+    rgba(255,255,255,0.28) 75%, transparent 75%, transparent
+  );
+  background-size: 18px 18px;
+  animation: yt-progress-flow 0.9s linear infinite;
+  transition: width 0.25s ease;
+}
+@keyframes yt-progress-flow {
+  from { background-position: 0 0; }
+  to { background-position: 18px 0; }
+}
+
+/* 우측 상단 동그라미 닫기 버튼(공유 팝업) */
+.picker-close-x {
+  position: absolute; top: 12px; right: 12px; z-index: 1;
+  width: 28px; height: 28px; padding: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card-2); color: var(--muted);
+  border: 1px solid rgba(var(--line-rgb),0.1); font-size: 0.85rem; line-height: 1;
+}
+.picker-close-x:hover { color: var(--text); background: rgba(var(--line-rgb),0.14); }
+#share-copy { flex: 0 0 auto; white-space: nowrap; }
+#share-copy.copied { color: var(--ok); border-color: var(--ok); }
+

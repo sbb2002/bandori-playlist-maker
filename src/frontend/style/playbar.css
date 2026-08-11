@@ -1,0 +1,184 @@
+/* ── 하단 고정 플레이바 ───────────────────────────────────────────────────────── */
+.playbar {
+  /* 플레이바는 라이트/다크 테마와 무관하게 항상 어두운 "플레이어 크롬"으로 고정
+     (유튜브 등 플레이어 컨트롤 바 관례) — 아래 --pb-* 는 테마 변수(--card-2 등) 대신 사용. */
+  --pb-text: #eef0f7;
+  --pb-muted: #9aa0b4;
+  --pb-surface: #232636;
+  --pb-line-rgb: 255,255,255;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 42;
+  /* 카드와 같은 톤이되 살짝 어둡고 블러 — 위로 스크롤되는 트랙 카드들과 시각적으로 분리된다. */
+  background: rgba(20,22,32,0.88);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(var(--pb-line-rgb),0.1);
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.45);
+  transform: translateY(100%); transition: transform 0.28s ease;
+  pointer-events: none;
+  padding-bottom: env(safe-area-inset-bottom, 0); /* 노치 기기 하단 안전영역 */
+}
+.playbar.show { transform: translateY(0); pointer-events: auto; }
+
+/* 진행바: 보이는 선은 얇게 두되, 클릭·터치 판정은 투명 여백을 포함한 바깥 상자가 받는다
+   (선 자체를 두껍게 하지 않고도 판정만 키움). 호버·드래그 시 선이 두꺼워지고 손잡이가 나온다. */
+.playbar-progress {
+  position: relative; display: flex; align-items: center;
+  height: 15px; cursor: pointer; touch-action: none;
+}
+.playbar-progress-track {
+  position: relative; width: 100%; height: 5px;
+  background: rgba(var(--pb-line-rgb),0.12);
+  transition: height 0.14s ease;
+}
+.playbar-progress:hover .playbar-progress-track,
+.playbar-progress.dragging .playbar-progress-track { height: 9px; }
+.playbar-progress-fill {
+  position: relative; height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+.playbar-progress-fill::after { /* 현재 위치 손잡이 — 평소 숨김, 호버·드래그 시 등장 */
+  content: ""; position: absolute; right: 0; top: 50%;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 5px rgba(0,0,0,0.55);
+  transform: translate(50%, -50%) scale(0);
+  transition: transform 0.14s ease;
+}
+.playbar-progress:hover .playbar-progress-fill::after,
+.playbar-progress.dragging .playbar-progress-fill::after { transform: translate(50%, -50%) scale(1); }
+/* 터치 환경(호버 없음) — 호버로 커지는 판정을 못 쓰므로 판정 상자를 더 키우고, 선도 두껍게,
+   손잡이는 상시 노출해 '끌 수 있다'는 어포던스를 준다. */
+@media (hover: none) {
+  .playbar-progress { height: 24px; }
+  .playbar-progress-track { height: 7px; }
+  .playbar-progress-fill::after { transform: translate(50%, -50%) scale(1); width: 15px; height: 15px; }
+}
+
+.playbar-inner {
+  display: flex; align-items: center; gap: 14px;
+  max-width: 1000px; margin: 0 auto; padding: 10px 16px;
+}
+.playbar-main { display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0; }
+.playbar-info {
+  display: flex; flex-direction: column; align-items: flex-start; min-width: 0; max-width: 100%;
+  background: none; border: none; padding: 3px 8px; border-radius: 8px; text-align: left;
+}
+.playbar-info:hover { background: var(--pb-surface); }
+.playbar-title {
+  display: block; max-width: 100%; overflow: hidden;
+  font-weight: 700; font-size: 1.05rem; color: #fff;
+  white-space: nowrap; text-overflow: ellipsis;
+}
+/* 곡 이름이 바 폭을 넘치면 한 방향(왼쪽)으로 끊김 없이 흐른다. JS가 사본을 하나 덧붙여
+   [원본][간격][사본] 을 만들고, 한 벌 길이(--marquee-distance)만큼 밀면 사본이 정확히 원본
+   자리에 오므로 루프가 이어져 보인다. 넘치지 않으면 클래스가 없어 말줄임 유지. */
+.playbar-title-track { display: inline-flex; }
+.playbar-title-text { display: inline-block; white-space: nowrap; }
+.playbar-title.marquee { text-overflow: clip; }
+.playbar-title.marquee .playbar-title-text { padding-right: var(--marquee-gap, 44px); }
+.playbar-title.marquee .playbar-title-track {
+  animation: playbar-marquee var(--marquee-duration, 8s) linear infinite;
+}
+@keyframes playbar-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-1 * var(--marquee-distance, 0px))); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .playbar-title.marquee .playbar-title-track { animation: none; }
+}
+.playbar-band {
+  color: var(--pb-muted); font-size: 0.82rem; max-width: 100%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.playbar-time {
+  flex: 0 0 auto; color: var(--pb-muted); font-size: 0.8rem;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.playbar-side { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.playbar-controls { display: flex; align-items: center; gap: 4px; }
+.playbar-btn {
+  position: relative; /* 반복 ON 표시 점(::after)의 기준점 */
+  width: 36px; height: 36px; padding: 0; border-radius: 50%;
+  display: grid; place-items: center; background: transparent; color: var(--pb-text);
+  border: 1px solid transparent;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.playbar-btn svg { display: block; width: 19px; height: 19px; }
+.playbar-btn:hover { background: var(--pb-surface); border-color: rgba(var(--pb-line-rgb),0.09); }
+.playbar-play {
+  width: 42px; height: 42px; color: #fff;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  box-shadow: 0 3px 12px rgba(124,108,255,0.35);
+}
+.playbar-play svg { width: 20px; height: 20px; }
+.playbar-play:hover {
+  filter: brightness(1.12);
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+}
+/* 재생 중 어쿠스틱 웨이브 링 — 버튼 테두리 바깥에 물결 모양 원 두 겹(SVG)을 겹쳐 회전시킨다.
+   재생 시작하면 서서히 가속하며 밖으로 자라나고, 일시정지하면 서서히 감속하며 버튼 테두리(원)
+   쪽으로 줄어들어 사라진다. 가속/감속·크기 보간은 app.js의 requestAnimationFrame 루프가 담당.
+   버튼 자체는 항상 파동보다 위(z-index)에 뜬다. */
+.play-wave-wrap { position: relative; width: 42px; height: 42px; isolation: isolate; }
+.play-wave-wrap .playbar-play { position: relative; z-index: 2; }
+.play-wave-svg {
+  position: absolute; inset: -18px; width: calc(100% + 36px); height: calc(100% + 36px);
+  overflow: visible; pointer-events: none; z-index: 1;
+}
+.play-wave-a, .play-wave-b { stroke: none; transform-origin: 50px 50px; }
+.play-wave-a { fill: url(#playWaveFlowA); fill-opacity: .55; }
+.play-wave-b { fill: url(#playWaveFlowB); fill-opacity: .4; }
+.play-wave-stop-pink { stop-color: var(--accent-2); }
+.play-wave-stop-purple { stop-color: var(--accent); }
+/* 반복 OFF/1/ALL 3단 토글 — 강조색 + 테두리 + 우하단 배지(숫자 "1"/알파벳 "A")로
+   두 반복 모드를 구분한다. 배지 글자는 data-repeat-label(app.js가 설정)을 그대로
+   찍는다 — off일 땐 .active가 안 붙으므로 ::after 자체가 안 그려진다. */
+.playbar-repeat.active {
+  color: var(--accent-2);
+  background: rgba(255,108,196,0.16);
+  border-color: rgba(255,108,196,0.55);
+}
+.playbar-repeat.active:hover { background: rgba(255,108,196,0.24); border-color: rgba(255,108,196,0.7); }
+.playbar-repeat.active::after {
+  content: attr(data-repeat-label);
+  position: absolute; bottom: -1px; right: -1px;
+  min-width: 12px; height: 12px; padding: 0 1px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent-2); color: #0f1017;
+  font-size: 8px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--pb-surface);
+}
+/* 현재곡/전체곡 — 알약 배지. 현재 번호만 흰색으로 키워 가시성 확보. */
+.playbar-count {
+  flex: 0 0 auto; display: flex; align-items: baseline; gap: 2px;
+  padding: 4px 11px; border-radius: 999px;
+  background: var(--pb-surface); border: 1px solid rgba(var(--pb-line-rgb),0.08);
+  font-variant-numeric: tabular-nums; line-height: 1.25;
+}
+.playbar-count-cur { color: #fff; font-size: 1rem; font-weight: 700; }
+.playbar-count-sep, .playbar-count-total { color: var(--pb-muted); font-size: 0.85rem; font-weight: 500; }
+
+@media (max-width: 520px) {
+  .wrap { padding: 56px 14px 76px; } /* 상단 여백: 좌상단 메뉴 버튼과 겹침 방지 */
+  .hero h1 { font-size: 1.6rem; }
+  .options-grid { flex-direction: column; }
+  .options-grid-divider { display: none; }
+  .picker-body { grid-template-columns: 1fr; }
+  .picker-bands { flex-direction: row; flex-wrap: wrap; max-height: 110px; }
+  .picker-panel { padding: 14px; }
+
+  /* 좁은 화면: 곡 정보/시간 한 줄 + 조작 버튼/카운트 한 줄로 스택 */
+  .playbar-inner { position: relative; flex-wrap: wrap; padding: 8px 10px 10px; gap: 4px 10px; }
+  .playbar-main { flex: 1 1 100%; padding-right: 84px; } /* 우측 절대배치 타임스탬프(확대됨)와 겹치지 않도록 여백 확보 */
+  /* 모바일 브라우저(삼성 인터넷 등)가 화면 하단 정중앙에 띄우는 "맨 위로" FAB는 좌우 위치와
+     무관하게 항상 바 최하단부와 겹친다. 조작 버튼(prev/play/next/repeat) 행을 곡 정보 행보다
+     위로 올려 그 위험 구간에서 벗어나게 하고, 최하단에는 상대적으로 덜 중요한 곡 정보 행만 남긴다. */
+  .playbar-side { flex: 1 1 100%; justify-content: center; gap: 10px; order: -1; }
+  /* 타임스탬프는 조작 버튼 행에서 빼내 바 전체의 우측 아래에 배치. 폰트 크기는 왼쪽 곡제목(1.05rem)+
+     밴드명(0.82rem) 합의 80% 수준(≈1.5rem)으로 키워 구석에 있어도 눈에 잘 띄게 한다. */
+  .playbar-time {
+    position: absolute; right: 18px; bottom: 12px;
+    font-size: 1.5rem; font-weight: 700; color: #fff;
+  }
+  .wrap { padding-bottom: 152px; } /* 2단 플레이바(+터치용 진행바 판정) 높이만큼 여유 */
+}
+
