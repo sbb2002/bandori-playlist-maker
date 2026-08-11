@@ -37,12 +37,12 @@ async function openSongPickerAt(atIndex) {
   pickerBand = null;
   pickerType = "all";
   pickerSearchEl.value = "";
-  pickerWhereEl.textContent = atIndex <= 0 ? "맨 앞에 삽입" : `${atIndex}번 다음에 삽입`;
+  pickerWhereEl.textContent = atIndex <= 0 ? t("picker.insertFirst") : t("picker.insertAfter", { n: atIndex });
   show(pickerEl);
   lockBodyScroll(true);
   pickerBandsEl.replaceChildren();
   pickerSongsEl.replaceChildren();
-  pickerSongsEl.textContent = "곡 목록 불러오는 중…";
+  pickerSongsEl.textContent = t("picker.loading");
   renderPickerTypeFilter();
   try {
     await ensureSongs();
@@ -50,7 +50,7 @@ async function openSongPickerAt(atIndex) {
     renderPickerSongs();
     pickerSearchEl.focus();
   } catch (_) {
-    pickerSongsEl.textContent = "곡 목록을 불러오지 못했어요 (백엔드가 켜져 있는지 확인).";
+    pickerSongsEl.textContent = t("picker.loadError");
   }
 }
 
@@ -78,7 +78,7 @@ function renderPickerBands() {
   const counts = new Map();
   for (const s of allSongs) counts.set(s.band, (counts.get(s.band) || 0) + 1);
   pickerBandsEl.replaceChildren();
-  pickerBandsEl.appendChild(pickerBandChip("전체", null, allSongs.length));
+  pickerBandsEl.appendChild(pickerBandChip(t("picker.allBands"), null, allSongs.length));
   for (const band of bandsInSelectorOrder([...counts.keys()])) {
     pickerBandsEl.appendChild(pickerBandChip(prettyBand(band), band, counts.get(band)));
   }
@@ -121,18 +121,18 @@ function renderPickerSongs() {
       || (s.song_hanja_reading?.toLowerCase().includes(q) ?? false);
   });
   pickerSongsEl.replaceChildren();
-  if (!list.length) { pickerSongsEl.textContent = "일치하는 곡이 없어요."; return; }
+  if (!list.length) { pickerSongsEl.textContent = t("picker.noResults"); return; }
   const CAP = 300; // 리스트 폭주 방지 — 넘으면 검색으로 좁히도록 유도
   for (const s of list.slice(0, CAP)) {
     const li = document.createElement("li");
     li.className = "picker-song";
     const info = elDiv("picker-song-info");
-    const t = elDiv("picker-song-title"); t.textContent = s.song;
+    const titleEl = elDiv("picker-song-title"); titleEl.textContent = s.song;
     const meta = elDiv("picker-song-band");
-    meta.textContent = `${prettyBand(s.band)} · ${keyLabel(s.camelot)} · 에너지 ${fmtNum(s.energy)}`;
-    info.append(t, meta);
+    meta.textContent = t("picker.songMeta", { band: prettyBand(s.band), key: keyLabel(s.camelot), energy: fmtNum(s.energy) });
+    info.append(titleEl, meta);
     const addBtn = document.createElement("button");
-    addBtn.type = "button"; addBtn.className = "picker-add"; addBtn.textContent = "추가";
+    addBtn.type = "button"; addBtn.className = "picker-add"; addBtn.textContent = t("picker.add");
     addBtn.addEventListener("click", () => insertSong(s));
     li.append(makeBandIcon(s.band, "picker-song-icon"), info, addBtn);
     li.addEventListener("dblclick", () => insertSong(s));
@@ -141,7 +141,7 @@ function renderPickerSongs() {
   if (list.length > CAP) {
     const more = document.createElement("li");
     more.className = "picker-more";
-    more.textContent = `+${list.length - CAP}곡 더 있음 — 검색으로 좁혀 주세요`;
+    more.textContent = t("picker.moreResults", { n: list.length - CAP });
     pickerSongsEl.appendChild(more);
   }
 }
@@ -165,7 +165,7 @@ function buildAddedPick(song) {
     song: song.song, camelot: song.camelot, energy: song.energy, stage_index: -1,
     reason: {
       stage_energy_target: 0, matched_energy: song.energy, harmonic: "added",
-      prev_camelot: null, param_fit: 0, text: "직접 추가한 곡",
+      prev_camelot: null, param_fit: 0, text: t("picker.directAdd"),
     },
   };
 }

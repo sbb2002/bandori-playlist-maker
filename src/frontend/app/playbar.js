@@ -36,7 +36,7 @@ function updateNowPlaying(p) {
   link.href = `https://youtu.be/${p.video_id}`;
   link.target = "_blank";
   link.rel = "noopener";
-  link.textContent = "YouTube에서 열기 ↗";
+  link.textContent = t("player.openYoutube");
   nowPlayingEl.append(strong, band, link);
   updatePlaybarInfo(p);
 }
@@ -130,8 +130,9 @@ window.addEventListener("resize", () => {
 
 function setPlaybarPlaying(isPlaying) {
   playbarPlayBtn.innerHTML = isPlaying ? ICON_PAUSE : ICON_PLAY;
-  playbarPlayBtn.setAttribute("aria-label", isPlaying ? "일시정지" : "재생");
-  playbarPlayBtn.title = isPlaying ? "일시정지" : "재생";
+  const playLabel = isPlaying ? t("player.pause") : t("player.play");
+  playbarPlayBtn.setAttribute("aria-label", playLabel);
+  playbarPlayBtn.title = playLabel;
   playWaveEngine.playing = isPlaying;
 }
 
@@ -275,16 +276,16 @@ function applyRepeatButtonState() {
   playbarRepeatBtn.setAttribute("aria-pressed", active ? "true" : "false");
   if (repeatMode === "off") {
     playbarRepeatBtn.dataset.repeatLabel = "";
-    playbarRepeatBtn.setAttribute("aria-label", "한 곡 반복 켜기");
-    playbarRepeatBtn.title = "반복 (꺼짐)";
+    playbarRepeatBtn.setAttribute("aria-label", t("playbar.repeatOffAria"));
+    playbarRepeatBtn.title = t("playbar.repeatOffTitle");
   } else if (repeatMode === "one") {
     playbarRepeatBtn.dataset.repeatLabel = "1";
-    playbarRepeatBtn.setAttribute("aria-label", "전체 반복으로 전환");
-    playbarRepeatBtn.title = "한 곡 반복 (켜짐)";
+    playbarRepeatBtn.setAttribute("aria-label", t("playbar.repeatOneAria"));
+    playbarRepeatBtn.title = t("playbar.repeatOneTitle");
   } else {
     playbarRepeatBtn.dataset.repeatLabel = "A";
-    playbarRepeatBtn.setAttribute("aria-label", "반복 끄기");
-    playbarRepeatBtn.title = "전체 반복 (켜짐)";
+    playbarRepeatBtn.setAttribute("aria-label", t("playbar.repeatAllAria"));
+    playbarRepeatBtn.title = t("playbar.repeatAllTitle");
   }
 }
 // 뷰포트 중심과 엘리먼트 중심 사이의 거리(px). 값이 작을수록 "지금 그 엘리먼트를 보고 있다"에 가깝다.
@@ -328,3 +329,9 @@ document.addEventListener("focusin", (e) => {
 
 // prettyBand/keyLabel/CAMELOT_TO_KEY_LABEL/PICK_PARAM_DEFS/makeParamBadge/harmonicLabelKo/
 // harmonicTooltipKo/fmtNum/fmtSigned/show/hide/toggle은 app/utils.js 참조.
+
+// 언어 전환 시 플레이바의 동적 title/aria-label(재생·반복 버튼)을 새 언어로 다시 반영.
+document.addEventListener("i18n:change", () => {
+  setPlaybarPlaying(playWaveEngine.playing);
+  applyRepeatButtonState();
+});

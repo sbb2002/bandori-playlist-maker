@@ -83,7 +83,7 @@ function removeSong(index) {
   if (!picks.length) {
     hide(resultEl);
     hidePlaybar();
-    showError("모든 곡을 제거했어요. 새 요청을 만들거나 되돌리기(Ctrl+Z) 하세요.");
+    showError(t("edit.allRemoved"));
     return;
   }
   renderTracklist(picks);

@@ -48,7 +48,7 @@ async function createYouTubePlaylist(token, title) {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      snippet: { title, description: "Bandori Playlist Maker에서 생성됨" },
+      snippet: { title, description: t("ytsave.playlistDescription") },
       status: { privacyStatus: "unlisted" },
     }),
   });
@@ -119,8 +119,8 @@ function offerYtOpenLink(url, label) {
 // 이 기능 도입 전의 동작인 익명 watch_videos 임시 재생목록(YouTube에 'Untitled List'로 표시)으로
 // 되돌린다. picks/재생 상태는 건드리지 않는다.
 function openAnonymousPlaylistFallback(reason) {
-  setYtSaveStatus(`${reason} 대신 임시 재생목록으로 들을 수 있어요(내 계정에는 저장되지 않아요).`);
-  offerYtOpenLink(shareUrl, "임시 재생목록으로 열기 ↗");
+  setYtSaveStatus(t("ytsave.fallbackNote", { reason }));
+  offerYtOpenLink(shareUrl, t("ytsave.openTempPlaylist"));
   track("playlist_save_fallback_anonymous", { count: picks.length });
 }
 
@@ -131,7 +131,7 @@ async function saveToYouTubePlaylist() {
   btn.disabled = true;
   hideYtProgress();
   hide(ytOpenLinkEl);
-  setYtSaveStatus("Google 로그인 확인 중...");
+  setYtSaveStatus(t("ytsave.checkingLogin"));
 
   try {
     let token;
@@ -140,13 +140,13 @@ async function saveToYouTubePlaylist() {
     } catch (e) {
       // 로그인 취소·팝업 닫힘, 그리고 인증(verification) 심사 중이라 계정이 차단된 경우가 모두 여기로 온다.
       track("playlist_save_auth_failed", { count: picks.length, reason: String((e && e.message) || e) });
-      openAnonymousPlaylistFallback("Google 계정에 저장하지 못했어요.");
+      openAnonymousPlaylistFallback(t("ytsave.googleSaveFail"));
       return; // picks/재생 상태 불변
     }
 
-    setYtSaveStatus("재생목록 만드는 중...");
+    setYtSaveStatus(t("ytsave.creating"));
     const title = (lastParams && lastParams.interpretation_summary)
-      || `뱅드림 세트리스트 (${new Date().toISOString().slice(0, 10)})`;
+      || t("ytsave.defaultTitle", { date: new Date().toISOString().slice(0, 10) });
     let playlistId;
     try {
       playlistId = await createYouTubePlaylist(token, title);
@@ -161,26 +161,26 @@ async function saveToYouTubePlaylist() {
       }
       if (!playlistId) {
         track("playlist_save_create_failed", { count: picks.length });
-        openAnonymousPlaylistFallback("재생목록을 만들지 못했어요.");
+        openAnonymousPlaylistFallback(t("ytsave.createFail"));
         return;
       }
     }
 
     const { succeeded, failed } = await addAllVideosToPlaylist(token, playlistId, picks, (n, total) => {
-      setYtSaveStatus(`곡 추가 중... (${n}/${total})`);
+      setYtSaveStatus(t("ytsave.addingProgress", { n, total }));
       setYtProgress(n, total);
     });
     hideYtProgress();
 
     const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
     if (failed.length === 0) {
-      setYtSaveStatus("내 계정에 저장했어요 ✓");
-      offerYtOpenLink(playlistUrl, "내 재생목록 열기 ↗");
+      setYtSaveStatus(t("ytsave.savedOk"));
+      offerYtOpenLink(playlistUrl, t("ytsave.openMyPlaylist"));
     } else if (succeeded.length > 0) {
-      setYtSaveStatus(`${picks.length}곡 중 ${succeeded.length}곡만 추가됐어요. 나머지는 YouTube에서 직접 추가해주세요.`);
-      offerYtOpenLink(playlistUrl, "내 재생목록 열기 ↗");
+      setYtSaveStatus(t("ytsave.partial", { picks: picks.length, succeeded: succeeded.length }));
+      offerYtOpenLink(playlistUrl, t("ytsave.openMyPlaylist"));
     } else {
-      openAnonymousPlaylistFallback("곡을 추가하지 못했어요.");
+      openAnonymousPlaylistFallback(t("ytsave.addFail"));
       return;
     }
     track("playlist_saved_to_account", { count: picks.length, succeeded: succeeded.length, failed: failed.length });

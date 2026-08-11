@@ -10,6 +10,9 @@ form.addEventListener("submit", async (e) => {
     if (!prompt) return;
     body.prompt = prompt;
     body.mode = "ai";
+    // 백엔드가 interpretation_summary·tags·구간별 impression을 이 언어로 쓰도록 지시하는 데
+    // 씀(app/i18n.js currentLang과 동일 값 — backend/app/api/schemas.py SetlistRequest.lang).
+    body.lang = window.i18n.getLang();
 
     if (minutesTouched) {
       const minutes = parseInt($("target-minutes").value, 10);
@@ -28,7 +31,7 @@ form.addEventListener("submit", async (e) => {
     body.mode = "custom";
     const customStages = collectStagesForCustomMode();
     if (!customStages || customStages.length === 0) {
-      showError("구간 설정을 해 주세요.");
+      showError(t("error.needStages"));
       return;
     }
     body.stages = customStages;
@@ -60,7 +63,7 @@ form.addEventListener("submit", async (e) => {
       // 큐잉(TPM 페이싱) 중 — job_id로 폴링해서 완료를 기다린다(architecture.md 스키마3 확장).
       data = await pollSetlistJob(data);
     } else if (!res.ok) {
-      const msg = (data && data.error && data.error.message) || `요청 실패 (HTTP ${res.status})`;
+      const msg = (data && data.error && data.error.message) || t("error.requestFailed", { status: res.status });
       throw new Error(msg);
     }
     renderResult(data);
@@ -69,7 +72,7 @@ form.addEventListener("submit", async (e) => {
   } catch (err) {
     const offline = err instanceof TypeError;
     showError(offline
-      ? "백엔드에 연결하지 못했어요. 서버가 켜져 있는지, API 주소가 맞는지 확인해 주세요."
+      ? t("error.backendDown")
       : err.message);
   } finally {
     showLoading(false);
@@ -86,20 +89,20 @@ const SETLIST_POLL_TIMEOUT_MS = 5 * 60 * 1000; // 5분 — groq_adapter.py tpm_m
 
 function setQueueWaitMessage(waitSeconds, queuePosition) {
   if (!loadingSubEl) return;
-  const ahead = queuePosition > 0 ? `내 앞에 ${queuePosition}명 대기 중. ` : "";
+  const ahead = queuePosition > 0 ? t("queue.ahead", { n: queuePosition }) : "";
   if (waitSeconds == null || waitSeconds <= 0) {
     loadingSubEl.textContent = ahead
-      ? `${ahead}곧 시작할게요! 🙏`
-      : "지금 요청이 몰려서 순서를 기다리고 있어요. 곧 시작할게요! 🙏";
+      ? t("queue.soonWithAhead", { ahead })
+      : t("queue.wrappingUp");
     return;
   }
   const rounded = Math.max(1, Math.round(waitSeconds));
-  loadingSubEl.textContent = `${ahead}약 ${rounded}초 정도 걸릴 것 같아요… ⏳`;
+  loadingSubEl.textContent = t("queue.eta", { ahead, sec: rounded });
 }
 
 async function pollSetlistJob(initial) {
   const jobId = initial && initial.job_id;
-  if (!jobId) throw new Error("대기열 등록에 실패했어요. 잠시 후 다시 시도해 주세요.");
+  if (!jobId) throw new Error(t("error.queueRegisterFail"));
   if (coldStartTimer) { clearTimeout(coldStartTimer); coldStartTimer = null; } // 콜드스타트 안내와 겹치지 않게
   setQueueWaitMessage(initial.estimated_wait_seconds, initial.queue_position);
 
@@ -109,26 +112,17 @@ async function pollSetlistJob(initial) {
     const res = await fetch(`${API_BASE}/api/setlist/status/${jobId}`);
     const data = await res.json().catch(() => null);
     if (!res.ok) {
-      const msg = (data && data.error && data.error.message) || `요청 실패 (HTTP ${res.status})`;
+      const msg = (data && data.error && data.error.message) || t("error.requestFailed", { status: res.status });
       throw new Error(msg);
     }
     if (data.status === "done") return data.result;
     setQueueWaitMessage(data.estimated_wait_seconds, data.queue_position);
   }
-  throw new Error("대기 시간이 너무 길어져 요청을 취소했어요. 잠시 후 다시 시도해 주세요.");
+  throw new Error(t("error.queueTimeout"));
 }
 
 // 대기 UX(트래픽/콜드스타트 대비): 로딩 중 문구를 위트있게 순환하고, 오래 걸리면(콜드스타트 추정)
 // '서버 깨우는 중' 안내로 강화. 무료 플랜 슬립 시 첫 응답이 느려도 이탈을 줄인다.
-const LOADING_MESSAGES = [
-  "플레이리스트를 만드는 중입니다~ 🎶",
-  "요청을 무드로 해석하고 있어요… 🔮",
-  "곡을 하모닉하게 잇는 중… 🎼",
-  "에너지 흐름을 다듬는 중… 📈",
-  "당신을 위한 곡을 고르고 있어요… ✨",
-];
-const COLDSTART_SUB = "서버가 잠깐 자고 있었나 봐요… 깨우는 중이에요! 🥱☕ (유메와 파와—!)";
-const LOADING_DEFAULT_SUB = "백엔드가 잠들어 있었다면 첫 응답이 조금 느릴 수 있어요.";
 const loadingTextEl = loadingEl.querySelector(".loading-text");
 const loadingSubEl = loadingEl.querySelector(".loading-sub");
 let loadingRotateTimer = null;
@@ -156,15 +150,16 @@ function showLoading(on) {
 
 function startLoadingAnimation() {
   let i = 0;
-  if (loadingTextEl) loadingTextEl.textContent = LOADING_MESSAGES[0];
-  if (loadingSubEl) loadingSubEl.textContent = LOADING_DEFAULT_SUB;
+  const messages = tArr("loading.messages");
+  if (loadingTextEl) loadingTextEl.textContent = messages[0];
+  if (loadingSubEl) loadingSubEl.textContent = t("loading.sub");
   loadingRotateTimer = setInterval(() => {
-    i = (i + 1) % LOADING_MESSAGES.length;
-    if (loadingTextEl) loadingTextEl.textContent = LOADING_MESSAGES[i];
+    i = (i + 1) % messages.length;
+    if (loadingTextEl) loadingTextEl.textContent = messages[i];
   }, 2200);
   // 8초 넘게 걸리면 콜드스타트로 보고 위트 멘트로 안내 강화.
   coldStartTimer = setTimeout(() => {
-    if (loadingSubEl) loadingSubEl.textContent = COLDSTART_SUB;
+    if (loadingSubEl) loadingSubEl.textContent = t("loading.coldstart");
   }, 8000);
 }
 
