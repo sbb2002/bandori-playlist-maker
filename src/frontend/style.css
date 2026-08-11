@@ -74,9 +74,57 @@ body {
   100% { transform: translateY(-50%) rotate(360deg); }
 }
 .omakase-btn.rolling { animation: omakase-roll 0.5s ease; }
+
+/* 오마카세 연타 방지 쿨타임(5초, app.js OMAKASE_COOLDOWN_MS) — 버튼을 반투명 검정 파이가
+   시계방향으로 걷히며 덮고 있다가 쿨타임이 끝나면 완전히 사라진다. conic-gradient를
+   퍼센트 커스텀 프로퍼티로 애니메이션하는 표준 "쿨다운 타이머" 기법(@property로 등록해야
+   브라우저가 <percentage> 보간을 해준다 — 지원 브라우저: Chrome/Edge/Safari 16.4+/Firefox 128+,
+   미지원이면 애니메이션 없이 즉시 사라짐으로 안전 열화).
+   버튼 자체는 이미 disabled(app.js)라 시각 효과일 뿐, 클릭 차단은 그걸로 충분하다. */
+@property --omakase-cd { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+.omakase-btn.cooldown::after {
+  content: "";
+  position: absolute; inset: 0; border-radius: inherit;
+  /* 12시 방향(0deg)에서 시작해 var(--omakase-cd)까지는 투명(이미 걷힌 부분), 그 뒤는 검정
+     (남은 쿨타임). 퍼센트가 0%→100%로 커지면서 투명 쐐기가 12시에서 시계방향(1시→3시→
+     6시…)으로 자라난다 — conic-gradient는 항상 시계방향으로 각도가 커지므로, 앞쪽 색을
+     투명으로 두고 그 경계를 늘려야 "시계방향으로 걷히는" 모양이 된다(반대로 두면 반시계
+     방향으로 걷히는 것처럼 보인다). */
+  background: conic-gradient(transparent var(--omakase-cd), rgba(0,0,0,0.55) var(--omakase-cd));
+  animation: omakase-cooldown-wipe 5s linear forwards;
+  pointer-events: none;
+}
+@keyframes omakase-cooldown-wipe {
+  from { --omakase-cd: 0%; }
+  to { --omakase-cd: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .omakase-btn.cooldown::after { animation: none; background: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .omakase-btn.rolling { animation: none; }
 }
+/* 오마카세 컨텍스트(시간대·날씨) 조회 중 프롬프트 입력창에 보이는 생성중 표시 —
+   위치·날씨 API가 ~4초까지 걸릴 수 있어(getOmakaseContext), 그동안 입력창이 멈춘 것처럼
+   보이지 않게 은은한 셔머 애니메이션 + placeholder 문구로 진행 중임을 알린다. */
+#prompt.prompt-generating {
+  background: linear-gradient(90deg, var(--card-2) 25%, rgba(var(--line-rgb),0.18) 50%, var(--card-2) 75%);
+  background-size: 200% 100%;
+  animation: prompt-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes prompt-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #prompt.prompt-generating { animation: none; }
+}
+
+/* 세트리스트 생성 중(POST /api/setlist 응답 대기) 커스텀 모드 파라미터 패널 전체를
+   잠근다 — 요청을 보낸 뒤 응답이 오기 전에 그래프를 더 만지면(레이스 컨디션) 다음 요청에
+   반영될 값과 방금 화면에 그린 값이 어긋날 수 있다. pointer-events:none 하나로 체크박스·
+   드래그 그래프·버튼까지 한 번에 잠근다(요소별로 disabled를 일일이 걸 필요 없음). */
+#options-details.locked { pointer-events: none; opacity: 0.55; }
 /* 커스텀 모드(세부 설정) 항목 이름만 다른 글자보다 2배 크게 — 재생시간·곡 종류·밴드 필터·
    에너지 X 감정 궤적·고급 설정처럼 각 블록이 무엇을 조정하는 영역인지 한눈에 구분되도록.
    간격 체계(전 항목 공통, 아래 .field-note·.setting-head 등과 짝): 이름→설명 6px,

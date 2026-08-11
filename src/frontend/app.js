@@ -193,20 +193,39 @@ function buildOmakasePrompt(ctx) {
   return parts.join(" ");
 }
 
+const OMAKASE_COOLDOWN_MS = 5000; // 연타 방지 — 클릭 시점부터 최소 5초는 버튼 비활성 유지
+
 if (omakaseBtn) {
   omakaseBtn.addEventListener("animationend", () => omakaseBtn.classList.remove("rolling"));
   omakaseBtn.addEventListener("click", async () => {
     track("omakase_click");
+    const clickedAt = Date.now();
     omakaseBtn.disabled = true;
     omakaseBtn.classList.remove("rolling");
     void omakaseBtn.offsetWidth; // 연타 시에도 애니메이션이 재시작되도록 리플로우 강제
-    omakaseBtn.classList.add("rolling");
+    omakaseBtn.classList.add("rolling", "cooldown");
+    // 입력창을 잠그고 셔머 애니메이션으로 "생성 중"을 표시 — 잠그지 않으면 조회(최대 4초
+    // 안팎, 위치·날씨 API) 도중 사용자가 직접 타이핑한 내용이 완료 시 덮어써지는 레이스
+    // 컨디션이 생긴다.
+    const prevPlaceholder = promptEl.placeholder;
+    promptEl.disabled = true;
+    promptEl.classList.add("prompt-generating");
+    promptEl.placeholder = "오마카세 프롬프트 생성 중…";
     try {
       const ctx = await getOmakaseContext();
       promptEl.value = buildOmakasePrompt(ctx);
       promptEl.dispatchEvent(new Event("input"));
     } finally {
-      omakaseBtn.disabled = false;
+      promptEl.disabled = false;
+      promptEl.classList.remove("prompt-generating");
+      promptEl.placeholder = prevPlaceholder;
+      // 쿨타임은 클릭 시점부터 5초 — 조회가 그보다 빨리 끝나도 버튼은 남은 시간만큼 더
+      // 잠가둔다(시계방향으로 걷히는 CSS 파이 애니메이션과 실제 잠금 해제 시점을 일치시킴).
+      const remaining = Math.max(0, OMAKASE_COOLDOWN_MS - (Date.now() - clickedAt));
+      setTimeout(() => {
+        omakaseBtn.disabled = false;
+        omakaseBtn.classList.remove("cooldown");
+      }, remaining);
     }
   });
 }
@@ -347,8 +366,21 @@ const loadingSubEl = loadingEl.querySelector(".loading-sub");
 let loadingRotateTimer = null;
 let coldStartTimer = null;
 
+// 세트리스트 생성 요청이 오가는 동안 AI 모드 프롬프트 입력창과 커스텀 모드 전체 파라미터를
+// 잠근다 — 응답이 오기 전에 사용자가 값을 바꾸면, 화면(다음 요청에 실릴 값)과 방금 보낸
+// 요청이 서로 다른 상태를 가리키는 레이스 컨디션이 생긴다.
+function setFormLocked(locked) {
+  promptEl.disabled = locked;
+  if (omakaseBtn) omakaseBtn.disabled = locked;
+  const modeSwitch = $("mode-switch");
+  if (modeSwitch) modeSwitch.disabled = locked;
+  const optionsDetails = $("options-details");
+  if (optionsDetails) optionsDetails.classList.toggle("locked", locked);
+}
+
 function showLoading(on) {
   submitBtn.disabled = on;
+  setFormLocked(on);
   toggle(loadingEl, on);
   if (on) startLoadingAnimation();
   else stopLoadingAnimation();
@@ -1161,6 +1193,9 @@ function collectStages() {
   }));
 }
 
+// stages는 renderResult가 이미 실제 곡 배정 비율(width)까지 채워둔 lastStages를 넘겨받는다
+// (에너지만 반영하고 나머지 6지표+감성문장을 0.5/빈 값으로 덮어쓰던 버그 수정 — 이제 이번
+// 생성에 실제로 쓰인 값을 커스텀 모드 파라미터 UI에 그대로 반영한다).
 function syncGraphToParams(params, stages) {
   if (stageTouched || !params) return;
   const total = params.target_minutes || (stageModel ? stageModel.totalMinutes : 60);
@@ -1168,17 +1203,17 @@ function syncGraphToParams(params, stages) {
   if (Array.isArray(stages) && stages.length >= MIN_SEGMENTS) {
     const n = Math.max(MIN_SEGMENTS, Math.min(MAX_SEGMENTS, stages.length));
     segments = stages.slice(0, n).map((s) => {
-      const e = typeof s.energy_target === "number" ? s.energy_target : 0.4;
+      const e = s.energy != null ? s.energy : (typeof s.energy_target === "number" ? s.energy_target : 0.4);
       return {
         energy: clamp01(+e.toFixed(2)),
-        width: 1 / n,
-        valence: 0.5,
-        lufs_integrated: 0.5,
-        lra: 0.5,
-        danceability_norm: 0.5,
-        instr_stem_ratio: 0.5,
-        speech_median: 0.5,
-        impression: "",
+        width: s.width != null ? s.width : 1 / n,
+        valence: s.valence != null ? +s.valence.toFixed(3) : 0.5,
+        lufs_integrated: s.lufs_integrated != null ? +s.lufs_integrated.toFixed(3) : 0.5,
+        lra: s.lra != null ? +s.lra.toFixed(3) : 0.5,
+        danceability_norm: s.danceability_norm != null ? +s.danceability_norm.toFixed(3) : 0.5,
+        instr_stem_ratio: s.instr_stem_ratio != null ? +s.instr_stem_ratio.toFixed(3) : 0.5,
+        speech_median: s.speech_median != null ? +s.speech_median.toFixed(3) : 0.5,
+        impression: s.impression || "",
         bands: s.bands && s.bands.length ? s.bands : [],
       };
     });
@@ -1468,7 +1503,7 @@ function renderResult(data) {
   renderTracklist(picks);
   renderCamelotWheel(picks);
   syncBandChecks(data.applied_bands); // 적용된 밴드(프롬프트 자동감지 포함)를 체크박스에 반영
-  syncGraphToParams(data.params, data.stages); // 그래프에 이번 해석 아크 반영(미조정 시, stages 우선)
+  syncGraphToParams(data.params, lastStages); // 그래프에 이번 해석 아크(실제 사용된 전 지표) 반영(미조정 시)
   reflectSettings(data); // 재생시간·단계 수·커버 필터를 세부 설정 UI에 반영(미조정 시)
   show(resultEl);
   showPlaybar();
