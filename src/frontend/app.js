@@ -193,14 +193,17 @@ function buildOmakasePrompt(ctx) {
   return parts.join(" ");
 }
 
+const OMAKASE_COOLDOWN_MS = 5000; // 연타 방지 — 클릭 시점부터 최소 5초는 버튼 비활성 유지
+
 if (omakaseBtn) {
   omakaseBtn.addEventListener("animationend", () => omakaseBtn.classList.remove("rolling"));
   omakaseBtn.addEventListener("click", async () => {
     track("omakase_click");
+    const clickedAt = Date.now();
     omakaseBtn.disabled = true;
     omakaseBtn.classList.remove("rolling");
     void omakaseBtn.offsetWidth; // 연타 시에도 애니메이션이 재시작되도록 리플로우 강제
-    omakaseBtn.classList.add("rolling");
+    omakaseBtn.classList.add("rolling", "cooldown");
     // 입력창을 잠그고 셔머 애니메이션으로 "생성 중"을 표시 — 잠그지 않으면 조회(최대 4초
     // 안팎, 위치·날씨 API) 도중 사용자가 직접 타이핑한 내용이 완료 시 덮어써지는 레이스
     // 컨디션이 생긴다.
@@ -213,10 +216,16 @@ if (omakaseBtn) {
       promptEl.value = buildOmakasePrompt(ctx);
       promptEl.dispatchEvent(new Event("input"));
     } finally {
-      omakaseBtn.disabled = false;
       promptEl.disabled = false;
       promptEl.classList.remove("prompt-generating");
       promptEl.placeholder = prevPlaceholder;
+      // 쿨타임은 클릭 시점부터 5초 — 조회가 그보다 빨리 끝나도 버튼은 남은 시간만큼 더
+      // 잠가둔다(시계방향으로 걷히는 CSS 파이 애니메이션과 실제 잠금 해제 시점을 일치시킴).
+      const remaining = Math.max(0, OMAKASE_COOLDOWN_MS - (Date.now() - clickedAt));
+      setTimeout(() => {
+        omakaseBtn.disabled = false;
+        omakaseBtn.classList.remove("cooldown");
+      }, remaining);
     }
   });
 }
