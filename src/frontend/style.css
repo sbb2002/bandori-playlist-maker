@@ -41,6 +41,9 @@ body {
 
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field-label { font-size: 0.85rem; color: var(--muted); }
+.prompt-input-row { display: flex; gap: 8px; }
+.prompt-input-row input { flex: 1 1 auto; min-width: 0; }
+.prompt-input-row #omakase-btn { flex: 0 0 auto; white-space: nowrap; }
 /* 커스텀 모드(세부 설정) 항목 이름만 다른 글자보다 2배 크게 — 재생시간·곡 종류·밴드 필터·
    에너지 X 감정 궤적·고급 설정처럼 각 블록이 무엇을 조정하는 영역인지 한눈에 구분되도록.
    간격 체계(전 항목 공통, 아래 .field-note·.setting-head 등과 짝): 이름→설명 6px,

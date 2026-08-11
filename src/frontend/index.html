@@ -60,8 +60,11 @@
 
       <label class="field" id="prompt-field">
         <span class="field-label">어떤 플레이리스트를 원하세요?</span>
-        <input id="prompt" name="prompt" type="text" maxlength="500" autocomplete="off"
-               placeholder="예) 퇴근하고 주말 시작! 기분이 절로 좋아지는 1시간 플레이리스트" required />
+        <div class="prompt-input-row">
+          <input id="prompt" name="prompt" type="text" maxlength="500" autocomplete="off"
+                 placeholder="예) 퇴근하고 주말 시작! 기분이 절로 좋아지는 1시간 플레이리스트" required />
+          <button type="button" id="omakase-btn" class="ghost" aria-label="오마카세로 프롬프트 자동 생성">🎲 오마카세</button>
+        </div>
         <span id="prompt-hint" class="field-hint" aria-live="polite"></span>
       </label>
 
