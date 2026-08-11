@@ -1,15 +1,32 @@
+/* 라이트가 기본 팔레트. 다크는 :root[data-theme="dark"]에서 같은 변수를 덮어쓴다
+   (레이아웃 셀렉터는 그대로, 색상 변수만 테마별로 바뀐다). */
 :root {
+  --bg: #f5f4fb;
+  --bg-glow: #e7e0fb; /* 배경 은은한 그라디언트 포인트색 */
+  --card: #ffffff;
+  --card-2: #f0eefa;
+  --text: #232436;
+  --muted: #6b6f85;
+  --accent: #7c6cff;
+  --accent-2: #ff6cc4;
+  --ok: #1f9d63;
+  --warn: #b3720a;
+  --err: #d6473f;
+  --radius: 14px;
+  --line-rgb: 20,20,30; /* 얇은 경계선용 — rgba(var(--line-rgb), alpha)로 사용 */
+}
+
+:root[data-theme="dark"] {
   --bg: #0f1017;
+  --bg-glow: #241d3a;
   --card: #1a1c28;
   --card-2: #232636;
   --text: #eef0f7;
   --muted: #9aa0b4;
-  --accent: #7c6cff;
-  --accent-2: #ff6cc4;
   --ok: #3ecf8e;
   --warn: #ffb020;
   --err: #ff6b6b;
-  --radius: 14px;
+  --line-rgb: 255,255,255;
 }
 
 * { box-sizing: border-box; }
@@ -17,7 +34,7 @@
 body {
   margin: 0;
   font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
-  background: radial-gradient(1200px 600px at 20% -10%, #241d3a 0%, var(--bg) 55%);
+  background: radial-gradient(1200px 600px at 20% -10%, var(--bg-glow) 0%, var(--bg) 55%);
   color: var(--text);
   line-height: 1.55;
   min-height: 100vh;
@@ -32,7 +49,7 @@ body {
 
 .card {
   background: var(--card);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(var(--line-rgb),0.06);
   border-radius: var(--radius);
   padding: 20px;
   margin-bottom: 18px;
@@ -75,7 +92,7 @@ input[type="text"], input[type="number"] {
   width: 100%;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(var(--line-rgb),0.1);
   background: var(--card-2);
   color: var(--text);
   font-size: 1rem;
@@ -99,7 +116,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .mode-switch {
   position: relative; display: flex; width: 100%; margin-bottom: 16px;
   padding: 4px; border-radius: 999px;
-  background: var(--card-2); border: 1px solid rgba(255,255,255,0.1);
+  background: var(--card-2); border: 1px solid rgba(var(--line-rgb),0.1);
   cursor: pointer; font-family: inherit;
 }
 .mode-switch:hover { border-color: rgba(124,108,255,0.45); }
@@ -142,10 +159,10 @@ input[type="number"] { -moz-appearance: textfield; }
    위젯이 시작하도록). 위젯 자체도 같은 min-height(48px)로 맞추고 내용은 세로 중앙 정렬. */
 .options-grid .field-label { min-height: 3.4rem; }
 .options-grid .field-note { min-height: 2.2rem; }
-.options-grid-divider { align-self: stretch; width: 1px; flex: 0 0 auto; background: rgba(255,255,255,0.12); }
+.options-grid-divider { align-self: stretch; width: 1px; flex: 0 0 auto; background: rgba(var(--line-rgb),0.12); }
 
 /* 설정 블록 */
-.setting-block { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); }
+.setting-block { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(var(--line-rgb),0.06); }
 .setting-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .setting-head .field-label, .setting-head .field-sublabel { margin: 0; } /* 행 자체가 아래 간격을 담당(정렬 틀어짐 방지) */
 .muted { color: var(--muted); font-weight: 400; }
@@ -196,14 +213,14 @@ input[type="number"] { -moz-appearance: textfield; }
   padding: 6px 12px; border-radius: 999px; cursor: pointer; font-family: inherit;
 }
 .bg-toggle button.on { background: var(--accent); color: #fff; }
-.bg-toggle button:hover:not(.on) { background: rgba(255,255,255,0.08); color: var(--text); }
+.bg-toggle button:hover:not(.on) { background: rgba(var(--line-rgb),0.08); color: var(--text); }
 
 .map-stage { display: flex; justify-content: center; }
 .map-wrap { position: relative; width: 100%; max-width: 420px; }
 .map-pad {
   position: relative; width: 100%; aspect-ratio: 1 / 1;
   border-radius: 12px; overflow: hidden; touch-action: none; user-select: none;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(var(--line-rgb),0.1);
   transition: background 0.2s ease;
 }
 /* 1안 — 현재(기존 프로토타입 그대로): accent/accent-2 코너 라디얼 */
@@ -225,6 +242,7 @@ input[type="number"] { -moz-appearance: textfield; }
     var(--card-2);
 }
 .map-pad.bg-quadrant .quadrant-label {
+  /* 사분면 배경색은 테마와 무관하게 항상 진하므로 텍스트는 고정 흰색 유지 */
   color: rgba(255,255,255,0.92); text-shadow: 0 1px 3px rgba(0,0,0,0.6);
 }
 /* 3안 — 형제 프로젝트 EMOI-MAP 톤(딥스페이스 + 별/성운)을 가볍게 재현한 예시. */
@@ -245,8 +263,8 @@ input[type="number"] { -moz-appearance: textfield; }
     radial-gradient(125% 95% at 50% 12%, #10141f 0%, #0a0b13 48%, #05050a 100%);
 }
 .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.map-grid { stroke: rgba(255,255,255,0.07); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.map-grid.mid { stroke: rgba(255,255,255,0.14); stroke-dasharray: 3 3; }
+.map-grid { stroke: rgba(var(--line-rgb),0.07); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.map-grid.mid { stroke: rgba(var(--line-rgb),0.14); stroke-dasharray: 3 3; }
 .map-path {
   fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
@@ -288,14 +306,14 @@ input[type="number"] { -moz-appearance: textfield; }
 .timebar-label-row > span:not(.field-sublabel) { font-size: 0.75rem; color: var(--muted); }
 .timebar-label-actions { display: flex; align-items: baseline; gap: 10px; }
 .timebar-equalize-btn {
-  border: 1px solid rgba(255,255,255,0.14); background: var(--card-2); color: var(--text);
+  border: 1px solid rgba(var(--line-rgb),0.14); background: var(--card-2); color: var(--text);
   font-size: 0.7rem; font-weight: 600; padding: 4px 8px; border-radius: 6px;
   cursor: pointer; font-family: inherit; transition: border-color 0.12s, background 0.12s;
 }
 .timebar-equalize-btn:hover { border-color: rgba(124,108,255,0.5); background: rgba(124,108,255,0.15); }
 .timebar {
   position: relative; height: 22px; border-radius: 999px;
-  background: var(--card-2); border: 1px solid rgba(255,255,255,0.1);
+  background: var(--card-2); border: 1px solid rgba(var(--line-rgb),0.1);
   overflow: hidden; touch-action: none; user-select: none;
 }
 .timebar-track {
@@ -305,12 +323,12 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 .timebar-seg {
   position: absolute; top: 0; height: 100%;
-  border-right: 1px solid rgba(255,255,255,0.2);
+  border-right: 1px solid rgba(var(--line-rgb),0.2);
   background: transparent;
   transition: background 0.12s;
 }
 .timebar-seg:last-child { border-right: none; }
-.timebar-seg.linked { background: rgba(255,255,255,0.16); }
+.timebar-seg.linked { background: rgba(var(--line-rgb),0.16); }
 /* 구간 순번 동그라미 — 정서 지도 점(.stage-node)과 같은 배지 스타일이면서, 그 자체가
    경계 드래그 핸들을 겸한다. (1)은 시작점(0분)에 고정되어 끌 수 없고, (2)부터는 좌우로
    끌어 바로 앞 구간과의 경계를 옮긴다 — "[(1)-----(2)----(3)---]" 형태. */
@@ -360,22 +378,22 @@ input[type="number"] { -moz-appearance: textfield; }
 .impression-input {
   flex: 1 1 auto; min-width: 0; /* flex 아이템이 내용 길이로 넘치지 않게 */
   font-size: 0.72rem; padding: 5px 7px; border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.14); background: var(--card-2); color: var(--text);
+  border: 1px solid rgba(var(--line-rgb),0.14); background: var(--card-2); color: var(--text);
   font-family: inherit; transition: border-color 0.12s, background 0.12s;
 }
 .impression-input::placeholder { color: var(--muted); }
 .impression-input:focus { outline: none; border-color: var(--accent); }
-.impression-input.linked { background: rgba(255,255,255,0.16); border-color: var(--accent-2); }
+.impression-input.linked { background: rgba(var(--line-rgb),0.16); border-color: var(--accent-2); }
 /* 구간별 "밴드 고정" 토글+팝업 — 감성 설정 텍스트박스 오른쪽(전역 밴드 필터와 별개,
    이 구간만 특정 밴드 1개 이상으로 고정). wrap이 팝업의 위치 기준점(relative). */
 .impression-band-wrap { position: relative; flex: 0 0 auto; }
 .impression-band-toggle {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 0.72rem; padding: 5px 9px; border-radius: 999px; white-space: nowrap;
-  border: 1px solid rgba(255,255,255,0.14); background: var(--card-2); color: var(--text);
+  border: 1px solid rgba(var(--line-rgb),0.14); background: var(--card-2); color: var(--text);
   font-family: inherit; cursor: pointer; transition: border-color 0.12s, background 0.12s;
 }
-.impression-band-toggle.linked { background: rgba(255,255,255,0.16); border-color: var(--accent-2); }
+.impression-band-toggle.linked { background: rgba(var(--line-rgb),0.16); border-color: var(--accent-2); }
 /* ON/OFF 점멸등 — 꺼짐(회색)=제한 없음(전역 필터만 적용), 켜짐(초록+은은한 발광)=이 구간 밴드 고정 중. */
 .impression-band-toggle .indicator-dot {
   width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: 0 0 auto;
@@ -388,7 +406,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .impression-band-popup {
   position: absolute; z-index: 30; top: 50%; left: calc(100% + 8px); transform: translateY(-50%);
   width: 220px;
-  background: var(--card); border: 1px solid rgba(255,255,255,0.14); border-radius: 10px;
+  background: var(--card); border: 1px solid rgba(var(--line-rgb),0.14); border-radius: 10px;
   padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.45);
 }
 .impression-band-popup .band-list { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); }
@@ -410,13 +428,13 @@ input[type="number"] { -moz-appearance: textfield; }
 .y-tick { font-size: 0.65rem; color: var(--muted); }
 .plot {
   position: relative; flex: 1; height: 84px; background: var(--card-2);
-  border-left: 1px solid rgba(255,255,255,0.16); border-bottom: 1px solid rgba(255,255,255,0.16);
+  border-left: 1px solid rgba(var(--line-rgb),0.16); border-bottom: 1px solid rgba(var(--line-rgb),0.16);
   border-radius: 0 8px 0 0; overflow: visible; touch-action: none; user-select: none;
 }
 .graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.grid { stroke: rgba(255,255,255,0.06); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.grid-edge { stroke: rgba(255,255,255,0.12); }
-.grid-boundary { stroke: rgba(255,255,255,0.14); stroke-dasharray: 3 3; }
+.grid { stroke: rgba(var(--line-rgb),0.06); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.grid-edge { stroke: rgba(var(--line-rgb),0.12); }
+.grid-boundary { stroke: rgba(var(--line-rgb),0.14); stroke-dasharray: 3 3; }
 .graph-area { fill: rgba(124,108,255,0.16); stroke: none; }
 .graph-curve { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
 /* 정서 지도(.stage-node)·시간 배분 바(.timebar-num)와 같은 동그라미 순번 배지 스타일 */
@@ -442,7 +460,7 @@ input[type="number"] { -moz-appearance: textfield; }
 /* 구간 추가/제거 컨텍스트 메뉴(우클릭·길게누름) */
 .graph-menu {
   position: fixed; z-index: 1000; min-width: 120px; padding: 4px;
-  background: #1b1f2a; border: 1px solid rgba(255,255,255,0.12);
+  background: var(--card-2); border: 1px solid rgba(var(--line-rgb),0.12);
   border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
 }
 .graph-menu-item {
@@ -450,7 +468,7 @@ input[type="number"] { -moz-appearance: textfield; }
   background: transparent; border: none; border-radius: 6px;
   color: var(--text); font-size: 0.85rem;
 }
-.graph-menu-item:hover:not(:disabled) { background: rgba(255,255,255,0.08); }
+.graph-menu-item:hover:not(:disabled) { background: rgba(var(--line-rgb),0.08); }
 .graph-menu-item:disabled { color: var(--muted); cursor: default; opacity: 0.6; }
 
 button {
@@ -473,7 +491,7 @@ button.ghost {
   padding: 8px 16px;
   background: var(--card-2);
   color: var(--text);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(var(--line-rgb),0.1);
 }
 
 .hidden { display: none !important; }
@@ -484,7 +502,7 @@ button.ghost {
 .loading-sub { color: var(--muted); font-size: 0.85rem; margin: 0; }
 .spinner {
   width: 42px; height: 42px; margin: 4px auto;
-  border: 4px solid rgba(255,255,255,0.12);
+  border: 4px solid rgba(var(--line-rgb),0.12);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
@@ -528,7 +546,7 @@ button.ghost {
   position: relative; /* 사이-삽입 인서터(+)의 기준점 */
   display: flex; gap: 12px; align-items: flex-start;
   padding: 12px 14px; margin-bottom: 14px;
-  background: var(--card); border: 1px solid rgba(255,255,255,0.06);
+  background: var(--card); border: 1px solid rgba(var(--line-rgb),0.06);
   border-radius: 12px; cursor: pointer;
   transition: border-color 0.15s, background-color 0.25s, transform 0.05s;
 }
@@ -549,7 +567,7 @@ button.ghost {
 .track:not(.active) .badges { display: none; }
 .badge {
   font-size: 0.72rem; padding: 2px 8px; border-radius: 999px;
-  background: var(--card-2); border: 1px solid rgba(255,255,255,0.1); color: var(--muted);
+  background: var(--card-2); border: 1px solid rgba(var(--line-rgb),0.1); color: var(--muted);
 }
 .badge.same, .badge.adjacent { color: var(--ok); }
 .badge.non_harmonic { color: var(--warn); }
@@ -612,7 +630,7 @@ button.ghost {
   background: transparent; border: 1px solid transparent; color: var(--muted);
   cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
-.track-btn:hover { background: var(--card-2); color: var(--text); border-color: rgba(255,255,255,0.09); }
+.track-btn:hover { background: var(--card-2); color: var(--text); border-color: rgba(var(--line-rgb),0.09); }
 .track-btn svg { display: block; }
 .track-move { cursor: grab; touch-action: none; }
 .track-move:active { cursor: grabbing; }
@@ -660,7 +678,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   position: relative; z-index: 1;
   width: min(560px, calc(100vw - 32px)); max-height: min(80vh, 680px);
   display: flex; flex-direction: column;
-  background: var(--card); border: 1px solid rgba(255,255,255,0.1);
+  background: var(--card); border: 1px solid rgba(var(--line-rgb),0.1);
   border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   padding: 16px;
 }
@@ -670,12 +688,12 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 #picker-search {
   width: 100%; padding: 9px 12px; margin-bottom: 12px;
   background: var(--card-2); color: var(--text);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; font-size: 0.95rem;
+  border: 1px solid rgba(var(--line-rgb),0.1); border-radius: 9px; font-size: 0.95rem;
 }
 .picker-type-filter { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; min-height: 48px; }
 .picker-type-pill {
   padding: 5px 12px; border-radius: 999px; cursor: pointer;
-  background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--muted); font-size: 0.82rem;
+  background: transparent; border: 1px solid rgba(var(--line-rgb),0.1); color: var(--muted); font-size: 0.82rem;
 }
 .picker-type-pill:hover { background: var(--card-2); color: var(--text); }
 .picker-type-pill.active {
@@ -702,7 +720,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   display: flex; align-items: center; gap: 10px;
   padding: 8px 10px; border-radius: 9px; border: 1px solid transparent;
 }
-.picker-song:hover { background: var(--card-2); border-color: rgba(255,255,255,0.06); }
+.picker-song:hover { background: var(--card-2); border-color: rgba(var(--line-rgb),0.06); }
 .picker-song-icon {
   flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px;
   object-fit: cover; background: var(--card-2);
@@ -724,9 +742,9 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 #share-url {
   flex: 1 1 auto; min-width: 0; padding: 9px 12px;
   background: var(--card-2); color: var(--text);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; font-size: 0.85rem;
+  border: 1px solid rgba(var(--line-rgb),0.1); border-radius: 9px; font-size: 0.85rem;
 }
-.share-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 0 0 14px; }
+.share-divider { border: none; border-top: 1px solid rgba(var(--line-rgb),0.08); margin: 0 0 14px; }
 .share-actions { display: flex; }
 .share-actions .primary { width: 100%; }
 .share-note { color: var(--muted); font-size: 0.78rem; margin: 12px 0 0; }
@@ -748,6 +766,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 .yt-progress-bar {
   height: 100%; width: 0%; border-radius: 4px;
   background-color: var(--accent);
+  /* accent 배경 위 진행률 줄무늬 — 테마와 무관하게 항상 고정 흰색 */
   background-image: linear-gradient(
     45deg,
     rgba(255,255,255,0.28) 25%, transparent 25%,
@@ -769,16 +788,16 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   width: 28px; height: 28px; padding: 0; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   background: var(--card-2); color: var(--muted);
-  border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; line-height: 1;
+  border: 1px solid rgba(var(--line-rgb),0.1); font-size: 0.85rem; line-height: 1;
 }
-.picker-close-x:hover { color: var(--text); background: rgba(255,255,255,0.14); }
+.picker-close-x:hover { color: var(--text); background: rgba(var(--line-rgb),0.14); }
 #share-copy { flex: 0 0 auto; white-space: nowrap; }
 #share-copy.copied { color: var(--ok); border-color: var(--ok); }
 
 /* 팬메이드 프로젝트 고지(푸터) */
 .disclaimer {
   margin-top: 30px; padding-top: 18px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(var(--line-rgb),0.06);
   color: var(--muted); font-size: 0.72rem; line-height: 1.55; text-align: left;
 }
 .disclaimer p { margin: 0 0 4px; }
@@ -791,13 +810,29 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 
 /* 좌측 메뉴 하단 현재 버전(v메인버전 - 커밋) — 메뉴 안에 숨김 */
 .menu-footer {
-  margin-top: auto; padding: 10px 6px 0; border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: auto; padding: 10px 6px 0; border-top: 1px solid rgba(var(--line-rgb),0.08);
 }
 .app-version {
   display: inline-block; font-size: 0.72rem; color: var(--muted); opacity: 0.65;
   text-decoration: none; font-variant-numeric: tabular-nums;
 }
 .app-version:hover { opacity: 0.95; color: var(--text); }
+
+/* 우상단 테마 토글 — 좌상단 .menu-btn과 대칭되는 위치·크기·스타일 */
+.theme-toggle {
+  position: fixed; right: 12px; top: 12px; z-index: 47;
+  width: 40px; height: 40px; padding: 0;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--card); border: 1px solid rgba(var(--line-rgb),0.08);
+  border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  font-size: 1.05rem; line-height: 1;
+  transition: border-color 0.15s;
+}
+.theme-toggle:hover { border-color: rgba(124,108,255,0.55); }
+/* 현재 테마 아이콘만 보이도록 root[data-theme]에 따라 전환 */
+.theme-toggle-icon { display: none; }
+:root:not([data-theme="dark"]) .theme-toggle-icon[data-theme-icon="light"] { display: block; }
+:root[data-theme="dark"] .theme-toggle-icon[data-theme-icon="dark"] { display: block; }
 
 /* 터치(호버 불가) 환경 — 호버로만 뜨던 편집 어포던스를 상시 노출(모바일 동일 UI) */
 @media (hover: none) {
@@ -811,7 +846,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   position: fixed; left: 12px; top: 12px; z-index: 47;
   width: 40px; height: 40px; padding: 0;
   display: grid; place-items: center; cursor: pointer;
-  background: var(--card); border: 1px solid rgba(255,255,255,0.08);
+  background: var(--card); border: 1px solid rgba(var(--line-rgb),0.08);
   border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);
   transition: border-color 0.15s;
 }
@@ -839,7 +874,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   width: min(320px, 86vw); height: 100vh; height: 100dvh;
   display: flex; flex-direction: column;
   padding: 60px 12px 16px;
-  background: var(--card); border-right: 1px solid rgba(255,255,255,0.08);
+  background: var(--card); border-right: 1px solid rgba(var(--line-rgb),0.08);
   box-shadow: 8px 0 30px rgba(0,0,0,0.45);
   transform: translateX(-100%); transition: transform 0.25s ease;
 }
@@ -871,11 +906,17 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 
 /* ── 하단 고정 플레이바 ───────────────────────────────────────────────────────── */
 .playbar {
+  /* 플레이바는 라이트/다크 테마와 무관하게 항상 어두운 "플레이어 크롬"으로 고정
+     (유튜브 등 플레이어 컨트롤 바 관례) — 아래 --pb-* 는 테마 변수(--card-2 등) 대신 사용. */
+  --pb-text: #eef0f7;
+  --pb-muted: #9aa0b4;
+  --pb-surface: #232636;
+  --pb-line-rgb: 255,255,255;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 42;
   /* 카드와 같은 톤이되 살짝 어둡고 블러 — 위로 스크롤되는 트랙 카드들과 시각적으로 분리된다. */
   background: rgba(20,22,32,0.88);
   backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(var(--pb-line-rgb),0.1);
   box-shadow: 0 -10px 30px rgba(0,0,0,0.45);
   transform: translateY(100%); transition: transform 0.28s ease;
   pointer-events: none;
@@ -891,7 +932,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 }
 .playbar-progress-track {
   position: relative; width: 100%; height: 5px;
-  background: rgba(255,255,255,0.12);
+  background: rgba(var(--pb-line-rgb),0.12);
   transition: height 0.14s ease;
 }
 .playbar-progress:hover .playbar-progress-track,
@@ -926,7 +967,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   display: flex; flex-direction: column; align-items: flex-start; min-width: 0; max-width: 100%;
   background: none; border: none; padding: 3px 8px; border-radius: 8px; text-align: left;
 }
-.playbar-info:hover { background: var(--card-2); }
+.playbar-info:hover { background: var(--pb-surface); }
 .playbar-title {
   display: block; max-width: 100%; overflow: hidden;
   font-weight: 700; font-size: 1.05rem; color: #fff;
@@ -950,11 +991,11 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   .playbar-title.marquee .playbar-title-track { animation: none; }
 }
 .playbar-band {
-  color: var(--muted); font-size: 0.82rem; max-width: 100%;
+  color: var(--pb-muted); font-size: 0.82rem; max-width: 100%;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .playbar-time {
-  flex: 0 0 auto; color: var(--muted); font-size: 0.8rem;
+  flex: 0 0 auto; color: var(--pb-muted); font-size: 0.8rem;
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .playbar-side { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
@@ -962,12 +1003,12 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 .playbar-btn {
   position: relative; /* 반복 ON 표시 점(::after)의 기준점 */
   width: 36px; height: 36px; padding: 0; border-radius: 50%;
-  display: grid; place-items: center; background: transparent; color: var(--text);
+  display: grid; place-items: center; background: transparent; color: var(--pb-text);
   border: 1px solid transparent;
   transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 .playbar-btn svg { display: block; width: 19px; height: 19px; }
-.playbar-btn:hover { background: var(--card-2); border-color: rgba(255,255,255,0.09); }
+.playbar-btn:hover { background: var(--pb-surface); border-color: rgba(var(--pb-line-rgb),0.09); }
 .playbar-play {
   width: 42px; height: 42px; color: #fff;
   background: linear-gradient(120deg, var(--accent), var(--accent-2));
@@ -1008,19 +1049,19 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   position: absolute; bottom: -1px; right: -1px;
   min-width: 12px; height: 12px; padding: 0 1px; border-radius: 50%;
   display: grid; place-items: center;
-  background: var(--accent-2); color: var(--bg);
+  background: var(--accent-2); color: #0f1017;
   font-size: 8px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums;
-  box-shadow: 0 0 0 2px var(--card);
+  box-shadow: 0 0 0 2px var(--pb-surface);
 }
 /* 현재곡/전체곡 — 알약 배지. 현재 번호만 흰색으로 키워 가시성 확보. */
 .playbar-count {
   flex: 0 0 auto; display: flex; align-items: baseline; gap: 2px;
   padding: 4px 11px; border-radius: 999px;
-  background: var(--card-2); border: 1px solid rgba(255,255,255,0.08);
+  background: var(--pb-surface); border: 1px solid rgba(var(--pb-line-rgb),0.08);
   font-variant-numeric: tabular-nums; line-height: 1.25;
 }
 .playbar-count-cur { color: #fff; font-size: 1rem; font-weight: 700; }
-.playbar-count-sep, .playbar-count-total { color: var(--muted); font-size: 0.85rem; font-weight: 500; }
+.playbar-count-sep, .playbar-count-total { color: var(--pb-muted); font-size: 0.85rem; font-weight: 500; }
 
 @media (max-width: 520px) {
   .wrap { padding: 56px 14px 76px; } /* 상단 여백: 좌상단 메뉴 버튼과 겹침 방지 */
@@ -1061,9 +1102,9 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 #camelot-wheel { width: 100%; max-width: 360px; height: auto; }
 
 .ring-label { font-size: 10px; fill: var(--muted); font-family: ui-monospace, Menlo, Consolas, monospace; }
-.ring-major, .ring-minor { fill: none; stroke: rgba(255,255,255,0.08); }
-.slot-major { fill: var(--card-2); stroke: rgba(255,255,255,0.1); }
-.slot-minor { fill: var(--card); stroke: rgba(255,255,255,0.06); }
+.ring-major, .ring-minor { fill: none; stroke: rgba(var(--line-rgb),0.08); }
+.slot-major { fill: var(--card-2); stroke: rgba(var(--line-rgb),0.1); }
+.slot-minor { fill: var(--card); stroke: rgba(var(--line-rgb),0.06); }
 
 .path-line {
   fill: none; stroke-width: 1.4;
@@ -1077,7 +1118,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
   transition: opacity 0.15s;
 }
 .wnode.active circle.whalo { opacity: 1; }
-.wnode circle.wdot { fill: var(--accent-2); stroke: #0f1017; stroke-width: 2; cursor: pointer; }
+.wnode circle.wdot { fill: var(--accent-2); stroke: var(--card); stroke-width: 2; cursor: pointer; }
 .wnode text.wn {
   fill: #0f1017; font-size: 10px; font-weight: 700; text-anchor: middle; dominant-baseline: central;
   font-family: ui-monospace, Menlo, Consolas, monospace; pointer-events: none;
@@ -1085,7 +1126,7 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 
 .wheel-guide {
   margin: 16px 0 0; padding: 12px 14px 12px 30px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(var(--line-rgb),0.06);
   color: var(--muted); font-size: 0.76rem; line-height: 1.6;
 }
 .wheel-guide li { margin-bottom: 4px; }

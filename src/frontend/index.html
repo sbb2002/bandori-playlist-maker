@@ -10,6 +10,11 @@
     자동 분기. Render 서비스명/URL이 바뀌면 아래 배포 URL만 고치면 됨.
   -->
   <script>
+    // 테마 FOUC 방지: CSS 렌더 전에 저장된 테마를 root에 미리 세팅(없으면 라이트 기본값 유지).
+    (function () {
+      var saved = localStorage.getItem("theme");
+      if (saved) document.documentElement.dataset.theme = saved;
+    })();
     window.SETLIST_API_BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
       ? "http://localhost:8000"
       : "https://bandori-playlist-maker.onrender.com";
@@ -33,6 +38,11 @@
   <!-- 좌상단 메뉴(햄버거 ↔ X) → 좌측 프리셋 패널 -->
   <button id="menu-btn" class="menu-btn" type="button" aria-label="메뉴 열기" aria-expanded="false">
     <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+  </button>
+  <!-- 우상단 테마 토글(햄버거 메뉴 버튼과 대칭 위치) -->
+  <button type="button" id="theme-toggle" class="theme-toggle" aria-label="다크 모드 전환" aria-pressed="false">
+    <span class="theme-toggle-icon" data-theme-icon="light" aria-hidden="true">☀️</span>
+    <span class="theme-toggle-icon" data-theme-icon="dark" aria-hidden="true">🌙</span>
   </button>
   <div id="menu-scrim" class="menu-scrim" hidden></div>
   <aside id="menu-panel" class="menu-panel" aria-hidden="true" aria-label="저장된 플레이리스트">
