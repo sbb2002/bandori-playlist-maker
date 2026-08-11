@@ -47,10 +47,11 @@ body {
   position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
   width: 30px; height: 30px; padding: 0; border-radius: 8px;
   display: grid; place-items: center; font-size: 1rem; line-height: 1;
-  background: transparent; color: var(--text);
-  border: 1px solid rgba(var(--line-rgb),0.14);
+  /* 입력창 배경(--card-2)과 구분되는 톤 + 뚜렷한 테두리라야 둥근 모서리가 실제로 보인다 */
+  background: var(--card); color: var(--text);
+  border: 1px solid rgba(var(--line-rgb),0.3);
 }
-.omakase-btn:hover { background: var(--card-2); }
+.omakase-btn:hover { background: var(--card-2); border-color: rgba(var(--line-rgb),0.5); }
 @keyframes omakase-roll {
   0% { transform: translateY(-50%) rotate(0deg); }
   100% { transform: translateY(-50%) rotate(360deg); }
