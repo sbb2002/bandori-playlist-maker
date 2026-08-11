@@ -55,8 +55,8 @@ class GroqMoodInterpreter:
         retry_base: float = 0.5,
         mood_parse_retries: int = 3,
         tpm_limit: float = 0.0,
-        tpm_max_wait: float = 20.0,
-        tpm_max_waiters: int = 100,
+        tpm_max_wait: float = 180.0,
+        tpm_max_waiters: int = 200,
     ) -> None:
         if not api_key:
             raise ValueError("Groq api_key가 비어 있습니다.")
@@ -73,6 +73,11 @@ class GroqMoodInterpreter:
         # 2026-08-10 실측: 요청 1건 고정비만 ~3200토큰이라 개수 기준 페이싱은 무의미했음),
         # (2) 429/5xx 지수 백오프 재시도(사후 backstop). 세마포어 선블로킹은 스레드풀 고갈
         # 위험이 있어 쓰지 않고, 리미터는 대기 상한(max_wait)·대기열 상한(max_waiters)으로 보호.
+        # tpm_max_wait 기본값이 180초로 넉넉한 이유: 호출측(routes.py)이 이 대기를 더 이상
+        # HTTP 요청 안에서 블로킹하지 않고 백그라운드 잡으로 돌린 뒤 폴링하게 바뀌었다
+        # (2026-08-10, jobs.py) — 20초짜리 짧은 상한은 "블로킹 요청이 플랫폼 타임아웃에 걸리기
+        # 전에 포기"하려던 것이었는데, 이제 그 제약이 없어져 사용자 체감 대기 한계(몇 분)로
+        # 새로 잡았다. 무한정 기다리면 안 되니 상한 자체는 유지.
         self._max_retries = max(0, max_retries)
         self._retry_base = max(0.0, retry_base)
         # 절대시간·다단계 마커가 많이 섞인 디테일한 요청은 200 응답이면서도 content가 JSON으로
@@ -102,6 +107,20 @@ class GroqMoodInterpreter:
             ratio = _SYSTEM_TOKENS_PER_CHAR if message.get("role") == "system" else _USER_TOKENS_PER_CHAR
             total += len(content) * ratio
         return total
+
+    def estimate_wait(
+        self, prompt: str, previous_prompt: str | None = None, feature_stats: dict | None = None,
+    ) -> float:
+        """이 요청을 지금 넣으면 TPM 버킷이 찰 때까지 몇 초 걸릴지 순수 조회(호출·소비 없음).
+
+        routes.py가 잡을 큐에 넣기 전에 사용자에게 보여줄 "약 N초 대기" 안내용 — 실제
+        레이트리밋 판정은 interpret() 안의 acquire()가 따로, 정확하게 한다(이건 참고치).
+        리미터가 비활성(tpm_limit=0)이면 항상 0.0.
+        """
+        if self._limiter is None:
+            return 0.0
+        messages = prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats)
+        return self._limiter.estimate_wait(cost=self._estimate_tokens(messages))
 
     def _headers(self) -> dict[str, str]:
         headers = {

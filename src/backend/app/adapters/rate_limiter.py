@@ -39,6 +39,21 @@ class TokenBucketLimiter:
         self._tokens = min(self._capacity, self._tokens + (now - self._last) * self._rate)
         self._last = now
 
+    def estimate_wait(self, cost: float = 1.0) -> float:
+        """cost만큼 채워지기까지 예상 대기초(소비하지 않는 순수 조회, UI 안내용).
+
+        이미 충분하면 0.0. cost가 용량을 넘으면(영원히 못 채움) math.inf.
+        다른 대기자가 먼저 채워진 토큰을 가져갈 수도 있어 근사치다 — acquire() 자체의
+        실제 판정이 always correct하고, 이 값은 참고용 안내 숫자일 뿐이다.
+        """
+        if cost > self._capacity:
+            return float("inf")
+        with self._lock:
+            self._refill_locked()
+            if self._tokens >= cost:
+                return 0.0
+            return (cost - self._tokens) / self._rate
+
     def acquire(self, cost: float = 1.0) -> bool:
         """토큰 cost만큼 소비. 성공 True, 대기열 초과/과대기/용량 초과로 거절 시 False."""
         if cost > self._capacity:

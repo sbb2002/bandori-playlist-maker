@@ -1,5 +1,7 @@
 """TokenBucketLimiter 테스트 — 버스트 허용·대기열 거절·충전 후 재허용."""
 
+import pytest
+
 from app.adapters.rate_limiter import TokenBucketLimiter
 
 
@@ -35,3 +37,23 @@ def test_cost_exceeding_capacity_never_succeeds():
     """추정 비용이 버킷 용량 자체보다 크면 아무리 기다려도 못 채우므로 즉시 거절."""
     lim = TokenBucketLimiter(rate_per_min=8000, burst=8000, max_wait=5.0, max_waiters=5)
     assert lim.acquire(cost=9000) is False
+
+
+def test_estimate_wait_does_not_consume():
+    """estimate_wait는 순수 조회 — 반복 호출해도 실제 acquire 가능 여부는 그대로다."""
+    lim = TokenBucketLimiter(rate_per_min=8000, burst=8000, max_wait=0, max_waiters=0)
+    assert lim.estimate_wait(cost=5000) == 0.0  # 가득 찬 버킷이라 즉시 가능
+    assert lim.estimate_wait(cost=5000) == 0.0  # 조회만 했으니 몇 번을 불러도 그대로
+    assert lim.acquire(cost=5000) is True  # 실제 소비도 여전히 성공
+
+
+def test_estimate_wait_positive_when_budget_short():
+    lim = TokenBucketLimiter(rate_per_min=6000, burst=6000, max_wait=0, max_waiters=0)  # 100/s
+    assert lim.acquire(cost=6000) is True  # 버킷 완전 소진
+    wait = lim.estimate_wait(cost=1000)
+    assert wait == pytest.approx(10.0, abs=0.05)  # 1000 토큰 / 100 tok/s ≈ 10초
+
+
+def test_estimate_wait_infinite_when_cost_exceeds_capacity():
+    lim = TokenBucketLimiter(rate_per_min=8000, burst=8000, max_wait=0, max_waiters=0)
+    assert lim.estimate_wait(cost=9000) == float("inf")
