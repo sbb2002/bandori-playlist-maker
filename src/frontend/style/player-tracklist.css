@@ -1,0 +1,143 @@
+/* 플레이어 */
+.player-frame {
+  position: relative; width: 100%; padding-top: 56.25%;
+  border-radius: 10px; overflow: hidden; background: #000;
+}
+.player-frame > div, .player-frame iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+}
+.now-playing { margin: 12px 0 6px; font-weight: 600; }
+.now-playing .np-band { color: var(--muted); font-weight: 400; }
+.now-playing .np-link { color: var(--accent); font-weight: 500; font-size: 0.85rem; text-decoration: none; white-space: nowrap; }
+.now-playing .np-link:hover { text-decoration: underline; }
+.player-controls { display: flex; gap: 10px; }
+
+/* 트랙리스트 */
+.tracklist { list-style: none; padding: 0; margin: 0; counter-reset: t; }
+.track {
+  position: relative; /* 사이-삽입 인서터(+)의 기준점 */
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 14px; margin-bottom: 14px;
+  background: var(--card); border: 1px solid rgba(var(--line-rgb),0.06);
+  border-radius: 12px; cursor: pointer;
+  transition: border-color 0.15s, background-color 0.25s, transform 0.05s;
+}
+.track:hover { border-color: rgba(124,108,255,0.5); }
+.track.active { border-color: var(--accent); background: var(--card-2); }
+.track .pos {
+  flex: 0 0 auto; width: 28px; height: 28px; border-radius: 8px;
+  display: grid; place-items: center; font-size: 0.85rem; font-weight: 700;
+  background: var(--card-2); color: var(--muted);
+  transition: background-color 0.25s, color 0.25s;
+}
+.track.active .pos { background: var(--accent); color: #fff; }
+.track .body { flex: 1 1 auto; min-width: 0; }
+.track .title { font-weight: 600; }
+.track .band { color: var(--muted); font-size: 0.85rem; }
+.track .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+/* 현재 재생 중인 곡만 태그(배지)를 펼쳐 보여주고, 나머지는 번호·곡명·밴드명만 접어서 표시. */
+.track:not(.active) .badges { display: none; }
+.badge {
+  font-size: 0.72rem; padding: 2px 8px; border-radius: 999px;
+  background: var(--card-2); border: 1px solid rgba(var(--line-rgb),0.1); color: var(--muted);
+}
+.badge.same, .badge.adjacent { color: var(--ok); }
+.badge.non_harmonic { color: var(--warn); }
+.badge.seed { color: var(--accent-2); }
+/* 곡별 오디오 지표 6종 배지(밝기·라우드·다이내믹·리듬감·악기·음절) — 예전 에너지 배지와 동일한
+   "미니 바 + 숫자" 표현에 라벨만 앞에 붙인다(어떤 지표인지 구분하기 위함). */
+.badge-param { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px 3px 8px; }
+.badge-param .label { font-size: 0.72rem; color: var(--muted); }
+.badge-param .bar-track {
+  display: inline-block; vertical-align: middle;
+  width: 36px; height: 6px;
+  border-radius: 999px; overflow: hidden; position: relative;
+  background: rgba(124,108,255,0.09);
+}
+.badge-param .bar-fill {
+  display: block; height: 100%; border-radius: 0;
+  background: linear-gradient(90deg, var(--accent), #d9962b);
+  background-size: 36px 100%;
+}
+.badge-param .num { font-variant-numeric: tabular-nums; color: var(--text); font-weight: 600; font-size: 0.72rem; }
+
+.badge[data-tooltip] { cursor: help; }
+
+/* 커스텀 툴팁(테마 일치, 하모닉 배지 전용) — JS가 badge.getBoundingClientRect()로 뷰포트
+   안에 들어오도록 매 오픈마다 위치를 계산해 이 고정(fixed) 엘리먼트에 반영한다. 화면
+   가장자리에서 잘리지 않도록 좌우로 클램프하고, 화살표는 배지 중심을 계속 가리키도록
+   별도로 이동한다(showTooltip/positionTooltip, app.js). */
+.badge-tooltip {
+  position: fixed; z-index: 40;
+  max-width: 240px; width: max-content; text-align: left; white-space: normal;
+  background: var(--card); color: var(--text); border: 1px solid var(--card-2);
+  padding: 8px 10px; border-radius: 8px; font-size: 0.72rem; line-height: 1.45;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  transform: translateY(4px);
+}
+.badge-tooltip.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.badge-tooltip .arrow {
+  position: absolute; width: 10px; height: 10px; background: var(--card);
+  transform: rotate(45deg);
+}
+.badge-tooltip.above .arrow { bottom: -5px; }
+.badge-tooltip.below .arrow { top: -5px; }
+
+/* 트랙 편집 액션 — 우측 이동 핸들·제거. 행 호버 시 은은히 나타나는 고스트 아이콘(테마 조화). */
+.track { user-select: none; -webkit-user-select: none; } /* 곡 텍스트 드래그 선택 방지 */
+.track-actions {
+  flex: 0 0 auto; align-self: center;
+  display: flex; align-items: center; gap: 4px;
+  margin-left: 2px;
+  opacity: 0; transition: opacity 0.14s;
+}
+.track:hover .track-actions, .track:focus-within .track-actions { opacity: 1; }
+/* 터치 환경 상시 노출 규칙은 아래 공용 `@media (hover: none)` 블록(터치 어포던스 모음)에서 처리 */
+
+.track-btn {
+  width: 30px; height: 30px; padding: 0; border-radius: 8px;
+  display: grid; place-items: center;
+  background: transparent; border: 1px solid transparent; color: var(--muted);
+  cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.track-btn:hover { background: var(--card-2); color: var(--text); border-color: rgba(var(--line-rgb),0.09); }
+.track-btn svg { display: block; }
+.track-move { cursor: grab; touch-action: none; }
+.track-move:active { cursor: grabbing; }
+.track-move svg { width: 18px; height: 12px; }
+.track-move:hover { color: var(--accent); }
+.track-remove svg { width: 15px; height: 15px; }
+.track-remove:hover { color: var(--err); background: rgba(255,107,107,0.10); border-color: rgba(255,107,107,0.35); }
+
+/* 사이-삽입 인서터 — 트랙 아래 간격에 겹쳐, 호버 시 라인 + 중앙 '+' 노출 */
+.track-inserter {
+  position: absolute; left: 0; right: 0; bottom: -14px; height: 14px; z-index: 5;
+  display: grid; place-items: center;
+}
+.track-inserter::before {
+  content: ""; position: absolute; left: 10px; right: 10px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent) 25%, var(--accent) 75%, transparent);
+  opacity: 0; transition: opacity 0.14s;
+}
+.inserter-btn {
+  position: relative; z-index: 1;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--card-2); border: 1px solid rgba(124,108,255,0.5); color: var(--accent);
+  opacity: 0; transform: scale(0.6); transition: opacity 0.14s, transform 0.14s;
+}
+.inserter-btn svg { display: block; width: 13px; height: 13px; }
+.track-inserter:hover::before { opacity: 0.65; }
+.track-inserter:hover .inserter-btn, .inserter-btn:focus-visible { opacity: 1; transform: scale(1); }
+.inserter-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* 드래그 중인 곡 — 떠오른 느낌 */
+.track.dragging {
+  z-index: 10; opacity: 0.97;
+  border-color: var(--accent); box-shadow: 0 12px 30px rgba(0,0,0,0.55);
+}
+body.reordering { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+.badge.added { color: var(--ok); border: 1px solid rgba(62,207,142,0.5); }
+

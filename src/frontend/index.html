@@ -4,7 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bangdream Playlist Maker — 뱅드림 세트리스트 메이커</title>
-  <link rel="stylesheet" href="style.css" />
+  <!-- style/*.css: 컴포넌트별 분할. 순서가 곧 캐스케이드 순서이므로(예: base.css의 색상
+       변수가 먼저 정의돼야 함) 임의로 재배열하지 말 것. -->
+  <link rel="stylesheet" href="style/base.css" />
+  <link rel="stylesheet" href="style/form-controls.css" />
+  <link rel="stylesheet" href="style/mood-map.css" />
+  <link rel="stylesheet" href="style/loading-summary.css" />
+  <link rel="stylesheet" href="style/player-tracklist.css" />
+  <link rel="stylesheet" href="style/song-picker-modal.css" />
+  <link rel="stylesheet" href="style/share-modal.css" />
+  <link rel="stylesheet" href="style/footer-menu.css" />
+  <link rel="stylesheet" href="style/playbar.css" />
+  <link rel="stylesheet" href="style/camelot-wheel.css" />
   <!--
     API 베이스: 로컬 서빙(localhost)은 로컬 백엔드, 그 외(배포=GitHub Pages)는 Render 백엔드로
     자동 분기. Render 서비스명/URL이 바뀌면 아래 배포 URL만 고치면 됨.
@@ -29,7 +40,7 @@
   </script>
   <!-- Google Identity Services(GIS) — YouTube 재생목록 저장용 OAuth 토큰 클라이언트. -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- umami 방문자 통계(cloud). app.js의 track()이 커스텀 이벤트를 이 스크립트로 전송. -->
+  <!-- umami 방문자 통계(cloud). app/utils.js의 track()이 커스텀 이벤트를 이 스크립트로 전송. -->
   <script defer src="https://cloud.umami.is/script.js" data-website-id="7185d432-2c87-41e5-8166-46125dc76e33"></script>
   <!-- Google Site Verification -->
   <meta name="google-site-verification" content="ICIAodsGsldrnICp3iCGnKwSpzHUFmzOS6nDBBVrSfY" />
@@ -50,7 +61,7 @@
     <ul id="preset-list" class="preset-list"></ul>
     <p id="preset-empty" class="preset-empty">아직 저장된 플레이리스트가 없어요.<br>플레이리스트를 만들면 자동으로 저장돼요.</p>
     <div class="menu-footer">
-      <!-- 현재 버전(v메인버전 - 커밋). app.js가 텍스트·링크 설정. -->
+      <!-- 현재 버전(v메인버전 - 커밋). app/main.js가 텍스트·링크 설정. -->
       <a id="app-version" class="app-version" target="_blank" rel="noopener" aria-label="현재 버전"></a>
     </div>
   </aside>
@@ -81,7 +92,7 @@
       <details class="options" id="options-details">
         <summary>세부 설정 (선택)</summary>
         <p class="options-guide">여기서 플레이리스트를 직접 다듬을 수 있어요. 바꾼 설정은 같은 요청에서 유지되고, 프롬프트를 새 내용으로 바꾸면 다시 자동으로 맞춰드려요.</p>
-        <!-- DEPRECATED(디버깅용, epic 3단계 stage_params 튜닝 완료 후 제거 예정) — 숨김(주석처리), app.js의 리스너 바인딩은 요소 없으면 자동 스킵.
+        <!-- DEPRECATED(디버깅용, epic 3단계 stage_params 튜닝 완료 후 제거 예정) — 숨김(주석처리), app/main.js의 리스너 바인딩은 요소 없으면 자동 스킵.
         <button type="button" id="debug-copy-state-btn" class="link-btn">🐛 현재 상태 복사 (디버그)</button>
         -->
         <div class="options-grid">
@@ -371,6 +382,27 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- app/*.js: 순수(비-module) 스크립트라 전역 스코프 공유(과거 단일 app.js와 동일). 로드
+       순서가 곧 실행 순서이자 의존성 순서이므로 임의로 재배열하지 말 것 — utils.js가 항상
+       첫 번째(다른 모든 파일이 참조하는 leaf 헬퍼), main.js가 항상 마지막(부트스트랩,
+       나머지 전부가 정의된 뒤 실행되어야 함)이어야 한다. 자세한 이유는 app/utils.js 헤더 참고. -->
+  <script src="app/utils.js"></script>
+  <script src="app/state.js"></script>
+  <script src="app/omakase.js"></script>
+  <script src="app/request-flow.js"></script>
+  <script src="app/band-filter.js"></script>
+  <script src="app/stage-graph.js"></script>
+  <script src="app/mode-switch.js"></script>
+  <script src="app/render-result.js"></script>
+  <script src="app/camelot-wheel.js"></script>
+  <script src="app/track-menu.js"></script>
+  <script src="app/youtube-player.js"></script>
+  <script src="app/track-edit.js"></script>
+  <script src="app/presets.js"></script>
+  <script src="app/song-picker.js"></script>
+  <script src="app/youtube-playlist-save.js"></script>
+  <script src="app/share-modal.js"></script>
+  <script src="app/playbar.js"></script>
+  <script src="app/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,58 @@
+/* 라이트가 기본 팔레트. 다크는 :root[data-theme="dark"]에서 같은 변수를 덮어쓴다
+   (레이아웃 셀렉터는 그대로, 색상 변수만 테마별로 바뀐다). */
+:root {
+  --bg: #f5f4fb;
+  --bg-glow: #e7e0fb; /* 배경 은은한 그라디언트 포인트색 */
+  --card: #ffffff;
+  --card-2: #f0eefa;
+  --text: #232436;
+  --muted: #6b6f85;
+  --accent: #7c6cff;
+  --accent-2: #ff6cc4;
+  --ok: #1f9d63;
+  --warn: #b3720a;
+  --err: #d6473f;
+  --radius: 14px;
+  --line-rgb: 20,20,30; /* 얇은 경계선용 — rgba(var(--line-rgb), alpha)로 사용 */
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1017;
+  --bg-glow: #241d3a;
+  --card: #1a1c28;
+  --card-2: #232636;
+  --text: #eef0f7;
+  --muted: #9aa0b4;
+  --ok: #3ecf8e;
+  --warn: #ffb020;
+  --err: #ff6b6b;
+  --line-rgb: 255,255,255;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(1200px 600px at 20% -10%, var(--bg-glow) 0%, var(--bg) 55%);
+  color: var(--text);
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+.wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 100px; } /* 하단: 고정 플레이바 높이 여유 */
+
+.hero { text-align: center; margin-bottom: 24px; }
+.hero h1 { font-size: 2rem; margin: 0 0 6px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.brand-logo { width: 40px; height: 40px; object-fit: contain; }
+.sub { color: var(--muted); margin: 0; }
+
+.card {
+  background: var(--card);
+  border: 1px solid rgba(var(--line-rgb),0.06);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+}
+

@@ -1,0 +1,303 @@
+/* 2D 정서 지도 + 시간 배분 + 고급 설정 그래프 (새로운 UI) */
+/* 상단 컨트롤: 구간 수 */
+.stage-count { display: inline-flex; background: var(--card-2); border-radius: 999px; padding: 3px; gap: 2px; }
+.stage-count button {
+  border: none; background: none; color: var(--text); font-size: 0.85rem; font-weight: 700;
+  width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-family: inherit;
+}
+.stage-count button:hover:not(:disabled) { background: rgba(124,108,255,0.25); }
+.stage-count button:disabled { color: var(--muted); cursor: default; opacity: 0.5; }
+.stage-count .n { min-width: 46px; text-align: center; align-self: center; font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* 2D 정서 지도 배경 — 3가지 시안을 토글로 비교(.bg-toggle). 셋 다 시안 확정 전이라 나란히
+   실험용으로 남겨둔다. 최종 채택안이 정해지면 나머지 두 세트는 지운다. */
+.bg-toggle-row { display: flex; justify-content: center; margin-bottom: 12px; }
+.bg-toggle { display: inline-flex; background: var(--card-2); border-radius: 999px; padding: 3px; gap: 2px; }
+.bg-toggle button {
+  border: none; background: none; color: var(--muted); font-size: 0.76rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px; cursor: pointer; font-family: inherit;
+}
+.bg-toggle button.on { background: var(--accent); color: #fff; }
+.bg-toggle button:hover:not(.on) { background: rgba(var(--line-rgb),0.08); color: var(--text); }
+
+.map-stage { display: flex; justify-content: center; }
+.map-wrap { position: relative; width: 100%; max-width: 420px; }
+.map-pad {
+  position: relative; width: 100%; aspect-ratio: 1 / 1;
+  border-radius: 12px; overflow: hidden; touch-action: none; user-select: none;
+  border: 1px solid rgba(var(--line-rgb),0.1);
+  transition: background 0.2s ease;
+}
+/* 1안 — 현재(기존 프로토타입 그대로): accent/accent-2 코너 라디얼 */
+.map-pad.bg-current {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,108,196,0.16), transparent 60%),
+    radial-gradient(circle at 0% 0%, rgba(124,108,255,0.16), transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(255,108,196,0.07), transparent 60%),
+    radial-gradient(circle at 0% 100%, rgba(124,108,255,0.07), transparent 60%),
+    var(--card-2);
+}
+/* 2안 — 사분면 4색: 1사분면(우상)=노랑, 2사분면(좌상)=빨강, 3사분면(좌하)=파랑, 4사분면(우하)=초록 */
+.map-pad.bg-quadrant {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(250,204,21,0.32), transparent 62%),
+    radial-gradient(circle at 0% 0%, rgba(239,68,68,0.30), transparent 62%),
+    radial-gradient(circle at 0% 100%, rgba(59,130,246,0.30), transparent 62%),
+    radial-gradient(circle at 100% 100%, rgba(34,197,94,0.30), transparent 62%),
+    var(--card-2);
+}
+.map-pad.bg-quadrant .quadrant-label {
+  /* 사분면 배경색은 테마와 무관하게 항상 진하므로 텍스트는 고정 흰색 유지 */
+  color: rgba(255,255,255,0.92); text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+/* 3안 — 형제 프로젝트 EMOI-MAP 톤(딥스페이스 + 별/성운)을 가볍게 재현한 예시. */
+.map-pad.bg-emoi {
+  background:
+    radial-gradient(1.6px 1.6px at 12% 18%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 26% 62%, #fff, transparent 100%),
+    radial-gradient(1.8px 1.8px at 40% 30%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 55% 76%, #fff, transparent 100%),
+    radial-gradient(1.4px 1.4px at 68% 22%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 78% 58%, #fff, transparent 100%),
+    radial-gradient(1.6px 1.6px at 88% 14%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 15% 85%, #fff, transparent 100%),
+    radial-gradient(1.4px 1.4px at 92% 80%, #fff, transparent 100%),
+    radial-gradient(1.2px 1.2px at 48% 8%, #fff, transparent 100%),
+    radial-gradient(60% 45% at 70% 75%, rgba(80,120,200,0.28), transparent 70%),
+    radial-gradient(55% 40% at 20% 20%, rgba(130,70,180,0.24), transparent 70%),
+    radial-gradient(125% 95% at 50% 12%, #10141f 0%, #0a0b13 48%, #05050a 100%);
+}
+.map-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.map-grid { stroke: rgba(var(--line-rgb),0.07); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.map-grid.mid { stroke: rgba(var(--line-rgb),0.14); stroke-dasharray: 3 3; }
+.map-path {
+  fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.quadrant-label {
+  position: absolute; font-size: 0.68rem; color: var(--muted); line-height: 1.35;
+  pointer-events: none; max-width: 40%;
+}
+.quadrant-label.q-tl { top: 8px; left: 10px; text-align: left; }
+.quadrant-label.q-tr { top: 8px; right: 10px; text-align: right; }
+.quadrant-label.q-bl { bottom: 8px; left: 10px; text-align: left; }
+.quadrant-label.q-br { bottom: 8px; right: 10px; text-align: right; }
+
+.stage-node {
+  position: absolute; z-index: 3; width: 26px; height: 26px; margin: -13px 0 0 -13px;
+  border-radius: 50%; cursor: grab; touch-action: none;
+  background: var(--accent); border: 2px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+  transition: background 0.1s;
+}
+.stage-node.dragging { cursor: grabbing; background: var(--accent-2); z-index: 4; }
+.stage-node:hover, .stage-node.linked { background: var(--accent-2); }
+.node-val {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  font-size: 0.66rem; color: var(--text); background: rgba(0,0,0,0.6);
+  padding: 2px 6px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.12s;
+}
+.stage-node:hover .node-val, .stage-node.dragging .node-val { opacity: 1; }
+
+
+/* 시간 배분 바 — 구간 경계를 직접 드래그(생산 코드의 bound-handle과 동일한 개념).
+   모든 그래프(정서 지도 + 아래 고급 설정 그래프들)가 이 경계를 공유한다. */
+.timebar-label-row { display: flex; justify-content: space-between; align-items: center; margin: 16px 0 6px; }
+.timebar-label-row .field-sublabel { margin: 0; } /* 행 자체가 위/아래 간격을 담당 */
+.timebar-label-row > span:not(.field-sublabel) { font-size: 0.75rem; color: var(--muted); }
+.timebar-label-actions { display: flex; align-items: baseline; gap: 10px; }
+.timebar-equalize-btn {
+  border: 1px solid rgba(var(--line-rgb),0.14); background: var(--card-2); color: var(--text);
+  font-size: 0.7rem; font-weight: 600; padding: 4px 8px; border-radius: 6px;
+  cursor: pointer; font-family: inherit; transition: border-color 0.12s, background 0.12s;
+}
+.timebar-equalize-btn:hover { border-color: rgba(124,108,255,0.5); background: rgba(124,108,255,0.15); }
+.timebar {
+  position: relative; height: 22px; border-radius: 999px;
+  background: var(--card-2); border: 1px solid rgba(var(--line-rgb),0.1);
+  overflow: hidden; touch-action: none; user-select: none;
+}
+.timebar-track {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  opacity: 0.55;
+}
+.timebar-seg {
+  position: absolute; top: 0; height: 100%;
+  border-right: 1px solid rgba(var(--line-rgb),0.2);
+  background: transparent;
+  transition: background 0.12s;
+}
+.timebar-seg:last-child { border-right: none; }
+.timebar-seg.linked { background: rgba(var(--line-rgb),0.16); }
+/* 구간 순번 동그라미 — 정서 지도 점(.stage-node)과 같은 배지 스타일이면서, 그 자체가
+   경계 드래그 핸들을 겸한다. (1)은 시작점(0분)에 고정되어 끌 수 없고, (2)부터는 좌우로
+   끌어 바로 앞 구간과의 경계를 옮긴다 — "[(1)-----(2)----(3)---]" 형태. */
+.timebar-num {
+  position: absolute; top: 50%; z-index: 2;
+  transform: translate(-50%, -50%);
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  font-size: 0.64rem; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.12s, transform 0.12s;
+}
+/* (1)은 실제로는 0%(=timebar 왼쪽 끝) 위치가 맞지만, 원 그대로 두면 .timebar의
+   overflow:hidden에 절반이 잘려 보인다. 판정용 좌표(left:0%)는 그대로 두고, 시각적으로만
+   translate를 절반만큼 덜 당겨 원이 바 안쪽에 온전히 보이도록 보정한다. */
+.timebar-num.fixed { pointer-events: none; transform: translate(0, -50%); }
+.timebar-num.draggable { cursor: ew-resize; touch-action: none; }
+.timebar-num.draggable:hover { transform: translate(-50%, -50%) scale(1.12); }
+.timebar-num.draggable.dragging {
+  background: var(--accent-2); transform: translate(-50%, -50%) scale(1.2); z-index: 3;
+}
+.timebar-num.linked { background: var(--accent-2); }
+.timebar-ticks { position: relative; height: 16px; margin-top: 4px; }
+.timebar-tick {
+  position: absolute; top: 0; transform: translateX(-50%);
+  font-size: 0.68rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.timebar-unit { position: absolute; right: -14px; top: 0; font-size: 0.68rem; color: var(--muted); }
+
+/* 구간별 가사 감상(선택) — "[①] 구간 [입력창]" 형태로 한 줄씩 세로 나열. */
+.impression-row { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.impression-item { display: flex; align-items: center; gap: 8px; }
+/* 정서 지도(.stage-node)·타임바(.timebar-num)와 같은 동그라미 순번 배지 스타일(정적, 드래그 불가). */
+.impression-badge {
+  flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  font-size: 0.64rem; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.12s;
+}
+.impression-badge.linked { background: var(--accent-2); }
+.impression-item-label { flex: 0 0 auto; font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.impression-input {
+  flex: 1 1 auto; min-width: 0; /* flex 아이템이 내용 길이로 넘치지 않게 */
+  font-size: 0.72rem; padding: 5px 7px; border-radius: 6px;
+  border: 1px solid rgba(var(--line-rgb),0.14); background: var(--card-2); color: var(--text);
+  font-family: inherit; transition: border-color 0.12s, background 0.12s;
+}
+.impression-input::placeholder { color: var(--muted); }
+.impression-input:focus { outline: none; border-color: var(--accent); }
+.impression-input.linked { background: rgba(var(--line-rgb),0.16); border-color: var(--accent-2); }
+/* 구간별 "밴드 고정" 토글+팝업 — 감성 설정 텍스트박스 오른쪽(전역 밴드 필터와 별개,
+   이 구간만 특정 밴드 1개 이상으로 고정). wrap이 팝업의 위치 기준점(relative). */
+.impression-band-wrap { position: relative; flex: 0 0 auto; }
+.impression-band-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.72rem; padding: 5px 9px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid rgba(var(--line-rgb),0.14); background: var(--card-2); color: var(--text);
+  font-family: inherit; cursor: pointer; transition: border-color 0.12s, background 0.12s;
+}
+.impression-band-toggle.linked { background: rgba(var(--line-rgb),0.16); border-color: var(--accent-2); }
+/* ON/OFF 점멸등 — 꺼짐(회색)=제한 없음(전역 필터만 적용), 켜짐(초록+은은한 발광)=이 구간 밴드 고정 중. */
+.impression-band-toggle .indicator-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: 0 0 auto;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.impression-band-toggle.on .indicator-dot { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+.impression-band-toggle.on { border-color: rgba(62,207,142,0.5); }
+/* 팝업 — 토글 버튼 오른쪽에 열림(사용자 요구사항). 전역 밴드 필터(.band-list/.band-item)와
+   동일한 디자인을 그대로 재사용하되, 카드 위에 뜨는 패널이라 배경·그림자·스크롤을 추가. */
+.impression-band-popup {
+  position: absolute; z-index: 30; top: 50%; left: calc(100% + 8px); transform: translateY(-50%);
+  width: 220px;
+  background: var(--card); border: 1px solid rgba(var(--line-rgb),0.14); border-radius: 10px;
+  padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+.impression-band-popup .band-list { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); }
+/* 화면 오른쪽 끝에 가까운 구간(모바일 등)은 팝업이 오른쪽으로 잘릴 수 있어 왼쪽으로 반전. */
+@media (max-width: 640px) {
+  .impression-band-popup { left: auto; right: calc(100% + 8px); }
+}
+
+/* 고급 설정 — 접이식이 아니라 항상 펼쳐둠(이 화면 전체가 이미 세부설정 진입 화면이라
+   한 번 더 접을 필요가 없음). 나머지 지표는 기존 시간구간 그래프 UI를 그대로 재사용. */
+.param-graph { margin-top: 16px; } /* 상위 항목("고급 설정") 라벨과는 margin collapse로 16px, 그래프끼리도 16px 균일 */
+.param-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.param-head strong { font-size: 0.85rem; }
+.plot-row { display: flex; gap: 6px; }
+.y-axis {
+  width: 34px; flex: 0 0 34px; display: flex; flex-direction: column;
+  justify-content: space-between; align-items: flex-end; padding: 2px 4px 2px 0;
+}
+.y-tick { font-size: 0.65rem; color: var(--muted); }
+.plot {
+  position: relative; flex: 1; height: 84px; background: var(--card-2);
+  border-left: 1px solid rgba(var(--line-rgb),0.16); border-bottom: 1px solid rgba(var(--line-rgb),0.16);
+  border-radius: 0 8px 0 0; overflow: visible; touch-action: none; user-select: none;
+}
+.graph-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.grid { stroke: rgba(var(--line-rgb),0.06); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.grid-edge { stroke: rgba(var(--line-rgb),0.12); }
+.grid-boundary { stroke: rgba(var(--line-rgb),0.14); stroke-dasharray: 3 3; }
+.graph-area { fill: rgba(124,108,255,0.16); stroke: none; }
+.graph-curve { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+/* 정서 지도(.stage-node)·시간 배분 바(.timebar-num)와 같은 동그라미 순번 배지 스타일 */
+.param-dot {
+  position: absolute; z-index: 3; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+  border-radius: 50%; background: var(--accent); border: 2px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums;
+  cursor: ns-resize; box-shadow: 0 2px 6px rgba(0,0,0,0.4); touch-action: none;
+}
+.param-dot.dragging { background: var(--accent-2); }
+.param-dot-val {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  font-size: 0.64rem; color: var(--text); background: rgba(0,0,0,0.6);
+  padding: 1px 5px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.12s;
+}
+.param-dot:hover .param-dot-val, .param-dot.dragging .param-dot-val { opacity: 1; }
+
+.field-hint { font-size: 0.75rem; color: var(--muted); min-height: 1em; }
+.field-hint.notice { color: var(--warn); font-weight: 600; }
+
+/* 구간 추가/제거 컨텍스트 메뉴(우클릭·길게누름) */
+.graph-menu {
+  position: fixed; z-index: 1000; min-width: 120px; padding: 4px;
+  background: var(--card-2); border: 1px solid rgba(var(--line-rgb),0.12);
+  border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+.graph-menu-item {
+  display: block; width: 100%; text-align: left; padding: 8px 12px;
+  background: transparent; border: none; border-radius: 6px;
+  color: var(--text); font-size: 0.85rem;
+}
+.graph-menu-item:hover:not(:disabled) { background: rgba(var(--line-rgb),0.08); }
+.graph-menu-item:disabled { color: var(--muted); cursor: default; opacity: 0.6; }
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+button.primary {
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+}
+button.primary:disabled { opacity: 0.55; cursor: progress; }
+button.ghost {
+  padding: 8px 16px;
+  background: var(--card-2);
+  color: var(--text);
+  border: 1px solid rgba(var(--line-rgb),0.1);
+}
+
+.hidden { display: none !important; }
+
