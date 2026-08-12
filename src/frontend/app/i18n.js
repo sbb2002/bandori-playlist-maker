@@ -86,7 +86,6 @@ const I18N_TABLE = {
   "options.bandClearAll": { ko: "전체 해제", ja: "全解除", en: "Clear all", "zh-Hans": "全部取消", "zh-Hant": "全部取消" },
   "options.bandNote1": { ko: "듣고 싶은 밴드만 선택해볼 수 있죠!", ja: "聴きたいバンドだけを選ぶこともできます！", en: "Pick only the bands you want to hear!", "zh-Hans": "只选择你想听的乐队吧！", "zh-Hant": "只選擇你想聽的樂團吧！" },
   "options.bandNote2": { ko: "모두 해제하면 모든 밴드가 선택되요.", ja: "すべて解除するとすべてのバンドが対象になります。", en: "Clear all selections to include every band.", "zh-Hans": "全部取消勾选即代表包含所有乐队。", "zh-Hant": "全部取消勾選即代表包含所有樂團。" },
-  "options.bandLoading": { ko: "밴드 목록 불러오는 중…", ja: "バンド一覧を読み込み中…", en: "Loading band list…", "zh-Hans": "正在加载乐队列表…", "zh-Hant": "正在載入樂團清單…" },
   "options.bandLoadError": { ko: "밴드 목록을 불러오지 못했어요 (백엔드가 켜져 있는지 확인).", ja: "バンド一覧を読み込めませんでした（バックエンドが起動しているか確認してください）。", en: "Couldn't load the band list (check that the backend is running).", "zh-Hans": "无法加载乐队列表（请确认后端是否已启动）。", "zh-Hant": "無法載入樂團清單（請確認後端是否已啟動）。" },
   "options.bandNone": { ko: "밴드 없음", ja: "バンドがありません", en: "No bands", "zh-Hans": "暂无乐队", "zh-Hant": "暫無樂團" },
 

@@ -97,20 +97,31 @@ function updateBandToggleIndicator(i) {
 // BAND_ORDER/bandsInSelectorOrder는 app/utils.js 참조(항상 첫 번째로 로드되어 이 함수 안에서
 // 안전하게 쓸 수 있음 — 자세한 이유는 그 파일 헤더 코멘트 참고).
 
-async function loadBands() {
+// Render 백엔드가 cold start로 잠들어 있으면 첫 fetch가 (재시도 없이) 즉시 실패해 에러
+// 문구에서 멈춘다 — 새로고침만 해결되는 이유는 새 페이지 로드가 새 fetch를 트리거해서일
+// 뿐, 그사이 백엔드가 깨어난 것과는 무관하다. cold start 각성 시간(약 30~50초)을 커버하는
+// 백오프 재시도로 새로고침 없이도 자연스럽게 회복하게 한다.
+async function loadBands(attempt = 0) {
   try {
     const res = await fetch(`${API_BASE}/api/bands`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     cachedBands = data.bands || [];
     renderBands(cachedBands);
     // 구간별 밴드 셀렉터는 이 응답이 오기 전에 이미 그려졌을 수 있어(비동기), 도착 즉시 갱신.
     if (stageModel) renderStageGraph();
   } catch (_) {
-    bandListEl.textContent = t("options.bandLoadError");
+    if (attempt < 6) {
+      setTimeout(() => loadBands(attempt + 1), 3000 * (attempt + 1));
+    } else {
+      bandListEl.classList.remove("band-list-loading");
+      bandListEl.textContent = t("options.bandLoadError");
+    }
   }
 }
 
 function renderBands(bands) {
+  bandListEl.classList.remove("band-list-loading");
   bandListEl.replaceChildren();
   if (!bands.length) { bandListEl.textContent = t("options.bandNone"); return; }
   // 표처럼 가지런한 그리드: 밴드 아이콘 + 곡 수(이름 생략, 툴팁으로 제공). 순서=BAND_ORDER.

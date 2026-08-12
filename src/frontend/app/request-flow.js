@@ -134,8 +134,8 @@ let coldStartTimer = null;
 function setFormLocked(locked) {
   promptEl.disabled = locked;
   if (omakaseBtn) omakaseBtn.disabled = locked;
-  const modeSwitch = $("mode-switch");
-  if (modeSwitch) modeSwitch.disabled = locked;
+  // AI/커스텀 모드 탭 자체는 잠그지 않는다 — 잠글 대상은 "요청에 실릴 파라미터"(프롬프트,
+  // 세부설정)뿐이고, 어느 모드를 보고 있는지는 파라미터가 아니라 화면 상태다.
   const optionsDetails = $("options-details");
   if (optionsDetails) optionsDetails.classList.toggle("locked", locked);
 }

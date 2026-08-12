@@ -10,6 +10,7 @@
   animation: spin 0.9s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.spinner-sm { width: 20px; height: 20px; margin: 0; border-width: 3px; }
 
 .error { border-color: rgba(255,107,107,0.5); color: var(--err); }
 
