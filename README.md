@@ -134,3 +134,14 @@ python -m pytest src/tests -q      # 도메인/선곡/하모닉/에너지/API �
 `git show version:README.md`, 또는 GitHub에서 `version` 브랜치로 전환, 또는
 `git worktree add ../<임의경로> version`으로 펼쳐서 참고. 베타 기간 커밋별 변경 이력도 그
 문서의 "Beta" 절로 이관되어 있습니다.
+
+
+## Disclaimer
+
+* This is a fan-made, non-official project inspired by 'BanG Dream!'. All rights to images and audio belong to ©BanG Dream! Project and their respective owners. This project is for non-commercial use only.
+
+Enter your mood in one sentence and AI builds a matching BanG Dream! playlist from song data, played instantly via YouTube. The app works fully without signing in; optionally, sign in with your Google account to save the generated playlist to your own YouTube account as a real playlist.
+
+* This service uses YouTube API Services. The YouTube Terms of Service apply; see also the Google Privacy Policy.
+
+* Privacy Policy · Terms of Service
