@@ -225,7 +225,17 @@
   background: var(--card); border: 1px solid rgba(var(--line-rgb),0.14); border-radius: 10px;
   padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.45);
 }
-.impression-band-popup .band-list { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); }
+.impression-band-popup .band-list {
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  /* 스크롤바를 OS 기본값(라이트/다크 무관 고정색) 대신 현재 테마 변수를 따르도록(Firefox). */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--line-rgb),0.35) transparent;
+}
+/* 위와 동일한 목적의 Chrome/Safari(WebKit) 대응. */
+.impression-band-popup .band-list::-webkit-scrollbar { width: 8px; }
+.impression-band-popup .band-list::-webkit-scrollbar-track { background: transparent; }
+.impression-band-popup .band-list::-webkit-scrollbar-thumb { background: rgba(var(--line-rgb),0.35); border-radius: 8px; }
+.impression-band-popup .band-list::-webkit-scrollbar-thumb:hover { background: rgba(var(--line-rgb),0.5); }
 /* 화면 오른쪽 끝에 가까운 구간(모바일 등)은 팝업이 오른쪽으로 잘릴 수 있어 왼쪽으로 반전. */
 @media (max-width: 640px) {
   .impression-band-popup { left: auto; right: calc(100% + 8px); }

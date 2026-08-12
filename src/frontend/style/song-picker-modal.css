@@ -30,7 +30,17 @@ body.modal-open { overflow: hidden; } /* 모달 열림 동안 메인 페이지 �
 }
 .picker-body { display: grid; grid-template-columns: 168px 1fr; gap: 12px; min-height: 0; flex: 1 1 auto; }
 /* overscroll-behavior: contain — 리스트 끝에서 스크롤이 메인 화면으로 전파되지 않음 */
-.picker-bands { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
+.picker-bands {
+  display: flex; flex-direction: column; gap: 4px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px;
+  /* 스크롤바를 OS 기본값(라이트/다크 무관 고정색) 대신 현재 테마 변수를 따르도록(Firefox). */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--line-rgb),0.35) transparent;
+}
+/* 위와 동일한 목적의 Chrome/Safari(WebKit) 대응. */
+.picker-bands::-webkit-scrollbar { width: 8px; }
+.picker-bands::-webkit-scrollbar-track { background: transparent; }
+.picker-bands::-webkit-scrollbar-thumb { background: rgba(var(--line-rgb),0.35); border-radius: 8px; }
+.picker-bands::-webkit-scrollbar-thumb:hover { background: rgba(var(--line-rgb),0.5); }
 .picker-band {
   display: flex; align-items: center; gap: 8px;
   text-align: left; padding: 6px 8px; border-radius: 8px; cursor: pointer;
