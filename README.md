@@ -144,4 +144,4 @@ Enter your mood in one sentence and AI builds a matching BanG Dream! playlist fr
 
 * This service uses YouTube API Services. The YouTube Terms of Service apply; see also the Google Privacy Policy.
 
-* Privacy Policy · Terms of Service
+* This repository's MIT license (see `LICENSE`) applies only to the original source code. Band logos and other game-related assets under `src/frontend/assets/bands/`, along with all 'BanG Dream!' trademarks, character names, and artwork, remain the property of Bushiroad Co., Ltd. / Craft Egg Inc. and are not covered by that license.
