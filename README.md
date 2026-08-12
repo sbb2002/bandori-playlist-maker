@@ -140,7 +140,7 @@ python -m pytest src/tests -q      # 도메인/선곡/하모닉/에너지/API �
 
 * This is a fan-made, non-official project inspired by 'BanG Dream!'. All rights to images and audio belong to ©BanG Dream! Project and their respective owners. This project is for non-commercial use only.
 
-Enter your mood in one sentence and AI builds a matching BanG Dream! playlist from song data, played instantly via YouTube. The app works fully without signing in; optionally, sign in with your Google account to save the generated playlist to your own YouTube account as a real playlist.
+* Enter your mood in one sentence and AI builds a matching BanG Dream! playlist from song data, played instantly via YouTube. The app works fully without signing in; optionally, sign in with your Google account to save the generated playlist to your own YouTube account as a real playlist.
 
 * This service uses YouTube API Services. The YouTube Terms of Service apply; see also the Google Privacy Policy.
 
