@@ -321,7 +321,7 @@ const I18N_TABLE = {
   "footer.notice2": {
     ko: "* 원하는 분위기를 한 문장으로 입력하면 AI가 뱅드림 곡 데이터를 분석해 무드에 맞는 플레이리스트를 자동으로 만들고 YouTube로 바로 재생합니다. 로그인 없이 모든 기능을 쓸 수 있고, 선택적으로 Google 계정으로 로그인하면 생성된 플레이리스트를 내 YouTube 계정에 실제 재생목록으로 저장할 수 있어요.",
     ja: "* 欲しい雰囲気を一文で入力すると、AIがバンドリの楽曲データを分析してムードに合ったプレイリストを自動生成し、YouTubeですぐに再生します。ログインなしですべての機能が使え、任意でGoogleアカウントでログインすれば生成したプレイリストを自分のYouTubeアカウントに実際の再生リストとして保存できます。",
-    en: "Enter your mood in one sentence and AI builds a matching BanG Dream! playlist from song data, played instantly via YouTube. The app works fully without signing in; optionally, sign in with your Google account to save the generated playlist to your own YouTube account as a real playlist.",
+    en: "* Enter your mood in one sentence and AI builds a matching BanG Dream! playlist from song data, played instantly via YouTube. The app works fully without signing in; optionally, sign in with your Google account to save the generated playlist to your own YouTube account as a real playlist.",
     "zh-Hans": "* 只需用一句话描述你想要的氛围，AI 就会分析 BanG Dream! 曲库数据，自动生成匹配的播放列表并通过 YouTube 立即播放。无需登录即可使用全部功能；也可选择使用 Google 账号登录，将生成的播放列表实际保存为你 YouTube 账号中的播放列表。",
     "zh-Hant": "* 只需用一句話描述你想要的氛圍，AI 就會分析 BanG Dream! 曲庫資料，自動產生匹配的播放清單並透過 YouTube 立即播放。無需登入即可使用全部功能；也可選擇使用 Google 帳號登入，將產生的播放清單實際儲存為你 YouTube 帳號中的播放清單。",
   },
