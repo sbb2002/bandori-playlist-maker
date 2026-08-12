@@ -14,7 +14,7 @@
 밴드 셀렉터 cold-start 복구(재시도+스피너) + 생성 중 모드탭 오잠금 수정 + 곡추가/밴드고정
 팝업 스크롤바 테마화.
 
-- 기준 커밋: (PR 오픈 후 갱신)
+- 기준 커밋: `11f1a1f`
 - 관련 PR: [#75](https://github.com/sbb2002/bandori-playlist-maker/pull/75)
 
 ## v2.5.0 — 2026-08-11
