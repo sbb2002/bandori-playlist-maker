@@ -26,6 +26,9 @@ const yToVal = (fracY) => clamp01(1 - (fracY * 100 - PAD_TOP) / (100 - PAD_TOP -
 // stageModel: { totalMinutes, segments: [{energy, width, valence, lufs_integrated, lra, danceability_norm, instr_stem_ratio, speech_median}] }
 let stageModel = null;
 
+// GET /api/feature-stats 결과(캐시) — 없으면(로딩 전/실패) 희소 힌트는 그냥 안 그림.
+let featureStats = null;
+
 // 백엔드도 180분(3시간) 하드캡을 두지만(routes.py _MAX_TARGET_MINUTES), 여기서도 넘긴 순간
 // 180으로 되돌리고 안내한다(number input의 native max는 스핀 버튼만 막고 타이핑은 안 막음).
 minutesEl.addEventListener("input", () => {
@@ -170,7 +173,52 @@ function renderStageGraph() {
     grad.append(s1, s2);
     defs.append(grad);
     path.setAttribute("stroke", "url(#path-grad)");
-    mapSvgEl.append(defs, gridG, path);
+
+    // 희소 셀 오버레이 — 지도 게임의 "못 가는 지형"(크레이터/물가) 관용구를 빌려 빗금
+    // 패턴으로 표시한다(2026-08-15 피드백 — 색 블러 얼룩은 무슨 뜻인지 안 와닿는다는 지적,
+    // 재차 "막는 건 아니고 표현만"이라는 요청). 클릭·드래그를 막지는 않는다(pointer-events:none
+    // 그대로) — 순수 시각적 힌트.
+    const hatchPattern = document.createElementNS(SVG_NS, "pattern");
+    hatchPattern.setAttribute("id", "sparse-hatch");
+    hatchPattern.setAttribute("patternUnits", "userSpaceOnUse");
+    hatchPattern.setAttribute("width", "3");
+    hatchPattern.setAttribute("height", "3");
+    hatchPattern.setAttribute("patternTransform", "rotate(45)");
+    const hatchLine = document.createElementNS(SVG_NS, "line");
+    hatchLine.setAttribute("x1", "0"); hatchLine.setAttribute("y1", "0");
+    hatchLine.setAttribute("x2", "0"); hatchLine.setAttribute("y2", "3");
+    hatchLine.setAttribute("class", "sparse-hatch-line");
+    hatchPattern.appendChild(hatchLine);
+    defs.append(hatchPattern);
+
+    // gridG 앞에 삽입해서 그리드가 위에 보이도록
+    const densityG = document.createElementNS(SVG_NS, "g");
+    densityG.setAttribute("class", "map-density");
+    if (featureStats && featureStats.map_2d) {
+      const { grid, bins } = featureStats.map_2d;
+      const maxCount = Math.max(1, ...grid.flat());
+      for (let row = 0; row < bins; row++) {
+        for (let col = 0; col < bins; col++) {
+          const count = grid[row][col];
+          const ratio = count / maxCount;
+          // 희소 셀만 빗금으로 강조 — 밀도 있는 셀은 완전히 투명하게 둬서 기존 파스텔
+          // 배경(정서 사분면)과 안 겹치게 한다(사용자 결정: 전체 히트맵이 아니라 "빈 곳만" 표시).
+          if (count > 2 && ratio > 0.15) continue;
+          const rect = document.createElementNS(SVG_NS, "rect");
+          const x0 = toMapPct(col / bins), x1 = toMapPct((col + 1) / bins);
+          const y0 = toMapPct(1 - (row + 1) / bins), y1 = toMapPct(1 - row / bins);
+          rect.setAttribute("x", String(x0));
+          rect.setAttribute("y", String(y0));
+          rect.setAttribute("width", String(x1 - x0));
+          rect.setAttribute("height", String(y1 - y0));
+          rect.setAttribute("fill", "url(#sparse-hatch)");
+          rect.setAttribute("class", "map-density-cell" + (count === 0 ? " empty" : ""));
+          densityG.appendChild(rect);
+        }
+      }
+    }
+
+    mapSvgEl.append(defs, densityG, gridG, path);
 
     mapPadEl.querySelectorAll(".stage-node").forEach((n) => n.remove());
     mapNodeEls = stageModel.segments.map((s, i) => {
@@ -444,6 +492,10 @@ function renderStageGraph() {
       const descLi = document.createElement("li");
       descLi.textContent = desc;
       descEl.appendChild(descLi);
+      // 추천 구간 범례 — 5개 슬라이더 전부 같은 문구를 공유한다(2026-08-15).
+      const recommendHintLi = document.createElement("li");
+      recommendHintLi.textContent = t("options.recommendBandHint");
+      descEl.appendChild(recommendHintLi);
 
       const plotRow = document.createElement("div");
       plotRow.className = "plot-row";
@@ -478,7 +530,37 @@ function renderStageGraph() {
       });
       const area = document.createElementNS(SVG_NS, "path"); area.setAttribute("class", "graph-area");
       const curve = document.createElementNS(SVG_NS, "path"); curve.setAttribute("class", "graph-curve");
-      svg.append(gridG, boundaryG, area, curve);
+
+      // 추천 구간 밴드 — 예전엔 희소 구간마다 경고색 rect를 깔았는데, "이 슬라이더들은
+      // 실제로는 전부 단봉분포(값 하나에 정점, 양옆은 완만히 줄어듦)라 희소 구간이 꼬리에만
+      // 있고, 경고색 여러 조각이 마치 서로 다른 두 그룹처럼 오해된다는 피드백(2026-08-15)이
+      // 있었다. 그래서 관점을 뒤집어 "후보가 충분한 연속 구간"을 초록 밴드 하나로 양성적으로
+      // 보여준다(카메라 노출계·오디오 미터의 "적정 구간" 표시와 같은 관용구).
+      const recommendG = document.createElementNS(SVG_NS, "g");
+      recommendG.setAttribute("class", "param-recommend");
+      if (featureStats && featureStats.histograms && featureStats.histograms[key]) {
+        const counts = featureStats.histograms[key];
+        const bins = featureStats.bins_1d;
+        const maxCount = Math.max(1, ...counts);
+        const isDense = counts.map((count) => count > 2 && count / maxCount > 0.15);
+        const firstDense = isDense.indexOf(true);
+        const lastDense = isDense.lastIndexOf(true);
+        if (firstDense !== -1) {
+          const rect = document.createElementNS(SVG_NS, "rect");
+          const y0 = valToY((lastDense + 1) / bins), y1 = valToY(firstDense / bins);
+          rect.setAttribute("x", "0");
+          rect.setAttribute("y", String(y0));
+          rect.setAttribute("width", "100");
+          rect.setAttribute("height", String(y1 - y0));
+          rect.setAttribute("class", "param-recommend-band");
+          recommendG.appendChild(rect);
+        }
+      }
+
+      // recommendG는 area(곡선 아래 보라색 채움) 뒤에 그린다 — 앞에 두면 area가 덮어써서
+      // 초록 밴드가 거의 안 보였다(2026-08-15 실측 발견. area는 곡선~바닥까지 항상 넓게
+      // 채우므로 기본값 근처에서는 recommend 밴드 대부분이 가려짐).
+      svg.append(gridG, boundaryG, area, recommendG, curve);
       plot.append(svg);
 
       const dotEls = stageModel.segments.map((_, i) => {
@@ -692,6 +774,23 @@ function initStageControls() {
       stageTouched = true;
       renderStageGraph();
     });
+  }
+}
+
+// 희소 힌트용 feature stats 로드 — loadBands 패턴과 동일한 재시도 백오프
+async function loadFeatureStats(attempt = 0) {
+  try {
+    const res = await fetch(`${API_BASE}/api/feature-stats`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    featureStats = data;
+    // 이미 그래프가 그려졌으면(stageModel 존재) 새 hint 데이터로 재렌더
+    if (stageModel) renderStageGraph();
+  } catch (_) {
+    if (attempt < 6) {
+      setTimeout(() => loadFeatureStats(attempt + 1), 3000 * (attempt + 1));
+    }
+    // 최종 실패: featureStats = null 유지 → 힌트 안 그려짐 (no-op, nice-to-have)
   }
 }
 

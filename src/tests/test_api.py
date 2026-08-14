@@ -182,6 +182,35 @@ def test_songs_endpoint(client):
     assert keys == sorted(keys)
 
 
+def test_feature_stats_endpoint(client):
+    r = client.get("/api/feature-stats")
+    assert r.status_code == 200
+    body = r.json()
+    assert "total_eligible" in body and body["total_eligible"] > 0
+    assert body["bins_1d"] == 12
+    # 모든 1D 히스토그램이 12 bin을 가져야 함
+    histograms = body["histograms"]
+    for key in ["energy", "valence", "lufs_integrated", "lra", "danceability_norm", "instr_stem_ratio", "speech_median"]:
+        assert key in histograms, f"histogram key '{key}' missing"
+        bins = histograms[key]
+        assert len(bins) == 12, f"histogram '{key}' has {len(bins)} bins, expected 12"
+        # None을 스킵했으므로 합계는 total_eligible 이하여야 함 (정규값이 없으면 0일 수도)
+        assert sum(bins) <= body["total_eligible"], f"histogram '{key}' sum > total_eligible"
+    # 2D 조인 히스토그램 검증
+    map_2d = body["map_2d"]
+    assert map_2d["x_field"] == "valence"
+    assert map_2d["y_field"] == "energy"
+    assert map_2d["bins"] == 8
+    grid = map_2d["grid"]
+    assert len(grid) == 8, f"grid has {len(grid)} rows, expected 8"
+    for row in grid:
+        assert len(row) == 8, f"grid row has {len(row)} cols, expected 8"
+        assert isinstance(row[0], int), "grid values should be ints"
+    # 2D grid의 총합도 total_eligible 이하여야 함(valence가 None이면 제외)
+    grid_sum = sum(sum(row) for row in grid)
+    assert grid_sum <= body["total_eligible"]
+
+
 def test_band_filter_restricts_to_selected(client):
     r = client.post("/api/setlist", json={"prompt": "신나는 곡", "bands": ["poppin_party"]})
     assert r.status_code == 200

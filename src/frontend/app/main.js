@@ -1,5 +1,6 @@
 // ── 초기화 ─────────────────────────────────────────────────────────────────────
 loadBands();
+loadFeatureStats();  // 희소 힌트용 데이터 로드
 initStageModel();
 initStageControls(); // 버튼 이벤트 한 번 붙이기
 

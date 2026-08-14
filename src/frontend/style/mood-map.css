@@ -83,6 +83,19 @@
   fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
+/* 희소 셀 오버레이 — 색 얼룩(블러 그라데이션)이 "무슨 뜻인지 안 와닿는다"는 피드백으로
+   지도류 게임의 "못 가는 지형"(크레이터/물가) 관용구인 빗금 패턴으로 교체했다(2026-08-15).
+   막는 게 아니라 표시만 — pointer-events:none은 그대로라 드래그·클릭 다 그대로 된다.
+   fill은 buildMap()이 rect마다 url(#sparse-hatch)로 직접 지정한다(여기서 지정 X). */
+.sparse-hatch-line { stroke: var(--muted); stroke-width: 1; }
+/* 가장자리도 그려서(2026-08-15 피드백) 빗금 영역의 경계를 명확히 한다 — 인접한 희소 칸끼리는
+   경계선이 서로 맞닿아 보이지만(칸 단위 렌더링이라), 그 자체로 "여기부터 저기까지" 지형
+   경계처럼 읽혀 오히려 도움이 된다. */
+.map-density-cell {
+  opacity: 0.4; pointer-events: none;
+  stroke: var(--muted); stroke-width: 0.3; stroke-opacity: 0.6;
+}
+.map-density-cell.empty { opacity: 0.65; stroke-opacity: 0.9; }
 
 .quadrant-label {
   position: absolute; font-size: 0.68rem; color: var(--muted); line-height: 1.35;
@@ -263,6 +276,10 @@
 .grid-boundary { stroke: rgba(var(--line-rgb),0.14); stroke-dasharray: 3 3; }
 .graph-area { fill: rgba(124,108,255,0.16); stroke: none; }
 .graph-curve { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+/* 추천 구간 밴드 — 희소 꼬리마다 경고색을 칠하던 방식은 단봉분포 슬라이더에서 "두 그룹처럼
+   보인다"는 오해를 샀다(2026-08-15 피드백). 대신 후보가 충분한 연속 구간 하나를 초록
+   밴드로 양성적으로 표시한다. */
+.param-recommend-band { fill: var(--ok); opacity: 0.32; pointer-events: none; }
 /* 정서 지도(.stage-node)·시간 배분 바(.timebar-num)와 같은 동그라미 순번 배지 스타일 */
 .param-dot {
   position: absolute; z-index: 3; width: 18px; height: 18px; margin: -9px 0 0 -9px;

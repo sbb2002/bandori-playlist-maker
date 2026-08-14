@@ -76,6 +76,64 @@ def _feature_stats(pool) -> dict | None:
     return stats
 
 
+def _histogram(values: list[float], bins: int) -> list[int]:
+    """값 목록을 주어진 bin 수로 히스토그램화한다(0~1 정규화).
+
+    bin i는 [i/bins, (i+1)/bins) 범위를 담당. 정확히 1.0인 값은 마지막 bin(bins-1)에 들어간다.
+    """
+    out = [0] * bins
+    for v in values:
+        # 1.0 처리: bins-1 bin으로, 그 외는 int(v * bins) clamp
+        idx = bins - 1 if v >= 1.0 else int(v * bins)
+        idx = max(0, min(bins - 1, idx))
+        out[idx] += 1
+    return out
+
+
+def _feature_stats_sparse(pool: list) -> dict:
+    """후보 곡 풀의 희소성 통계 — 1D 히스토그램 7종 + 2D 조인 히스토그램(valence × energy).
+
+    UI가 사용자가 드래그하는 영역의 희소도를 시각화하는 데 쓴다(sparse 힌트 오버레이용).
+    """
+    BINS_1D = 12
+    BINS_2D = 8
+
+    # 1D 히스토그램: energy + 6개 오디오 지표(None 스킵)
+    histograms: dict[str, list[int]] = {}
+
+    # energy는 항상 present
+    energy_values = [s.energy for s in pool if s.energy is not None]
+    histograms["energy"] = _histogram(energy_values, BINS_1D) if energy_values else [0] * BINS_1D
+
+    # 6개 오디오 지표 (None 스킵)
+    for field in ["valence", "lufs_integrated", "lra", "danceability_norm", "instr_stem_ratio", "speech_median"]:
+        values = [getattr(s, field) for s in pool if getattr(s, field) is not None]
+        histograms[field] = _histogram(values, BINS_1D) if values else [0] * BINS_1D
+
+    # 2D 조인 히스토그램: (valence, energy) — 둘 다 present 필요
+    grid = [[0 for _ in range(BINS_2D)] for _ in range(BINS_2D)]
+    for s in pool:
+        if s.valence is not None and s.energy is not None:
+            col = BINS_2D - 1 if s.valence >= 1.0 else int(s.valence * BINS_2D)
+            col = max(0, min(BINS_2D - 1, col))
+            # row: energy (0 = 낮은 에너지)
+            row = BINS_2D - 1 if s.energy >= 1.0 else int(s.energy * BINS_2D)
+            row = max(0, min(BINS_2D - 1, row))
+            grid[row][col] += 1
+
+    return {
+        "total_eligible": len(pool),
+        "bins_1d": BINS_1D,
+        "histograms": histograms,
+        "map_2d": {
+            "x_field": "valence",
+            "y_field": "energy",
+            "bins": BINS_2D,
+            "grid": grid,
+        },
+    }
+
+
 def _build_stage_impression_vectors(embedder, impression_texts: list[str | None]) -> list[list[float] | None] | None:
     """스테이지별 가사 감상 텍스트(우선순위 해석 완료)를 임베딩 어댑터로 벡터화한다(프로토타입).
 
@@ -177,6 +235,23 @@ def list_bands(request: Request) -> dict:
     bands = [{"band": b, "count": n} for b, n in counts.items()]
     bands.sort(key=lambda x: (-x["count"], x["band"]))
     return {"bands": bands}
+
+
+@router.get("/api/feature-stats")
+def feature_stats(request: Request) -> dict:
+    """후보(eligible) 곡 풀의 희소성 통계 — 1D 히스토그램 7종 + 2D 조인 히스토그램.
+
+    프론트 설정 UI(정서 지도·고급 설정 슬라이더)가 희소한 영역을 시각적으로 표시하기 위한
+    수동 힌트(제약 없음, 읽기 전용 정보). 사용자가 드래그할 때마다 갱신하지 않고, 페이지
+    로드 시 한 번만 페칭한다.
+    """
+    pool = [s for s in request.app.state.songs if s.eligible_band]
+    return _feature_stats_sparse(pool) if pool else {
+        "total_eligible": 0,
+        "bins_1d": 12,
+        "histograms": {f: [] for f in ["energy", "valence", "lufs_integrated", "lra", "danceability_norm", "instr_stem_ratio", "speech_median"]},
+        "map_2d": {"x_field": "valence", "y_field": "energy", "bins": 8, "grid": []},
+    }
 
 
 @router.get("/api/songs")
