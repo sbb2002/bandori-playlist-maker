@@ -149,6 +149,70 @@ def _audio_path(band: str, idx: int) -> Path:
     return _AUDIO_DIR / f"{band}__{idx:03d}.wav"
 
 
+_SIBLING_VIDEO_ID_TO_IDX: Optional[dict[str, int]] = None
+_SIBLING_SONGS_FULL_REL = "src/content/cluster/songs_full.csv"
+
+
+def _sibling_repo_root() -> Path:
+    # _AUDIO_DIR = <sorter_repo>/src/content/cluster/audio_full
+    return _AUDIO_DIR.parent.parent.parent
+
+
+def _sibling_idx_by_video_id(video_id: str) -> Optional[int]:
+    """형제 songs_full.csv에서 video_id로 형제 idx를 찾는다.
+
+    master 자신의 idx(merge_data.merge()가 own max+1로 독립 채번, PR #59)와
+    wav 캐시 파일명에 쓰이는 형제 idx는 서로 다르다(README "idx 채번" 절) — 신곡
+    반영 후 이 둘이 어긋난 경우, master idx로 만든 경로에 파일이 없으면 이 매핑으로
+    형제 idx를 역산해 재시도한다.
+
+    형제 데브 레포의 로컬 워킹트리는 (run_local.py가 전용 클론 `bandori-pipeline`에서
+    커밋·push하는 구조라) 방금 반영된 신곡을 아직 pull하지 않아 뒤처져 있을 수 있다
+    (2026-08-14 실사례: idx=733 신곡이 워킹트리엔 없고 origin/main에만 있었음) —
+    autoloader/sources.py의 load_sorter_songs_full()과 동일하게 `git show origin/main:...`
+    로 로컬 pull 상태와 무관하게 항상 최신을 읽는다.
+    """
+    global _SIBLING_VIDEO_ID_TO_IDX
+    if _SIBLING_VIDEO_ID_TO_IDX is None:
+        _SIBLING_VIDEO_ID_TO_IDX = {}
+        import subprocess
+        sorter_repo = _sibling_repo_root()
+        try:
+            out = subprocess.run(
+                ["git", "-C", str(sorter_repo), "show",
+                 f"origin/main:{_SIBLING_SONGS_FULL_REL}"],
+                capture_output=True, check=True,
+            ).stdout.decode("utf-8")
+        except (subprocess.CalledProcessError, OSError):
+            out = None
+        if out is None:
+            # git 접근 실패 시 로컬 워킹트리 파일로 폴백(뒤처져 있을 수 있음, 그래도
+            # 아예 안 찾는 것보다 낫다).
+            songs_full = sorter_repo / _SIBLING_SONGS_FULL_REL
+            if songs_full.exists():
+                out = songs_full.read_text(encoding="utf-8")
+        if out:
+            for r in csv.DictReader(io.StringIO(out)):
+                url = (r.get("url") or "").strip()
+                vid = url.rsplit("/", 1)[-1] if url else ""
+                if vid:
+                    _SIBLING_VIDEO_ID_TO_IDX[vid] = int(r["idx"])
+    return _SIBLING_VIDEO_ID_TO_IDX.get(video_id)
+
+
+def _resolve_audio_path(band: str, idx: int, video_id: str) -> Path:
+    """master idx로 우선 조회하고, 없으면 형제 idx(video_id 매핑)로 재시도."""
+    path = _audio_path(band, idx)
+    if path.exists():
+        return path
+    sib_idx = _sibling_idx_by_video_id(video_id)
+    if sib_idx is not None and sib_idx != idx:
+        alt = _audio_path(band, sib_idx)
+        if alt.exists():
+            return alt
+    return path
+
+
 def _vocal_stem_paths(band: str, idx: int) -> Optional[tuple[Path, Path]]:
     """보컬/악기 스템 폴더 확인. 존재하면 (vocals.wav, no_vocals.wav) 튜플."""
     stem_dir = _VOCAL_STEM_DIR / f"{band}__{idx:03d}"
@@ -499,11 +563,12 @@ def main():
             idx = int(row["idx"])
             band = row["band"]
             song = row["song"]
+            video_id = (row.get("video_id") or "").strip()
 
             print(f"  [{i}/{len(target_rows)}] idx={idx} {band} - {song}")
 
-            # 오디오 경로 확인
-            audio_path = _audio_path(band, idx)
+            # 오디오 경로 확인 (master idx 우선, 없으면 형제 idx로 재시도)
+            audio_path = _resolve_audio_path(band, idx, video_id)
             if not audio_path.exists():
                 print(f"    [SKIP] 오디오 없음")
                 skipped += 1
