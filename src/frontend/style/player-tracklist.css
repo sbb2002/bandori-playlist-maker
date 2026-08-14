@@ -44,6 +44,7 @@
 .badge.same, .badge.adjacent { color: var(--ok); }
 .badge.non_harmonic { color: var(--warn); }
 .badge.seed { color: var(--accent-2); }
+.badge.degraded { color: var(--warn); border-color: rgba(var(--line-rgb),0.1); }
 /* 곡별 오디오 지표 6종 배지(밝기·라우드·다이내믹·리듬감·악기·음절) — 예전 에너지 배지와 동일한
    "미니 바 + 숫자" 표현에 라벨만 앞에 붙인다(어떤 지표인지 구분하기 위함). */
 .badge-param { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px 3px 8px; }

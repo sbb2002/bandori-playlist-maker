@@ -193,6 +193,8 @@ const I18N_TABLE = {
   "harmonic.added.label": { ko: "추가한 곡", ja: "追加した曲", en: "Added song", "zh-Hans": "手动添加", "zh-Hant": "手動新增" },
   "harmonic.added.tooltip": { ko: "직접 추가한 곡이라 하모닉 배치 로직이 적용되지 않았어요.", ja: "手動で追加した曲のため、ハーモニック配置ロジックは適用されていません。", en: "You added this song manually, so the harmonic-mixing logic wasn't applied.", "zh-Hans": "这是你手动添加的歌曲，未套用和声排列逻辑。", "zh-Hant": "這是你手動新增的歌曲，未套用和聲排列邏輯。" },
   "track.keyTooltip": { ko: "조성(Camelot {{code}})", ja: "調（Camelot {{code}}）", en: "Key (Camelot {{code}})", "zh-Hans": "调性（Camelot {{code}}）", "zh-Hant": "調性（Camelot {{code}}）" },
+  "track.degradedLabel": { ko: "차선책", ja: "次善策", en: "Best available", "zh-Hans": "次优选择", "zh-Hant": "次優選擇" },
+  "track.degradedTooltip": { ko: "이 무드 조합에 딱 맞는 후보 곡이 부족해서, 그나마 가장 가까운 곡으로 채워졌어요.", ja: "このムードの組み合わせにぴったり合う候補曲が足りず、一番近い曲で埋められました。", en: "Not enough songs matched this exact mood combo — this is the closest available substitute.", "zh-Hans": "符合这种氛围组合的候选曲目不足，因此用最接近的歌曲填补。", "zh-Hant": "符合這種氛圍組合的候選曲目不足，因此用最接近的歌曲填補。" },
 
   // ── 플레이어 컨트롤 ───────────────────────────────────────────────────────
   "player.prev": { ko: "이전 곡", ja: "前の曲", en: "Previous track", "zh-Hans": "上一首", "zh-Hant": "上一首" },

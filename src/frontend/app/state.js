@@ -100,6 +100,11 @@ let currentMode = "ai"; // "ai" | "custom"
 let lastParams = {};
 let lastAppliedBands = [];
 let lastStages = [];
+// 마지막으로 완료된 생성 결과의 실제 재생시간(초) — params.target_minutes(LLM/사용자 목표치)와
+// 달리 flexible_duration(AI 모드, 재생시간 미지정 요청) 때문에 실제로 채워진 곡 수가 목표보다
+// 짧을 수 있어 따로 둔다. 그래프 X축은 "목표"가 아니라 "실제로 이 플레이리스트가 몇 분인가"를
+// 보여줘야 하므로(2026-08-15 실사용 피드백) 그래프 쪽 totalMinutes 계산은 이 값을 우선한다.
+let lastEstimatedTotalSeconds = 0;
 let currentPresetId = null; // 현재 세션이 매핑된 프리셋 id(편집 시 이 프리셋 갱신)
 let restoring = false; // 프리셋 복원 중엔 새 프리셋 자동생성 생략
 // DEPRECATED(2026-08-11): previousPrompt(직전 성공 요청 저장)는 제거됨 — AI/커스텀 모드가

@@ -145,6 +145,9 @@ class StubMoodInterpreter:
             tags=tags,
             song_type=song_type,
             same_as_previous=same_as_previous,
+            # _extract_minutes가 값을 못 찾았으면(None) 발화에 시간 언급이 없었다는 뜻 —
+            # LLM의 duration_specified와 동일한 신호를 스텁도 같은 방식으로 낸다.
+            duration_specified=target_minutes is not None,
         )
 
 

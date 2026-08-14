@@ -53,14 +53,53 @@ _NEW_STAGE_PARAM_FIELDS = (
 
 # 2단계 엔진 파라미터(R&D §4.2 권장 기본값). 파일럿 후 실사용 피드백으로 튜닝.
 _TOL = 0.08              # Stage B 오프너(전체 첫 곡) 시드 선정에서만 쓰는 강도 근접창(아래 참조).
-# Stage A 통합 지표 거리(에너지+신규 6종, _param_distance) 파라미터 — 2026-08-11 재설계.
-# 값 있는 필드만 평균하는 0~1 스케일 거리라 mode_score/shape 시절의 _TOL(0.08, 에너지 단독
-# 기준)보다 폭을 조금 넓게 잡았다(여러 필드 평균은 단일 필드보다 극단값이 상쇄되는 경향).
-# 둘 다 실사용 피드백으로 튜닝 예정인 프로토타입 상수.
-_PARAM_BUCKET = 0.15       # 이 폭으로 이산화한 버킷이 같으면 "동등하게 가까운" 후보로 취급.
-_PARAM_HARD_TOL = 0.35     # 가장 가까운 후보조차 이보다 멀면 억지로 채우지 않고 슬롯을 건너뛴다
-                           # (자동 축소 — 밴드 필터 등으로 풀이 좁을 때의 안전망, 기존 완충 노드
-                           # 정책과 같은 취지). 이 값 이하는 채우되 버킷폭을 넘으면 degraded로 표시.
+# 2026-08-11 재설계로 도입됐던 단일 통합거리 방식(_PARAM_BUCKET/_PARAM_HARD_TOL, 에너지+신규
+# 6종을 한 번에 평균)은 2026-08-14 4단계 깔때기(아래 _STAGE1~3_BUCKET)로 완전히 대체돼
+# 제거됐다 — 평균 하나로는 한 지표가 크게 벗어나도 나머지가 가까우면 희석돼 놓치는 문제가
+# 실사용에서 반복 확인됐기 때문(이 파일 하단 build_setlist 관련 주석 참고). `_param_distance()`
+# 자체는 리포트용 param_fit 계산에만 남아있다(선곡 판정에는 더 이상 안 쓰임).
+
+# feature/staged-param-funnel-selection (실험, 2026-08-14): 7개 지표를 한 번에 평균하는
+# _param_distance 단일거리 방식은 에너지 하나가 목표에서 크게 벗어나도(예: "조용한 밤" 목표
+# 0.15인데 곡 강도 0.77) 나머지 6개 지표가 우연히 가까우면 평균이 희석돼 "부합"으로 통과하는
+# 문제가 실사용에서 확인됐다(1/7 가중치라 에너지 하나의 이탈이 잘 안 걸러짐). 대신 후보를
+# 4단계로 순차 좁히는 깔때기로 바꿔, 무드의 핵심 축이 다른 지표에 의해 희석되지 않게 한다.
+#   1차: energy + valence(강도·밝기) — 실사용 검증 결과 이미 거의 완벽히 맞음(평균 편차 ~0.03).
+#   2차: instr_stem_ratio + lufs_integrated("사운드 질감/무게감" 축) — "조용한 밤" 요청에
+#        록 사운드가 섞여 나오는 사례 4건을 직접 청취·지표 분해해 찾아낸 진짜 범인. 4곡 모두
+#        1~2위로 가장 크게 벗어나 있었고(평균 편차 instr_stem_ratio~0.28, lufs~0.15), 반면
+#        danceability_norm·speech_median은 상대적으로 잘 맞았다(~0.065~0.10) — 그래서 이 둘만
+#        따로 떼어 전용 버킷을 준다(나머지와 묶으면 또 희석됨).
+#   3차: 나머지(lra, danceability_norm, speech_median) — 미세 조정.
+#   4차: 가사 임베딩 유사도(기존과 동일).
+# 버킷은 전부 기존 _PARAM_BUCKET과 같은 "최솟값 기준 상대 버킷" 방식(절대 반경이 아님) — 처음에
+# 절대 반경(0.2)으로 시도했더니 조용한 요청 회귀 테스트(에너지 최대 0.25 상한)가 깨졌다.
+# 원인: 절대 반경은 최솟값이 0에 가까워도 항상 넓게 열려 있어 한 필드가 크게 벗어난 곡도
+# 통과시킨다 — 버킷 방식은 최솟값이 작을수록 버킷 자체가 좁아져 자동으로 타이트해진다.
+# 버킷폭은 필드 수가 적을수록 좁게 잡았다(필드 수가 적을수록 한 필드의 이탈이 평균에 덜
+# 희석되므로, 같은 버킷폭이면 사실상 더 관대해짐 — 이 원칙 자체가 이번에 찾아낸 버그의 반대
+# 방향 보정이다).
+_STAGE1_BUCKET = 0.1       # 2필드 평균(energy+valence).
+_STAGE1_HARD_TOL = 0.4     # 1차 최선 후보조차 이보다 멀면 슬롯 스킵(기존 _PARAM_HARD_TOL과 동격).
+_STAGE2_BUCKET = 0.12      # 3필드 평균(instr_stem_ratio+lufs_integrated+lra) — "질감" 축 전용, 타이트하게.
+_STAGE3_BUCKET = 0.15      # 2필드 평균(danceability_norm+speech_median) — 기존 _PARAM_BUCKET과 동일 폭.
+
+# feature/staged-param-funnel-selection (실험, 2026-08-14): AI 모드에서 사용자가 프롬프트에
+# 재생시간을 직접 말하지 않았는데도(params.duration_specified=False) target_minutes(LLM 추정치,
+# 기본 60분)를 그대로 강제하다 보니, 좋은 후보가 소진된 뒤에도 목표 곡 수를 채우려고 텍스처가
+# 안 맞는 곡을 강제로 끼워넣는 문제가 있었다(catalog 자체가 특정 무드 조합에 부족한 경우 —
+# "esora no clover"류, 곡 자체는 있지만 17곡 채우기엔 부족). 그래서 flexible_duration일 때는
+# 품질이 나쁘면 억지로 채우지 않는다. 판정은 1~3차 깔때기 각각의 버킷폭(_STAGE1/2/3_BUCKET)을
+# 그대로 재사용한다(전체 7지표 평균 하나로 재판정하면 또 희석 버그가 재도입되므로 — 아래
+# build_setlist 본문 참고). [2026-08-15 변경, 1차] "30분은 채운 뒤에만 게이트"에서 재생시간과
+# 무관하게 처음부터 게이트가 걸리도록 바꿨더니(degraded 절대 금지 우선), "잠들기 전 편안한"류
+# 흔해 보이는 요청조차 0~1곡만 나오는 일이 실사용에서 확인됐다 — 게이트가 슬롯 1개도 못 채우고
+# 바로 멈추는 경우가 너무 잦았다. [2026-08-15 변경, 2차] 그래서 하이브리드로 되돌린다: 이
+# 최소 재생시간(`_FLEXIBLE_MIN_SECONDS`) 전까지는 (비-flexible과 동일한) 상대 버킷 체인으로
+# 강제 채우고(품질이 나빠도 degraded 태그만 붙여 채움 — "완전히 빈 세트리스트"보다는 낫다는
+# 판단), 그 이후로는 절대기준 필터(아래 build_setlist 본문의 flexible_duration 분기, 이 픽
+# 자신의 1~3차 지표가 전부 버킷폭 이내인 곡만)로 넘어가 degraded 없는 곡만 추가한다.
+_FLEXIBLE_MIN_SECONDS = 30 * 60  # routes.py의 기존 30분 하한(_MINUTES_RANGE)과 동일 기준.
 _LYRIC_KEEP_FRACTION = 0.5  # 버킷 후보 중 가사 임베딩 유사도 상위 비율만 최종 후보로 남긴다.
 # Stage B 시퀀싱: 경계갭 + 하모닉 + 강도순서이탈을 다목적 비용으로 최소화. (검증 하네스로 튜닝 — R&D §8.)
 _RANDOM_SLACK = 0.05     # 최소 비용 대비 이 범위 내 후보는 랜덤(곡 선택 변주는 Stage A가 담당)
@@ -319,6 +358,62 @@ def _param_distance(song: Song, energy_target: float, target_params: dict[str, f
     return sum(diffs) / len(diffs)
 
 
+# 3차(나머지) 필터에서 쓰는 지표 — 1차(energy+valence)·2차(질감 축) 뺀 나머지. 순서는 리포트에
+# 안 쓰이므로 무관.
+# 2026-08-14 재조정: lra는 원래 3차(나머지)에 있었는데, 실사용 5개 사례(esora no clover·
+# 迷星叫·Sage der Rosen·Whole Blue World·チューニング) 전부에서 instr_stem_ratio·
+# lufs_integrated와 동급으로(때로는 그 이상으로) 크게 벗어난 지표였다 — danceability_norm·
+# speech_median과 한 평균에 묶이면서 다시 희석돼 걸러지지 않는 사례가 반복 확인됐다(チューニング:
+# lra 편차 0.40이 lufs 0.36보다도 컸는데 3차 평균(dance·speech와 함께)에 묻힘). "사운드
+# 질감/무게감" 축은 이 셋(instr_stem_ratio·lufs_integrated·lra)이 함께 움직인다는 뜻이라
+# 2차로 옮긴다.
+_STAGE2_TEXTURE_FIELDS = ("instr_stem_ratio", "lufs_integrated", "lra")
+_STAGE3_PARAM_FIELDS = tuple(
+    f for f in _NEW_STAGE_PARAM_FIELDS if f != "valence" and f not in _STAGE2_TEXTURE_FIELDS
+)
+
+
+def _energy_valence_distance(song: Song, energy_target: float, valence_target: float | None) -> float:
+    """1차 거리 — 무드의 핵심 두 축(강도·밝기)만 평균. valence 목표가 없으면 에너지 단독."""
+    diffs = [abs(song.energy - energy_target)]
+    if valence_target is not None and song.valence is not None:
+        diffs.append(abs(song.valence - valence_target))
+    return sum(diffs) / len(diffs)
+
+
+def _texture_distance(song: Song, target_params: dict[str, float | None]) -> float:
+    """2차 거리 — instr_stem_ratio+lufs_integrated+lra("사운드 질감/무게감" 축) 평균.
+
+    "조용한 밤" 요청에 록 사운드가 섞여 나오는 사례를 실제로 들어보고 지표를 분해해 찾아낸
+    범인 지표들(2026-08-14) — energy/valence는 맞아도 이들이 크게 벗어나면 청감상 "웅장하다/
+    락스럽다"로 느껴진다. lra는 원래 3차였으나, 실사용 5개 사례(esora no clover·迷星叫·
+    Sage der Rosen·Whole Blue World·チューニング) 전부에서 instr_stem_ratio·lufs_integrated와
+    동급으로(チューニング는 그 이상으로) 벗어난 지표라 danceability_norm·speech_median과
+    묶여 희석되지 않도록 이쪽으로 옮겼다. 값 있는 필드만 평균, 전부 없으면 0.0(중립).
+    """
+    diffs = []
+    for field in _STAGE2_TEXTURE_FIELDS:
+        t = target_params.get(field)
+        v = getattr(song, field)
+        if t is None or v is None:
+            continue
+        diffs.append(abs(v - t))
+    return sum(diffs) / len(diffs) if diffs else 0.0
+
+
+def _remaining_params_distance(song: Song, target_params: dict[str, float | None]) -> float:
+    """3차 거리 — 1차·2차에 안 쓰인 나머지 2지표(danceability_norm·speech_median) 평균.
+    전부 없으면 0.0(중립)."""
+    diffs = []
+    for field in _STAGE3_PARAM_FIELDS:
+        t = target_params.get(field)
+        v = getattr(song, field)
+        if t is None or v is None:
+            continue
+        diffs.append(abs(v - t))
+    return sum(diffs) / len(diffs) if diffs else 0.0
+
+
 def _lyric_similarity(song: Song, target_vec: list[float] | None) -> float:
     """곡의 가사 감상 임베딩과 스테이지 목표 임베딩의 코사인 유사도(프로토타입).
 
@@ -372,6 +467,7 @@ def build_setlist(
     stage_specs: list[StageSpec] | None = None,
     rng: random.Random | None = None,
     stage_impression_vectors: list[list[float] | None] | None = None,
+    flexible_duration: bool = False,
 ) -> Setlist:
     """무드/에너지 파라미터로 세트리스트를 구성한다(2단계 SELECT→SEQUENCE).
 
@@ -388,6 +484,20 @@ def build_setlist(
             넘긴다(도메인은 임베딩 모델을 직접 호출하지 않음 — 클린 아키텍처 불변식). 길이는
             stage_count와 같아야 하며, 인덱스가 벗어나거나 항목이 None이면 그 스테이지는
             가사 유사도 타이브레이크 없이(중립) 기존 동작 그대로.
+        flexible_duration: True면 target_seconds를 "상한 스캐폴드"로만 쓴다(AI 모드에서
+            params.duration_specified=False일 때만 라우트가 True로 넘김 — 사용자가 프롬프트에
+            시간을 직접 말하지 않은 경우). 2단계 하이브리드(2026-08-14~15 실사용 피드백으로
+            정착):
+            1) `_FLEXIBLE_MIN_SECONDS`(30분) 전까지는 비-flexible과 동일하게 강제로 채운다
+               (품질이 나빠도 degraded 태그만 붙여서라도 채움 — 완전히 빈/짧은 세트리스트보다
+               낫다는 판단. "잠들기 전 편안한"류 흔한 요청조차 0~1곡만 나오는 문제가 실사용에서
+               확인돼 재도입).
+            2) 그 이후로는 절대기준 필터로 전환 — 슬롯을 채울 때마다 이 픽 자신의 1~3차 지표
+               편차가 전부 그 단계 버킷폭 이내인 곡만 후보로 남기고, 하나도 없으면 억지로
+               채우지 않고 그 시점에서 세트리스트를 끝낸다(목표보다 짧게 끝날 수 있음. 30분은
+               이미 확보했으므로 0곡까지 줄어들 일은 없다). target_seconds를 채우려고 무드에
+               안 맞는 곡(esora no clover·チューニング류 텍스처 불일치)을 강제로 끼워넣는 걸
+               막는 게 목적.
 
     Returns:
         Setlist(단계·추정시간·곡 순서·선곡 이유 포함).
@@ -427,6 +537,8 @@ def build_setlist(
     stage_members: list[list[Song]] = []
     degraded_idx: set[int] = set()  # 허용창 밖이지만 채택된 픽(완충 노드가 표시만 하는 케이스)
     slot = 0
+    flexible_stop = False  # True가 되면 이후 모든 슬롯을 건너뛴다(flexible_duration 품질 게이트 발동).
+    cumulative_seconds = 0.0  # flexible_duration 전용 — _FLEXIBLE_MIN_SECONDS 이후부터 절대기준 필터로 전환.
     for stage_index, count in enumerate(counts):
         chosen: list[Song] = []
         target_params = stage_target_params[stage_index]
@@ -439,6 +551,10 @@ def build_setlist(
         for _ in range(count):
             if not remaining:
                 break
+            if flexible_stop:
+                # flexible_duration: 이미 30분 이상 확보한 뒤 품질이 바닥나 멈추기로 한 상태 —
+                # 이 스테이지를 포함해 이후 모든 슬롯을 채우지 않는다(카운트만 소비하고 스킵).
+                continue
             slot_target = slot_targets[slot]
             slot += 1
             # 스테이지 고정 밴드(프로토타입) — 에너지 허용창보다 먼저 적용하는 최우선 하드필터.
@@ -451,31 +567,103 @@ def build_setlist(
             )
             if not band_pool:
                 continue
-            # 2026-08-11 재설계: 에너지 하드필터+밝기(mode_score/shape) 버킷 대신, 에너지도
-            # 포함한 통합 지표 거리(_param_distance) 하나로 정렬한다(사용자 결정 — 임계값 없이
-            # 항상 최선을 찾되, 그래도 너무 멀면 슬롯 스킵 안전망만 유지).
-            scored = sorted(
-                ((_param_distance(s, slot_target, target_params), s) for s in band_pool.values()),
+            candidates = list(band_pool.values())
+
+            if flexible_duration and cumulative_seconds >= _FLEXIBLE_MIN_SECONDS:
+                # 2026-08-15(사용자 결정 — "degraded 절대 금지" + "그래도 최소 재생시간 하한은
+                # 필요하다"): 최소 재생시간(`_FLEXIBLE_MIN_SECONDS`)을 채우기 전까지는 아래
+                # 비-flexible 경로(상대 버킷 체인, 품질 나빠도 degraded 태그 붙여 강제 채움)로
+                # 흘러가고, 그 이후부터만 여기(절대기준 필터)로 전환한다 — 완전히 빈/짧은
+                # 세트리스트보다 degraded 태그 붙여서라도 채우는 쪽이 낫다는 재판단("잠들기 전
+                # 편안한"류 흔한 요청도 0~1곡만 나오는 문제가 실사용에서 확인됨).
+                #
+                # 상대 버킷 체인(1차→2차→3차, 매 단계 "그 순간의 최솟값" 기준으로 좁힘)은 중간
+                # 단계의 반올림 경계 때문에, 전체 후보 중엔 3개 축 절대 임계값을 동시에 만족하는
+                # 곡이 있어도 체인을 다 통과 못 시키는 버그가 있었다(실측: ホワイトノスタルジア는
+                # d1=0.008·d2=0.112·d3=0.138로 셋 다 통과인데도, 체인 2단계에서 "그 순간
+                # 최솟값과 다른 버킷"으로 걸러짐). 그래서 여기서는 체인 없이 전체 후보 풀에서
+                # 곧장 "이 곡 자신"의 3개 축 절대 임계값을 동시에 만족하는 곡만 남긴다 — 이러면
+                # 실제로 커밋되는 픽이 결코 degraded일 수 없다. 하나도 없으면 더 채우지 않고
+                # 여기서 세트리스트를 끝낸다.
+                strict_pool = [
+                    s for s in candidates
+                    if _energy_valence_distance(s, slot_target, target_params.get("valence")) <= _STAGE1_BUCKET
+                    and _texture_distance(s, target_params) <= _STAGE2_BUCKET
+                    and _remaining_params_distance(s, target_params) <= _STAGE3_BUCKET
+                ]
+                if not strict_pool:
+                    flexible_stop = True
+                    continue
+                # 4차: 셔플 후 가사 임베딩 유사도 상위 _LYRIC_KEEP_FRACTION만 남기고 그 안에서
+                # 최종 1곡을 랜덤으로 고른다(비-flexible 경로와 동일한 다양성 규칙).
+                rng.shuffle(strict_pool)
+                strict_pool.sort(key=lambda s: -_lyric_similarity(s, stage_target_vec))
+                keep_n = max(1, round(len(strict_pool) * _LYRIC_KEEP_FRACTION))
+                pick = rng.choice(strict_pool[:keep_n])
+                del remaining[pick.idx]
+                chosen.append(pick)
+                cumulative_seconds += pick.duration_sec or avg_song_seconds
+                continue
+
+            # feature/staged-param-funnel-selection (실험): 7지표 단일 평균거리 대신 4단계
+            # 깔때기로 후보를 순차 좁힌다 — 특정 지표가 평균에 희석돼 무드와 어긋난 곡이
+            # "부합"으로 통과하는 문제 대응(1차 개선 후에도 남아있던 "질감" 축 희석까지 대응).
+            # 1차: energy+valence(무드의 핵심 두 축) 거리로 1차 필터.
+            scored1 = sorted(
+                (
+                    (_energy_valence_distance(s, slot_target, target_params.get("valence")), s)
+                    for s in candidates
+                ),
                 key=lambda ds: (ds[0], ds[1].idx),
             )
-            min_dist = scored[0][0]
-            if min_dist > _PARAM_HARD_TOL:
-                # 안전망: 밴드 필터 등으로 후보가 극히 좁아 가장 가까운 곡조차 목표와 크게
-                # 동떨어지면 억지로 채우지 않고 슬롯을 건너뛴다(목표 곡 수보다 자동 축소).
+            min_d1 = scored1[0][0]
+            if min_d1 > _STAGE1_HARD_TOL:
+                # 안전망: 밴드 필터 등으로 후보가 극히 좁아 가장 가까운 곡조차 강도·밝기가
+                # 목표와 크게 동떨어지면 억지로 채우지 않고 슬롯을 건너뛴다(자동 축소).
                 continue
-            best_bucket = round(min_dist / _PARAM_BUCKET)
-            bucket_pool = [s for d, s in scored if round(d / _PARAM_BUCKET) == best_bucket]
-            # 같은 버킷 안에서는 rng 셔플로 다양성을 확보한 뒤, 가사 임베딩 유사도 상위
+            best_bucket1 = round(min_d1 / _STAGE1_BUCKET)
+            stage1_pool = [s for d, s in scored1 if round(d / _STAGE1_BUCKET) == best_bucket1]
+
+            # 2차: instr_stem_ratio+lufs_integrated+lra("사운드 질감/무게감" 축) 거리로 추가 필터.
+            scored2 = sorted(
+                ((_texture_distance(s, target_params), s) for s in stage1_pool),
+                key=lambda ds: (ds[0], ds[1].idx),
+            )
+            min_d2 = scored2[0][0]
+            best_bucket2 = round(min_d2 / _STAGE2_BUCKET)
+            stage2_pool = [s for d, s in scored2 if round(d / _STAGE2_BUCKET) == best_bucket2]
+
+            # 3차: 나머지 2지표(danceability/speech) 거리로 추가 필터.
+            scored3 = sorted(
+                ((_remaining_params_distance(s, target_params), s) for s in stage2_pool),
+                key=lambda ds: (ds[0], ds[1].idx),
+            )
+            min_d3 = scored3[0][0]
+            best_bucket3 = round(min_d3 / _STAGE3_BUCKET)
+            stage3_pool = [s for d, s in scored3 if round(d / _STAGE3_BUCKET) == best_bucket3]
+
+            # 4차: 같은 풀 안에서는 rng 셔플로 다양성을 확보한 뒤, 가사 임베딩 유사도 상위
             # _LYRIC_KEEP_FRACTION만 남기고(벡터 없는 곡들은 전부 0.0으로 동률 — 셔플 덕에
             # 편향 없이 살아남는다), 그 안에서 최종 1곡을 랜덤으로 고른다.
-            rng.shuffle(bucket_pool)
-            bucket_pool.sort(key=lambda s: -_lyric_similarity(s, stage_target_vec))
-            keep_n = max(1, round(len(bucket_pool) * _LYRIC_KEEP_FRACTION))
-            pick = rng.choice(bucket_pool[:keep_n])
-            if min_dist > _PARAM_BUCKET:
+            rng.shuffle(stage3_pool)
+            stage3_pool.sort(key=lambda s: -_lyric_similarity(s, stage_target_vec))
+            keep_n = max(1, round(len(stage3_pool) * _LYRIC_KEEP_FRACTION))
+            pick = rng.choice(stage3_pool[:keep_n])
+            # degraded 판정 — "이 픽 자신"의 1~3차 지표 편차 기준. 예전엔 전체 7지표 평균
+            # (_param_distance)을 썼는데, 그 방식은 텍스처 하나가 크게 벗어나도 나머지가
+            # 가까우면 평균이 낮게 나와 degraded를 놓치는 문제가 있었다(迷星叫류: 전체 평균
+            # 0.12로 버킷 0.15 미만이라 안 걸림, 실제로는 instr_stem_ratio·lufs가 크게 벗어난
+            # 곡). (이 경로는 커스텀 모드 등 비-flexible이거나, flexible_duration이라도 아직
+            # _FLEXIBLE_MIN_SECONDS를 못 채운 상태에서만 도달한다 — 그 이후는 위에서 이미
+            # continue로 절대기준 경로로 분리돼 여기 오지 않는다.)
+            pick_d1 = _energy_valence_distance(pick, slot_target, target_params.get("valence"))
+            pick_d2 = _texture_distance(pick, target_params)
+            pick_d3 = _remaining_params_distance(pick, target_params)
+            if pick_d1 > _STAGE1_BUCKET or pick_d2 > _STAGE2_BUCKET or pick_d3 > _STAGE3_BUCKET:
                 degraded_idx.add(pick.idx)
             del remaining[pick.idx]
             chosen.append(pick)
+            cumulative_seconds += pick.duration_sec or avg_song_seconds
         stage_members.append(chosen)
 
     # ── Stage B: SEQUENCE — 곡 경계 텐션 연속성 체인(이전 아웃트로 ↔ 다음 인트로) ──
