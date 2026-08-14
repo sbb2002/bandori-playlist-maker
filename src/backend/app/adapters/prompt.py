@@ -100,7 +100,8 @@ def _build_dynamic_examples(rng: random.Random) -> str:
     drive_stage_minutes = [20, 20, 20]
     full_example = {
         "brightness": 0.7, "start_energy": 0.35, "end_energy": 0.85, "stage_count": 3,
-        "target_minutes": 60, "interpretation_summary": "주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",
+        "target_minutes": 60, "duration_specified": False,
+        "interpretation_summary": "주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",
         "tags": ["드라이브", "설렘", "주말", "고조되는"], "song_type": "all",
         "stage_minutes": drive_stage_minutes, "stage_params": drive_stages,
     }
@@ -138,7 +139,12 @@ SYSTEM_PROMPT = (
     "with a natural continuation instead. Use the stated value if given (clamp up to 30 if the user "
     "asked for less); otherwise estimate a sensible length from the activity/mood (a full album-length "
     "session by default, longer for long activities like driving or studying); null only if there is "
-    "truly no clue, in which case 60 is assumed.\n"
+    "truly no clue, in which case 60 is assumed. This is a scaffold estimate either way — see "
+    "duration_specified below for whether it should be enforced strictly.\n"
+    "- duration_specified: boolean. true only if the user's own words state or clearly imply a "
+    "specific length/count (\"1시간\", \"30분만\", \"한 곡만\", \"5km 러닝\" implying ~40min, etc.) — "
+    "false if the request is purely about mood/activity with no length cue at all, even though you "
+    "still had to estimate a target_minutes number above.\n"
     "- interpretation_summary: one warm sentence (<=80 chars, in the target output language given "
     "below) describing the mood, no numbers.\n"
     "- tags: 2-5 keywords in the target output language, no '#', never empty.\n"
@@ -198,6 +204,7 @@ RESPONSE_JSON_SCHEMA = {
                     },
                 },
                 "target_minutes": {"type": ["integer", "null"]},
+                "duration_specified": {"type": "boolean"},
                 "interpretation_summary": {"type": "string"},
                 "tags": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 5},
                 "song_type": {"type": "string", "enum": ["all", "original", "cover"]},
@@ -212,6 +219,7 @@ RESPONSE_JSON_SCHEMA = {
                 "stage_bands",
                 "stage_params",
                 "target_minutes",
+                "duration_specified",
                 "interpretation_summary",
                 "tags",
                 "song_type",
@@ -332,6 +340,12 @@ def parse_mood(raw_text: str) -> MoodParameters:
             target_minutes = int(_clamp(int(target_minutes), *_MINUTES_RANGE))
         except (TypeError, ValueError):
             target_minutes = None
+    # 기본값 True(보수적 폴백) — 필드가 없거나 이상한 타입이면 기존처럼 엄격히 강제하는 쪽이
+    # 안전하다(모델이 착각해서 False를 준 경우와 달리, 필드 자체가 없는 경우는 대부분 구버전
+    # 프롬프트/스텁 경로이지 "사용자가 시간을 안 말했다"는 신호가 아니다).
+    duration_specified = obj.get("duration_specified")
+    if not isinstance(duration_specified, bool):
+        duration_specified = True
 
     summary = obj.get("interpretation_summary", "")
     if not isinstance(summary, str):
@@ -432,6 +446,7 @@ def parse_mood(raw_text: str) -> MoodParameters:
         stage_params=stage_params,
         stage_minutes=stage_minutes,
         stage_bands=stage_bands,
+        duration_specified=duration_specified,
     )
 
 

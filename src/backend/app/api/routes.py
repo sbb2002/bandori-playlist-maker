@@ -336,6 +336,13 @@ def _run_setlist(payload: SetlistRequest, state, acquired_event: threading.Event
         # _MINUTES_RANGE와 동일한 하한을 이중으로 보장).
         minutes = max(30, min(_MAX_TARGET_MINUTES, minutes))
 
+    # feature/staged-param-funnel-selection (2026-08-14): AI 모드에서 사용자가 프롬프트에
+    # 재생시간을 직접 말하지 않았으면(LLM이 duration_specified=False로 판단) minutes는 위에서
+    # 계산한 대로 여전히 스캐폴드 상한으로 넘기되, build_setlist에는 "품질 나쁘면 억지로
+    # 채우지 말라"는 신호(flexible_duration)를 같이 넘긴다. 커스텀 모드(stage_specs 존재)는
+    # 사용자가 항상 명시적으로 분을 지정하므로 대상 아님.
+    flexible_duration = stage_specs is None and not params.duration_specified
+
     effective = replace(params, stage_count=stage_count, target_minutes=minutes)
     # 프로토타입: 스테이지별 impression 텍스트(스펙 우선 → LLM 폴백, AI/커스텀 모드 공통 규칙)를
     # 임베딩(있을 때만) — 도메인은 임베딩 모델을 모르므로 조립 지점(라우트)에서 미리 벡터화해 넘긴다.
@@ -349,6 +356,7 @@ def _run_setlist(payload: SetlistRequest, state, acquired_event: threading.Event
         songs, effective, target_seconds=minutes * 60,
         band_filter=band_filter, stage_specs=stage_specs,
         stage_impression_vectors=stage_impression_vectors,
+        flexible_duration=flexible_duration,
     )
     result = serialize_setlist(setlist)
     # 실제 적용된 밴드 필터(프롬프트 자동감지 포함) — 프론트가 체크박스 동기화에 사용.

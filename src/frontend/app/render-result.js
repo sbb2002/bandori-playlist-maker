@@ -17,14 +17,20 @@ function renderResult(data) {
 
   lastParams = data.params || {};
   lastAppliedBands = data.applied_bands || [];
+  lastEstimatedTotalSeconds = estimatedTotal;
   // data.params.stage_minutes는 LLM의 '의도'일 뿐, 실제 적용 결과(완충 노드로 슬롯이 건너뛰어질
   // 수 있음 등)와 다를 수 있다 — 그래서 width는 여기서 실제 곡 배정 결과(picks의 stage_index별
   // 개수)로 직접 계산한다. 이렇게 안 하면 커스텀 모드 프리필(prefillCustomFromLast)이 항상
   // 균등폭(1/n)으로 되돌아가 "마지막 구간만 길게" 같은 요청이 커스텀 모드로 넘어오면서 사라져
   // 보인다(실사용 버그로 발견). stage_minutes 자체는 디버그 스냅샷(last_ai_params)에서 확인 가능.
+  // count가 0인 스테이지(곡이 배정되지 않은 스테이지 — 예: flexible_duration으로 세트리스트가
+  // 조기 종료돼 뒤쪽 스테이지가 통째로 비는 경우)도 width를 명시적으로 0으로 채운다. 예전엔
+  // count>0일 때만 width를 넣고 나머지는 undefined로 남겨뒀는데, stage-graph.js의
+  // syncGraphToParams가 undefined를 1/n으로 대체하면서 이미 합이 1인 나머지 스테이지 width에
+  // 얹혀 그래프가 오른쪽으로 삐져나가는 버그가 있었다(2026-08-14 실사용 발견).
   lastStages = (data.stages || []).map((s, i) => {
     const count = picks.filter((p) => p.stage_index === i).length;
-    return count > 0 ? { ...s, width: count / picks.length } : { ...s };
+    return { ...s, width: count / picks.length };
   });
 
   // 백엔드가 재생 형태 override를 존중하지 않았다면(1회차·의도 변경 → honored_overrides=false) 사용자가
@@ -55,10 +61,14 @@ function renderResult(data) {
 // 사용자가 직접 건드린 값(touched)은 덮지 않는다. 프로그램적 대입이라 change/input 미발생 →
 // touched 플래그가 오염되지 않아 다음 요청에 강제 override로 새지 않는다(밴드 필터 패턴과 동일).
 function reflectSettings(data) {
-  const p = data.params || {};
-  if (!minutesTouched && typeof p.target_minutes === "number") {
-    $("target-minutes").value = p.target_minutes;
-    if (stageModel) { stageModel.totalMinutes = p.target_minutes; }
+  // 그래프 X축·재생시간 입력창은 LLM의 "목표"(params.target_minutes)가 아니라 이 결과가
+  // 실제로 몇 분짜리인지(estimatedTotal)를 보여준다 — flexible_duration(AI 모드, 재생시간
+  // 미지정 요청)으로 실제 곡 수가 목표보다 짧게 끝날 수 있어, 목표치를 그대로 쓰면 그래프
+  // X축 끝(0~목표분)이 실제 플레이리스트 길이와 안 맞았다(2026-08-15 실사용 피드백).
+  const actualMinutes = Math.round(estimatedTotal / 60);
+  if (!minutesTouched && actualMinutes > 0) {
+    $("target-minutes").value = actualMinutes;
+    if (stageModel) { stageModel.totalMinutes = actualMinutes; }
   }
   if (!coverTouched) {
     settingsType = flagsToType(data.include_original !== false, data.include_cover === true);
@@ -134,6 +144,12 @@ function renderTracklist(list) {
     const h = p.reason ? p.reason.harmonic : "";
     badges.appendChild(makeBadge(h, harmonicLabelKo(h), harmonicTooltipKo(h)));
     badges.appendChild(makeBadge("key", keyLabel(p.camelot), t("track.keyTooltip", { code: p.camelot || "" })));
+    // 후보 풀 부족으로 목표 무드에서 다소 벗어난 채 채워진 곡 — 버그가 아니라 catalog 한계임을
+    // 사용자에게 투명하게 알리는 배지(2026-08-14, 실사용 피드백: 태그 없이는 "왜 이 곡이?"로
+    // 오인되기 쉬움).
+    if (p.reason && p.reason.degraded) {
+      badges.appendChild(makeBadge("degraded", t("track.degradedLabel"), t("track.degradedTooltip")));
+    }
     for (const { key, label } of PICK_PARAM_DEFS) {
       if (typeof p[key] === "number") badges.appendChild(makeParamBadge(label, p[key]));
     }

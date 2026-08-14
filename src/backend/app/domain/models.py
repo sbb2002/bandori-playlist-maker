@@ -96,6 +96,14 @@ class MoodParameters:
     # None으로 무효화한다(LLM이 언급 안 된 밴드를 지어내는 것 방지) — selection.py가
     # stage_specs 없을 때 이 값을 스테이지별 최우선(에너지보다 먼저) 하드필터로 쓴다.
     stage_bands: list[str | None] | None = None
+    # feature/staged-param-funnel-selection (2026-08-14): 사용자가 프롬프트에서 재생시간을
+    # 직접 말했는지(예: "1시간", "30분만") 여부. 기본값 True(하위호환 — 커스텀 모드는 항상
+    # UI 슬라이더로 명시하므로 True, LLM이 이 필드를 못 채워도 기존처럼 target_minutes를
+    # 엄격히 강제). False면(AI 모드에서 LLM이 감지) selection.py가 target_minutes를 상한
+    # 스캐폴드로만 쓰고, 최소 30분만 채우면 그 이상은 무리해서 채우지 않는다(품질 우선) —
+    # 사용자가 "esora no clover"류 텍스처 불일치 곡이 60분을 억지로 채우려 섞여 나온다고
+    # 지적한 것에 대한 근본 대응(routes.py _run_setlist가 이 값으로 flexible_duration 결정).
+    duration_specified: bool = True
 
 
 @dataclass(frozen=True)
