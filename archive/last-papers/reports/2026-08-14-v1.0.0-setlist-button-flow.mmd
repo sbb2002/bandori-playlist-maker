@@ -1,0 +1,33 @@
+%% v1.0.0 "플레이리스트 만들기" 버튼 클릭 시 선곡 로직 흐름
+%% 근거: docs/architecture.md (git tag v1.0.0, commit 515e9ea) 스키마 1~3 서술을 도식화
+flowchart TD
+    A["사용자: 프롬프트 입력 + 세부설정\n(재생시간·곡종류·밴드필터·에너지 텐션 그래프)\n'플레이리스트 만들기' 버튼 클릭"] --> B["POST /api/setlist\n{prompt, previous_prompt?, target_minutes?,\nstage_count?, bands?, stages?, include_original?, include_cover?}"]
+    B --> C["ports/mood_port.py: MoodInterpreter.interpret(prompt)\n← adapters/openrouter_adapter.py 구현체 주입"]
+    C --> D["OpenRouter 소형 모델 호출\n(prompt.py: 시스템 프롬프트 + JSON 스키마)"]
+    D --> E{"파싱/검증 성공?"}
+    E -- "실패" --> E1["MoodInterpretationError\n(재시도 없음) → 422 MOOD_UNINTERPRETABLE"]
+    E -- "성공" --> F["MoodParameters 조립\n(brightness, start/end_energy, stage_count,\ntarget_minutes, same_as_previous, ...)\n— 누락 필드는 기본값 주입"]
+    F --> G["domain/selection.py: build_setlist(songs, params,\ntarget_seconds, avg_song_seconds=213)"]
+    G --> H["1. 곡풀 필터: eligible_band==True\n(+ band_filter 적용)"]
+    H --> I["2. 밝기 랭킹: mode_score 정규화(주 신호)\n+ shape 보조 가중 vs params.brightness"]
+    I --> J["3. 단계 에너지 목표\nstart + (end-start)*i/(N-1) 선형 보간"]
+    J --> K["4. 단계별 곡 수 산정\nround(target_seconds / effective_song_seconds)"]
+    K --> L["5. 단계 내 선곡 루프\n에너지 근접 후보 중 직전 곡과 하모닉 호환\n(a==b or is_adjacent(a,b)) 우선"]
+    L --> L1{"첫 곡(seed)?"}
+    L1 -- "예" --> L2["하모닉 제약 없이 선택"]
+    L1 -- "아니오" --> L3{"하모닉 호환 후보 있음?"}
+    L3 -- "예" --> L4["호환 후보 중 에너지 근접곡 선택"]
+    L3 -- "아니오(인접 고갈)" --> L5["non_harmonic 폴백\n(하드 필터 아님 — key 신뢰도 미검증)"]
+    L2 --> M
+    L4 --> M
+    L5 --> M["6. 중복 방지: idx unique\n(동점 시 동일 밴드 연속 억제로 타이브레이크)"]
+    M --> N["Setlist 조립\nparams + stages[] + estimated_total_seconds\n+ picks[{position, idx, video_id, ..., reason}]"]
+    N --> O["200 응답 → 프론트엔드"]
+    O --> P["YouTube iframe Player API\npicks 순서대로 순차 자동재생"]
+
+    style E fill:#f5f5f5,stroke:#999
+    style E1 fill:#fbe8e8,stroke:#c44
+    style L1 fill:#f5f5f5,stroke:#999
+    style L3 fill:#f5f5f5,stroke:#999
+    style N fill:#e8f4ea,stroke:#4a4
+    style P fill:#e8f0fa,stroke:#48a
