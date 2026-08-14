@@ -6678,6 +6678,14 @@
             "x": 30.81,
             "y": 22.01,
             "bpm": 117.5
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "うちゅうのふしぎ",
+            "url": "https://youtu.be/TedsUWY90Vs",
+            "x": -48.91,
+            "y": 4.49,
+            "bpm": 123.0
         }
     ],
     "centroids": [
@@ -6719,9 +6727,9 @@
         },
         {
             "band": "mugendai_mutype",
-            "n": 72,
-            "x": 4.12,
-            "y": 7.94
+            "n": 73,
+            "x": 3.39,
+            "y": 7.9
         },
         {
             "band": "mygo",
@@ -6765,7 +6773,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 733,
+        "n": 734,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
