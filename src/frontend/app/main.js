@@ -30,6 +30,8 @@ if (debugCopyBtn) {
       last_ai_params: lastParams,
       last_ai_stages: lastStages,
       last_applied_bands: lastAppliedBands,
+      // 실제로 뽑힌 곡 목록(선곡 이유 포함) — 해석 결과가 실제 트랙과 얼마나 맞아떨어지는지 대조용.
+      picks,
     };
     const json = JSON.stringify(snapshot, null, 2);
     try {
