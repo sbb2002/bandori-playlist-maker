@@ -28,7 +28,9 @@ import asyncio
 import json
 import logging
 import os
+from collections.abc import Callable
 from contextlib import asynccontextmanager
+from functools import partial
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -291,9 +293,40 @@ class InflightLimitMiddleware:
         await send({"type": "http.response.body", "body": body})
 
 
-def _load_current_songs(*, force: bool = False) -> list:
-    """`data` 브랜치에서 songs_master.csv(+가사 감상 임베딩)를 fetch(또는 캐시 재사용)해 적재한다."""
-    path = remote_source.ensure_songs_csv(force=force)
+def _sync_notify_factory(app: FastAPI) -> Callable[[str, str], None]:
+    """`app.state.notifier`(async 포트)를 sync 컨텍스트에서 부를 수 있게 감싼 팩토리.
+
+    호출 지점(기동 시 `create_app()`, 리프레시 루프의 `asyncio.to_thread` 워커, admin 강제 리프레시
+    sync 라우트)이 모두 "실행 중인 이벤트 루프가 없는 스레드"라 `asyncio.run()`으로 안전하게 새
+    루프를 띄워 처리한다. `TelegramNotifier.notify()` 자체가 이미 best-effort(전송 실패 흡수)라
+    여기서는 스레드/루프 관련 예외만 추가로 삼킨다.
+    """
+    def _notify(title: str, body: str) -> None:
+        notifier = getattr(app.state, "notifier", None)
+        if notifier is None:
+            return
+        try:
+            asyncio.run(notifier.notify(title, body))
+        except Exception:  # noqa: BLE001 — 알림 실패가 데이터 로드 흐름을 깨면 안 됨
+            logger.warning("degraded 데이터 로드 알림 전송 실패(무시)", exc_info=True)
+    return _notify
+
+
+def _load_current_songs(
+    *, force: bool = False, notify: Callable[[str, str], None] | None = None
+) -> list:
+    """`data` 브랜치에서 songs_master.csv(+가사 감상 임베딩)를 fetch(또는 캐시 재사용)해 적재한다.
+
+    songs_master.csv fetch가 재시도 끝에 stale 캐시나 번들 fallback으로 대체됐으면(`degraded`)
+    `notify`(주어졌을 때)로 운영 알림을 보낸다 — 앱은 계속 뜨지만 데이터가 최신이 아닐 수 있음을
+    알아야 하기 때문.
+    """
+    path, degraded, reason = remote_source.ensure_songs_csv(force=force)
+    if degraded and notify is not None:
+        notify(
+            "songs_master.csv 원격 fetch 저하",
+            reason or "재시도 소진 — stale 캐시 또는 번들 fallback으로 대체됨",
+        )
     lyric_path = remote_source.ensure_lyric_json(force=force)  # 없어도(None) load_songs가 정상 동작.
     return load_songs(path, lyric_path)
 
@@ -309,11 +342,13 @@ async def _lifespan(app: FastAPI):
     interval = _env_int("DATA_REFRESH_INTERVAL_SEC", 1800)
     task: asyncio.Task | None = None
     if interval > 0:
+        _notify = _sync_notify_factory(app)
+
         async def _refresh_loop() -> None:
             while True:
                 await asyncio.sleep(interval)
                 try:
-                    songs = await asyncio.to_thread(_load_current_songs, force=True)
+                    songs = await asyncio.to_thread(_load_current_songs, force=True, notify=_notify)
                 except Exception:  # noqa: BLE001 — 리프레시 실패는 기존 데이터로 계속 서빙
                     logger.warning("songs_master.csv 주기 리프레시 실패(기존 데이터 유지).", exc_info=True)
                     continue
@@ -349,9 +384,10 @@ def create_app() -> FastAPI:
     app.state.interpreter = _build_interpreter()
     app.state.interpreter_name = type(app.state.interpreter).__name__  # /api/health 진단(stub|groq 확인)
     app.state.notifier = _build_notifier()
+    _notify = _sync_notify_factory(app)
     app.state.embedder = SentenceTransformerEmbedder()  # 지연 로드 — 실제 모델은 첫 embed() 호출 시.
-    app.state.songs = _load_current_songs()
-    app.state.refresh_songs = _load_current_songs  # 관리자 강제 리프레시 엔드포인트가 재사용
+    app.state.songs = _load_current_songs(notify=_notify)
+    app.state.refresh_songs = partial(_load_current_songs, notify=_notify)  # 관리자 강제 리프레시 엔드포인트가 재사용
     logger.info("곡 %d건 적재 완료.", len(app.state.songs))
     # AI 모드 setlist 생성(LLM 호출 포함)을 백그라운드 잡으로 돌리는 큐 — REQUEST_QUEUE_MAX와
     # 동일한 상한으로 사이징(그 이상 동시 요청은 InflightLimitMiddleware가 이미 503으로 막음).

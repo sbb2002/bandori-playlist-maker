@@ -81,3 +81,11 @@
 브랜치의 `songs_master.csv`(+선택적 `lyric_impressions.json`)를 기동 시 1회, 이후
 `DATA_REFRESH_INTERVAL_SEC`(기본 1800초) 주기로 원격 재fetch한다. 로컬 개발/테스트는 `SONGS_CSV`
 환경변수로 원격 fetch를 건너뛸 수 있다. 자세한 배경은 루트 `CLAUDE.md`의 "데이터 브랜치" 절 참조.
+
+**장애 대응(2026-08-17 인시던트 이후 추가):** `raw.githubusercontent.com`이 무인증 요청에
+429/타임아웃을 반환하는 경우를 대비해 fetch는 최대 3회 재시도(`RETRY_ATTEMPTS`)한다. 그래도
+실패하면 ① 기존 로컬 캐시가 있으면 stale 캐시로, ② 캐시도 없으면 리포에 커밋된
+`app/repo/fallback/songs_master.csv` 스냅샷으로 대체해 최소 기동은 유지한다(완전 중단보다 낫다는
+판단). 두 경우 모두 `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`가 설정돼 있으면 Telegram으로 저하
+알림을 보낸다. fallback 스냅샷은 신곡 백필 때 자동 갱신되지 않으므로 오래되면 수동으로
+`git show origin/data:data/songs_master.csv > app/repo/fallback/songs_master.csv`로 최신화할 것.
