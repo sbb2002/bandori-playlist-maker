@@ -88,17 +88,23 @@
 
 /* 트랙 편집 액션 — 우측 이동 핸들·제거. 행 호버 시 은은히 나타나는 고스트 아이콘(테마 조화). */
 .track { user-select: none; -webkit-user-select: none; } /* 곡 텍스트 드래그 선택 방지 */
-/* 컨테이너 자체는 항상 은은한 색으로 "여기에 액션이 있다"를 알리고(사용자 피드백 —
-   숨겨져 있어 존재를 모른다), 아이콘만 호버 시 페이드인(기존 발견 애니메이션 유지). */
+/* 우측 그립존 힌트 — 아이콘 자체가 아니라 박스 오른쪽 전체에 옅은 그라데이션을 깔아
+   "여기를 잡으면 된다"는 느낌을 상시 준다(사용자 피드백 — 아이콘만 색칠하면 존재를
+   눈치채기 어려움). 트랙 안 다른 요소(인서터 등) 클릭을 막지 않도록 pointer-events:none,
+   .track 자체 배경/테두리보다 위에 오되 텍스트 아래에 깔리도록 z-index 0. */
+.track::after {
+  content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 110px;
+  border-radius: 0 11px 11px 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(to right, transparent, rgba(124,108,255,0.10));
+}
 .track-actions {
+  position: relative; z-index: 1; /* 그라데이션 위에 아이콘이 보이도록 */
   flex: 0 0 auto; align-self: center;
   display: flex; align-items: center; gap: 4px;
-  margin-left: 2px; padding: 3px 5px;
-  border-radius: 10px;
-  background: rgba(124,108,255,0.08);
+  margin-left: 2px;
+  opacity: 0; transition: opacity 0.14s;
 }
-.track-actions .track-btn { opacity: 0; transition: opacity 0.14s; }
-.track:hover .track-actions .track-btn, .track:focus-within .track-actions .track-btn { opacity: 1; }
+.track:hover .track-actions, .track:focus-within .track-actions { opacity: 1; }
 /* 터치 환경 상시 노출 규칙은 아래 공용 `@media (hover: none)` 블록(터치 어포던스 모음)에서 처리 */
 
 .track-btn {
