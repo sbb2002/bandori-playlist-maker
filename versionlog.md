@@ -21,6 +21,21 @@
 
 ## Log
 
+### v1.2.1 — 2026-08-18 (Patch)
+
+`various_artists` 나머지 4곡의 `display_band`를 YouTube 발매 메타데이터(℗
+레이블·아티스트 크레딧)로 확인해 채움 — `main` PR #87(`v2.7.1`)이 곡 추가
+팝업에서 이 콜라보곡들이 `various_artists` 밖으로 튀어나와 보이던 버그를
+고치면서 함께 반영.
+
+- 현재 총 곡 수: **734곡** (변동 없음, 컬럼 값만 채움)
+- idx=101 `Don't be afraid!`, idx=102 `Glee! Glee! Glee!` → `display_band=Glitter*Green`
+- idx=103 `Be shine, shining!` → `display_band=CHiSPA`
+- idx=104 `Here, the world` → `display_band=sumimi`
+- idx=105 `CiRCLE THANKS MUSiC♪`는 7개 밴드(Poppin'Party·Afterglow·Pastel*Palettes·
+  Roselia·Hello Happy World·Morfonica·RAISE A SUILEN) 합동곡이라 단일
+  display_band로 특정할 수 없어 빈 값 유지(various_artists 그대로 표시).
+
 ### v1.2.0 — 2026-08-18 (Minor)
 
 `songs_master.csv`에 신규 컬럼 `display_band` 추가(모든 행 기본값 빈 문자열).
