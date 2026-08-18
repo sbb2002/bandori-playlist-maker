@@ -257,11 +257,16 @@ def feature_stats(request: Request) -> dict:
 @router.get("/api/songs")
 def list_songs(request: Request) -> dict:
     """전체 곡 목록 — 프론트 '곡 추가' 미니 브라우저용(밴드/곡 선택). 삽입·재생에 필요한
-    필드만 반환(idx·band·song·video_id·camelot·energy). 밴드→곡 순 정렬."""
+    필드만 반환(idx·band·song·video_id·camelot·energy). 밴드→곡 순 정렬.
+
+    `band`는 밴드 셀렉터 그룹핑/필터링 키로 원본 소속 그대로 둔다(예: various_artists
+    콜라보곡이 실연 유닛별로 따로 쪼개져 보이지 않도록). 실연 밴드명은 `band_label`에
+    별도로 담아 프론트가 곡 목록 텍스트(picker-song-band)에서만 표시에 쓴다(song-picker.js)."""
     songs = [
         {
             "idx": s.idx,
-            "band": s.display_band or s.band,
+            "band": s.band,
+            "band_label": s.display_band,
             "song": s.song,
             "video_id": s.video_id,
             "camelot": s.camelot,

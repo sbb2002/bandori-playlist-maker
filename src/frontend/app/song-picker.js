@@ -113,6 +113,7 @@ function renderPickerSongs() {
     return s.song.toLowerCase().includes(q)
       || prettyBand(s.band).toLowerCase().includes(q)
       || s.band.toLowerCase().includes(q)
+      || (s.band_label?.toLowerCase().includes(q) ?? false)
       // 로마자/한글 음차/한자음 검색(구버전 백엔드엔 필드가 없을 수 있음 — optional chaining으로 안전 처리).
       || (s.song_romaji?.toLowerCase().includes(q) ?? false)
       || (s.song_hangul?.toLowerCase().includes(q) ?? false)
@@ -129,7 +130,7 @@ function renderPickerSongs() {
     const info = elDiv("picker-song-info");
     const titleEl = elDiv("picker-song-title"); titleEl.textContent = s.song;
     const meta = elDiv("picker-song-band");
-    meta.textContent = t("picker.songMeta", { band: prettyBand(s.band), key: keyLabel(s.camelot), energy: fmtNum(s.energy) });
+    meta.textContent = t("picker.songMeta", { band: s.band_label || prettyBand(s.band), key: keyLabel(s.camelot), energy: fmtNum(s.energy) });
     info.append(titleEl, meta);
     const addBtn = document.createElement("button");
     addBtn.type = "button"; addBtn.className = "picker-add"; addBtn.textContent = t("picker.add");
@@ -161,7 +162,7 @@ function insertSong(song) {
 // 추가곡을 세트리스트 pick 형태로 구성(엔진 pick과 렌더 호환). harmonic="added"로 배지 구분.
 function buildAddedPick(song) {
   return {
-    position: 0, idx: song.idx, video_id: song.video_id, band: song.band,
+    position: 0, idx: song.idx, video_id: song.video_id, band: song.band_label || song.band,
     song: song.song, camelot: song.camelot, energy: song.energy, stage_index: -1,
     reason: {
       stage_energy_target: 0, matched_energy: song.energy, harmonic: "added",
