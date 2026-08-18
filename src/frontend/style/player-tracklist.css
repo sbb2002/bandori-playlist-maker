@@ -88,13 +88,17 @@
 
 /* 트랙 편집 액션 — 우측 이동 핸들·제거. 행 호버 시 은은히 나타나는 고스트 아이콘(테마 조화). */
 .track { user-select: none; -webkit-user-select: none; } /* 곡 텍스트 드래그 선택 방지 */
+/* 컨테이너 자체는 항상 은은한 색으로 "여기에 액션이 있다"를 알리고(사용자 피드백 —
+   숨겨져 있어 존재를 모른다), 아이콘만 호버 시 페이드인(기존 발견 애니메이션 유지). */
 .track-actions {
   flex: 0 0 auto; align-self: center;
   display: flex; align-items: center; gap: 4px;
-  margin-left: 2px;
-  opacity: 0; transition: opacity 0.14s;
+  margin-left: 2px; padding: 3px 5px;
+  border-radius: 10px;
+  background: rgba(124,108,255,0.08);
 }
-.track:hover .track-actions, .track:focus-within .track-actions { opacity: 1; }
+.track-actions .track-btn { opacity: 0; transition: opacity 0.14s; }
+.track:hover .track-actions .track-btn, .track:focus-within .track-actions .track-btn { opacity: 1; }
 /* 터치 환경 상시 노출 규칙은 아래 공용 `@media (hover: none)` 블록(터치 어포던스 모음)에서 처리 */
 
 .track-btn {

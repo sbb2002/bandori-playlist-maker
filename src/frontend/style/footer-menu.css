@@ -77,7 +77,7 @@
 
 /* 터치(호버 불가) 환경 — 호버로만 뜨던 편집 어포던스를 상시 노출(모바일 동일 UI) */
 @media (hover: none) {
-  .track-actions { opacity: 1; }
+  .track-actions .track-btn { opacity: 1; }
   .track-inserter::before { opacity: 0.4; }
   .inserter-btn { opacity: 1; transform: none; }
 }
