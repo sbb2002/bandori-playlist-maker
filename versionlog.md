@@ -21,6 +21,38 @@
 
 ## Log
 
+### v1.2.0 — 2026-08-18 (Minor)
+
+`songs_master.csv`에 신규 컬럼 `display_band` 추가(모든 행 기본값 빈 문자열).
+`band`(필터·통계용 원본 소속)와 분리된 "재생 시 표시용 밴드명" 필드 — `main`
+`feature/display-band`(PR #86, `v2.7.0`)가 이 컬럼을 읽어 세트리스트 결과·곡
+추가 화면에 노출한다.
+
+- 현재 총 곡 수: **734곡** (변동 없음, 컬럼만 추가)
+- **RAISE A SUILEN "THE THIRD(仮)" 12곡** → `band=various_artists`,
+  `display_band=THE THIRD(仮)`로 재분류. RAS 결성 이전 임시 유닛 명의로 다른
+  밴드(Poppin'Party·Pastel*Palettes·Hello Happy World·Roselia) 곡을 라이브
+  커버한 것으로, 참여 인원 구성이 현재 RAS와 다르므로 별도 유닛으로 취급하기로
+  결정(idx 516,517,518,519,520,521,522,523,524,526,527,729). RAS 자체 선곡
+  풀에서는 제외되지만 재생 목록엔 "THE THIRD(仮)"로 표시된다.
+- **YouTube API 전수조사로 곡명에 `(Cover)`/`(Solo)`/`(feat. X)` 태그 정정** —
+  실제 발매 아티스트·채널 메타데이터(`℗` 저작권 라벨, 업로드 채널) 대조 기준:
+  - `mugendai_mutype` idx=691 `好きになっちゃえ！` — 이전 세션 백필 오류(Neko
+    Hacker 원곡에 멤버가 게스트 참여한 곡을 자체곡으로 오분류) 정정,
+    `(feat. 仲町あられ)`로 수정.
+  - `mugendai_mutype` 그 외 44곡: 개인 채널 솔로 커버는 `(Solo)`(32곡), 峰月律
+    채널 중 원제목에 영문 `(Cover)`가 그대로 있던 5곡은 `(Cover)` 유지,
+    그룹 일부 멤버만 참여한 6곡은 `(feat. 참여 멤버)`, 그룹 전원 참여지만
+    자기 밴드 명의 곡이 아닌 3곡은 `(Cover)`.
+  - `poppin_party` 개인 캐릭터 공식 솔로곡 5곡 → `(Solo)`.
+  - `mygo` 개인 채널 "歌ってみた" 단독 커버 16곡 → 기존 `(Cover)` 오표기를
+    `(Solo)`로 정정(개인 참여 + 원제목에 영문 `(Cover)` 표기 없음).
+  - `raise_a_suilen` "THE THIRD(仮)" 12곡 → `(Cover)`(위 재분류와 별개로 곡명에도 표기).
+  - `afterglow`·`hello_happy_world`·`morfonica`·`pastel_palettes`·`ave_mujica`는
+    기존 `(Cover)` 표기가 이미 규칙과 일치해 수정 없음.
+  - `roselia` idx=731 `擬態ごっこ (Cover)`(Sakamata Chloe 콜라보)는 참여 인원
+    메타데이터 확인 불가로 보류(추후 확인 필요).
+
 ### v1.1.0 — 2026-08-02 19:31 (Minor)
 
 `songs_master.csv`에 9개 신규 오디오 지표 컬럼 추가(`bpm-research` 연구
