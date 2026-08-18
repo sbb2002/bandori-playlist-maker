@@ -9,6 +9,16 @@
 
 ---
 
+## v2.7.1 — 2026-08-18
+
+v2.7.0에서 `/api/songs`의 `band`를 표시용 값으로 덮어쓰는 바람에, 곡 추가 팝업의
+밴드 셀렉터에서 "THE THIRD(仮)"가 `various_artists` 밖으로 튀어나와 별도 밴드처럼
+보이던 버그 수정 — `band`(그룹핑용 원본)와 `band_label`(표시용)을 분리했다. 트랙
+박스 우측에 그립(드래그 가능) 어포던스로 옅은 그라데이션을 상시 표시하도록 UI 추가.
+
+- 기준 커밋: `7f3d5b9`
+- 관련 PR: [#87](https://github.com/sbb2002/bandori-playlist-maker/pull/87)
+
 ## v2.7.0 — 2026-08-18
 
 `various_artists`로 분류된 곡(예: RAISE A SUILEN이 결성 전 "THE THIRD(仮)" 명의로
