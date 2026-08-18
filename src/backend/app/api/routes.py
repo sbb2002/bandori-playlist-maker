@@ -261,7 +261,7 @@ def list_songs(request: Request) -> dict:
     songs = [
         {
             "idx": s.idx,
-            "band": s.band,
+            "band": s.display_band or s.band,
             "song": s.song,
             "video_id": s.video_id,
             "camelot": s.camelot,

@@ -26,6 +26,10 @@ class Song:
     mode_score: float
     shape: str
     eligible_band: bool
+    # 원곡 밴드가 아닌 곡(예: 다른 밴드 명의 커버·콜라보)에서 실제 연주/가창한 밴드명.
+    # band는 필터링·통계용 원곡 소속 그대로 두고, 화면 표시(피크 목록)에서만 이 값을 우선한다.
+    # 비어 있으면 band를 그대로 표시(대다수 곡).
+    display_band: str = ""
     duration_sec: int | None = None
     # 곡 경계 텐션(전곡 프레임별 강도의 인트로 0~15s / 아웃트로 last-15s 평균; i_* 동일 스케일).
     # 시퀀싱에서 이전 곡 아웃트로 ↔ 다음 곡 인트로를 매끄럽게 잇는 데 쓴다.

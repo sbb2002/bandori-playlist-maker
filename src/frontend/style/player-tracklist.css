@@ -124,12 +124,12 @@
 }
 .inserter-btn {
   position: relative; z-index: 1;
-  width: 24px; height: 24px; border-radius: 50%;
+  width: 30px; height: 30px; border-radius: 50%;
   display: grid; place-items: center; cursor: pointer;
   background: var(--card-2); border: 1px solid rgba(124,108,255,0.5); color: var(--accent);
   opacity: 0; transform: scale(0.6); transition: opacity 0.14s, transform 0.14s;
 }
-.inserter-btn svg { display: block; width: 13px; height: 13px; }
+.inserter-btn svg { display: block; width: 18px; height: 18px; }
 .track-inserter:hover::before { opacity: 0.65; }
 .track-inserter:hover .inserter-btn, .inserter-btn:focus-visible { opacity: 1; transform: scale(1); }
 .inserter-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
