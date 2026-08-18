@@ -709,7 +709,7 @@ def build_setlist(
                     position=position,
                     idx=s.idx,
                     video_id=s.video_id,
-                    band=s.band,
+                    band=s.display_band or s.band,
                     song=s.song,
                     camelot=s.camelot,
                     energy=s.energy,
