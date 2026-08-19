@@ -125,23 +125,26 @@
 /* 사이-삽입 인서터 — 트랙 아래 간격에 겹쳐, 호버 시 라인 + 중앙 '+' 노출 */
 .track-inserter {
   position: absolute; left: 0; right: 0; bottom: -14px; height: 14px; z-index: 5;
-  display: grid; place-items: center;
 }
 .track-inserter::before {
-  content: ""; position: absolute; left: 10px; right: 10px; height: 2px; border-radius: 2px;
+  content: ""; position: absolute; left: 10px; right: 10px; top: 50%; height: 2px;
+  border-radius: 2px; transform: translateY(-50%);
   background: linear-gradient(90deg, transparent, var(--accent) 25%, var(--accent) 75%, transparent);
   opacity: 0; transition: opacity 0.14s;
 }
 .inserter-btn {
-  position: relative; z-index: 1;
+  /* 버튼(30px)이 zone 높이(14px)보다 커서 grid place-items로는 zone 하단으로 쏠렸다
+     (row가 콘텐츠 높이에 맞춰 늘어나며 중앙정렬 기준점이 깨짐) — zone 중심에 절대
+     고정해 항상 정확히 가운데 오도록 한다. */
+  position: absolute; top: 50%; left: 50%; z-index: 1;
   width: 30px; height: 30px; border-radius: 50%;
   display: grid; place-items: center; cursor: pointer;
   background: var(--card-2); border: 1px solid rgba(124,108,255,0.5); color: var(--accent);
-  opacity: 0; transform: scale(0.6); transition: opacity 0.14s, transform 0.14s;
+  opacity: 0; transform: translate(-50%, -50%) scale(0.6); transition: opacity 0.14s, transform 0.14s;
 }
 .inserter-btn svg { display: block; width: 18px; height: 18px; }
 .track-inserter:hover::before { opacity: 0.65; }
-.track-inserter:hover .inserter-btn, .inserter-btn:focus-visible { opacity: 1; transform: scale(1); }
+.track-inserter:hover .inserter-btn, .inserter-btn:focus-visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 .inserter-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 /* 드래그 중인 곡 — 떠오른 느낌 */

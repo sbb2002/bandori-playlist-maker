@@ -79,7 +79,7 @@
 @media (hover: none) {
   .track-actions { opacity: 1; }
   .track-inserter::before { opacity: 0.4; }
-  .inserter-btn { opacity: 1; transform: none; }
+  .inserter-btn { opacity: 1; transform: translate(-50%, -50%); }
 }
 
 /* 좌상단 메뉴 버튼(햄버거 ↔ X) */

@@ -58,9 +58,10 @@ function bandsInSelectorOrder(present) {
   return [...ordered, ...rest];
 }
 
-// 커버곡 판정 — 제목의 '(Cover)' 표기 기준(데이터 관례). 백엔드 routes.py의 _is_cover와 동일 규칙.
+// 커버곡 판정 — 제목의 '(Cover)'/'(Solo)'/'(feat. ...)' 표기 기준(데이터 관례). 백엔드 routes.py의 _is_cover와 동일 규칙.
 function isCoverSong(song) {
-  return song.song.toLowerCase().includes("(cover)");
+  const title = song.song.toLowerCase();
+  return title.includes("(cover)") || title.includes("(solo)") || title.includes("(feat.");
 }
 
 const BAND_ICON_BASE = "assets/bands";
