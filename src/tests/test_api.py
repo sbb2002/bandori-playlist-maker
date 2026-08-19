@@ -137,6 +137,26 @@ def test_no_song_type_mention_is_all(client):
     assert body["include_original"] is True and body["include_cover"] is True
 
 
+@pytest.mark.parametrize(
+    "title,expected",
+    [
+        ("Butter-Fly (Cover)", True),
+        ("チョコレイトの低音レシピ (Solo)", True),
+        ("唱 (feat. 仲町あられ・峰月律)", True),
+        ("Redo", False),
+        ("Feathered Dreams", False),  # "feat" 부분문자열이지만 '(feat.' 태그가 아님
+    ],
+)
+def test_is_cover_detects_solo_and_feat_variants(title, expected):
+    # Solo/feat.도 오리지널이 아닌 파생 버전이라 cover 필터에서만 등장해야 함(회귀 방지).
+    from app.api.routes import _is_cover
+
+    class _Song:
+        song = title
+
+    assert _is_cover(_Song()) is expected
+
+
 def test_out_of_range_minutes_is_invalid_request(client):
     r = client.post("/api/setlist", json={"prompt": "x", "target_minutes": 999})
     assert r.status_code == 400

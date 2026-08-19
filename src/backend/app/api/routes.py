@@ -186,8 +186,10 @@ def _validate_stage_bands(
 
 
 def _is_cover(song) -> bool:
-    """커버 곡 판정 — 제목의 '(Cover)' 표기 기준(데이터 관례)."""
-    return "(cover)" in song.song.lower()
+    """커버 곡 판정 — 제목의 '(Cover)'/'(Solo)'/'(feat. ...)' 표기 기준(데이터 관례).
+    셋 다 오리지널이 아닌 파생 버전이라 cover 필터에서만 등장해야 한다."""
+    title = song.song.lower()
+    return "(cover)" in title or "(solo)" in title or "(feat." in title
 
 
 def _apply_cover_filter(songs, include_original: bool, include_cover: bool):
