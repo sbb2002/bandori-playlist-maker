@@ -6694,6 +6694,22 @@
             "x": -23.08,
             "y": -2.62,
             "bpm": 136.0
+        },
+        {
+            "band": "mygo",
+            "song": "シャルル (Cover)",
+            "url": "https://youtu.be/IKtjzy0uDkQ",
+            "x": 13.65,
+            "y": 35.89,
+            "bpm": 143.6
+        },
+        {
+            "band": "various_artists",
+            "song": "supremacy「disobedience」",
+            "url": "https://youtu.be/LQMZyNKpo60",
+            "x": 5.6,
+            "y": -19.74,
+            "bpm": 95.7
         }
     ],
     "centroids": [
@@ -6741,9 +6757,9 @@
         },
         {
             "band": "mygo",
-            "n": 60,
-            "x": -1.98,
-            "y": 16.36
+            "n": 61,
+            "x": -1.72,
+            "y": 16.68
         },
         {
             "band": "pastel_palettes",
@@ -6771,9 +6787,9 @@
         },
         {
             "band": "various_artists",
-            "n": 5,
-            "x": -22.84,
-            "y": 44.27
+            "n": 6,
+            "x": -18.1,
+            "y": 33.6
         }
     ],
     "metrics": {
@@ -6781,7 +6797,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 735,
+        "n": 737,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
