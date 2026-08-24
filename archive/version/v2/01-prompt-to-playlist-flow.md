@@ -29,9 +29,9 @@ flowchart TD
     subgraph RUN["_run_setlist() — D~L까지가 이 함수의 본문(반환값은 L의 dict)"]
         direction TB
         E{"모드"}
-        E -- "custom" --> D1["band_filter = payload.bands<br/>(prompt 미사용 — detect_bands() 호출 안 함, PR #91)"]
+        E -- "커스텀 모드" --> D1["band_filter = payload.bands<br/>(prompt 미사용 — detect_bands() 호출 안 함, PR #91)"]
         D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성 (honor=True)"]
-        E -- "AI(자연어)" --> D2["band_filter = payload.bands ∪ detect_bands(prompt)"]
+        E -- "AI 모드" --> D2["band_filter = payload.bands ∪ detect_bands(prompt)"]
         D2 --> E2["pool = band_filter 적용 곡<br/>energy_stats·feature_stats(오디오 6지표 분포) 계산"]
         E2 --> F["interpreter.interpret(prompt,<br/>energy_stats, feature_stats)"]
 
