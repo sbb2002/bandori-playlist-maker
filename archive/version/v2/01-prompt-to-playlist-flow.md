@@ -13,47 +13,61 @@
 
 ```mermaid
 flowchart TD
-    A["POST /api/setlist<br/>{prompt, previous_prompt?, bands?, mode, ...}"] --> B{"mode == custom<br/>또는 TPM 리미터 비활성?"}
-    B -- "예" --> C["_run_setlist() 즉시 동기 실행"]
-    B -- "아니오(AI 모드+큐 활성)" --> Q["estimate_fn()으로 대기시간 추정<br/>→ job_store.submit(백그라운드 스레드)<br/>→ 202 {job_id, estimated_wait_seconds}"]
-    Q --> QP["프론트: GET /api/setlist/status/{job_id} 폴링"]
-    QP --> C
+    A["POST /api/setlist<br/>{prompt, previous_prompt?, bands?, mode, ...}"] --> B
 
-    C --> D["band_filter = payload.bands ∪ detect_bands(prompt)<br/>(LLM 호출 전에 결정)"]
-    D --> E{"모드"}
-    E -- "custom" --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성 (honor=True)"]
-    E -- "AI(자연어)" --> E2["pool = band_filter 적용 곡<br/>energy_stats·feature_stats(오디오 6지표 분포) 계산"]
-    E2 --> F["interpreter.interpret(prompt, previous_prompt,<br/>energy_stats, feature_stats)"]
-
-    subgraph LLM["GroqMoodInterpreter.interpret() — 단일 호출"]
+    subgraph INTAKE["요청 접수·큐잉 — TPM 레이트리밋 체크"]
         direction TB
-        F1["prompt.build_messages()로 system+user 메시지 조립<br/>(feature_stats는 system 말미 블록으로 첨부)"]
-        F1 --> F2["POST /chat/completions (temperature=0.2)"]
-        F2 --> F3{"429/5xx?"}
-        F3 -- "예" --> F2note["지수백오프 재시도<br/>(GROQ_MAX_RETRIES, 기본 2)"]
-        F3 -- "아니오(200)" --> F4["prompt.parse_mood(content)<br/>JSON 관용적 추출 + 필드 클램프"]
-        F4 --> F5{"파싱 성공?"}
-        F5 -- "아니오" --> F4note["재호출<br/>(GROQ_MOOD_RETRIES, 기본 3)"]
-        F5 -- "예" --> F6["MoodParameters 반환"]
+        B{"mode == custom<br/>또는 TPM 리미터 비활성?"}
+        B -- "예" --> APPROVE["요청 승인"]
+        B -- "아니오(AI 모드+큐 활성)" --> Q["estimate_fn()으로 대기시간 추정<br/>→ job_store.submit(백그라운드 스레드)<br/>→ 202 {job_id, estimated_wait_seconds}"]
+        Q --> QP["프론트: GET /api/setlist/status/{job_id} 폴링"]
+        QP --> APPROVE
     end
 
-    F --> LLM
-    LLM --> G["params.stage_bands를 실제 감지 밴드로 검증<br/>honor=False 고정(AI 모드는 항상 재해석)"]
-    E1 --> H
-    G --> H["song_type 필터(기본 Original/Cover/All)<br/>stage_specs 구성(custom만)<br/>stage_count(2~11)/target_minutes(10~180) clamp"]
-    H --> I["resolve_stage_impression_text() → 임베딩 벡터화<br/>(실패해도 중립 처리, 선곡은 안 막힘)"]
-    I --> J["build_setlist(songs, params, target_seconds,<br/>band_filter, stage_specs, impression_vectors)"]
+    APPROVE --> RUN
 
-    subgraph SEL["domain/selection.py — 순수 함수(LLM·HTTP 무의존)"]
+    subgraph RUN["_run_setlist() — D~L까지가 이 함수의 본문(반환값은 L의 dict)"]
         direction TB
-        SA["Stage A(SELECT)<br/>슬롯별 에너지 허용창 하드선택<br/>+ 밝기 버킷 + 6지표거리 + 가사유사도"]
-        SA --> SB["Stage B(SEQUENCE)<br/>곡 경계 텐션 최소화 그리디 체인<br/>+ 하모닉 소프트 + 오프너 룰 + 2-opt 국소개선"]
-    end
-    J --> SEL
-    SEL --> K["Setlist(트랙 순서 + 이유 메타 + 총재생시간)"]
-    K --> L["serialize_setlist() + applied_bands/honored_overrides 등 부가"]
-    L --> M["200 JSON 응답"]
+        E{"모드"}
+        E -- "custom" --> D1["band_filter = payload.bands<br/>(prompt 미사용 — detect_bands() 호출 안 함, PR #91)"]
+        D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성 (honor=True)"]
+        E -- "AI(자연어)" --> D2["band_filter = payload.bands ∪ detect_bands(prompt)"]
+        D2 --> E2["pool = band_filter 적용 곡<br/>energy_stats·feature_stats(오디오 6지표 분포) 계산"]
+        E2 --> F["interpreter.interpret(prompt, previous_prompt,<br/>energy_stats, feature_stats)"]
 
+        subgraph LLM["GroqMoodInterpreter.interpret() — 단일 호출"]
+            direction TB
+            F1["prompt.build_messages()로 system+user 메시지 조립<br/>(feature_stats는 system 말미 블록으로 첨부)"]
+            F1 --> F2["POST /chat/completions (temperature=0.2)"]
+            F2 --> F3{"429/5xx?"}
+            F3 -- "예" --> F2note["지수백오프 재시도<br/>(GROQ_MAX_RETRIES, 기본 2)"]
+            F3 -- "아니오(200)" --> F4["prompt.parse_mood(content)<br/>JSON 관용적 추출 + 필드 클램프"]
+            F4 --> F5{"파싱 성공?"}
+            F5 -- "아니오" --> F4note["재호출<br/>(GROQ_MOOD_RETRIES, 기본 3)"]
+            F5 -- "예" --> F6["MoodParameters 반환"]
+        end
+
+        F --> LLM
+        LLM --> G["params.stage_bands를 실제 감지 밴드로 검증<br/>honor=False 고정(AI 모드는 항상 재해석)"]
+        E1 --> H
+        G --> H["song_type 필터(기본 Original/Cover/All)<br/>stage_specs 구성(custom만)<br/>stage_count(2~11)/target_minutes(10~180) clamp"]
+        H --> I["resolve_stage_impression_text() → 임베딩 벡터화<br/>(실패해도 중립 처리, 선곡은 안 막힘)"]
+        I --> J["build_setlist(songs, params, target_seconds,<br/>band_filter, stage_specs, impression_vectors)"]
+
+        subgraph SEL["domain/selection.py — 순수 함수(LLM·HTTP 무의존)"]
+            direction TB
+            SA["Stage A(SELECT)<br/>슬롯별 에너지 허용창 하드선택<br/>+ 밝기 버킷 + 6지표거리 + 가사유사도"]
+            SA --> SB["Stage B(SEQUENCE)<br/>곡 경계 텐션 최소화 그리디 체인<br/>+ 하모닉 소프트 + 오프너 룰 + 2-opt 국소개선"]
+        end
+        J --> SEL
+        SEL --> K["Setlist(트랙 순서 + 이유 메타 + 총재생시간)"]
+        K --> L["serialize_setlist() + applied_bands/honored_overrides 등 부가"]
+    end
+
+    RUN --> M["200 JSON 응답<br/>(FastAPI가 L의 dict를 감싸 반환 —<br/>큐잉 경로는 이 지점이 GET /status/{job_id}로 분리됨)"]
+
+    style INTAKE fill:#f0f0f0,stroke:#888
+    style RUN fill:#eef2fb,stroke:#5a7bd6
     style LLM fill:#fff3e0,stroke:#e0a030
     style SEL fill:#e8f4ea,stroke:#4a4
 ```
@@ -70,8 +84,19 @@ flowchart TD
 
 ## 2. `_run_setlist()` 내부 순서
 
-1. **밴드 필터**: `payload.bands ∪ detect_bands(payload.prompt)`(`band_aliases.py`) — LLM
-   호출 **전에** 결정되며 LLM 결과와 무관하다.
+1. **밴드 필터**: 모드별로 갈라진다 — 커스텀 모드는 `payload.bands`만(유저가 체크박스로
+   직접 고른 밴드), AI 모드는 `payload.bands ∪ detect_bands(payload.prompt)`
+   (`band_aliases.py`). LLM 호출 **전에** 결정되며 LLM 결과와는 무관하다.
+
+   **조치 완료(2026-08-24, PR #91).** 예전엔 `routes.py:305-307`이 모드 분기(310행)
+   이전에 `band_filter = (payload.bands ∪ detect_bands(payload.prompt))`를 **모드
+   구분 없이** 한 번만 계산했다 — 커스텀 모드에서 결과가 의도대로 "유저 선택만"으로
+   보인 건, 프론트(`request-flow.js`)가 커스텀 모드 제출 시 애초에 `body.prompt`
+   자체를 안 실어 `detect_bands("")`가 우연히 항상 공집합이었기 때문이지, 백엔드가
+   모드를 보고 분기한 결과가 아니었다(프론트 payload 구성이 바뀌면 바로 깨지는
+   암묵적 결합). 지금은 `payload.mode == "custom"`일 때 `detect_bands()` 호출 자체를
+   건너뛰도록 명시적으로 분기시켜, 프론트가 뭘 보내든 백엔드 차원에서 의도가
+   보장된다(최종 동작은 기존과 동일 — 회귀 없음, 전체 스위트 356 passed).
 2. **모드 분기**:
    - `custom`: LLM 호출 없이 `payload.stages`로 `MoodParameters`를 직접 구성, `honor=True`.
    - AI 모드: `pool`(밴드필터 적용 곡)의 `energy_stats`(min/max/mean/std) + `_feature_stats(pool)`
