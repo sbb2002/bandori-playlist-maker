@@ -18,10 +18,9 @@ let minutesTouched = false;
 let coverTouched = false;
 let settingsType = "all"; // "all" | "original" | "cover" — 세 개 중 항상 정확히 하나만 켜짐(토글 버튼)
 
-// 사용자가 '직접' 체크한 밴드만 요청 간 지속한다. 프롬프트 자동감지 밴드는 매 요청 일회성이어야
-// 하므로(자연어 요청 = 매번 새 의도), 체크박스의 시각 상태와 분리해 별도 집합으로 추적한다.
-// 이 집합은 오직 사용자의 change 이벤트로만 갱신 — 프로그램적 .checked 대입은 change를 발생시키지
-// 않으므로 syncBandChecks가 여기 섞이지 않는다(요청 간 밴드 누적 버그의 근본 차단).
+// 실제 요청에 실리는 밴드 필터 상태. 사용자의 change 이벤트로 갱신되며, syncBandChecks(playbar.js)도
+// 프롬프트 자동감지분을 여기 편입시킨다 — 체크박스에 보이는 상태 = 이 집합이 항상 같아야 사용자가
+// 화면에서 본 대로 다음 재생성에도 유지된다(2026-08-24, 어긋나서 생긴 버그 수정).
 const manualBands = new Set();
 // 감성 설정 구간별 밴드 셀렉터(#impression-row) 옵션 채우기용 — loadBands()가 채운다.
 let cachedBands = [];
@@ -134,8 +133,6 @@ function renderBands(bands) {
     cb.type = "checkbox";
     cb.value = band;
     cb.className = "band-cb";
-    // 사용자가 직접 토글한 것만 manualBands에 반영(요청 간 지속 대상). syncBandChecks의
-    // 프로그램적 대입은 change를 발생시키지 않으므로 자동감지분은 여기 들어오지 않는다.
     cb.addEventListener("change", () => {
       if (cb.checked) manualBands.add(cb.value);
       else manualBands.delete(cb.value);
@@ -151,8 +148,6 @@ function renderBands(bands) {
 }
 
 function collectBands() {
-  // 수동 선택분만 요청에 싣는다. 프롬프트 자동감지 밴드는 백엔드가 이번 프롬프트에서 매번 새로
-  // 더하므로 프론트가 재전송하면 안 된다(이전 요청 밴드 누적 방지).
   return [...manualBands];
 }
 
