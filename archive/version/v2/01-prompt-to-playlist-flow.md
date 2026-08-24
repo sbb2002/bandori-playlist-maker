@@ -41,8 +41,8 @@ flowchart TD
 
         subgraph SEL["build_setlist"]
             direction TB
-            SA["Stage A(선곡)<br/>슬롯별 에너지 허용창 하드선택<br/>+ 밝기 버킷 + 6지표거리 + 가사유사도"]
-            SA --> SB["Stage B(시퀀싱)<br/>곡 경계 텐션 최소화 그리디 체인<br/>+ 하모닉 소프트 + 오프너 룰 + 2-opt 국소개선"]
+            SA["Stage A(선곡)"]
+            SA --> SB["Stage B(시퀀싱)"]
         end
         SEL --> K["Setlist(트랙 순서 + 이유 메타 + 총재생시간)"]
         K --> L["serialize_setlist() + applied_bands/honored_overrides 등 부가"]
@@ -218,7 +218,7 @@ band_filter 곡)이 0건이면 즉시 `NoSetlistError`(409).
   `distribute_counts`/`distribute_counts_by_weights`(stage_minutes 비율 있으면 가중)로
   스테이지별 곡수 배분 → `continuous_slot_targets()`로 곡 슬롯 단위 보간 목표까지 세분화.
 
-### Stage A — SELECT(하드 선택)
+### Stage A — 선곡(하드 선택)
 
 슬롯마다:
 1. 스테이지 고정 밴드(`stage_bands_resolved[i]`)가 있으면 최우선 하드필터.
@@ -272,7 +272,7 @@ direction as brightness**)"라고 지시하므로, `valence`는 애초에 `brigh
 것은 가능하지만, 그건 "같은 밝기대에서도 매번 똑같은 순서로 곡이 나오게" 만드는 트레이드오프라
 신중해야 한다.
 
-### Stage B — SEQUENCE(곡 순서 배치)
+### Stage B — 시퀀싱(곡 순서 배치)
 
 `_sequence_by_continuity()` — 곡 경계 텐션(이전 곡 아웃트로 ↔ 다음 곡 인트로) 최소화
 그리디 체인:
