@@ -39,7 +39,7 @@ flowchart TD
         G --> H["song_type 필터<br/>stage_specs 구성(커스텀 모드)<br/>stage_count/target_minutes 확정<br/>stage_impression 추출"]
         H --> SEL
 
-        subgraph SEL["domain/selection.py — 순수 함수(LLM·HTTP 무의존)"]
+        subgraph SEL["domain/selection.py"]
             direction TB
             SA["Stage A(SELECT)<br/>슬롯별 에너지 허용창 하드선택<br/>+ 밝기 버킷 + 6지표거리 + 가사유사도"]
             SA --> SB["Stage B(SEQUENCE)<br/>곡 경계 텐션 최소화 그리디 체인<br/>+ 하모닉 소프트 + 오프너 룰 + 2-opt 국소개선"]
