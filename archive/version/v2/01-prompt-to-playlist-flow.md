@@ -40,7 +40,7 @@ flowchart TD
     F --> LLM
     LLM --> G["params.stage_bands를 실제 감지 밴드로 검증<br/>honor=False 고정(AI 모드는 항상 재해석)"]
     E1 --> H
-    G --> H["song_type 필터(Original/Cover)<br/>stage_specs 구성(custom만)<br/>stage_count(2~11)/target_minutes(10~180) clamp"]
+    G --> H["song_type 필터(기본 Original/Cover/All)<br/>stage_specs 구성(custom만)<br/>stage_count(2~11)/target_minutes(10~180) clamp"]
     H --> I["resolve_stage_impression_text() → 임베딩 벡터화<br/>(실패해도 중립 처리, 선곡은 안 막힘)"]
     I --> J["build_setlist(songs, params, target_seconds,<br/>band_filter, stage_specs, impression_vectors)"]
 
@@ -80,7 +80,13 @@ flowchart TD
      결과의 `params.stage_bands`는 `_validate_stage_bands()`로 실제 감지 밴드만 남기고,
      `honor=False`로 고정한다(AI 모드는 세부설정 override를 갖지 않고 항상 LLM 재해석 결과를
      따르는 설계).
-3. **커버/오리지널 필터**: 사용자 명시값이 항상 LLM `song_type`보다 우선.
+3. **커버/오리지널 필터**: 사용자 명시값(체크박스)이 항상 LLM `song_type`보다 우선. `song_type`
+   기본값은 **Original**(2026-08-24 변경, PR #90, `v2.7.3`) — 프롬프트에 곡 종류 언급이
+   없으면(원곡 명시 포함) Original, 명시적 커버 요청("커버곡만" 등)이면 Cover, "모든 곡"류
+   명시적 전체 요청(표현 다양 — 고정 키워드 매칭이 아니라 `SYSTEM_PROMPT` 지시에 따라 LLM이
+   의미로 판단)이면 All. 커버 판정 자체(`_is_cover()`, `routes.py`)는 곡 제목의
+   `(Cover)`/`(Solo)`/`(feat. …)` 표기 기준(PR #88, 2026-08-19, `v2.7.2`) — `(Solo)`·
+   `(feat.)`도 비-오리지널 파생판으로 취급한다(예전엔 `(Cover)`만 검사해 놓쳤었다).
 4. **stage_specs**: `honor=True`(custom)일 때만 `payload.stages`로 `StageSpec` 리스트를
    강제 구성. 총 곡수가 180분 상당을 넘으면 비례 축소.
 5. **stage_count/target_minutes 확정**: stage_specs가 있으면 그로부터 산출, 없으면
