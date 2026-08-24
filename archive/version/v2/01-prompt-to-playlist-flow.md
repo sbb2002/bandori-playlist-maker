@@ -36,9 +36,8 @@ flowchart TD
         E2 --> LLM["MoodParameters를 LLM이 구성"]
         LLM --> G["band 환각 스크리닝"]
         E1 --> H
-        G --> H["song_type 필터<br/>stage_specs 구성(커스텀 모드)<br/>stage_count/target_minutes 확정"]
-        H --> I["resolve_stage_impression_text() → 임베딩 벡터화<br/>(실패해도 중립 처리, 선곡은 안 막힘)"]
-        I --> J["build_setlist(songs, params, target_seconds,<br/>band_filter, stage_specs, impression_vectors)"]
+        G --> H["song_type 필터<br/>stage_specs 구성(커스텀 모드)<br/>stage_count/target_minutes 확정<br/>stage_impression 추출"]
+        H --> J["build_setlist(songs, params, target_seconds,<br/>band_filter, stage_specs, impression_vectors)"]
 
         subgraph SEL["domain/selection.py — 순수 함수(LLM·HTTP 무의존)"]
             direction TB
@@ -91,9 +90,9 @@ flowchart TD
    강제 구성. 총 곡수가 180분 상당을 넘으면 비례 축소.
 5. **stage_count/target_minutes 확정**: stage_specs가 있으면 그로부터 산출, 없으면
    `params.stage_count`(2~11)/`params.target_minutes`(10~180)를 clamp.
-6. **impression 텍스트/임베딩**: `resolve_stage_impression_text()`(스펙 우선 → LLM
-   `stage_params.impression` 폴백) → 임베딩 벡터화. 실패해도 해당 스테이지만 중립(None)
-   처리되고 선곡 자체는 막히지 않는다.
+6. **stage_impression 추출**(다이어그램상 H 노드 마지막 줄): `resolve_stage_impression_text()`
+   (스펙 우선 → LLM `stage_params.impression` 폴백) → 임베딩 벡터화. 실패해도 해당 스테이지만
+   중립(None) 처리되고 선곡 자체는 막히지 않는다.
 7. **`build_setlist(...)`** 호출(아래 4절).
 8. **직렬화**: `serialize_setlist()` + `applied_bands`/`include_original`/`include_cover`/
    `honored_overrides` 메타 부가.
