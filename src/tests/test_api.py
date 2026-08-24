@@ -45,51 +45,32 @@ def test_setlist_happy_path(client):
     assert len(idxs) == len(set(idxs))
 
 
-def test_ai_mode_never_honors_overrides_even_with_same_intent(client):
-    """DEPRECATED 동작 교체 확인(3단계): 예전엔 previous_prompt와 의도가 같으면(same_as_previous)
-    AI 모드에서도 사용자 override(재생시간·단계수)를 존중했다. 지금은 AI 모드가 항상 honor=False라
-    같은 의도여도 override를 무시하고 모델이 새로 제어한다(routes.py의 honor 판정 참고)."""
+def test_ai_mode_never_honors_overrides(client):
+    """AI 모드는 항상 honor=False라 사용자 override(재생시간·단계수)를 무시하고 모델이
+    새로 제어한다(routes.py의 honor 판정 참고)."""
     r = client.post("/api/setlist", json={
-        "prompt": "차분한 곡", "previous_prompt": "차분한 곡",
-        "target_minutes": 30, "stage_count": 2,
+        "prompt": "차분한 곡", "target_minutes": 30, "stage_count": 2,
     })
     assert r.status_code == 200
     body = r.json()
-    # 스텁 기본 단계수는 3 — override(2)가 이제는 항상 무시됨을 확인.
+    # 스텁 기본 단계수는 3 — override(2)가 항상 무시됨을 확인.
     assert body["params"]["stage_count"] == 3
     assert len(body["stages"]) == 3
 
 
 def test_first_request_ignores_user_overrides(client):
-    """1회차(previous_prompt 없음)에는 사용자 override를 무시하고 모델이 전 파라미터를 제어한다."""
+    """AI 모드는 사용자 override를 무시하고 모델이 전 파라미터를 제어한다."""
     r = client.post("/api/setlist", json={"prompt": "차분한 곡", "target_minutes": 30, "stage_count": 5})
     assert r.status_code == 200
     # 스텁 기본 단계수는 3 — override(5)가 무시됐음을 확인.
     assert r.json()["params"]["stage_count"] == 3
 
 
-def test_changed_prompt_drops_stale_overrides(client):
-    """직전과 의도가 '다른' 프롬프트면 사용자 override를 무시(프롬프트 바꾸면 자동 복귀)."""
-    r = client.post("/api/setlist", json={
-        "prompt": "신나는 파티 음악", "previous_prompt": "조용한 수면 음악",
-        "stage_count": 2,
-        "stages": [{"energy": 0.9, "minutes": 5}, {"energy": 0.9, "minutes": 5}],
-    })
-    assert r.status_code == 200
-    # 의도가 달라 stages/stage_count override 무시 → 스텁 기본 단계수(3).
-    assert r.json()["params"]["stage_count"] == 3
-
-
 def test_response_exposes_honored_overrides(client):
-    """DEPRECATED 동작 교체 확인(3단계): honored_overrides는 이제 AI 모드에서 항상 False다
-    (예전엔 같은 의도일 때 True였음 — routes.py의 honor DEPRECATED 주석 참고). 커스텀 모드는
-    test_custom_mode_* 쪽에서 항상 True인지 별도로 검증한다."""
-    r1 = client.post("/api/setlist", json={"prompt": "차분한 곡"})
-    assert r1.json()["honored_overrides"] is False  # 1회차 → 자동
-    r2 = client.post("/api/setlist", json={"prompt": "차분한 곡", "previous_prompt": "차분한 곡"})
-    assert r2.json()["honored_overrides"] is False  # 같은 의도여도 AI 모드는 항상 자동(변경됨)
-    r3 = client.post("/api/setlist", json={"prompt": "신나는 파티", "previous_prompt": "조용한 수면 명상"})
-    assert r3.json()["honored_overrides"] is False  # 의도 변경 → 자동
+    """honored_overrides는 AI 모드에서 항상 False다(커스텀 모드는 test_custom_mode_* 쪽에서
+    항상 True인지 별도로 검증한다)."""
+    r = client.post("/api/setlist", json={"prompt": "차분한 곡"})
+    assert r.json()["honored_overrides"] is False
 
 
 def test_empty_prompt_is_invalid_request(client):
@@ -105,7 +86,7 @@ def test_missing_prompt_is_invalid_request(client):
 
 
 def test_original_only_excludes_covers(client):
-    # 커버/오리지널은 스코프 필터라 previous_prompt 없이(1회차)도 항상 명시값 적용.
+    # 커버/오리지널은 스코프 필터라 항상 명시값 적용.
     r = client.post("/api/setlist", json={"prompt": "아무거나", "include_original": True, "include_cover": False})
     assert r.status_code == 200
     assert all("(cover)" not in p["song"].lower() for p in r.json()["picks"])
@@ -248,11 +229,10 @@ def test_band_filter_restricts_to_selected(client):
     assert {p["band"] for p in body["picks"]} == {"poppin_party"}
 
 
-def test_manual_band_filter_always_applies_even_on_intent_change(client):
-    """밴드는 스코프 필터라 의도가 바뀐 2회차에도 항상 적용된다(honor와 무관)."""
+def test_manual_band_filter_always_applies(client):
+    """밴드는 스코프 필터라 항상 적용된다(honor와 무관)."""
     r = client.post("/api/setlist", json={
-        "prompt": "조용한 수면 음악", "previous_prompt": "신나는 파티 음악",
-        "bands": ["poppin_party"],
+        "prompt": "조용한 수면 음악", "bands": ["poppin_party"],
     })
     assert r.status_code == 200
     assert r.json()["applied_bands"] == ["poppin_party"]
@@ -312,8 +292,7 @@ def test_prompt_bands_do_not_carry_across_requests(client):
 
 
 def test_custom_stages_override(client):
-    # DEPRECATED 동작 교체(3단계): 예전엔 그래프 수동 단계(stages)도 previous_prompt가 같은
-    # 의도일 때만 적용됐다. 지금은 mode="custom"이 항상 사용자 stages를 그대로 존중한다.
+    # mode="custom"은 항상 사용자 stages를 그대로 존중한다.
     r = client.post("/api/setlist", json={
         "prompt": "아무거나", "mode": "custom",
         "stages": [{"energy": 0.2, "minutes": 5}, {"energy": 0.85, "minutes": 5}],
@@ -347,7 +326,7 @@ def test_many_stages_up_to_eleven(client):
 def test_twelve_stages_is_invalid(client):
     """12구간(분리선 11개)은 스키마 검증에서 거부(최대 11구간)."""
     stages = [{"energy": 0.5, "song_count": 1} for _ in range(12)]
-    r = client.post("/api/setlist", json={"prompt": "x", "previous_prompt": "x", "stages": stages})
+    r = client.post("/api/setlist", json={"prompt": "x", "stages": stages})
     assert r.status_code == 400
     assert r.json()["error"]["code"] == "INVALID_REQUEST"
 
@@ -424,16 +403,6 @@ def test_custom_mode_builds_from_stages(client):
     assert body["stages"][1]["energy_target"] == 0.85
 
 
-def test_custom_mode_ignores_previous_prompt(client):
-    """커스텀 모드는 previous_prompt를 무시(LLM 호출 없음)."""
-    r = client.post("/api/setlist", json={
-        "mode": "custom",
-        "previous_prompt": "불필요한 프롬프트",
-        "stages": [{"energy": 0.5, "song_count": 3}],
-    })
-    assert r.status_code == 200
-
-
 def test_custom_mode_new_stage_fields_echoed(client):
     """커스텀 모드에서 신규 필드(valence 등)가 요청에 있으면 응답에도 있어야 한다."""
     r = client.post("/api/setlist", json={
@@ -466,8 +435,8 @@ def test_custom_mode_skips_llm_interpreter(client, monkeypatch):
     """커스텀 모드에서는 LLM interpreter.interpret이 호출되지 않아야 한다."""
     calls = []
 
-    def fake_interpret(prompt, previous_prompt=None, energy_stats=None, feature_stats=None, lang="ko", acquired_event=None):
-        calls.append((prompt, previous_prompt))
+    def fake_interpret(prompt, energy_stats=None, feature_stats=None, lang="ko", acquired_event=None):
+        calls.append(prompt)
         raise RuntimeError("interpreter.interpret should not be called in custom mode")
 
     monkeypatch.setattr(client.app.state, "interpreter", type("FakeInterpreter", (), {"interpret": fake_interpret})())
@@ -483,7 +452,7 @@ def test_ai_mode_stage_params_flow_to_response(client, monkeypatch):
     """3단계: AI 모드 첫 요청도(honor 무관) LLM이 채운 stage_params가 응답 stages에 실려야 한다."""
     from app.domain.models import MoodParameters
 
-    def fake_interpret(self, prompt, previous_prompt=None, energy_stats=None, feature_stats=None, lang="ko", acquired_event=None):
+    def fake_interpret(self, prompt, energy_stats=None, feature_stats=None, lang="ko", acquired_event=None):
         return MoodParameters(
             brightness=0.5, start_energy=0.4, end_energy=0.4, stage_count=2,
             target_minutes=20, interpretation_summary="test",
