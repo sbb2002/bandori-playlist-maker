@@ -47,7 +47,7 @@ flowchart TD
             F5 -- "예" --> F6["MoodParameters 반환"]
         end
 
-        LLM --> G["params.stage_bands를 실제 감지 밴드로 검증<br/>honor=False 고정(AI 모드는 항상 재해석)"]
+        LLM --> G["band_hallucination_screening"]
         E1 --> H
         G --> H["song_type 필터(기본 Original/Cover/All)<br/>stage_specs 구성(custom만)<br/>stage_count(2~11)/target_minutes(10~180) clamp"]
         H --> I["resolve_stage_impression_text() → 임베딩 벡터화<br/>(실패해도 중립 처리, 선곡은 안 막힘)"]
@@ -87,10 +87,9 @@ flowchart TD
    무관하다 — 상세는 아래 "노드 상세: `band_filter`" 참고.
 2. **모드 분기**:
    - `custom`: LLM 호출 없이 `payload.stages`로 `MoodParameters`를 직접 구성, `honor=True`.
-   - AI 모드: `pool` 계산 → `interpret()` 호출 → 결과의 `params.stage_bands`는
-     `_validate_stage_bands()`로 실제 감지 밴드만 남기고 `honor=False`로 고정(AI 모드는
-     세부설정 override 없이 항상 LLM 재해석 결과를 따르는 설계) — 상세는 아래 "노드 상세:
-     `pool`"/"`interpret()`" 참고.
+   - AI 모드: `pool` 계산 → `interpret()` 호출 → `band_hallucination_screening`(밴드 검증) →
+     `honor=False`로 고정(AI 모드는 세부설정 override 없이 항상 LLM 재해석 결과를 따르는
+     설계) — 상세는 아래 "노드 상세" 참고.
 3. **커버/오리지널 필터**: 사용자 명시값(체크박스)이 항상 LLM `song_type`보다 우선. `song_type`
    기본값은 **Original**(2026-08-24 변경, PR #90, `v2.7.3`) — 프롬프트에 곡 종류 언급이
    없으면(원곡 명시 포함) Original, 명시적 커버 요청("커버곡만" 등)이면 Cover, "모든 곡"류
@@ -109,7 +108,7 @@ flowchart TD
 8. **직렬화**: `serialize_setlist()` + `applied_bands`/`include_original`/`include_cover`/
    `honored_overrides` 메타 부가.
 
-### 노드 상세: `band_filter` · `pool` · `interpret()`
+### 노드 상세: `band_filter` · `pool` · `interpret()` · `band_hallucination_screening`
 
 **`band_filter`(D1/D2) — 모드별 스코프 필터**
 - 커스텀 모드(D1): `payload.bands`만 — 유저가 체크박스로 직접 고른 밴드.
@@ -135,8 +134,20 @@ flowchart TD
   feature_stats)`).
 - 곡을 고르지 않는다. 자연어 요청을 구조화된 파라미터로 "번역"만 하는 단계.
 - 내부 동작(호출 구조·추출 필드·에러/재시도) 상세는 아래 "3. LLM 호출" 절 참고.
-- 반환된 `params.stage_bands`는 이후 `G`에서 `band_filter`(=이번에 실제 감지된 밴드)로
-  검증·무효화된다 — LLM이 언급 안 된 밴드를 지어내도 걸러짐.
+- 반환된 `params.stage_bands`는 이후 `band_hallucination_screening`을 거친다(바로 아래).
+
+**`band_hallucination_screening`(G) — LLM이 지어낸 stage_bands 걸러내기**
+- `_validate_stage_bands(params.stage_bands, band_names)` — LLM이 스테이지별로 지정한
+  `stage_bands`(자유 텍스트, 오탈자·별명·환각 가능)를 다시 `detect_bands()`에 통과시켜 정규
+  밴드 id로 재해석.
+- 정확히 밴드 1개로 좁혀지고 그 밴드가 `band_names`(=`band_filter`의 근거, 이번 요청에서
+  실제로 감지된 밴드 집합)에 **있을 때만** 유효 — 아니면 `None`으로 무효화(그 스테이지는
+  밴드 제한 없이 진행되는 안전 폴백).
+- 즉 LLM이 이번 프롬프트에 언급되지 않은 밴드를 지어내거나 애매하게 적어도, 실제 감지 사실과
+  대조해 걸러내는 안전장치.
+- 코드상 이 검증 직후에 `honor = False` 대입도 같은 AI 분기 블록에 붙어 있지만, 조건도 계산도
+  없는 상수 대입이라(AI 브랜치에 들어온 시점에 이미 결정된 사실) 이 노드의 로직과는 무관 —
+  다이어그램에서 분리했다(2026-08-24).
 
 ## 3. LLM 호출 — 단일 호출 구조 (`groq_adapter.py` + `prompt.py`)
 
