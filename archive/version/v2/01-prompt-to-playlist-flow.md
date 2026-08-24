@@ -29,11 +29,11 @@ flowchart TD
     subgraph RUN["_run_setlist() — D~L까지가 이 함수의 본문(반환값은 L의 dict)"]
         direction TB
         E{"모드"}
-        E -- "커스텀 모드" --> D1["band_filter = payload.bands<br/>(prompt 미사용 — detect_bands() 호출 안 함, PR #91)"]
+        E -- "커스텀 모드" --> D1["band_filter"]
         D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성 (honor=True)"]
-        E -- "AI 모드" --> D2["band_filter = payload.bands ∪ detect_bands(prompt)"]
-        D2 --> E2["pool = band_filter 적용 곡<br/>energy_stats·feature_stats(오디오 6지표 분포) 계산"]
-        E2 --> F["interpreter.interpret(prompt,<br/>energy_stats, feature_stats)"]
+        E -- "AI 모드" --> D2["band_filter"]
+        D2 --> E2["pool"]
+        E2 --> F["interpret()"]
 
         subgraph LLM["GroqMoodInterpreter.interpret() — 단일 호출"]
             direction TB
@@ -84,27 +84,14 @@ flowchart TD
 
 ## 2. `_run_setlist()` 내부 순서
 
-1. **밴드 필터**: 모드별로 갈라진다 — 커스텀 모드는 `payload.bands`만(유저가 체크박스로
-   직접 고른 밴드), AI 모드는 `payload.bands ∪ detect_bands(payload.prompt)`
-   (`band_aliases.py`). LLM 호출 **전에** 결정되며 LLM 결과와는 무관하다.
-
-   **조치 완료(2026-08-24, PR #91).** 예전엔 `routes.py:305-307`이 모드 분기(310행)
-   이전에 `band_filter = (payload.bands ∪ detect_bands(payload.prompt))`를 **모드
-   구분 없이** 한 번만 계산했다 — 커스텀 모드에서 결과가 의도대로 "유저 선택만"으로
-   보인 건, 프론트(`request-flow.js`)가 커스텀 모드 제출 시 애초에 `body.prompt`
-   자체를 안 실어 `detect_bands("")`가 우연히 항상 공집합이었기 때문이지, 백엔드가
-   모드를 보고 분기한 결과가 아니었다(프론트 payload 구성이 바뀌면 바로 깨지는
-   암묵적 결합). 지금은 `payload.mode == "custom"`일 때 `detect_bands()` 호출 자체를
-   건너뛰도록 명시적으로 분기시켜, 프론트가 뭘 보내든 백엔드 차원에서 의도가
-   보장된다(최종 동작은 기존과 동일 — 회귀 없음, 전체 스위트 356 passed).
+1. **밴드 필터(`band_filter`)**: 모드별로 갈라진다. LLM 호출 **전에** 결정되며 LLM 결과와는
+   무관하다 — 상세는 아래 "노드 상세: `band_filter`" 참고.
 2. **모드 분기**:
    - `custom`: LLM 호출 없이 `payload.stages`로 `MoodParameters`를 직접 구성, `honor=True`.
-   - AI 모드: `pool`(밴드필터 적용 곡)의 `energy_stats`(min/max/mean/std) + `_feature_stats(pool)`
-     (오디오 6지표 분포, 표본 10 미만 밴드는 통계에서 제외)를 계산해
-     `interpreter.interpret(prompt, energy_stats, feature_stats)` 호출.
-     결과의 `params.stage_bands`는 `_validate_stage_bands()`로 실제 감지 밴드만 남기고,
-     `honor=False`로 고정한다(AI 모드는 세부설정 override를 갖지 않고 항상 LLM 재해석 결과를
-     따르는 설계).
+   - AI 모드: `pool` 계산 → `interpret()` 호출 → 결과의 `params.stage_bands`는
+     `_validate_stage_bands()`로 실제 감지 밴드만 남기고 `honor=False`로 고정(AI 모드는
+     세부설정 override 없이 항상 LLM 재해석 결과를 따르는 설계) — 상세는 아래 "노드 상세:
+     `pool`"/"`interpret()`" 참고.
 3. **커버/오리지널 필터**: 사용자 명시값(체크박스)이 항상 LLM `song_type`보다 우선. `song_type`
    기본값은 **Original**(2026-08-24 변경, PR #90, `v2.7.3`) — 프롬프트에 곡 종류 언급이
    없으면(원곡 명시 포함) Original, 명시적 커버 요청("커버곡만" 등)이면 Cover, "모든 곡"류
@@ -122,6 +109,33 @@ flowchart TD
 7. **`build_setlist(...)`** 호출(아래 4절).
 8. **직렬화**: `serialize_setlist()` + `applied_bands`/`include_original`/`include_cover`/
    `honored_overrides` 메타 부가.
+
+### 노드 상세: `band_filter` · `pool` · `interpret()`
+
+**`band_filter`(D1/D2) — 모드별 스코프 필터**
+- 커스텀 모드(D1): `payload.bands`만 — 유저가 체크박스로 직접 고른 밴드.
+- AI 모드(D2): `payload.bands ∪ detect_bands(payload.prompt)` — 체크박스 선택 + 프롬프트
+  텍스트 자동감지(`band_aliases.py`, 결정론적 별칭 매칭, **LLM 무관**)의 합집합.
+- 두 경우 모두 LLM 호출 **이전에** 확정되고, LLM 결과와 무관하게 고정된다.
+- (2026-08-24, PR #91) 이전엔 모드 무관 단일 공식이라 커스텀 모드도 우연히만 의도대로
+  동작했음 — 지금은 모드별 명시 분기로 고쳐짐(회귀 없음).
+
+**`pool`(E2) — 후보 곡 집합 + LLM용 분포 통계(AI 모드 전용)**
+- `pool = band_filter가 적용된 곡 목록`. 커스텀 모드는 LLM을 안 부르므로 이 단계 자체가 없다.
+- `energy_stats`: `pool`의 `song.energy` 분포(`min/max/mean/std`).
+- `feature_stats`: 오디오 6지표(`valence`/`lufs_integrated`/`lra`/`danceability_norm`/
+  `instr_stem_ratio`/`speech_median`) 각각의 분포(`min/max/mean/median/std`) — **전체 +
+  밴드별**(표본 10곡 미만 밴드는 통계에서 제외).
+- 목적: LLM이 `stage_params` 값을 실제 데이터 분포에 근거해 고르게 함 — 분포 정보가 없으면
+  중앙값 근처로 소극적으로 안주하는 문제가 관찰됨. `build_messages()`가 이 통계를 시스템
+  메시지 말미 `[지표 분포 통계]` 블록으로 첨부한다.
+
+**`interpret()`(F) — 자연어 → `MoodParameters` 단일 LLM 호출**
+- `interpreter.interpret(prompt, energy_stats, feature_stats)` — 곡을 고르지 않는다. 자연어
+  요청을 구조화된 파라미터로 "번역"만 하는 단계.
+- 내부 동작(호출 구조·추출 필드·에러/재시도)은 상세는 아래 "3. LLM 호출" 절 참고.
+- 반환된 `params.stage_bands`는 이후 `G`에서 `band_filter`(=이번에 실제 감지된 밴드)로
+  검증·무효화된다 — LLM이 언급 안 된 밴드를 지어내도 걸러짐.
 
 ## 3. LLM 호출 — 단일 호출 구조 (`groq_adapter.py` + `prompt.py`)
 
