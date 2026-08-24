@@ -1,10 +1,14 @@
-// 이번 요청에 실제 적용된 밴드(수동선택 ∪ 프롬프트 자동감지)를 체크박스에 시각 반영한다.
-// manualBands는 건드리지 않는다(자동감지분이 다음 요청에 지속되지 않도록). 프로그램적 .checked
-// 대입이므로 change 이벤트가 발생하지 않아 manualBands가 오염되지 않는다.
+// 이번 요청에 실제 적용된 밴드(수동선택 ∪ 프롬프트 자동감지)를 체크박스에 반영한다. 자동감지분도
+// manualBands에 편입시켜 화면에 보이는 체크 상태 = 실제 필터 상태가 항상 일치하게 한다(그래야
+// 커스텀 모드로 넘어가거나 재생성해도 화면에서 본 그대로 유지되고, 사용자가 직접 해제하면 그 change
+// 이벤트로 정상적으로 빠진다). 2026-08-24: 예전엔 자동감지분을 manualBands에서 제외해 체크박스
+// 시각 상태와 실제 요청 상태가 어긋났고, 그 결과 프롬프트 없는 커스텀 모드에서 재생성하면 화면엔
+// 체크돼 보이던 밴드가 실제로는 필터에 실리지 않아 전체 밴드가 나오는 버그가 있었다.
 function syncBandChecks(bands) {
   const applied = new Set(bands || []);
+  applied.forEach((b) => manualBands.add(b));
   document.querySelectorAll(".band-cb").forEach((cb) => {
-    cb.checked = manualBands.has(cb.value) || applied.has(cb.value);
+    cb.checked = manualBands.has(cb.value);
   });
 }
 
