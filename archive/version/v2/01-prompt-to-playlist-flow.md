@@ -33,7 +33,7 @@ flowchart TD
         D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성 (honor=True)"]
         E -- "AI 모드" --> D2["band_filter"]
         D2 --> E2["pool"]
-        E2 --> F["interpret()"]
+        E2 --> LLM
 
         subgraph LLM["GroqMoodInterpreter.interpret() — 단일 호출"]
             direction TB
@@ -47,7 +47,6 @@ flowchart TD
             F5 -- "예" --> F6["MoodParameters 반환"]
         end
 
-        F --> LLM
         LLM --> G["params.stage_bands를 실제 감지 밴드로 검증<br/>honor=False 고정(AI 모드는 항상 재해석)"]
         E1 --> H
         G --> H["song_type 필터(기본 Original/Cover/All)<br/>stage_specs 구성(custom만)<br/>stage_count(2~11)/target_minutes(10~180) clamp"]
@@ -130,10 +129,12 @@ flowchart TD
   중앙값 근처로 소극적으로 안주하는 문제가 관찰됨. `build_messages()`가 이 통계를 시스템
   메시지 말미 `[지표 분포 통계]` 블록으로 첨부한다.
 
-**`interpret()`(F) — 자연어 → `MoodParameters` 단일 LLM 호출**
-- `interpreter.interpret(prompt, energy_stats, feature_stats)` — 곡을 고르지 않는다. 자연어
-  요청을 구조화된 파라미터로 "번역"만 하는 단계.
-- 내부 동작(호출 구조·추출 필드·에러/재시도)은 상세는 아래 "3. LLM 호출" 절 참고.
+**`interpret()`(`LLM` 서브그래프) — 자연어 → `MoodParameters` 단일 LLM 호출**
+- `pool` 다음 화살표가 바로 `LLM` 서브그래프로 들어간다 — 별도 "호출부" 노드 없이, 호출과
+  내부 구현(F1~F6)을 하나로 그린다(`GroqMoodInterpreter.interpret(prompt, energy_stats,
+  feature_stats)`).
+- 곡을 고르지 않는다. 자연어 요청을 구조화된 파라미터로 "번역"만 하는 단계.
+- 내부 동작(호출 구조·추출 필드·에러/재시도) 상세는 아래 "3. LLM 호출" 절 참고.
 - 반환된 `params.stage_bands`는 이후 `G`에서 `band_filter`(=이번에 실제 감지된 밴드)로
   검증·무효화된다 — LLM이 언급 안 된 밴드를 지어내도 걸러짐.
 
