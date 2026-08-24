@@ -32,7 +32,7 @@ flowchart TD
         E -- "커스텀 모드" --> D1["band_filter"]
         D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성"]
         E -- "AI 모드" --> D2["band_filter"]
-        D2 --> E2["pool"]
+        D2 --> E2["pooling by song stats"]
         E2 --> LLM["GroqMoodInterpreter.interpret()"]
         LLM --> G["band_hallucination_screening"]
         E1 --> H
@@ -74,7 +74,8 @@ flowchart TD
    무관하다 — 상세는 아래 "노드 상세: `band_filter`" 참고.
 2. **모드 분기**:
    - `custom`: LLM 호출 없이 `payload.stages`로 `MoodParameters`를 직접 구성, `honor=True`.
-   - AI 모드: `pool` 계산 → `interpret()` 호출 → `band_hallucination_screening`(밴드 검증) →
+   - AI 모드: `pooling by song stats`(`pool` 계산) → `interpret()` 호출 →
+     `band_hallucination_screening`(밴드 검증) →
      `honor=False`로 고정(AI 모드는 세부설정 override 없이 항상 LLM 재해석 결과를 따르는
      설계) — 상세는 아래 "노드 상세" 참고.
 3. **커버/오리지널 필터**: 사용자 명시값(체크박스)이 항상 LLM `song_type`보다 우선. `song_type`
@@ -95,7 +96,7 @@ flowchart TD
 8. **직렬화**: `serialize_setlist()` + `applied_bands`/`include_original`/`include_cover`/
    `honored_overrides` 메타 부가.
 
-### 노드 상세: `band_filter` · `pool` · `interpret()` · `band_hallucination_screening`
+### 노드 상세: `band_filter` · `pooling by song stats` · `interpret()` · `band_hallucination_screening`
 
 **`band_filter`(D1/D2) — 모드별 스코프 필터**
 - 커스텀 모드(D1): `payload.bands`만 — 유저가 체크박스로 직접 고른 밴드.
@@ -105,7 +106,7 @@ flowchart TD
 - (2026-08-24, PR #91) 이전엔 모드 무관 단일 공식이라 커스텀 모드도 우연히만 의도대로
   동작했음 — 지금은 모드별 명시 분기로 고쳐짐(회귀 없음).
 
-**`pool`(E2) — 후보 곡 집합 + LLM용 분포 통계(AI 모드 전용)**
+**`pooling by song stats`(E2) — 후보 곡 집합 + LLM용 분포 통계(AI 모드 전용)**
 - `pool = band_filter가 적용된 곡 목록`. 커스텀 모드는 LLM을 안 부르므로 이 단계 자체가 없다.
 - `energy_stats`: `pool`의 `song.energy` 분포(`min/max/mean/std`).
 - `feature_stats`: 오디오 6지표(`valence`/`lufs_integrated`/`lra`/`danceability_norm`/
@@ -137,7 +138,8 @@ flowchart TD
 
 ## 3. LLM 호출 — 단일 호출 구조 (`groq_adapter.py` + `prompt.py`)
 
-전체 흐름도의 `LLM["GroqMoodInterpreter.interpret()"]` 노드(AI 모드 분기, `pool` 다음) 내부를
+전체 흐름도의 `LLM["GroqMoodInterpreter.interpret()"]` 노드(AI 모드 분기, `pooling by song
+stats` 다음) 내부를
 펼친 것이 아래 다이어그램이다 — 전체 흐름도엔 이 노드 이름만 남기고, 내부 6단계는 여기서
 따로 그린다.
 
