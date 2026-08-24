@@ -33,20 +33,8 @@ flowchart TD
         D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성"]
         E -- "AI 모드" --> D2["band_filter"]
         D2 --> E2["pool"]
-        E2 --> LLM
-
-        subgraph LLM["GroqMoodInterpreter.interpret() — 단일 호출"]
-            direction TB
-            F1["prompt.build_messages()로 system+user 메시지 조립<br/>(feature_stats는 system 말미 블록으로 첨부)"]
-            F1 --> F2["POST /chat/completions (temperature=0.2)"]
-            F2 --> F3{"429/5xx?"}
-            F3 -- "예" --> F2note["지수백오프 재시도<br/>(GROQ_MAX_RETRIES, 기본 2)"]
-            F3 -- "아니오(200)" --> F4["prompt.parse_mood(content)<br/>JSON 관용적 추출 + 필드 클램프"]
-            F4 --> F5{"파싱 성공?"}
-            F5 -- "아니오" --> F4note["재호출<br/>(GROQ_MOOD_RETRIES, 기본 3)"]
-            F5 -- "예" --> F6["MoodParameters 반환"]
-        end
-
+        E2 --> F["GroqMoodInterpreter.interpret()"]
+        F --> LLM
         LLM --> G["band_hallucination_screening"]
         E1 --> H
         G --> H["song_type 필터(기본 Original/Cover/All)<br/>stage_specs 구성(custom만)<br/>stage_count(2~11)/target_minutes(10~180) clamp"]
@@ -64,6 +52,18 @@ flowchart TD
     end
 
     RUN --> M["200 JSON 응답<br/>(FastAPI가 L의 dict를 감싸 반환 —<br/>큐잉 경로는 이 지점이 GET /status/{job_id}로 분리됨)"]
+
+    subgraph LLM["GroqMoodInterpreter.interpret() — 단일 호출"]
+        direction TB
+        F1["prompt.build_messages()로 system+user 메시지 조립<br/>(feature_stats는 system 말미 블록으로 첨부)"]
+        F1 --> F2["POST /chat/completions (temperature=0.2)"]
+        F2 --> F3{"429/5xx?"}
+        F3 -- "예" --> F2note["지수백오프 재시도<br/>(GROQ_MAX_RETRIES, 기본 2)"]
+        F3 -- "아니오(200)" --> F4["prompt.parse_mood(content)<br/>JSON 관용적 추출 + 필드 클램프"]
+        F4 --> F5{"파싱 성공?"}
+        F5 -- "아니오" --> F4note["재호출<br/>(GROQ_MOOD_RETRIES, 기본 3)"]
+        F5 -- "예" --> F6["MoodParameters 반환"]
+    end
 
     style INTAKE fill:#f0f0f0,stroke:#888
     style RUN fill:#eef2fb,stroke:#5a7bd6
@@ -128,10 +128,11 @@ flowchart TD
   중앙값 근처로 소극적으로 안주하는 문제가 관찰됨. `build_messages()`가 이 통계를 시스템
   메시지 말미 `[지표 분포 통계]` 블록으로 첨부한다.
 
-**`interpret()`(`LLM` 서브그래프) — 자연어 → `MoodParameters` 단일 LLM 호출**
-- `pool` 다음 화살표가 바로 `LLM` 서브그래프로 들어간다 — 별도 "호출부" 노드 없이, 호출과
-  내부 구현(F1~F6)을 하나로 그린다(`GroqMoodInterpreter.interpret(prompt, energy_stats,
-  feature_stats)`).
+**`GroqMoodInterpreter.interpret()`(F → `LLM` 서브그래프) — 자연어 → `MoodParameters` 단일 LLM 호출**
+- `F` 노드(`interpret(prompt, energy_stats, feature_stats)` 호출부)에서 `LLM` 서브그래프로
+  들어간다. `LLM` 서브그래프는 `RUN`(`_run_setlist()`) 박스 안에 중첩하지 않고 별도로 그려
+  — 내부가 6단계(F1~F6)라 `RUN` 안에 넣으면 커스텀 모드 쪽(`D1`/`E1`)과 좌우 비대칭이 심해짐
+  (2026-08-24, 가독성 조정).
 - 곡을 고르지 않는다. 자연어 요청을 구조화된 파라미터로 "번역"만 하는 단계.
 - 내부 동작(호출 구조·추출 필드·에러/재시도) 상세는 아래 "3. LLM 호출" 절 참고.
 - 반환된 `params.stage_bands`는 이후 `band_hallucination_screening`을 거친다(바로 아래).
