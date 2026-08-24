@@ -36,7 +36,7 @@ flowchart TD
         E2 --> LLM["MoodParameters를 LLM이 구성"]
         LLM --> G["band 환각 스크리닝"]
         E1 --> H
-        G --> H["song_type 필터<br/>stage_specs 구성<br/>stage_count/target_minutes 확정"]
+        G --> H["song_type 필터<br/>stage_specs 구성(커스텀 모드인 경우)<br/>stage_count/target_minutes 확정"]
         H --> I["resolve_stage_impression_text() → 임베딩 벡터화<br/>(실패해도 중립 처리, 선곡은 안 막힘)"]
         I --> J["build_setlist(songs, params, target_seconds,<br/>band_filter, stage_specs, impression_vectors)"]
 
