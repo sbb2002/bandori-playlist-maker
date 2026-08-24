@@ -53,7 +53,7 @@ flowchart TD
     style INTAKE fill:#f0f0f0,stroke:#888
     style RUN fill:#eef2fb,stroke:#5a7bd6
     style LLM fill:#fff3e0,stroke:#e0a030
-    style SEL fill:#e8f4ea,stroke:#4a4
+    style SEL fill:#fff3e0,stroke:#e0a030
 ```
 
 ## 1. 요청 접수·큐잉 (`routes.py`)
