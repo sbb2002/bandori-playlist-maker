@@ -30,7 +30,7 @@ flowchart TD
         direction TB
         E{"모드"}
         E -- "커스텀 모드" --> D1["band_filter"]
-        D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성 (honor=True)"]
+        D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성"]
         E -- "AI 모드" --> D2["band_filter"]
         D2 --> E2["pool"]
         E2 --> LLM
