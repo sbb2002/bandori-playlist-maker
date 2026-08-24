@@ -13,7 +13,7 @@
 
 ```mermaid
 flowchart TD
-    A["POST /api/setlist<br/>{prompt, previous_prompt?, bands?, mode, ...}"] --> B
+    A["POST /api/setlist<br/>{prompt, bands?, mode, ...}"] --> B
 
     subgraph INTAKE["요청 접수·큐잉 — TPM 레이트리밋 체크"]
         direction TB
@@ -33,7 +33,7 @@ flowchart TD
         D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성 (honor=True)"]
         E -- "AI(자연어)" --> D2["band_filter = payload.bands ∪ detect_bands(prompt)"]
         D2 --> E2["pool = band_filter 적용 곡<br/>energy_stats·feature_stats(오디오 6지표 분포) 계산"]
-        E2 --> F["interpreter.interpret(prompt, previous_prompt,<br/>energy_stats, feature_stats)"]
+        E2 --> F["interpreter.interpret(prompt,<br/>energy_stats, feature_stats)"]
 
         subgraph LLM["GroqMoodInterpreter.interpret() — 단일 호출"]
             direction TB
@@ -101,7 +101,7 @@ flowchart TD
    - `custom`: LLM 호출 없이 `payload.stages`로 `MoodParameters`를 직접 구성, `honor=True`.
    - AI 모드: `pool`(밴드필터 적용 곡)의 `energy_stats`(min/max/mean/std) + `_feature_stats(pool)`
      (오디오 6지표 분포, 표본 10 미만 밴드는 통계에서 제외)를 계산해
-     `interpreter.interpret(prompt, previous_prompt, energy_stats, feature_stats)` 호출.
+     `interpreter.interpret(prompt, energy_stats, feature_stats)` 호출.
      결과의 `params.stage_bands`는 `_validate_stage_bands()`로 실제 감지 밴드만 남기고,
      `honor=False`로 고정한다(AI 모드는 세부설정 override를 갖지 않고 항상 LLM 재해석 결과를
      따르는 설계).
@@ -131,7 +131,7 @@ flowchart TD
 - `SYSTEM_PROMPT`가 지시하는 추출 필드: `brightness`(-1~1), `start_energy`/`end_energy`
   (0~1), `stage_count`(2~5), `stage_energies`(비단조 에너지 아크, 선택), `stage_minutes`,
   `stage_bands`, `target_minutes`(10~180), `interpretation_summary`, `tags`, `song_type`,
-  `same_as_previous`, `stage_params`(스테이지별 `valence/lufs_integrated/lra/
+  `stage_params`(스테이지별 `valence/lufs_integrated/lra/
   danceability_norm/instr_stem_ratio/speech_median` 6수치 + `impression` 텍스트).
 - 예시 문구는 `_build_dynamic_examples()`가 호출마다 jitter를 줘 모델이 예시를 그대로
   베끼는 걸 방지한다.
@@ -143,42 +143,37 @@ flowchart TD
 - `TPM 예산`(`GROQ_RATE_PER_MIN`)이 활성이면 HTTP 호출 전에 `TokenBucketLimiter.acquire()`로
   선차감한다 — 대기열 초과 시에도 `LLMRateLimitError`.
 
-### `previous_prompt`는 죽은 코드인가? (2026-08-11 코멘트 답변)
+### `previous_prompt` 완전 제거 (2026-08-24, PR #93)
 
-**아니다 — 라우팅 판단에서만 죽었고, LLM 호출·프론트 배선은 여전히 살아있다.** AI 모드가
-`mode` 필드로 커스텀 모드와 완전히 분리된 뒤(§8-3, `routes.py:266-273` 주석에 DEPRECATED로
-명시), AI 모드는 항상 `honor=False`로 고정된다 — 즉 "직전 요청과 의도가 같은가"
-(`same_as_previous`)로 세부설정 override 여부를 가르던 옛 판정식은 라우팅에서 **더 이상
-안 쓰인다.**
+**경위.** 2026-08-11(PR #68)에 프론트 전송·`same_as_previous` 판정 로직이 이미 비활성화됐고,
+그 뒤로 `previous_prompt`는 스키마→`routes.py`→`interpret()`→`build_messages()`까지 값만
+나르고 아무도 소비하지 않는 죽은 배선으로 남아 있었다(LLM 호출 여부·결과·레이트리밋 판정
+어디에도 영향 없는 순수 no-op — 당시엔 포트 인터페이스·미배포 실험 어댑터
+`groq_multistage_adapter`와의 시그니처 호환을 이유로 인자 자체는 남겨뒀었다).
 
-다만 `previous_prompt` 자체는 아직 3곳에서 살아있다:
-1. **프론트**(`app.js:61,211,266`): 직전 성공 요청 프롬프트를 `previousPrompt` 변수에 저장해
-   두었다가, 다음 요청 body에 `previous_prompt`로 계속 실어 보낸다.
-2. **`interpret()` 호출**(`routes.py:257`): 여전히 인자로 그대로 전달된다.
-3. **LLM 프롬프트 본문**(`prompt.py:236-245`): `previous_prompt`가 있으면 "[직전 요청]\n...\n\n
-   [현재 요청]\n..."을 user 메시지에 통째로 끼워 넣고, `same_as_previous`를 판정해 응답
-   JSON에 채우라고 지시한다. `routes.py`는 그 응답값을 받고도 라우팅에는 안 쓴다
-   (§ 위 DEPRECATED 주석 — 하위호환으로만 보관).
+**→ 조치 완료.** 배선째 지우는 게 맞다고 판단해 실배포 경로 전체에서 파라미터 자체를
+삭제했다:
+- `schemas.py`: `SetlistRequest.previous_prompt` 필드 삭제.
+- `routes.py`: `interpret()`/`estimate_fn()` 호출부에서 인자 제거.
+- `ports/mood_port.py`: `MoodInterpreter.interpret()` 포트 시그니처에서 제거.
+- `adapters/groq_adapter.py`: `interpret()`/`estimate_wait()` 시그니처 + `build_messages()`
+  호출부 정리.
+- `adapters/prompt.py`: `build_messages()` 시그니처에서 제거, DEPRECATED 주석도 정리.
+- `adapters/openrouter_adapter.py`(죽은 파일 — `main.py` 어디서도 import 안 됨, PR #93
+  조사로 확인): 같은 `build_messages()`를 호출해 시그니처를 안 맞추면 깨지므로 동일하게 반영.
 
-**→ 조치 완료(2026-08-11, PR #68, 태그 `v2.2.1`).** 아래 3곳을 고쳐 단일호출 경로에서
-완전히 비활성화했다 — 각 자리에 DEPRECATED 코드 코멘트를 남겨 다음 세션이 "아직 뭔가에
-쓰이나?" 헷갈리지 않게 했다:
-- 프론트: `previousPrompt` 저장·전송 로직 자체를 삭제(`app.js`).
-- `prompt.py`: `build_messages()`가 `previous_prompt` 인자를 받되 본문에서 무시(항상
-  `user_prompt` 그대로 사용), `SYSTEM_PROMPT`/`RESPONSE_JSON_SCHEMA`/예시에서
-  `same_as_previous` 필드 지시 제거, `parse_mood()`는 `same_as_previous`를 항상 `None`으로
-  고정. 매 AI 모드 요청의 프롬프트 토큰이 소폭 줄어드는 부수효과도 있다(TPM 예산이 빠듯한
-  이 프로젝트엔 실이익).
-- 테스트(`test_openrouter_adapter.py`): "previous_prompt가 무시된다"를 검증하는 방향으로
-  3개 테스트 재작성.
+**남겨둔 것(의도적, 이번엔 범위 밖):**
+- `adapters/stub_adapter.py`: `_essentially_same()`이 이 값을 실제로 계산에 쓰는 유일한
+  소비자였다 — 다만 레포 오너 확인상 스텁은 로컬 포트 테스트에서도 더 이상 안 쓰여(실배포
+  경로로 테스트) 이번 제거 범위에서 제외했다. 단순 인자 삭제가 아니라 `same_as_previous`
+  계산 자체를 없앨지 별도 설계 판단이 필요.
+- `adapters/groq_multistage_adapter.py`: 미배포 어댑터, 시그니처에 파라미터가 남아있지만
+  실제 조사 결과 본문에서 소비하는 코드는 확인 안 됨(이 문서 상단의 예전 서술 —
+  "0차 변경판정 `_stage0_decide`에서 실제 사용" — 은 현재 코드와 어긋난 것으로 보임, 별도
+  확인 필요).
 
-**남겨둔 것(의도적):** `previous_prompt` **파라미터 자체는 시그니처에 남아있다** —
-`MoodInterpreter` 포트 인터페이스, 그리고 미배포 실험 어댑터 `groq_multistage_adapter`
-(0차 변경판정 `_stage0_decide`의 핵심 입력으로 `previous_prompt`/`previous_params`를 실제
-사용 — 스킵 최적화 전체가 이 값에 의존)와의 시그니처 호환 때문에, 값을 무시할 뿐 인자
-자체를 지우지는 않았다. `MoodParameters.same_as_previous` 필드도 커스텀 모드 등 다른 생성
-경로와 공유하는 도메인 모델 필드라 그대로 남겼다(단일호출 경로에서 채우는 값만 항상
-`None`).
+`MoodParameters.same_as_previous` 도메인 필드 자체는 커스텀 모드 등 다른 생성 경로와 공유돼
+그대로 남아있다(AI 모드 단일호출 경로가 채우는 값은 이미 2026-08-11부터 항상 `None`).
 
 ## 4. 선곡 로직 — `build_setlist()` (`domain/selection.py`, 순수 함수)
 
