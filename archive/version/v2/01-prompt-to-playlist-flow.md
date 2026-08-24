@@ -33,20 +33,7 @@ flowchart TD
         D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성"]
         E -- "AI 모드" --> D2["band_filter"]
         D2 --> E2["pool"]
-        E2 --> LLM
-
-        subgraph LLM["GroqMoodInterpreter.interpret() — 단일 호출"]
-            direction TB
-            F1["prompt.build_messages()로 system+user 메시지 조립<br/>(feature_stats는 system 말미 블록으로 첨부)"]
-            F1 --> F2["POST /chat/completions (temperature=0.2)"]
-            F2 --> F3{"429/5xx?"}
-            F3 -- "예" --> F2note["지수백오프 재시도<br/>(GROQ_MAX_RETRIES, 기본 2)"]
-            F3 -- "아니오(200)" --> F4["prompt.parse_mood(content)<br/>JSON 관용적 추출 + 필드 클램프"]
-            F4 --> F5{"파싱 성공?"}
-            F5 -- "아니오" --> F4note["재호출<br/>(GROQ_MOOD_RETRIES, 기본 3)"]
-            F5 -- "예" --> F6["MoodParameters 반환"]
-        end
-
+        E2 --> LLM["GroqMoodInterpreter.interpret()"]
         LLM --> G["band_hallucination_screening"]
         E1 --> H
         G --> H["song_type 필터(기본 Original/Cover/All)<br/>stage_specs 구성(custom만)<br/>stage_count(2~11)/target_minutes(10~180) clamp"]
@@ -128,12 +115,11 @@ flowchart TD
   중앙값 근처로 소극적으로 안주하는 문제가 관찰됨. `build_messages()`가 이 통계를 시스템
   메시지 말미 `[지표 분포 통계]` 블록으로 첨부한다.
 
-**`interpret()`(`LLM` 서브그래프) — 자연어 → `MoodParameters` 단일 LLM 호출**
-- `pool` 다음 화살표가 바로 `LLM` 서브그래프로 들어간다 — 별도 "호출부" 노드 없이, 호출과
-  내부 구현(F1~F6)을 하나로 그린다(`GroqMoodInterpreter.interpret(prompt, energy_stats,
-  feature_stats)`).
+**`GroqMoodInterpreter.interpret()`(`LLM`) — 자연어 → `MoodParameters` 단일 LLM 호출**
+- 전체 흐름도엔 노드 이름만 표시(`GroqMoodInterpreter.interpret(prompt, energy_stats,
+  feature_stats)` 호출). 내부 6단계(F1~F6: 메시지 조립 → HTTP POST → 재시도 → 파싱 → 반환)는
+  별도 다이어그램으로 분리 — "3. LLM 호출" 절 맨 위 참고(2026-08-24, 가독성 조정).
 - 곡을 고르지 않는다. 자연어 요청을 구조화된 파라미터로 "번역"만 하는 단계.
-- 내부 동작(호출 구조·추출 필드·에러/재시도) 상세는 아래 "3. LLM 호출" 절 참고.
 - 반환된 `params.stage_bands`는 이후 `band_hallucination_screening`을 거친다(바로 아래).
 
 **`band_hallucination_screening`(G) — LLM이 지어낸 stage_bands 걸러내기**
@@ -150,6 +136,22 @@ flowchart TD
   다이어그램에서 분리했다(2026-08-24).
 
 ## 3. LLM 호출 — 단일 호출 구조 (`groq_adapter.py` + `prompt.py`)
+
+전체 흐름도의 `LLM["GroqMoodInterpreter.interpret()"]` 노드(AI 모드 분기, `pool` 다음) 내부를
+펼친 것이 아래 다이어그램이다 — 전체 흐름도엔 이 노드 이름만 남기고, 내부 6단계는 여기서
+따로 그린다.
+
+```mermaid
+flowchart TD
+    F1["prompt.build_messages()로 system+user 메시지 조립<br/>(feature_stats는 system 말미 블록으로 첨부)"]
+    F1 --> F2["POST /chat/completions (temperature=0.2)"]
+    F2 --> F3{"429/5xx?"}
+    F3 -- "예" --> F2note["지수백오프 재시도<br/>(GROQ_MAX_RETRIES, 기본 2)"]
+    F3 -- "아니오(200)" --> F4["prompt.parse_mood(content)<br/>JSON 관용적 추출 + 필드 클램프"]
+    F4 --> F5{"파싱 성공?"}
+    F5 -- "아니오" --> F4note["재호출<br/>(GROQ_MOOD_RETRIES, 기본 3)"]
+    F5 -- "예" --> F6["MoodParameters 반환"]
+```
 
 - `GroqMoodInterpreter.interpret()`가 `prompt_mod.build_messages()`로 system+user 메시지를
   조립해 `temperature=0.2`로 `/chat/completions` 1회 호출한다(멀티스테이지 순차 호출이
