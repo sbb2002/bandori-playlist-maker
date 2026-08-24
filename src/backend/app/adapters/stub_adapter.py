@@ -31,7 +31,7 @@ _RISE_WORDS = ("점점", "고조", "올라", "끌어올", "달아오", "build", 
 _FALL_WORDS = ("가라앉", "마무리", "식", "진정", "내려", "wind down", "cool down")
 
 _COVER_WORDS = ("커버", "cover")
-_ORIGINAL_WORDS = ("오리지널", "원곡", "original")
+_ALL_WORDS = ("모든", "전곡", "전체", "다 들려", "all")
 
 # 단위는 한국어 조사가 뒤에 붙을 수 있어(예: "30분만") 후행 \b를 쓰지 않는다.
 # 오탐 위험이 있는 단문자 h/m 약어는 제외하고 명확한 단위만 인식한다.
@@ -122,13 +122,14 @@ class StubMoodInterpreter:
         summary = f"{summary} (이 문구는 stub입니다.)"
 
         cover_hits = _count(text, _COVER_WORDS)
-        orig_hits = _count(text, _ORIGINAL_WORDS)
-        if cover_hits and not orig_hits:
+        all_hits = _count(text, _ALL_WORDS)
+        # 기본값은 original — 명시적 커버/전체 요청이 없으면(원곡 언급 포함) original로 수렴.
+        if cover_hits and not all_hits:
             song_type = "cover"
-        elif orig_hits and not cover_hits:
-            song_type = "original"
-        else:
+        elif all_hits and not cover_hits:
             song_type = "all"
+        else:
+            song_type = "original"
 
         # 직전 요청이 주어졌을 때만 의도 동일 여부를 판정(핫픽스: 세부설정 우선순위).
         same_as_previous = (

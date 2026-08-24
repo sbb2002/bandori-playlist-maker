@@ -71,9 +71,10 @@ class MoodParameters:
     # 인스타그램식 해시태그 키워드(# 없이, 2~5개). 요약 카드에 감성 태그로 표시.
     # 어댑터가 domain/tags.ensure_min_tags로 최소 2개를 보장한다(LLM이 비워도 파생 보충).
     tags: list[str] | None = None
-    # 곡 종류 필터 의도: "all" | "original" | "cover". 사용자가 커버/오리지널만 원하면 그에 맞게,
-    # 아니면 "all". 사용자가 체크박스를 명시하면 그게 우선(라우트에서 조정).
-    song_type: str = "all"
+    # 곡 종류 필터 의도: "all" | "original" | "cover". 기본값은 "original" — 사용자가 커버나
+    # 전체 카탈로그를 명시적으로 요청할 때만 그에 맞게 바뀐다(2026-08-24 default 변경). 사용자가
+    # 체크박스를 명시하면 그게 우선(라우트에서 조정).
+    song_type: str = "original"
     # DEPRECATED(2026-08-03, 3단계): AI 모드/커스텀 모드가 명확히 분리되면서(AI=항상 LLM이
     # 새로 해석, 커스텀=항상 사용자 설정 그대로) "직전 요청과 의도가 같은가"를 판정해 세부설정
     # override 여부를 가르던 이 메커니즘 자체가 불필요해졌다 — 라우트는 이제 payload.mode만

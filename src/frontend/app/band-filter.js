@@ -16,7 +16,7 @@ let stageTouched = false; // 사용자가 그래프를 조정했는지 — 조�
 // 응답 후 그 값을 UI에 '반영'만 한다(다음 요청에 강제되지 않게 — 밴드 필터 패턴과 동일).
 let minutesTouched = false;
 let coverTouched = false;
-let settingsType = "all"; // "all" | "original" | "cover" — 세 개 중 항상 정확히 하나만 켜짐(토글 버튼)
+let settingsType = "original"; // "all" | "original" | "cover" — 세 개 중 항상 정확히 하나만 켜짐(토글 버튼). 기본값 original(2026-08-24)이 백엔드 기본값과 일치.
 
 // 실제 요청에 실리는 밴드 필터 상태. 사용자의 change 이벤트로 갱신되며, syncBandChecks(playbar.js)도
 // 프롬프트 자동감지분을 여기 편입시킨다 — 체크박스에 보이는 상태 = 이 집합이 항상 같아야 사용자가
