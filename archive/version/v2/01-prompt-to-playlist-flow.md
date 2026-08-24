@@ -44,8 +44,8 @@ flowchart TD
             SA["Stage A(선곡)"]
             SA --> SB["Stage B(시퀀싱)"]
         end
-        SEL --> K["Setlist(트랙 순서 + 이유 메타 + 총재생시간)"]
-        K --> L["serialize_setlist() + applied_bands/honored_overrides 등 부가"]
+        SEL --> K["setlist 반환"]
+        K --> L["setlist json화"]
     end
 
     RUN --> M["200 JSON 응답<br/>(FastAPI가 L의 dict를 감싸 반환 —<br/>큐잉 경로는 이 지점이 GET /status/{job_id}로 분리됨)"]
