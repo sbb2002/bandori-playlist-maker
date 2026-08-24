@@ -10,9 +10,14 @@ function setMode(mode) {
   // 프롬프트 필드 표시/숨김. required도 함께 꺼야 한다 — 켜진 채로 두면 커스텀 모드에서
   // 빈 프롬프트input이 네이티브 HTML5 검증에 걸려 submit 이벤트 자체가 발생하지 않는다
   // (콘솔 에러도 안 남아 겉으로는 아무 반응도 없는 것처럼 보이는 버그였음).
+  // display 대신 hidden 속성을 쓴다 — 밴드 셀렉터(모드 공통, 프롬프트 바로 아래)가 모드
+  // 전환 때마다 순간이동하듯 튀지 않고 부드럽게 접혔다 펴지도록(form-controls.css의
+  // #prompt-field[hidden]/#options-details[hidden] 오버라이드가 max-height 트랜지션을 건다.
+  // display:none은 트랜지션이 아예 안 먹어서 hidden 속성 + CSS 오버라이드 조합으로 바꿈).
   const promptField = $("prompt-field");
   if (promptField) {
-    promptField.style.display = isAi ? "" : "none";
+    if (isAi) promptField.removeAttribute("hidden");
+    else promptField.setAttribute("hidden", "");
   }
   promptEl.required = isAi;
 
@@ -20,16 +25,36 @@ function setMode(mode) {
   // 커스텀 모드에서는 항상 펼쳐서 보여준다(더 이상 접었다 펴는 선택 요소가 아님).
   const optionsDetails = $("options-details");
   if (optionsDetails) {
-    optionsDetails.style.display = isAi ? "none" : "";
+    optionsDetails.classList.remove("is-settled"); // 전환 시작 — 애니메이션 동안은 overflow:hidden으로 되돌림
     if (isAi) {
+      optionsDetails.setAttribute("hidden", "");
       optionsDetails.classList.remove("force-open");
     } else {
+      optionsDetails.removeAttribute("hidden");
       optionsDetails.classList.add("force-open");
       optionsDetails.open = true;
       prefillCustomFromLast();
+      // prefers-reduced-motion이면 트랜지션 자체가 없어(CSS에서 transition:none) transitionend가
+      // 안 터진다 — is-settled를 못 받아 overflow:hidden이 영영 안 풀리는 걸 막기 위해 즉시 처리.
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        optionsDetails.classList.add("is-settled");
+      }
     }
   }
 }
+
+// 세부설정 패널이 다 펼쳐진 뒤에만 overflow를 풀어준다 — 그 안의 구간별 "밴드 고정" 팝업이
+// 패널 박스 밖(오른쪽)으로 튀어나오는 절대위치 요소라, 펼치는 애니메이션 도중에만 걸어두는
+// overflow:hidden이 다 끝나기 전엔 여전히 살아있으면 팝업이 잘린다(form-controls.css 주석 참고).
+(() => {
+  const optionsDetails = $("options-details");
+  if (!optionsDetails) return;
+  optionsDetails.addEventListener("transitionend", (e) => {
+    if (e.propertyName === "max-height" && !optionsDetails.hasAttribute("hidden")) {
+      optionsDetails.classList.add("is-settled");
+    }
+  });
+})();
 
 function prefillCustomFromLast() {
   // 마지막 AI 생성 결과(lastStages)가 있으면 그것으로, 없으면 기본 0.5로.

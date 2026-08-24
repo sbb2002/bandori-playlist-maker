@@ -102,6 +102,22 @@
         <span id="prompt-hint" class="field-hint" aria-live="polite"></span>
       </label>
 
+      <!-- 밴드 필터는 스코프 필터라 AI/커스텀 모드 공통으로 항상 노출한다(세부설정 details와
+           달리 모드 전환에 안 숨겨짐) — AI 모드에서 셀렉터가 안 보이는 채로 이전에 고른 밴드가
+           조용히 적용되던 문제(2026-08-24) 수정. band-filter.js 바인딩은 id 기반이라 위치만
+           옮기면 되고 JS 변경은 필요 없다. -->
+      <div class="options band-select-block">
+        <div class="setting-head">
+          <span class="field-label" data-i18n="options.bandLabel">듣고싶은 밴드</span>
+          <button type="button" id="band-clear" class="timebar-equalize-btn" data-i18n="options.bandClearAll">전체 해제</button>
+        </div>
+        <ul class="field-note">
+          <li data-i18n="options.bandNote1">듣고 싶은 밴드만 선택해볼 수 있죠!</li>
+          <li data-i18n="options.bandNote2">모두 해제하면 모든 밴드가 선택되요.</li>
+        </ul>
+        <div id="band-list" class="band-list band-list-loading"><div class="spinner spinner-sm" aria-hidden="true"></div></div>
+      </div>
+
       <details class="options" id="options-details">
         <summary data-i18n="options.summary">세부 설정 (선택)</summary>
         <p class="options-guide" data-i18n="options.guide">여기서 플레이리스트를 직접 다듬을 수 있어요. 바꾼 설정은 같은 요청에서 유지되고, 프롬프트를 새 내용으로 바꾸면 다시 자동으로 맞춰드려요.</p>
@@ -130,18 +146,6 @@
             </ul>
             <div id="settings-type-filter" class="picker-type-filter"></div>
           </div>
-        </div>
-
-        <div class="setting-block">
-          <div class="setting-head">
-            <span class="field-label" data-i18n="options.bandLabel">듣고싶은 밴드</span>
-            <button type="button" id="band-clear" class="timebar-equalize-btn" data-i18n="options.bandClearAll">전체 해제</button>
-          </div>
-          <ul class="field-note">
-            <li data-i18n="options.bandNote1">듣고 싶은 밴드만 선택해볼 수 있죠!</li>
-            <li data-i18n="options.bandNote2">모두 해제하면 모든 밴드가 선택되요.</li>
-          </ul>
-          <div id="band-list" class="band-list band-list-loading"><div class="spinner spinner-sm" aria-hidden="true"></div></div>
         </div>
 
         <!-- UI상으로만 별도 항목으로 분리(데이터는 정서 궤적과 같은 stageModel.segments 공유).

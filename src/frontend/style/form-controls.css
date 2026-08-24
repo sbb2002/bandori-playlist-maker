@@ -1,5 +1,20 @@
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field-label { font-size: 0.85rem; color: var(--muted); }
+
+/* 프롬프트 필드는 모드 전환 시 display:none 대신 hidden 속성으로 접힌다(mode-switch.js) —
+   그래야 max-height 트랜지션이 먹어서, 프롬프트 아래 밴드 셀렉터가 순간이동하듯 튀지 않고
+   부드럽게 위로/아래로 이동한다(2026-08-24, 실사용 피드백). */
+#prompt-field {
+  overflow: hidden;
+  max-height: 100px; opacity: 1;
+  transition: max-height 0.28s cubic-bezier(.4,0,.2,1), opacity 0.22s ease;
+}
+#prompt-field[hidden] {
+  display: block; max-height: 0; opacity: 0; pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  #prompt-field { transition: none; }
+}
 .prompt-input-row { position: relative; }
 .prompt-input-row input { padding-right: 44px; } /* 우측 오마카세 아이콘과 텍스트 겹침 방지 */
 .omakase-btn {
@@ -134,6 +149,28 @@ input[type="number"] { -moz-appearance: textfield; }
 .options { margin: 14px 0; }
 .options summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
 .options.force-open summary { display: none; }
+/* #options-details도 #prompt-field와 동일하게 hidden 속성 + max-height 트랜지션으로 접힌다
+   (mode-switch.js). 구간 그래프 길이(2~11구간)에 따라 실제 높이가 크게 달라지므로 넉넉한
+   상한을 잡는다 — 상한이 실제 높이보다 많이 크면 열리는 체감 속도가 빨라 보일 수 있지만,
+   display:none 순간전환보다는 항상 낫다. ponytail: 정확한 높이 측정(ResizeObserver 등) 대신
+   고정 상한 — 지금 체감상 문제 되면 그때 정교화.
+   overflow:hidden은 열림 애니메이션이 끝나기 전까지만 건다(mode-switch.js가 transitionend에서
+   is-settled 클래스를 붙임) — 안에 있는 구간별 "밴드 고정" 팝업(.impression-band-popup)이
+   `left: calc(100% + 8px)`로 박스 밖까지 튀어나오는 절대위치 요소라, 계속 overflow:hidden을
+   걸어두면 열려 있는 동안에도 팝업이 잘려버린다(2026-08-24 발견). */
+#options-details[hidden] {
+  display: block; max-height: 0; opacity: 0; margin-top: 0; margin-bottom: 0; overflow: hidden;
+  pointer-events: none; transition: max-height 0.32s cubic-bezier(.4,0,.2,1), opacity 0.22s ease,
+    margin 0.28s ease;
+}
+#options-details:not([hidden]) {
+  max-height: 900px; opacity: 1; overflow: hidden;
+  transition: max-height 0.32s cubic-bezier(.4,0,.2,1), opacity 0.24s ease, margin 0.28s ease;
+}
+#options-details.is-settled { overflow: visible; max-height: none; }
+@media (prefers-reduced-motion: reduce) {
+  #options-details[hidden], #options-details:not([hidden]) { transition: none; }
+}
 .options-guide {
   margin: 12px 0 4px; color: var(--muted); font-size: 0.72rem; line-height: 1.55;
 }
