@@ -129,7 +129,7 @@ youtube-playlist-save.js → share-modal.js → playbar.js → main.js
 | `state.js` | 중앙 가변 상태(전역 `let`/`const`) — `picks`, `current`, `stageModel` 등 다른 모든 파일이 직접 읽고 쓰는 허브. 테마 토글, 언어 팝업 UI도 여기서 배선. |
 | `omakase.js` | "오마카세" 버튼 — 시간대+날씨(Open-Meteo, 프론트에서 직접 호출) 기반 프롬프트 자동 생성. |
 | `request-flow.js` | `POST /api/setlist` 제출 플로우(AI/Custom 모드), 202 응답 시 `GET /api/setlist/status/{job_id}` 폴링 큐 UX, 로딩 애니메이션. |
-| `band-filter.js` | 전역 밴드 체크리스트 + 단계별 "밴드 고정" 팝업. `manualBands`(사용자가 직접 체크한 것)와 프롬프트 자동감지 밴드를 분리 추적해 요청마다 누적되지 않게 한다. |
+| `band-filter.js` | 전역 밴드 체크리스트 + 단계별 "밴드 고정" 팝업. `manualBands`가 실제 요청에 실리는 밴드 필터 상태 — 사용자 체크와 프롬프트 자동감지 밴드(`playbar.js`의 `syncBandChecks`가 편입) 모두 여기 반영돼, 화면 체크 상태와 실제 필터가 항상 일치한다(2026-08-24, PR #89 — 예전엔 자동감지분을 분리 추적해 요청마다 누적 안 되게 했는데, 그 결과 화면과 실제 상태가 어긋나는 버그가 있었다). |
 | `stage-graph.js` | **가장 큰 파일(~700줄)**. Custom 모드/고급설정 편집기 전체: 2D valence×energy 무드맵, 시간배분 바(드래그로 단계 경계 조절), 단계별 가사 인상 텍스트+밴드고정 팝업, 5종 고급 파라미터(러프니스/LRA/댄서빌리티/악기비중/음절밀도) 스플라인 그래프. `renderStageGraph()`가 매번 전체 재구성. |
 | `mode-switch.js` | AI↔Custom 모드 전환, 두 모드 간 단계 데이터 형태 변환(`prefillCustomFromLast`). |
 | `render-result.js` | API 응답(또는 복원된 프리셋)을 전체 UI에 반영하는 중앙 함수 `renderResult()` — 요약/트랙리스트/카멜롯휠/설정 반영을 모두 조율. |
