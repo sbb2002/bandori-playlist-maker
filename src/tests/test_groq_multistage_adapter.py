@@ -66,7 +66,7 @@ def test_success_assembles_mood_parameters():
     assert params.start_energy == pytest.approx(0.20)
     assert params.end_energy == pytest.approx(0.35)
     assert params.brightness == 0.0
-    assert params.song_type == "all"
+    assert params.song_type == "original"
     assert params.same_as_previous is None
     assert 2 <= len(params.tags) <= 5
     assert params.interpretation_summary == _STAGE4_OK  # 4차 LLM 응답을 그대로 사용

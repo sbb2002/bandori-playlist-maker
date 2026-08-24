@@ -327,7 +327,7 @@ def _run_setlist(payload: SetlistRequest, state, acquired_event: threading.Event
             interpretation_summary="",
             stage_energies=[s.energy for s in payload.stages],
             tags=[],
-            song_type="all",
+            song_type="original",  # 체크박스 미조작 시 기본값(2026-08-24) — 명시하면 _resolve_song_type이 override.
             same_as_previous=None,
         )
         honor = True  # 커스텀 모드는 항상 사용자 설정을 존중

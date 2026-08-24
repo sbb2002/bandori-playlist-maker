@@ -128,9 +128,19 @@ def test_cover_keyword_sets_cover_only(client):
     assert all("(cover)" in p["song"].lower() for p in body["picks"])
 
 
-def test_no_song_type_mention_is_all(client):
-    # 체크박스 미지정 + 언급 없음 → song_type=all → 둘 다 포함(기본 ALL).
+def test_no_song_type_mention_is_original(client):
+    # 체크박스 미지정 + 언급 없음 → song_type=original(기본값, 2026-08-24) → 오리지널만.
     r = client.post("/api/setlist", json={"prompt": "신나는 곡"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["params"]["song_type"] == "original"
+    assert body["include_original"] is True and body["include_cover"] is False
+    assert all("(cover)" not in p["song"].lower() for p in body["picks"])
+
+
+def test_all_keyword_sets_all(client):
+    # 체크박스 미지정 + 프롬프트에 '모든/전곡' 등 명시적 전체 언급 → song_type=all → 둘 다 포함.
+    r = client.post("/api/setlist", json={"prompt": "모든 곡 다 들려줘"})
     assert r.status_code == 200
     body = r.json()
     assert body["params"]["song_type"] == "all"

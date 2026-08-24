@@ -102,7 +102,7 @@ def _build_dynamic_examples(rng: random.Random) -> str:
         "brightness": 0.7, "start_energy": 0.35, "end_energy": 0.85, "stage_count": 3,
         "target_minutes": 60, "duration_specified": False,
         "interpretation_summary": "주말을 여는 설레는 드라이브, 점점 달아오르는 한 시간",
-        "tags": ["드라이브", "설렘", "주말", "고조되는"], "song_type": "all",
+        "tags": ["드라이브", "설렘", "주말", "고조되는"], "song_type": "original",
         "stage_minutes": drive_stage_minutes, "stage_params": drive_stages,
     }
     return (
@@ -148,7 +148,13 @@ SYSTEM_PROMPT = (
     "- interpretation_summary: one warm sentence (<=80 chars, in the target output language given "
     "below) describing the mood, no numbers.\n"
     "- tags: 2-5 keywords in the target output language, no '#', never empty.\n"
-    "- song_type: \"all\"|\"original\"|\"cover\" — only set original/cover if explicitly mentioned.\n"
+    "- song_type: \"all\"|\"original\"|\"cover\". Default is \"original\" — use it whenever the "
+    "request doesn't explicitly ask for covers or the full catalog (including when it explicitly "
+    "asks for originals, e.g. \"오리지널\"/\"원곡\"). Set \"cover\" only if the request explicitly "
+    "asks for cover versions (e.g. \"커버곡\", \"커버만\", \"cover ver\"). Set \"all\" only if the "
+    "request explicitly asks for everything/the whole catalog regardless of version, in any "
+    "phrasing (e.g. \"모든 곡\", \"전곡\", \"다 들려줘\", \"오리지널이든 커버든 상관없이\") — "
+    "understand the intent, don't pattern-match a fixed word list.\n"
     "- stage_params: array of length stage_count, never null. Each object has 6 floats (0.0-1.0) "
     "plus impression:\n"
     "  - valence (emotional brightness, same direction as brightness)\n"
@@ -423,9 +429,9 @@ def parse_mood(raw_text: str) -> MoodParameters:
         target_minutes,
     )
 
-    song_type = str(obj.get("song_type", "all")).strip().lower()
+    song_type = str(obj.get("song_type", "original")).strip().lower()
     if song_type not in ("all", "original", "cover"):
-        song_type = "all"
+        song_type = "original"
 
     # DEPRECATED(2026-08-11): same_as_previous는 더 이상 프롬프트에서 묻지 않으므로(위
     # build_messages 참조) 항상 None — MoodParameters 필드 자체는 커스텀 모드 등 다른 생성

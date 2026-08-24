@@ -14,7 +14,8 @@ LLM에 물어 JSON을 조립한다 — LLM 응답은 매번 숫자/짧은 텍스
 
 스코프 결정(배경 문서에 없는 필드는 이 실험에서 다루지 않음, 확장은 별도 라운드):
     - brightness: 이 파이프라인엔 밝기 축 질문이 없다 → 중립값 0.0 고정.
-    - song_type / same_as_previous: 배경 문서 미언급 → 기본값(all / None). same_as_previous가
+    - song_type / same_as_previous: 배경 문서 미언급 → 기본값(original / None, 2026-08-24 default
+      변경 반영). same_as_previous가
       항상 None이므로 라우트의 `honor`는 이 인터프리터에서는 항상 False로 평가된다(세부설정
       override가 회차 간 유지되지 않음 — 실험 범위 밖의 알려진 제약).
     - tags: 4차에서 받은 것이 아니라 2차 감정 키워드를 그대로 재사용(ensure_min_tags로 최소
@@ -376,6 +377,6 @@ class GroqMultistageMoodInterpreter:
             interpretation_summary=summary[:120],
             stage_energies=energies,
             tags=tags,
-            song_type="all",
+            song_type="original",
             same_as_previous=None,
         )
