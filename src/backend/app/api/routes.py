@@ -352,7 +352,7 @@ def _run_setlist(payload: SetlistRequest, state, acquired_event: threading.Event
             energy_stats = None
 
         params = interpreter.interpret(
-            payload.prompt, payload.previous_prompt,
+            payload.prompt,
             energy_stats=energy_stats, feature_stats=_feature_stats(pool),
             lang=payload.lang, acquired_event=acquired_event,
         )
@@ -366,9 +366,6 @@ def _run_setlist(payload: SetlistRequest, state, acquired_event: threading.Event
         # 프롬프트+수동 그래프 조정이 섞여 있던 시절의 핫픽스였다. 지금은 AI 모드가 항상
         # 세부설정 UI 자체를 숨기고 매번 새로 해석하므로(커스텀 모드는 반대로 항상 honor=True,
         # 위 분기) 이 판정이 더 이상 필요 없다 — AI 모드는 항상 honor=False.
-        # params.same_as_previous/payload.previous_prompt 자체는 하위호환을 위해 계속 받고
-        # LLM에도 전달하지만(interpret 호출 그대로), 라우팅 판단에는 더 이상 쓰지 않는다.
-        # 옛 판정식(참고용, 삭제 안 함): bool(payload.previous_prompt) and bool(params.same_as_previous)
         honor = False
 
         # ※ **스코프 필터(밴드·커버)는 honor와 무관하게 항상 적용** — 사용자가 명시적으로 좁힌 범위라
@@ -483,7 +480,7 @@ def create_setlist(payload: SetlistRequest, request: Request, response: Response
     acquired_event = threading.Event()
     estimate = lambda: (  # noqa: E731
         0.0 if acquired_event.is_set()
-        else estimate_fn(payload.prompt, payload.previous_prompt, _feature_stats(pool), lang=payload.lang)
+        else estimate_fn(payload.prompt, _feature_stats(pool), lang=payload.lang)
     )
     # 제출 "직전"에 한 번 재보고 응답에 그대로 싣는다 — job.estimated_wait_seconds()는 폴링용이라
     # 잡이 이미 끝났으면 0을 주는데(status="done"/"error"), 잡이 아주 빨리 끝나버리면(경합) 방금

@@ -73,7 +73,7 @@ class OpenRouterMoodInterpreter:
         return headers
 
     def interpret(
-        self, prompt: str, previous_prompt: str | None = None,
+        self, prompt: str,
         energy_stats: dict | None = None,
         feature_stats: dict | None = None,
         lang: str = "ko",
@@ -81,7 +81,7 @@ class OpenRouterMoodInterpreter:
     ) -> MoodParameters:
         payload = {
             "model": self._model,
-            "messages": prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats, lang=lang),
+            "messages": prompt_mod.build_messages(prompt, feature_stats=feature_stats, lang=lang),
             "temperature": 0.2,
         }
         if self._response_format_mode == "json_schema":

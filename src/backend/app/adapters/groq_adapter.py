@@ -110,7 +110,7 @@ class GroqMoodInterpreter:
         return total
 
     def estimate_wait(
-        self, prompt: str, previous_prompt: str | None = None, feature_stats: dict | None = None,
+        self, prompt: str, feature_stats: dict | None = None,
         lang: str = "ko",
     ) -> float:
         """이 요청을 지금 넣으면 TPM 버킷이 찰 때까지 몇 초 걸릴지 순수 조회(호출·소비 없음).
@@ -122,7 +122,7 @@ class GroqMoodInterpreter:
         """
         if self._limiter is None:
             return 0.0
-        messages = prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats, lang=lang)
+        messages = prompt_mod.build_messages(prompt, feature_stats=feature_stats, lang=lang)
         return self._limiter.estimate_wait(cost=self._estimate_tokens(messages))
 
     def _headers(self) -> dict[str, str]:
@@ -137,7 +137,7 @@ class GroqMoodInterpreter:
         return headers
 
     def interpret(
-        self, prompt: str, previous_prompt: str | None = None,
+        self, prompt: str,
         energy_stats: dict | None = None,
         feature_stats: dict | None = None,
         lang: str = "ko",
@@ -146,7 +146,7 @@ class GroqMoodInterpreter:
         # print("TEST:", self._model, self._base_url, self._response_format_mode)
         payload = {
             "model": self._model,
-            "messages": prompt_mod.build_messages(prompt, previous_prompt, feature_stats=feature_stats, lang=lang),
+            "messages": prompt_mod.build_messages(prompt, feature_stats=feature_stats, lang=lang),
             "temperature": 0.2,
         }
         if self._response_format_mode == "json_schema":

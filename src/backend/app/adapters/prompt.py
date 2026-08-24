@@ -255,18 +255,12 @@ def _format_feature_stats(feature_stats: dict) -> str:
 
 
 def build_messages(
-    user_prompt: str, previous_prompt: str | None = None,
+    user_prompt: str,
     feature_stats: dict | None = None,
     lang: str = DEFAULT_LANG,
 ) -> list[dict]:
     """OpenRouter/Groq chat/completions messages 배열을 만든다.
 
-    DEPRECATED(2026-08-11): previous_prompt는 더 이상 프롬프트에 반영하지 않는다 — AI/커스텀
-    모드가 완전히 분리된 뒤 same_as_previous 판정 결과를 라우팅에서 쓰지 않게 됐고(honor는
-    모드로만 결정, routes.py DEPRECATED 주석 참조), 프롬프트 1회당 LLM 요청도 1회뿐이라 "직전
-    요청과 비교" 자체가 의미가 없다. 파라미터는 포트 인터페이스(MoodInterpreter.interpret) 및
-    미배포 실험 어댑터(groq_multistage_adapter, previous_prompt/previous_params를 0차
-    변경판정에 실제 사용)와의 시그니처 호환을 위해서만 남겨두고 여기서는 무시한다.
     feature_stats가 주어지면 시스템 메시지 끝에 [지표 분포 통계] 블록을 덧붙인다.
     lang이 주어지면 interpretation_summary·tags·stage_params[].impression을 그 언어로 쓰라는
     지시를 시스템 메시지 맨 끝(가장 최근 지시가 더 잘 지켜지는 recency 효과 노림)에 덧붙인다

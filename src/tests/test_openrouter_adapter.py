@@ -264,15 +264,6 @@ def test_unparseable_content_raises_mood_error():
         interp.interpret("x")
 
 
-# ── previous_prompt/same_as_previous DEPRECATED(2026-08-11): AI/커스텀 모드 분리 후
-# 라우팅에서 안 쓰여 프롬프트 생성 단계에서도 완전히 무시한다 ────────────────────────
-def test_build_messages_ignores_previous_prompt():
-    from app.adapters.prompt import build_messages
-    with_prev = build_messages("현재 요청 텍스트", "직전 요청 텍스트")[-1]["content"]
-    assert with_prev == "현재 요청 텍스트"
-    assert "직전 요청" not in with_prev
-
-
 def test_build_messages_without_previous_is_plain():
     from app.adapters.prompt import build_messages
     assert build_messages("현재 요청 텍스트")[-1]["content"] == "현재 요청 텍스트"
@@ -309,8 +300,3 @@ def test_parse_mood_same_as_previous_absent_is_none():
     assert parse_mood(_OK_JSON).same_as_previous is None
 
 
-def test_interpret_does_not_forward_previous_prompt():
-    client = FakeClient(response=_chat_response(_OK_JSON))
-    _make(client).interpret("현재 요청", "직전 요청")
-    sent = client.calls[0]["json"]["messages"][-1]["content"]
-    assert "현재 요청" in sent and "직전 요청" not in sent
