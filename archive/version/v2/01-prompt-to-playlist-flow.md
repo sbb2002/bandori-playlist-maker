@@ -30,11 +30,11 @@ flowchart TD
         direction TB
         E{"모드"}
         E -- "커스텀 모드" --> D1["band_filter"]
-        D1 --> E1["LLM 호출 없이 payload.stages로<br/>MoodParameters 직접 구성"]
+        D1 --> E1["MoodParameters를 수동으로 구성"]
         E -- "AI 모드" --> D2["band_filter"]
         D2 --> E2["pooling by song stats"]
-        E2 --> LLM["GroqMoodInterpreter.interpret()"]
-        LLM --> G["band_hallucination_screening"]
+        E2 --> LLM["MoodParameters를 LLM이 구성"]
+        LLM --> G["band 환각 스크리닝"]
         E1 --> H
         G --> H["song_type 필터(기본 Original/Cover/All)<br/>stage_specs 구성(custom만)<br/>stage_count(2~11)/target_minutes(10~180) clamp"]
         H --> I["resolve_stage_impression_text() → 임베딩 벡터화<br/>(실패해도 중립 처리, 선곡은 안 막힘)"]
@@ -72,12 +72,14 @@ flowchart TD
 
 1. **밴드 필터(`band_filter`)**: 모드별로 갈라진다. LLM 호출 **전에** 결정되며 LLM 결과와는
    무관하다 — 상세는 아래 "노드 상세: `band_filter`" 참고.
-2. **모드 분기**:
-   - `custom`: LLM 호출 없이 `payload.stages`로 `MoodParameters`를 직접 구성, `honor=True`.
-   - AI 모드: `pooling by song stats`(`pool` 계산) → `interpret()` 호출 →
-     `band_hallucination_screening`(밴드 검증) →
-     `honor=False`로 고정(AI 모드는 세부설정 override 없이 항상 LLM 재해석 결과를 따르는
-     설계) — 상세는 아래 "노드 상세" 참고.
+2. **모드 분기**: 결국 둘 다 `MoodParameters`를 만드는 두 가지 경로다 — 좌우 대칭으로 보면
+   커스텀은 "수동 구성", AI는 "LLM 자동 구성 + 검증"이라는 차이만 있다.
+   - 커스텀: **MoodParameters를 수동으로 구성** — LLM 호출 없이 `payload.stages`(유저가
+     그래프로 그린 값)를 그대로 옮겨 담음, `honor=True`.
+   - AI: `pooling by song stats`(`pool` 계산) → **MoodParameters를 LLM이 구성**
+     (`interpret()`) → **band 환각 스크리닝**(밴드 검증) → `honor=False`로 고정(AI 모드는
+     세부설정 override 없이 항상 LLM 재해석 결과를 따르는 설계) — 상세는 아래 "노드 상세"
+     참고.
 3. **커버/오리지널 필터**: 사용자 명시값(체크박스)이 항상 LLM `song_type`보다 우선. `song_type`
    기본값은 **Original**(2026-08-24 변경, PR #90, `v2.7.3`) — 프롬프트에 곡 종류 언급이
    없으면(원곡 명시 포함) Original, 명시적 커버 요청("커버곡만" 등)이면 Cover, "모든 곡"류
@@ -96,7 +98,7 @@ flowchart TD
 8. **직렬화**: `serialize_setlist()` + `applied_bands`/`include_original`/`include_cover`/
    `honored_overrides` 메타 부가.
 
-### 노드 상세: `band_filter` · `pooling by song stats` · `interpret()` · `band_hallucination_screening`
+### 노드 상세: `band_filter` · `pooling by song stats` · `MoodParameters를 LLM이 구성` · `band 환각 스크리닝`
 
 **`band_filter`(D1/D2) — 모드별 스코프 필터**
 - 커스텀 모드(D1): `payload.bands`만 — 유저가 체크박스로 직접 고른 밴드.
@@ -116,14 +118,17 @@ flowchart TD
   중앙값 근처로 소극적으로 안주하는 문제가 관찰됨. `build_messages()`가 이 통계를 시스템
   메시지 말미 `[지표 분포 통계]` 블록으로 첨부한다.
 
-**`GroqMoodInterpreter.interpret()`(`LLM`) — 자연어 → `MoodParameters` 단일 LLM 호출**
+**`MoodParameters를 LLM이 구성`(`LLM`, 실체는 `GroqMoodInterpreter.interpret()`)**
+- 좌우 대칭 짝: 커스텀 모드의 `MoodParameters를 수동으로 구성`(E1)에 대응하는 AI 모드 쪽
+  — 유저가 손으로 채우는 대신 LLM이 채운다는 차이만 있을 뿐, 둘 다 하는 일은 같다
+  (`MoodParameters` 만들기).
 - 전체 흐름도엔 노드 이름만 표시(`GroqMoodInterpreter.interpret(prompt, energy_stats,
   feature_stats)` 호출). 내부 6단계(F1~F6: 메시지 조립 → HTTP POST → 재시도 → 파싱 → 반환)는
   별도 다이어그램으로 분리 — "3. LLM 호출" 절 맨 위 참고(2026-08-24, 가독성 조정).
 - 곡을 고르지 않는다. 자연어 요청을 구조화된 파라미터로 "번역"만 하는 단계.
-- 반환된 `params.stage_bands`는 이후 `band_hallucination_screening`을 거친다(바로 아래).
+- 반환된 `params.stage_bands`는 이후 `band 환각 스크리닝`을 거친다(바로 아래).
 
-**`band_hallucination_screening`(G) — LLM이 지어낸 stage_bands 걸러내기**
+**`band 환각 스크리닝`(G, 실체는 `_validate_stage_bands()`) — LLM이 지어낸 stage_bands 걸러내기**
 - `_validate_stage_bands(params.stage_bands, band_names)` — LLM이 스테이지별로 지정한
   `stage_bands`(자유 텍스트, 오탈자·별명·환각 가능)를 다시 `detect_bands()`에 통과시켜 정규
   밴드 id로 재해석.
