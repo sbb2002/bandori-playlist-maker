@@ -23,7 +23,7 @@ flowchart TD
 
     APPROVE --> RUN
 
-    subgraph RUN["_run_setlist() — D~L까지가 이 함수의 본문(반환값은 L의 dict)"]
+    subgraph RUN["_run_setlist() — E~L까지가 이 함수의 본문(반환값은 L의 dict)"]
         direction TB
         E{"모드"}
         E -- "커스텀 모드" --> D1["band_filter"]
@@ -88,13 +88,15 @@ flowchart TD
 
 ### LLM — MoodParameters를 LLM이 구성
 실체는 `GroqMoodInterpreter.interpret(prompt, energy_stats, feature_stats)`. 내부 흐름은
-아래 "LLM 호출 내부" 절 참고. `honor=False`(이후 노드에서 고정).
+아래 "LLM 호출 내부" 절 참고.
 
 ### G — band 환각 스크리닝
 실체는 `_validate_stage_bands(params.stage_bands, band_names)`.
 - LLM이 스테이지별로 지정한 `stage_bands`(자유 텍스트)를 `detect_bands()`로 재해석.
 - 정확히 밴드 1개로 좁혀지고 그 밴드가 `band_names`(D2의 근거)에 있을 때만 유효 — 아니면
   `None`(그 스테이지는 밴드 제한 없이 진행).
+- 이 검증 직후 `honor=False`로 고정(값을 계산하지 않는 상수 대입 — AI 브랜치에 들어온
+  시점에 이미 정해진 사실).
 
 ### H — song_type 필터 / stage_specs 구성 / stage_count·target_minutes 확정 / stage_impression 추출
 - **song_type 필터**: 사용자 명시값(체크박스)이 LLM `song_type`보다 항상 우선. 기본값
@@ -145,7 +147,8 @@ flowchart TD
 
 ## 선곡 로직(`SEL` 노드)
 
-`pool`(에너지허용 밴드 ∧ band_filter 곡)이 0건이면 즉시 `NoSetlistError`(409).
+이 안에서 후보 풀을 다시 계산한다(`E2`의 `pool`과는 다른 별도 계산 — 에너지허용 밴드 ∧
+band_filter 곡). 이 풀이 0건이면 즉시 `NoSetlistError`(409).
 
 **목표 계산**: `params.stage_energies`(있으면 그대로) 또는 `stage_energy_targets()`(선형
 보간)로 스테이지별 목표 에너지 산출 → `distribute_counts()`로 스테이지별 곡수 배분 →
