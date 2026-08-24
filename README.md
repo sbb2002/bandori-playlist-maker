@@ -8,7 +8,7 @@
 
 - 🌐 **프론트(GitHub Pages)**: https://sbb2002.github.io/bandori-playlist-maker/
 - ⚙️ **백엔드(Render)**: https://bandori-playlist-maker.onrender.com
-- 📄 자세한 배경/지표는 [`docs/PRD.md`](docs/PRD.md), 배포는 [`docs/DEPLOY.md`](docs/DEPLOY.md), 향후 계획은 [`docs/BACKLOG.md`](docs/BACKLOG.md).
+- 📄 자세한 배경/지표는 [`docs/PRD.md`](docs/PRD.md), 배포는 [`docs/DEPLOY.md`](docs/DEPLOY.md), 향후 계획(백로그)은 아래 "로드맵" 참고.
 
 ---
 
@@ -79,7 +79,7 @@ src/backend/app/
 │  ├─ scripts/        # 데이터 추출/가공(로컬 오디오 필요)
 │  └─ tests/          # pytest(70+)
 ├─ data/              # songs_master.csv 등(읽기 전용 산출물)
-├─ docs/              # PRD · architecture · DEPLOY · BACKLOG · orgarnization
+├─ docs/              # PRD · architecture · DEPLOY · orgarnization (구조/설계 문서만; 백로그·작업 스냅샷은 document-archive 브랜치)
 ├─ render.yaml        # Render Blueprint
 └─ .github/workflows/ # GitHub Pages 배포
 ```
@@ -116,8 +116,11 @@ python -m pytest src/tests -q      # 도메인/선곡/하모닉/에너지/API �
 
 ## 🗺️ 로드맵
 
-포스트-파일럿 백로그는 [`docs/BACKLOG.md`](docs/BACKLOG.md): YouTube 계정 저장형 재생목록(OAuth),
-공유 결과 팝업(URL 복사), 플레이리스트 프리셋(localStorage) 등.
+포스트-파일럿 백로그는 `main`이 아니라 `document-archive` 브랜치에 있습니다(구조/설계 문서만
+`main`에 남기고, 우선순위 목록 같은 시점 스냅샷은 그쪽으로 이관 — 2026-08-24). 조회:
+`git show document-archive:archive/last-papers/reports/2026-08-24-backlog-post-pilot.md`,
+또는 `git worktree add ../<임의경로> document-archive`로 펼쳐서 참고. YouTube 계정 저장형
+재생목록(OAuth), 공유 결과 팝업(URL 복사), 플레이리스트 프리셋(localStorage) 등.
 
 ## 📊 데이터 출처
 
