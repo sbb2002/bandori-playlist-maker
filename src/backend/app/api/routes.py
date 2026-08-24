@@ -300,10 +300,15 @@ def _run_setlist(payload: SetlistRequest, state, acquired_event: threading.Event
     """
     interpreter = state.interpreter
 
-    # 밴드 필터(설정 §5-1b, 스코프 필터): 항상 적용 — 수동 선택 밴드 ∪ 현재 프롬프트 자동감지.
-    # interpreter.interpret() 호출 전에 계산 (band_filter는 LLM 결과에 의존하지 않음).
+    # 밴드 필터(설정 §5-1b, 스코프 필터): 모드별로 갈라진다 — 커스텀 모드는 유저가 직접 고른
+    # 밴드만(payload.bands), AI 모드는 거기에 프롬프트 자동감지분을 더한다(설계의도,
+    # 2026-08-24 명시화 — 이전엔 모드 무관하게 한 공식으로 계산해, 커스텀 모드가 의도대로
+    # 동작한 건 프론트가 커스텀 모드 요청에 prompt 자체를 안 실어서 detect_bands가 우연히
+    # 항상 공집합이었기 때문이었다). interpreter.interpret() 호출 전에 계산(LLM 결과에
+    # 의존하지 않음).
     band_names = {b.strip() for b in (payload.bands or []) if b and b.strip()}
-    band_names |= detect_bands(payload.prompt or "")  # 현재 프롬프트에 밴드명(별명) 언급 시 자동 필터
+    if payload.mode != "custom":
+        band_names |= detect_bands(payload.prompt or "")  # 현재 프롬프트에 밴드명(별명) 언급 시 자동 필터
     band_filter = band_names or None
 
     # AI 모드 vs 커스텀 모드 분기

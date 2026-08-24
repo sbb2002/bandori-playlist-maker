@@ -311,6 +311,20 @@ def test_prompt_bands_do_not_carry_across_requests(client):
     assert {p["band"] for p in r2.json()["picks"]} == {"morfonica"}
 
 
+def test_custom_mode_ignores_prompt_band_auto_detect(client):
+    """커스텀 모드는 payload.bands만 스코프 필터로 쓴다 — prompt에 다른 밴드명이 있어도
+    자동감지로 섞이지 않는다(설계의도, 2026-08-24 명시화: 이전엔 프론트가 커스텀 모드
+    요청에 prompt를 안 보내서 우연히 이렇게 됐을 뿐, 백엔드는 모드 무관하게 감지했었다)."""
+    r = client.post("/api/setlist", json={
+        "prompt": "로젤리아랑 라스 노래로", "mode": "custom", "bands": ["morfonica"],
+        "stages": [{"energy": 0.5, "song_count": 3}],
+    })
+    assert r.status_code == 200
+    body = r.json()
+    assert body["applied_bands"] == ["morfonica"]
+    assert {p["band"] for p in body["picks"]} == {"morfonica"}
+
+
 def test_custom_stages_override(client):
     # DEPRECATED 동작 교체(3단계): 예전엔 그래프 수동 단계(stages)도 previous_prompt가 같은
     # 의도일 때만 적용됐다. 지금은 mode="custom"이 항상 사용자 stages를 그대로 존중한다.
