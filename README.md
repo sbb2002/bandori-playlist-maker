@@ -9,6 +9,30 @@
 
 ---
 
+## v2.8.0 — 2026-08-24
+
+AI 모드에 밴드 셀렉터 노출(모드 공통 요소로 이동, 선택 상태 자동 유지) + 모드
+전환 시 프롬프트/세부설정 패널이 부드럽게 접혔다 펴지도록 애니메이션 추가.
+
+- 기준 커밋: `cadd3ad`
+- 관련 PR: [#94](https://github.com/sbb2002/bandori-playlist-maker/pull/94)
+
+## v2.7.5 — 2026-08-24
+
+previous_prompt 인자를 실배포 경로(스키마·라우트·포트·Groq 어댑터)에서 완전
+제거 — 값을 받고도 아무 데도 안 쓰던 죽은 배선 정리, 동작 변화 없음.
+
+- 기준 커밋: `2b56e12`
+- 관련 PR: [#93](https://github.com/sbb2002/bandori-playlist-maker/pull/93)
+
+## v2.7.4 — 2026-08-24
+
+커스텀 모드의 밴드 스코프를 payload.bands만 쓰도록 명시(기존엔 프론트가
+prompt를 안 보내 우연히 같은 결과였을 뿐, 백엔드가 모드로 분기하지 않았음).
+
+- 기준 커밋: `e7bf67b`
+- 관련 PR: [#91](https://github.com/sbb2002/bandori-playlist-maker/pull/91)
+
 ## v2.7.3 — 2026-08-24
 
 곡 종류 필터 기본값을 All에서 Original로 변경. 프롬프트에 곡 종류 언급이 없으면
