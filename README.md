@@ -9,6 +9,15 @@
 
 ---
 
+## v2.7.2 — 2026-08-24
+
+곡 종류 필터의 커버 판정에 `(Solo)`·`(feat. ...)` 파생판 포함(PR #88). 프롬프트
+자동감지 밴드가 체크박스에만 반영되고 실제 필터 상태에는 안 실려, 커스텀 모드
+전환 후 재생성 시 밴드 필터가 풀리던 버그 수정(PR #89).
+
+- 기준 커밋: `2c710e5`
+- 관련 PR: [#88](https://github.com/sbb2002/bandori-playlist-maker/pull/88), [#89](https://github.com/sbb2002/bandori-playlist-maker/pull/89)
+
 ## v2.7.1 — 2026-08-18
 
 v2.7.0에서 `/api/songs`의 `band`를 표시용 값으로 덮어쓰는 바람에, 곡 추가 팝업의
