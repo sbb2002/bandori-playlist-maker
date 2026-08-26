@@ -21,6 +21,43 @@
 
 ## Log
 
+### v1.2.2 — 2026-08-26 (Patch)
+
+`Roselia` 앨범 재생목록(공식 유튜브 `OLAK5uy_mQiK9wR7hZR0rOH9EEqG9qNUjMWq4ha2k`) 기준으로 기존
+24곡의 `url`/`video_id`를 앨범판 링크로 교체. 사용자가 지정한 재생목록 URL을 곡 제목으로 대조해
+기존 등록곡과 매칭한 뒤 반영 — 신곡 추가가 아니라 기존 곡의 소스 링크 정정이다.
+
+- 현재 총 곡 수: **736곡** (idx=730 `roselia` `Neo-Aspect` 중복행 삭제로 737→736)
+- **중복 제거**: idx=570과 idx=730이 동일 곡(Neo-Aspect, 영상만 다른 재업로드)으로 확인되어
+  idx=730을 삭제하고 idx=570에 새 URL을 반영.
+- **제목 접미사 반영**: 재생목록 쪽 표기에 맞춰 6곡의 `song`에 ` (10th anniv. ver.)`를 추가(분류는
+  전부 original — cover 아님).
+- URL 교체 24곡(idx·곡명·새 url):
+  - idx=570 Neo-Aspect → https://youtu.be/uzju3Lb7Snk
+  - idx=571 BLACK SHOUT (10th anniv. ver.) → https://youtu.be/35IMBUZz_50
+  - idx=573 陽だまりロードナイト (10th anniv. ver.) → https://youtu.be/5k1LEXeLjn0
+  - idx=578 Determination Symphony → https://youtu.be/ov8roESpuDg
+  - idx=579 熱色スターマイン → https://youtu.be/Rl3PmcgxePc
+  - idx=580 軌跡 → https://youtu.be/kRWHkr4KFr0
+  - idx=582 R → https://youtu.be/x2szJNLEWHY
+  - idx=583 BRAVE JEWEL → https://youtu.be/DkhxP_MpNZw
+  - idx=584 FIRE BIRD (10th anniv. ver.) → https://youtu.be/WbR3g1xuEAA
+  - idx=586 Avant-garde HISTORY → https://youtu.be/YfY82CJjyII
+  - idx=589 約束 → https://youtu.be/aJBcjvGBuI0
+  - idx=591 Song I am. → https://youtu.be/nAUYgGbWtpg
+  - idx=597 Floral Haven → https://youtu.be/TqtHS3dSC0g
+  - idx=598 Sprechchor → https://youtu.be/lP2_umDbADY
+  - idx=601 ROZEN HORIZON → https://youtu.be/-azA3blqTuI
+  - idx=612 Blessing Chord → https://youtu.be/FM_2nkBck7U
+  - idx=614 PASSIONATE ANTHEM (10th anniv. ver.) → https://youtu.be/aMLTI64iwjg
+  - idx=616 Sanctuary → https://youtu.be/oShAD90PB_E
+  - idx=619 一逢のFull Glory → https://youtu.be/3T7er-ESUf0
+  - idx=620 礎の花冠 (10th anniv. ver.) → https://youtu.be/qH_JzJEJEwQ
+  - idx=625 VIOLET LINE (10th anniv. ver.) → https://youtu.be/jOM0l0UZ-Z4
+  - idx=626 Ringing Bloom → https://youtu.be/L8f7zQ2AozU
+  - idx=627 ZEAL of proud → https://youtu.be/yRPpG_KttQQ
+  - idx=632 Sing Alive → https://youtu.be/o0zBOPxmrCM
+
 ### v1.2.1 — 2026-08-18 (Patch)
 
 `various_artists` 나머지 4곡의 `display_band`를 YouTube 발매 메타데이터(℗
