@@ -6710,14 +6710,46 @@
             "x": 5.6,
             "y": -19.74,
             "bpm": 95.7
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "夢はトゥルーエンド！",
+            "url": "https://youtu.be/eZG4sXy0zPM",
+            "x": 10.1,
+            "y": -8.67,
+            "bpm": 129.2
+        },
+        {
+            "band": "afterglow",
+            "song": "Right Here, Right Now",
+            "url": "https://youtu.be/NP70bwVYHcQ",
+            "x": -59.62,
+            "y": 28.31,
+            "bpm": 123.0
+        },
+        {
+            "band": "afterglow",
+            "song": "The Night We Chose Us",
+            "url": "https://youtu.be/HtWqMnotCaE",
+            "x": -70.0,
+            "y": -7.0,
+            "bpm": 129.2
+        },
+        {
+            "band": "millsage",
+            "song": "青のすみか (Cover)",
+            "url": "https://youtu.be/XYpcz_mI4ck",
+            "x": -27.3,
+            "y": 5.0,
+            "bpm": 152.0
         }
     ],
     "centroids": [
         {
             "band": "afterglow",
-            "n": 72,
-            "x": 13.94,
-            "y": 17.38
+            "n": 74,
+            "x": 11.81,
+            "y": 17.2
         },
         {
             "band": "ave_mujica",
@@ -6739,9 +6771,9 @@
         },
         {
             "band": "millsage",
-            "n": 3,
-            "x": -14.48,
-            "y": 6.79
+            "n": 4,
+            "x": -17.69,
+            "y": 6.34
         },
         {
             "band": "morfonica",
@@ -6751,9 +6783,9 @@
         },
         {
             "band": "mugendai_mutype",
-            "n": 73,
-            "x": 3.39,
-            "y": 7.9
+            "n": 74,
+            "x": 3.49,
+            "y": 7.67
         },
         {
             "band": "mygo",
@@ -6797,7 +6829,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 737,
+        "n": 741,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
