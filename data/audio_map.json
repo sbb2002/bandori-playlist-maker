@@ -6742,6 +6742,14 @@
             "x": -27.3,
             "y": 5.0,
             "bpm": 152.0
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "song": "イケナイ太陽 (Cover)",
+            "url": "https://youtu.be/Gwwcu8sSIkM",
+            "x": -3.94,
+            "y": 0.01,
+            "bpm": 143.6
         }
     ],
     "centroids": [
@@ -6765,9 +6773,9 @@
         },
         {
             "band": "ikka_dumb_rock",
-            "n": 2,
-            "x": 16.44,
-            "y": 12.22
+            "n": 3,
+            "x": 9.64,
+            "y": 8.15
         },
         {
             "band": "millsage",
@@ -6829,7 +6837,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 741,
+        "n": 742,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
