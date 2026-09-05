@@ -6758,14 +6758,30 @@
             "x": -25.09,
             "y": 58.81,
             "bpm": 129.2
+        },
+        {
+            "band": "afterglow",
+            "song": "Keep Me in the Feeling",
+            "url": "https://youtu.be/pasFqCnn5E0",
+            "x": -54.75,
+            "y": 35.7,
+            "bpm": 123.0
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "song": "ジャイアント・キラー・チューン",
+            "url": "https://youtu.be/KiDSrEjBFLI",
+            "x": 9.75,
+            "y": 6.48,
+            "bpm": 136.0
         }
     ],
     "centroids": [
         {
             "band": "afterglow",
-            "n": 74,
-            "x": 11.81,
-            "y": 17.2
+            "n": 75,
+            "x": 10.92,
+            "y": 17.45
         },
         {
             "band": "ave_mujica",
@@ -6781,9 +6797,9 @@
         },
         {
             "band": "ikka_dumb_rock",
-            "n": 3,
-            "x": 9.64,
-            "y": 8.15
+            "n": 4,
+            "x": 9.67,
+            "y": 7.73
         },
         {
             "band": "millsage",
@@ -6845,7 +6861,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 743,
+        "n": 745,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
