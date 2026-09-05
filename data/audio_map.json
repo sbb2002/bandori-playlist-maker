@@ -5838,39 +5838,12 @@
         },
         {
             "band": "roselia",
-            "song": "Neo-Aspect",
-            "url": "https://youtu.be/03iVXFZ8jrs",
-            "x": 5.86,
-            "y": 50.34,
-            "bpm": 117.5,
-            "energy": 0.116
-        },
-        {
-            "band": "roselia",
-            "song": "BLACK SHOUT",
-            "url": "https://youtu.be/MmnU-s1TdsI",
-            "x": 1.87,
-            "y": -39.58,
-            "bpm": 123.0,
-            "energy": 0.654
-        },
-        {
-            "band": "roselia",
             "song": "Opera of the wasteland",
             "url": "https://youtu.be/kzzXxwU3qo4",
             "x": 0.83,
             "y": -3.34,
             "bpm": 136.0,
             "energy": 0.845
-        },
-        {
-            "band": "roselia",
-            "song": "陽だまりロードナイト",
-            "url": "https://youtu.be/KjgjeK-ppd0",
-            "x": -11.13,
-            "y": 50.16,
-            "bpm": 143.6,
-            "energy": 0.204
         },
         {
             "band": "roselia",
@@ -5910,66 +5883,12 @@
         },
         {
             "band": "roselia",
-            "song": "Determination Symphony",
-            "url": "https://youtu.be/4jyT00Gn2Ec",
-            "x": 18.15,
-            "y": -9.04,
-            "bpm": 129.2,
-            "energy": 0.214
-        },
-        {
-            "band": "roselia",
-            "song": "熱色スターマイン",
-            "url": "https://youtu.be/DZNOUNsvWps",
-            "x": 0.83,
-            "y": -10.18,
-            "bpm": 123.0,
-            "energy": 0.168
-        },
-        {
-            "band": "roselia",
-            "song": "軌跡",
-            "url": "https://youtu.be/P2BT98BC1N8",
-            "x": -70.0,
-            "y": 63.28,
-            "bpm": 172.3,
-            "energy": 0.429
-        },
-        {
-            "band": "roselia",
             "song": "LOUDER",
             "url": "https://youtu.be/RZBHAjojJhg",
             "x": 3.14,
             "y": 36.71,
             "bpm": 129.2,
             "energy": 0.292
-        },
-        {
-            "band": "roselia",
-            "song": "R",
-            "url": "https://youtu.be/ZqdMPCDsCeE",
-            "x": 11.24,
-            "y": -21.68,
-            "bpm": 123.0,
-            "energy": 0.747
-        },
-        {
-            "band": "roselia",
-            "song": "BRAVE JEWEL",
-            "url": "https://youtu.be/MHXRfiufs2o",
-            "x": 3.3,
-            "y": -17.56,
-            "bpm": 129.2,
-            "energy": 0.618
-        },
-        {
-            "band": "roselia",
-            "song": "FIRE BIRD",
-            "url": "https://youtu.be/59kPRviWjAo",
-            "x": -16.48,
-            "y": -33.25,
-            "bpm": 152.0,
-            "energy": 0.364
         },
         {
             "band": "roselia",
@@ -5982,15 +5901,6 @@
         },
         {
             "band": "roselia",
-            "song": "Avant-garde HISTORY",
-            "url": "https://youtu.be/C3vzihABDZQ",
-            "x": -3.13,
-            "y": -29.73,
-            "bpm": 112.3,
-            "energy": 0.251
-        },
-        {
-            "band": "roselia",
             "song": "Break your desire",
             "url": "https://youtu.be/tzXB1HCJAQo",
             "x": 3.46,
@@ -6000,39 +5910,12 @@
         },
         {
             "band": "roselia",
-            "song": "Neo-Aspect",
-            "url": "https://youtu.be/Izq3AAix1Os",
-            "x": 9.94,
-            "y": 49.31,
-            "bpm": 117.5,
-            "energy": 0.119
-        },
-        {
-            "band": "roselia",
-            "song": "約束",
-            "url": "https://youtu.be/Xrx-qzgzhek",
-            "x": 2.39,
-            "y": -26.15,
-            "bpm": 123.0,
-            "energy": 0.69
-        },
-        {
-            "band": "roselia",
             "song": "\"UNIONS\" Road",
             "url": "https://youtu.be/1afLYh5w8XY",
             "x": -14.85,
             "y": 25.95,
             "bpm": 136.0,
             "energy": 0.545
-        },
-        {
-            "band": "roselia",
-            "song": "Song I am.",
-            "url": "https://youtu.be/Kohn9PRanoY",
-            "x": 33.96,
-            "y": 4.98,
-            "bpm": 129.2,
-            "energy": 0.5
         },
         {
             "band": "roselia",
@@ -6081,24 +5964,6 @@
         },
         {
             "band": "roselia",
-            "song": "Floral Haven",
-            "url": "https://youtu.be/Qa7n53DmlHg",
-            "x": -18.96,
-            "y": 30.39,
-            "bpm": 129.2,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
-            "song": "Sprechchor",
-            "url": "https://youtu.be/OpSimLr7ouc",
-            "x": -12.91,
-            "y": 9.65,
-            "bpm": 152.0,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
             "song": "閃光",
             "url": "https://youtu.be/I0s49imrtho",
             "x": -4.18,
@@ -6113,15 +5978,6 @@
             "x": 16.2,
             "y": -34.01,
             "bpm": 117.5,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
-            "song": "ROZEN HORIZON",
-            "url": "https://youtu.be/8Cygbjd1h8Y",
-            "x": -8.98,
-            "y": -42.65,
-            "bpm": 107.7,
             "energy": 0.5
         },
         {
@@ -6216,15 +6072,6 @@
         },
         {
             "band": "roselia",
-            "song": "Blessing Chord",
-            "url": "https://youtu.be/qKYf5ozmgsE",
-            "x": -11.51,
-            "y": 6.72,
-            "bpm": 152.0,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
             "song": "Fear Nothing",
             "url": "https://youtu.be/WhEs2KF4zNo",
             "x": 12.28,
@@ -6234,29 +6081,11 @@
         },
         {
             "band": "roselia",
-            "song": "PASSIONATE ANTHEM",
-            "url": "https://youtu.be/68Gwwqp1DK4",
-            "x": 14.22,
-            "y": -4.89,
-            "bpm": 129.2,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
             "song": "Requiem for Fate",
             "url": "https://youtu.be/eoq81V4BpHQ",
             "x": 26.25,
             "y": 15.36,
             "bpm": 103.4,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
-            "song": "Sanctuary",
-            "url": "https://youtu.be/LAPLzxHzaHY",
-            "x": -25.13,
-            "y": 41.6,
-            "bpm": 123.0,
             "energy": 0.5
         },
         {
@@ -6275,24 +6104,6 @@
             "x": -22.4,
             "y": 32.19,
             "bpm": 103.4,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
-            "song": "一逢のFull Glory",
-            "url": "https://youtu.be/uXgEOq0544w",
-            "x": -31.53,
-            "y": 49.33,
-            "bpm": 99.4,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
-            "song": "礎の花冠",
-            "url": "https://youtu.be/GyZ4UFCbWZo",
-            "x": 6.5,
-            "y": 1.87,
-            "bpm": 117.5,
             "energy": 0.5
         },
         {
@@ -6333,33 +6144,6 @@
         },
         {
             "band": "roselia",
-            "song": "VIOLET LINE",
-            "url": "https://youtu.be/-yVtSiKoc1c",
-            "x": 2.54,
-            "y": 30.21,
-            "bpm": 99.4,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
-            "song": "Ringing Bloom",
-            "url": "https://youtu.be/h4cEEXCPO8M",
-            "x": 21.79,
-            "y": 9.45,
-            "bpm": 129.2,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
-            "song": "ZEAL of proud",
-            "url": "https://youtu.be/LKvJhHQN4Y8",
-            "x": 20.47,
-            "y": -17.39,
-            "bpm": 129.2,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
             "song": "Singing “OURS”",
             "url": "https://youtu.be/rGkei9v-jz4",
             "x": -70.0,
@@ -6391,15 +6175,6 @@
             "url": "https://youtu.be/QJ5DMiLGliA",
             "x": -9.71,
             "y": 1.9,
-            "bpm": 129.2,
-            "energy": 0.5
-        },
-        {
-            "band": "roselia",
-            "song": "Sing Alive",
-            "url": "https://youtu.be/2zRyFvvZa-g",
-            "x": -5.67,
-            "y": -6.92,
             "bpm": 129.2,
             "energy": 0.5
         },
