@@ -6549,6 +6549,14 @@
             "x": 9.75,
             "y": 6.48,
             "bpm": 136.0
+        },
+        {
+            "band": "mygo",
+            "song": "青春コンプレックス / MyGO!!!!! cover ver. (Cover)",
+            "url": "https://youtu.be/V_PDo4_K8OI",
+            "x": 29.97,
+            "y": 7.92,
+            "bpm": 95.7
         }
     ],
     "centroids": [
@@ -6596,9 +6604,9 @@
         },
         {
             "band": "mygo",
-            "n": 61,
-            "x": -1.72,
-            "y": 16.68
+            "n": 62,
+            "x": -1.21,
+            "y": 16.54
         },
         {
             "band": "pastel_palettes",
@@ -6636,7 +6644,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 745,
+        "n": 746,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
