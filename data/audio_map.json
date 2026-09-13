@@ -6557,6 +6557,46 @@
             "x": 29.97,
             "y": 7.92,
             "bpm": 95.7
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "in my words",
+            "url": "https://youtu.be/keIRgf-YfSI",
+            "x": 44.58,
+            "y": 28.81,
+            "bpm": 136.0
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "愛は衝動",
+            "url": "https://youtu.be/5NZp6NKhhlQ",
+            "x": 16.19,
+            "y": -26.81,
+            "bpm": 117.5
+        },
+        {
+            "band": "roselia",
+            "song": "この蒼き闇と光",
+            "url": "https://youtu.be/IOTOr1UCyis",
+            "x": 4.99,
+            "y": -0.33,
+            "bpm": 136.0
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "song": "革命道中 (Cover)",
+            "url": "https://youtu.be/EE7e5k6L6GI",
+            "x": -7.94,
+            "y": 22.93,
+            "bpm": 123.0
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "song": "「革命道中」 Covered by 一家Dumb Rock! (Cover)",
+            "url": "https://youtu.be/RQ9JDmerqTo",
+            "x": -6.5,
+            "y": 23.48,
+            "bpm": 123.0
         }
     ],
     "centroids": [
@@ -6580,9 +6620,9 @@
         },
         {
             "band": "ikka_dumb_rock",
-            "n": 4,
-            "x": 9.67,
-            "y": 7.73
+            "n": 6,
+            "x": 4.04,
+            "y": 12.89
         },
         {
             "band": "millsage",
@@ -6598,9 +6638,9 @@
         },
         {
             "band": "mugendai_mutype",
-            "n": 74,
-            "x": 3.49,
-            "y": 7.67
+            "n": 76,
+            "x": 4.19,
+            "y": 7.5
         },
         {
             "band": "mygo",
@@ -6628,9 +6668,9 @@
         },
         {
             "band": "roselia",
-            "n": 90,
-            "x": -2.02,
-            "y": 2.07
+            "n": 92,
+            "x": -1.77,
+            "y": 1.86
         },
         {
             "band": "various_artists",
@@ -6644,7 +6684,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 746,
+        "n": 751,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
