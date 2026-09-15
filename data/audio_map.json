@@ -6613,6 +6613,14 @@
             "x": 20.01,
             "y": -42.71,
             "bpm": 112.3
+        },
+        {
+            "band": "millsage",
+            "song": "「Pretender」 Covered by millsage (Cover)",
+            "url": "https://youtu.be/FZhB4f7wmzk",
+            "x": -53.98,
+            "y": 36.59,
+            "bpm": 92.3
         }
     ],
     "centroids": [
@@ -6642,9 +6650,9 @@
         },
         {
             "band": "millsage",
-            "n": 5,
-            "x": -19.17,
-            "y": 16.83
+            "n": 6,
+            "x": -24.97,
+            "y": 20.13
         },
         {
             "band": "morfonica",
@@ -6700,7 +6708,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 753,
+        "n": 754,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
