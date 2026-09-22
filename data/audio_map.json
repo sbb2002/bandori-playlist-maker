@@ -6645,6 +6645,22 @@
             "x": -19.97,
             "y": 5.06,
             "bpm": 129.2
+        },
+        {
+            "band": "millsage",
+            "song": "Stellar Stellar (Cover)",
+            "url": "https://youtu.be/OT11qQyv9xU",
+            "x": -28.4,
+            "y": 43.46,
+            "bpm": 117.5
+        },
+        {
+            "band": "millsage",
+            "song": "「Stellar Stellar」Covered by millsage (Cover)",
+            "url": "https://youtu.be/ygfd-2Be0DA",
+            "x": -34.47,
+            "y": 42.54,
+            "bpm": 117.5
         }
     ],
     "centroids": [
@@ -6674,9 +6690,9 @@
         },
         {
             "band": "millsage",
-            "n": 6,
-            "x": -24.97,
-            "y": 20.13
+            "n": 8,
+            "x": -26.59,
+            "y": 25.84
         },
         {
             "band": "morfonica",
@@ -6732,7 +6748,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 757,
+        "n": 759,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
