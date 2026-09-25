@@ -6661,6 +6661,46 @@
             "x": -34.47,
             "y": 42.54,
             "bpm": 117.5
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "オリオンをなぞる (Cover)",
+            "url": "https://youtu.be/1_WyE1U0f4E",
+            "x": 19.8,
+            "y": 19.17,
+            "bpm": 123.0
+        },
+        {
+            "band": "ave_mujica",
+            "song": "Abracadabra (Cover)",
+            "url": "https://youtu.be/-3cP_Y3tQYQ",
+            "x": 19.99,
+            "y": -4.29,
+            "bpm": 123.0
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "オリオンをなぞる【Covered by 夢限大みゅーたいぷ】 (Cover)",
+            "url": "https://youtu.be/ekZUC5KaJFw",
+            "x": 16.83,
+            "y": 20.02,
+            "bpm": 123.0
+        },
+        {
+            "band": "mygo",
+            "song": "ないものねだり / MyGO!!!!! cover ver. (Cover)",
+            "url": "https://youtu.be/07Qzp6RlybE",
+            "x": 12.15,
+            "y": 2.43,
+            "bpm": 89.1
+        },
+        {
+            "band": "millsage",
+            "song": "「ロウワー」Covered by millsage【期間限定】 (Cover)",
+            "url": "https://youtu.be/jOopfZgVxek",
+            "x": 4.6,
+            "y": -1.62,
+            "bpm": 136.0
         }
     ],
     "centroids": [
@@ -6672,9 +6712,9 @@
         },
         {
             "band": "ave_mujica",
-            "n": 30,
-            "x": -0.21,
-            "y": -7.23
+            "n": 31,
+            "x": 0.44,
+            "y": -7.14
         },
         {
             "band": "hello_happy_world",
@@ -6690,9 +6730,9 @@
         },
         {
             "band": "millsage",
-            "n": 8,
-            "x": -26.59,
-            "y": 25.84
+            "n": 9,
+            "x": -23.12,
+            "y": 22.79
         },
         {
             "band": "morfonica",
@@ -6702,15 +6742,15 @@
         },
         {
             "band": "mugendai_mutype",
-            "n": 77,
-            "x": 4.4,
-            "y": 6.84
+            "n": 79,
+            "x": 4.75,
+            "y": 7.17
         },
         {
             "band": "mygo",
-            "n": 62,
-            "x": -1.21,
-            "y": 16.54
+            "n": 63,
+            "x": -1.0,
+            "y": 16.31
         },
         {
             "band": "pastel_palettes",
@@ -6748,7 +6788,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 759,
+        "n": 764,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
