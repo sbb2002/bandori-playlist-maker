@@ -6950,6 +6950,14 @@
             "x": -16.22,
             "y": 43.88,
             "bpm": 123.0
+        },
+        {
+            "band": "poppin_party",
+            "song": "スキップ･スランプ･スリッパ",
+            "url": "https://youtu.be/vrn3_IIeH8w",
+            "x": 41.74,
+            "y": 41.02,
+            "bpm": 117.5
         }
     ],
     "centroids": [
@@ -7009,9 +7017,9 @@
         },
         {
             "band": "poppin_party",
-            "n": 115,
-            "x": -0.2,
-            "y": 17.62
+            "n": 117,
+            "x": 0.11,
+            "y": 18.13
         },
         {
             "band": "raise_a_suilen",
@@ -7037,7 +7045,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 767,
+        "n": 768,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
