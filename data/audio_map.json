@@ -6958,6 +6958,22 @@
             "x": 41.74,
             "y": 41.02,
             "bpm": 117.5
+        },
+        {
+            "band": "poppin_party",
+            "song": "Amore",
+            "url": "https://youtu.be/Ua79y2vDfCc",
+            "x": -21.02,
+            "y": 35.25,
+            "bpm": 117.5
+        },
+        {
+            "band": "millsage",
+            "song": "Odd Dice",
+            "url": "https://youtu.be/aqVt_zlAwK8",
+            "x": -23.08,
+            "y": 42.81,
+            "bpm": 112.3
         }
     ],
     "centroids": [
@@ -6987,9 +7003,9 @@
         },
         {
             "band": "millsage",
-            "n": 10,
-            "x": -22.43,
-            "y": 24.9
+            "n": 11,
+            "x": -22.49,
+            "y": 26.53
         },
         {
             "band": "morfonica",
@@ -7017,9 +7033,9 @@
         },
         {
             "band": "poppin_party",
-            "n": 117,
-            "x": 0.11,
-            "y": 18.13
+            "n": 118,
+            "x": -0.06,
+            "y": 18.27
         },
         {
             "band": "raise_a_suilen",
@@ -7045,7 +7061,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 768,
+        "n": 770,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
