@@ -6974,6 +6974,30 @@
             "x": -23.08,
             "y": 42.81,
             "bpm": 112.3
+        },
+        {
+            "band": "ave_mujica",
+            "song": "A Song Of Romance Pt.2",
+            "url": "https://youtu.be/G5PTiZBcQEs",
+            "x": -66.89,
+            "y": -28.31,
+            "bpm": 129.2
+        },
+        {
+            "band": "ave_mujica",
+            "song": "BADDY BADDY",
+            "url": "https://youtu.be/Mq_BtL47_9o",
+            "x": 13.51,
+            "y": 23.7,
+            "bpm": 103.4
+        },
+        {
+            "band": "ave_mujica",
+            "song": "神の名を",
+            "url": "https://youtu.be/bqHY2CEppko",
+            "x": -48.35,
+            "y": -9.48,
+            "bpm": 99.4
         }
     ],
     "centroids": [
@@ -6985,9 +7009,9 @@
         },
         {
             "band": "ave_mujica",
-            "n": 31,
-            "x": 0.44,
-            "y": -7.14
+            "n": 34,
+            "x": -2.59,
+            "y": -6.92
         },
         {
             "band": "hello_happy_world",
@@ -7061,7 +7085,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 770,
+        "n": 773,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
