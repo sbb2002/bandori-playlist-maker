@@ -6998,6 +6998,14 @@
             "x": -48.35,
             "y": -9.48,
             "bpm": 99.4
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "song": "アイライク・ユアライク",
+            "url": "https://youtu.be/NhrF8malA_c",
+            "x": -10.15,
+            "y": 31.02,
+            "bpm": 107.7
         }
     ],
     "centroids": [
@@ -7021,9 +7029,9 @@
         },
         {
             "band": "ikka_dumb_rock",
-            "n": 10,
-            "x": -4.42,
-            "y": 18.99
+            "n": 11,
+            "x": -4.94,
+            "y": 20.09
         },
         {
             "band": "millsage",
@@ -7085,7 +7093,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 773,
+        "n": 774,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
