@@ -7006,6 +7006,14 @@
             "x": -10.15,
             "y": 31.02,
             "bpm": 107.7
+        },
+        {
+            "band": "roselia",
+            "song": "The Tale was Hers",
+            "url": "https://youtu.be/HwbWzd9KY3I",
+            "x": -26.98,
+            "y": 14.87,
+            "bpm": 117.5
         }
     ],
     "centroids": [
@@ -7077,9 +7085,9 @@
         },
         {
             "band": "roselia",
-            "n": 92,
-            "x": -1.77,
-            "y": 1.86
+            "n": 93,
+            "x": -2.04,
+            "y": 2.0
         },
         {
             "band": "various_artists",
@@ -7093,7 +7101,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 774,
+        "n": 775,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
