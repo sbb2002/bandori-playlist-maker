@@ -7014,6 +7014,14 @@
             "x": -26.98,
             "y": 14.87,
             "bpm": 117.5
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "song": "「サムライハート(Some Like It Hot!!)」 Covered by 一家Dumb Rock! (Cover)",
+            "url": "https://youtu.be/jklgiZWYLlg",
+            "x": -6.48,
+            "y": 56.3,
+            "bpm": 112.3
         }
     ],
     "centroids": [
@@ -7037,9 +7045,9 @@
         },
         {
             "band": "ikka_dumb_rock",
-            "n": 11,
-            "x": -4.94,
-            "y": 20.09
+            "n": 12,
+            "x": -5.07,
+            "y": 23.1
         },
         {
             "band": "millsage",
@@ -7101,7 +7109,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 775,
+        "n": 776,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
