@@ -7022,14 +7022,254 @@
             "x": -6.48,
             "y": 56.3,
             "bpm": 112.3
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "BIBIBABI BRAVER",
+            "url": "https://youtu.be/bLzL8HHYYAg",
+            "x": 15.39,
+            "y": 4.87,
+            "bpm": 123.0
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "I AM WHO I AM",
+            "url": "https://youtu.be/vxJYn_UHjyo",
+            "x": 35.92,
+            "y": -10.6,
+            "bpm": 152.0
+        },
+        {
+            "band": "mygo",
+            "song": "世点彩",
+            "url": "https://youtu.be/o4mBDY2O3Hs",
+            "x": 13.19,
+            "y": 35.86,
+            "bpm": 112.3
+        },
+        {
+            "band": "mygo",
+            "song": "迷況指漱",
+            "url": "https://youtu.be/J7h8zOw8FDg",
+            "x": -3.59,
+            "y": -17.88,
+            "bpm": 117.5
+        },
+        {
+            "band": "mugendai_mutype",
+            "song": "KEEP ON",
+            "url": "https://youtu.be/JeKeE0N8s3Q",
+            "x": 5.35,
+            "y": 22.52,
+            "bpm": 136.0
+        },
+        {
+            "band": "poppin_party",
+            "song": "BRAVE JEWEL (Poppin'Party ver.)",
+            "url": "https://youtu.be/iASQ8BJ4bD4",
+            "x": 13.29,
+            "y": 2.85,
+            "bpm": 129.2
+        },
+        {
+            "band": "roselia",
+            "song": "ときめきエクスペリエンス！ (Roselia ver.)",
+            "url": "https://youtu.be/Uel83TMRa6A",
+            "x": -4.05,
+            "y": -23.37,
+            "bpm": 117.5
+        },
+        {
+            "band": "morfonica",
+            "song": "LaVI-Bavellabion (Cover)",
+            "url": "https://youtu.be/TbIATfSecjI",
+            "x": 3.17,
+            "y": -14.12,
+            "bpm": 143.6
+        },
+        {
+            "band": "ikka_dumb_rock",
+            "song": "サムライハート(Some Like It Hot!!) (Cover)",
+            "url": "https://youtu.be/DupL4TVJO4E",
+            "x": -5.47,
+            "y": 56.0,
+            "bpm": 112.3
+        },
+        {
+            "band": "roselia",
+            "song": "MAdEaR MAdEaR (Cover)",
+            "url": "https://youtu.be/BAwhUkW2oQI",
+            "x": 17.84,
+            "y": 1.55,
+            "bpm": 99.4
+        },
+        {
+            "band": "afterglow",
+            "song": "ランデヴー (Cover)",
+            "url": "https://youtu.be/otjXfB8hOfY",
+            "x": -42.83,
+            "y": 55.44,
+            "bpm": 143.6
+        },
+        {
+            "band": "afterglow",
+            "song": "季節は次々死んでいく (Cover)",
+            "url": "https://youtu.be/gfSYpltrCzg",
+            "x": -28.55,
+            "y": 45.06,
+            "bpm": 123.0
+        },
+        {
+            "band": "afterglow",
+            "song": "愛唄 (Cover)",
+            "url": "https://youtu.be/sg8-d71ouT4",
+            "x": -32.2,
+            "y": 18.4,
+            "bpm": 172.3
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "イケナイ太陽 (Cover)",
+            "url": "https://youtu.be/eLrBhHKM3TE",
+            "x": 6.96,
+            "y": -22.77,
+            "bpm": 143.6
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "ミラクルペイント (Cover)",
+            "url": "https://youtu.be/tixCOACYyJs",
+            "x": -20.18,
+            "y": -20.92,
+            "bpm": 107.7
+        },
+        {
+            "band": "hello_happy_world",
+            "song": "怪獣 (Cover)",
+            "url": "https://youtu.be/sRGh44R4Aoc",
+            "x": -53.1,
+            "y": -4.24,
+            "bpm": 89.1
+        },
+        {
+            "band": "morfonica",
+            "song": "オン・ザ・フロントライン (Cover)",
+            "url": "https://youtu.be/5xOF8HfYlHQ",
+            "x": -22.01,
+            "y": 51.34,
+            "bpm": 95.7
+        },
+        {
+            "band": "morfonica",
+            "song": "白い雪のプリンセスは (Cover)",
+            "url": "https://youtu.be/kajAzxKJHoc",
+            "x": -41.53,
+            "y": 29.82,
+            "bpm": 99.4
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "デビルじゃないもん (Cover)",
+            "url": "https://youtu.be/Y_T0b0XGqfY",
+            "x": 16.71,
+            "y": 5.58,
+            "bpm": 152.0
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "恋愛サーキュレーション (Cover)",
+            "url": "https://youtu.be/hvsvIKtQ9Gc",
+            "x": -13.13,
+            "y": 21.83,
+            "bpm": 117.5
+        },
+        {
+            "band": "pastel_palettes",
+            "song": "超最強 (Cover)",
+            "url": "https://youtu.be/OSpsOnri4yg",
+            "x": -4.31,
+            "y": -0.88,
+            "bpm": 129.2
+        },
+        {
+            "band": "poppin_party",
+            "song": "I wonder (Cover)",
+            "url": "https://youtu.be/zCcH8nktvYk",
+            "x": -28.11,
+            "y": -0.66,
+            "bpm": 123.0
+        },
+        {
+            "band": "poppin_party",
+            "song": "POP IN 2 (Cover)",
+            "url": "https://youtu.be/3DsHldJWY84",
+            "x": 9.33,
+            "y": -41.23,
+            "bpm": 117.5
+        },
+        {
+            "band": "poppin_party",
+            "song": "オドループ (Cover)",
+            "url": "https://youtu.be/l6n1xUQOBgo",
+            "x": 1.09,
+            "y": 19.01,
+            "bpm": 112.3
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "BROKEN GAMES (Cover)",
+            "url": "https://youtu.be/61o2729piJY",
+            "x": 16.34,
+            "y": -30.88,
+            "bpm": 107.7
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "D-tecnoLife (Cover)",
+            "url": "https://youtu.be/MsU_sosXmj4",
+            "x": 11.92,
+            "y": 14.3,
+            "bpm": 112.3
+        },
+        {
+            "band": "raise_a_suilen",
+            "song": "百花繚乱 (Cover)",
+            "url": "https://youtu.be/6LkfwRfE4Io",
+            "x": 11.82,
+            "y": -8.86,
+            "bpm": 152.0
+        },
+        {
+            "band": "roselia",
+            "song": "Sincerely (Cover)",
+            "url": "https://youtu.be/QQj8BF_4JC4",
+            "x": -47.95,
+            "y": -6.3,
+            "bpm": 143.6
+        },
+        {
+            "band": "roselia",
+            "song": "ファイトソング (Cover)",
+            "url": "https://youtu.be/Jfav3Z-dgog",
+            "x": 10.1,
+            "y": -8.38,
+            "bpm": 123.0
+        },
+        {
+            "band": "roselia",
+            "song": "人マニア (Cover)",
+            "url": "https://youtu.be/qKL9JeDBo-k",
+            "x": 6.78,
+            "y": -35.39,
+            "bpm": 152.0
         }
     ],
     "centroids": [
         {
             "band": "afterglow",
-            "n": 75,
-            "x": 10.92,
-            "y": 17.45
+            "n": 78,
+            "x": 9.17,
+            "y": 18.3
         },
         {
             "band": "ave_mujica",
@@ -7039,15 +7279,15 @@
         },
         {
             "band": "hello_happy_world",
-            "n": 72,
-            "x": -15.75,
-            "y": 18.57
+            "n": 75,
+            "x": -16.01,
+            "y": 17.18
         },
         {
             "band": "ikka_dumb_rock",
-            "n": 12,
-            "x": -5.07,
-            "y": 23.1
+            "n": 13,
+            "x": -5.1,
+            "y": 25.63
         },
         {
             "band": "millsage",
@@ -7057,45 +7297,45 @@
         },
         {
             "band": "morfonica",
-            "n": 57,
-            "x": -20.1,
-            "y": 16.22
+            "n": 61,
+            "x": -20.12,
+            "y": 15.8
         },
         {
             "band": "mugendai_mutype",
-            "n": 80,
-            "x": 5.0,
-            "y": 6.64
+            "n": 81,
+            "x": 5.01,
+            "y": 6.83
         },
         {
             "band": "mygo",
-            "n": 63,
-            "x": -1.0,
-            "y": 16.31
+            "n": 65,
+            "x": -0.82,
+            "y": 16.09
         },
         {
             "band": "pastel_palettes",
-            "n": 74,
-            "x": -7.43,
-            "y": 16.01
+            "n": 77,
+            "x": -7.15,
+            "y": 15.73
         },
         {
             "band": "poppin_party",
-            "n": 118,
-            "x": -0.06,
-            "y": 18.27
+            "n": 122,
+            "x": -0.1,
+            "y": 17.51
         },
         {
             "band": "raise_a_suilen",
-            "n": 80,
-            "x": 19.01,
-            "y": -3.28
+            "n": 85,
+            "x": 18.97,
+            "y": -3.45
         },
         {
             "band": "roselia",
-            "n": 93,
-            "x": -2.04,
-            "y": 2.0
+            "n": 98,
+            "x": -2.11,
+            "y": 1.16
         },
         {
             "band": "various_artists",
@@ -7109,7 +7349,7 @@
         "y_feature": "mode",
         "x_r": -0.81,
         "y_r": 0.51,
-        "n": 776,
+        "n": 806,
         "x_shift": 0.0,
         "y_shift": 10.0,
         "loo_acc": 0.133,
